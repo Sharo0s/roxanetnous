@@ -1,0 +1,124 @@
+import { createClient } from '@/lib/supabase/server'
+import { redirect } from 'next/navigation'
+import Link from 'next/link'
+import { LogoutButton } from '@/components/auth/logout-button'
+import { AdminAvisActions } from '@/components/admin/avis-actions'
+
+export default async function AdminAvisPage() {
+  const supabase = await createClient()
+
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect('/login')
+
+  const { data: adminData } = await supabase
+    .from('users')
+    .select('first_name, last_name, role')
+    .eq('id', user.id)
+    .single()
+
+  if (!adminData || adminData.role !== 'admin') redirect('/')
+
+  const supabaseAdmin = await createClient({ serviceRole: true })
+
+  // Avis signales en priorite, puis tous les avis recents
+  const { data: avisSignales } = await supabaseAdmin
+    .from('avis')
+    .select(`
+      id, note, commentaire, signale, masque, created_at,
+      auteur:auteur_id (first_name, last_name, email),
+      cible:cible_id (first_name, last_name, email)
+    `)
+    .eq('signale', true)
+    .eq('masque', false)
+    .order('created_at', { ascending: false })
+
+  const { data: avisRecents } = await supabaseAdmin
+    .from('avis')
+    .select(`
+      id, note, commentaire, signale, masque, created_at,
+      auteur:auteur_id (first_name, last_name, email),
+      cible:cible_id (first_name, last_name, email)
+    `)
+    .order('created_at', { ascending: false })
+    .limit(50)
+
+  return (
+    <main className="min-h-screen bg-gray-50">
+      <header className="bg-white border-b">
+        <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Link href="/admin" className="text-xl font-bold text-black">roxanetnous</Link>
+            <span className="text-xs bg-gray-200 text-gray-700 px-2 py-1 rounded-full font-medium">Admin</span>
+          </div>
+          <div className="flex items-center gap-4">
+            <Link href="/admin" className="text-sm text-gray-500 hover:text-black">Tableau de bord</Link>
+            <span className="text-sm text-gray-600">{adminData.first_name} {adminData.last_name}</span>
+            <LogoutButton />
+          </div>
+        </div>
+      </header>
+
+      <div className="max-w-6xl mx-auto px-4 py-8">
+        {avisSignales && avisSignales.length > 0 && (
+          <>
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">Avis signales ({avisSignales.length})</h2>
+            <div className="space-y-3 mb-10">
+              {avisSignales.map((avis: any) => (
+                <AvisCard key={avis.id} avis={avis} showActions adminId={user.id} />
+              ))}
+            </div>
+          </>
+        )}
+
+        <h2 className="text-2xl font-bold text-gray-900 mb-4">Avis recents</h2>
+        {!avisRecents || avisRecents.length === 0 ? (
+          <div className="bg-white rounded-xl border p-8 text-center text-gray-500">
+            Aucun avis.
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {avisRecents.map((avis: any) => (
+              <AvisCard key={avis.id} avis={avis} showActions={!avis.masque} adminId={user.id} />
+            ))}
+          </div>
+        )}
+      </div>
+    </main>
+  )
+}
+
+function AvisCard({ avis, showActions, adminId }: { avis: any; showActions: boolean; adminId: string }) {
+  const auteur = avis.auteur as any
+  const cible = avis.cible as any
+
+  return (
+    <div className={`bg-white rounded-xl border p-5 ${avis.masque ? 'opacity-50' : ''}`}>
+      <div className="flex items-start justify-between">
+        <div className="flex-1">
+          <div className="flex items-center gap-2 mb-1">
+            <div className="flex gap-0.5">
+              {[1, 2, 3, 4, 5].map((n) => (
+                <div key={n} className={`w-3 h-3 rounded-sm ${n <= avis.note ? 'bg-black' : 'bg-gray-200'}`} />
+              ))}
+            </div>
+            {avis.signale && (
+              <span className="px-2 py-0.5 bg-red-100 text-red-700 rounded-full text-xs font-medium">Signale</span>
+            )}
+            {avis.masque && (
+              <span className="px-2 py-0.5 bg-gray-200 text-gray-500 rounded-full text-xs font-medium">Masque</span>
+            )}
+          </div>
+          <p className="text-sm text-gray-700 mb-2">{avis.commentaire}</p>
+          <p className="text-xs text-gray-400">
+            Par {auteur?.first_name} {auteur?.last_name} ({auteur?.email})
+            {' -> '} {cible?.first_name} {cible?.last_name}
+            {' — '} {new Date(avis.created_at).toLocaleDateString('fr-FR')}
+          </p>
+        </div>
+        {showActions && (
+          <AdminAvisActions avisId={avis.id} isMasque={avis.masque} />
+        )}
+      </div>
+    </div>
+  )
+}

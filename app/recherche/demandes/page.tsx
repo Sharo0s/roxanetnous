@@ -1,0 +1,130 @@
+import { createClient } from '@/lib/supabase/server'
+import Link from 'next/link'
+import { SPECIALITES, DIPLOMES, EXPERIENCE_LEVELS } from '@/lib/constants'
+
+type SearchParams = {
+  ville?: string
+  specialite?: string
+  page?: string
+}
+
+export default async function DemandesBeneficiairesPage({
+  searchParams,
+}: {
+  searchParams: Promise<SearchParams>
+}) {
+  const params = await searchParams
+  const supabase = await createClient()
+
+  const { data: { user } } = await supabase.auth.getUser()
+
+  let userData = null
+  if (user) {
+    const { data } = await supabase
+      .from('users')
+      .select('first_name, last_name, role')
+      .eq('id', user.id)
+      .single()
+    userData = data
+  }
+
+  let query = supabase
+    .from('annonces_beneficiaires')
+    .select('*')
+    .eq('status', 'publiee')
+    .order('published_at', { ascending: false })
+
+  if (params.ville) {
+    query = query.ilike('ville', `%${params.ville}%`)
+  }
+
+  if (params.specialite) {
+    query = query.contains('specialites_recherchees', [params.specialite])
+  }
+
+  const page = Number(params.page) || 1
+  const perPage = 12
+  const from = (page - 1) * perPage
+  const to = from + perPage - 1
+
+  const { data: annonces } = await query.range(from, to)
+
+  return (
+    <main className="min-h-screen bg-gray-50">
+      <header className="bg-white border-b">
+        <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
+          <Link href="/" className="text-xl font-bold text-black">
+            roxanetnous
+          </Link>
+          <div className="flex items-center gap-4">
+            {userData ? (
+              <Link
+                href={userData.role === 'auxiliaire' ? '/auxiliaire/dashboard' : '/beneficiaire/dashboard'}
+                className="text-sm text-gray-600 hover:text-black"
+              >
+                Mon espace
+              </Link>
+            ) : (
+              <Link href="/login" className="text-sm text-gray-600 hover:text-black">
+                Connexion
+              </Link>
+            )}
+          </div>
+        </div>
+      </header>
+
+      <div className="max-w-6xl mx-auto px-4 py-8">
+        <h2 className="text-2xl font-bold text-gray-900 mb-6">Demandes des beneficiaires</h2>
+
+        {!annonces || annonces.length === 0 ? (
+          <div className="bg-white rounded-xl border p-8 text-center">
+            <p className="text-gray-500">Aucune demande pour le moment.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {annonces.map((annonce) => {
+              const specLabels = (annonce.specialites_recherchees as string[]).map(
+                (s) => SPECIALITES.find((sp) => sp.value === s)?.label || s
+              )
+              const diplomeLabel = annonce.diplome_requis
+                ? DIPLOMES.find((d) => d.value === annonce.diplome_requis)?.label
+                : null
+              const expLabel = annonce.experience_min
+                ? EXPERIENCE_LEVELS.find((e) => e.value === annonce.experience_min)?.label
+                : null
+
+              return (
+                <div key={annonce.id} className="bg-white rounded-xl border p-5">
+                  <h3 className="font-semibold text-gray-900 mb-1">{annonce.titre}</h3>
+                  <p className="text-sm text-gray-500 mb-2">
+                    {annonce.ville} {annonce.code_postal && `(${annonce.code_postal})`} — Debut: {new Date(annonce.date_debut).toLocaleDateString('fr-FR')}
+                  </p>
+                  <p className="text-sm text-gray-600 line-clamp-3 mb-3">{annonce.description}</p>
+
+                  <div className="flex flex-wrap gap-1 mb-3">
+                    {specLabels.slice(0, 3).map((label, i) => (
+                      <span key={i} className="px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full text-xs">
+                        {label}
+                      </span>
+                    ))}
+                    {specLabels.length > 3 && (
+                      <span className="px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full text-xs">
+                        +{specLabels.length - 3}
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="flex items-center gap-3 text-xs text-gray-400">
+                    {diplomeLabel && <span>{diplomeLabel}</span>}
+                    {expLabel && <span>{expLabel}</span>}
+                    <span className="capitalize">Dependance {annonce.niveau_dependance}</span>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        )}
+      </div>
+    </main>
+  )
+}
