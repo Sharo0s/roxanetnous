@@ -50,6 +50,8 @@ export async function createCheckoutSession(formData: FormData): Promise<void> {
     success_url: `${process.env.NEXT_PUBLIC_BASE_URL}${dashboardPath}/abonnement/success?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}${dashboardPath}/abonnement`,
     metadata: { user_id: user.id, role, plan },
+    billing_address_collection: 'required',
+    customer_update: { name: 'auto', address: 'auto' },
   }
 
   if (trialDays) {
