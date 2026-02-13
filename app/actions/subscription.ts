@@ -15,7 +15,7 @@ export async function createCheckoutSession(formData: FormData): Promise<void> {
 
   const { data: userData } = await supabase
     .from('users')
-    .select('role, email')
+    .select('role, email, first_name, last_name')
     .eq('id', user.id)
     .single()
 
@@ -34,6 +34,7 @@ export async function createCheckoutSession(formData: FormData): Promise<void> {
   if (!customerId) {
     const customer = await stripe.customers.create({
       email: userData.email,
+      name: `${userData.first_name || ''} ${userData.last_name || ''}`.trim() || undefined,
       metadata: { user_id: user.id, role },
     })
     customerId = customer.id
