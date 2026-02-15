@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { Footer } from '@/components/footer'
+import { ContactForm } from '@/components/contact-form'
 import { createClient } from '@/lib/supabase/server'
 
 export default async function HomePage() {
@@ -21,8 +22,38 @@ export default async function HomePage() {
   const launchOfferEnd = process.env.LAUNCH_OFFER_END
   const launchOfferActive = launchOfferEnd ? new Date(launchOfferEnd) > new Date() : false
 
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'WebApplication',
+    name: 'roxanetnous',
+    url: process.env.NEXT_PUBLIC_BASE_URL || 'https://roxanetnous.fr',
+    description: 'Plateforme de mise en relation entre auxiliaires de vie verifies et beneficiaires.',
+    applicationCategory: 'HealthApplication',
+    operatingSystem: 'Web',
+    offers: [
+      {
+        '@type': 'Offer',
+        name: 'Abonnement mensuel',
+        price: '4.99',
+        priceCurrency: 'EUR',
+        description: 'Abonnement mensuel sans engagement',
+      },
+      {
+        '@type': 'Offer',
+        name: 'Abonnement annuel',
+        price: '49.99',
+        priceCurrency: 'EUR',
+        description: 'Abonnement annuel, economisez 17%',
+      },
+    ],
+  }
+
   return (
     <div className="min-h-screen flex flex-col">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <main className="flex-1">
         {/* Hero */}
         <section className="flex flex-col items-center justify-center px-4 py-20 md:py-28">
@@ -43,22 +74,33 @@ export default async function HomePage() {
               )}
             </div>
 
-            <div className="flex gap-4 justify-center pt-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-lg mx-auto pt-8">
               <Link
-                href="/recherche"
-                className="px-6 py-3 bg-black text-white rounded-lg hover:bg-gray-800 transition"
+                href="/register?role=beneficiaire"
+                className="p-5 border-2 border-black rounded-xl text-left hover:bg-gray-50 transition"
               >
-                Trouver un auxiliaire
+                <p className="font-semibold text-black">Je recherche un auxiliaire</p>
+                <p className="text-sm text-gray-500 mt-1">Pour moi ou un proche</p>
               </Link>
               <Link
-                href="/register"
-                className="px-6 py-3 border-2 border-black text-black rounded-lg hover:bg-gray-100 transition"
+                href="/register?role=auxiliaire"
+                className="p-5 border-2 border-black rounded-xl text-left hover:bg-gray-50 transition"
               >
-                Creer un compte
+                <p className="font-semibold text-black">Je suis auxiliaire de vie</p>
+                <p className="text-sm text-gray-500 mt-1">Je propose mes services</p>
+              </Link>
+            </div>
+
+            <div className="flex gap-4 justify-center pt-4">
+              <Link
+                href="/recherche"
+                className="text-sm text-gray-500 hover:text-black transition underline"
+              >
+                Consulter les annonces
               </Link>
               <Link
                 href="/login"
-                className="px-6 py-3 text-gray-600 hover:text-black transition"
+                className="text-sm text-gray-500 hover:text-black transition underline"
               >
                 Se connecter
               </Link>
@@ -202,17 +244,12 @@ export default async function HomePage() {
 
         {/* Contact */}
         <section className="bg-gray-50 px-4 py-16">
-          <div className="max-w-3xl mx-auto text-center">
-            <h2 className="text-2xl font-bold mb-4">Une question ?</h2>
-            <p className="text-gray-600 mb-4">
+          <div className="max-w-md mx-auto">
+            <h2 className="text-2xl font-bold text-center mb-2">Une question ?</h2>
+            <p className="text-center text-gray-600 mb-6">
               Notre equipe est disponible pour repondre a toutes vos questions.
             </p>
-            <a
-              href="mailto:contact@roxanetnous.fr"
-              className="inline-flex items-center px-6 py-3 border-2 border-black rounded-lg font-medium hover:bg-gray-100 transition"
-            >
-              contact@roxanetnous.fr
-            </a>
+            <ContactForm />
           </div>
         </section>
       </main>

@@ -4,6 +4,12 @@ import { SPECIALITES, DIPLOMES, EXPERIENCE_LEVELS } from '@/lib/constants'
 import { SearchFilters } from '@/components/recherche/search-filters'
 import { getBadges } from '@/lib/badges'
 import { BadgesDisplay } from '@/components/badges-display'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'Rechercher un auxiliaire de vie',
+  description: 'Trouvez un auxiliaire de vie verifie pres de chez vous. Filtrez par specialite, localisation et experience.',
+}
 
 type SearchParams = {
   ville?: string

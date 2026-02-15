@@ -34,6 +34,17 @@ Il fait autorite sur les documents bmad en cas de contradiction.
 
 ---
 
+## 2026-02-15 : Suppression fonctionnalite contrats PDF
+
+**Decision :** La generation automatique de contrats PDF entre auxiliaire et beneficiaire est supprimee du projet.
+
+**Perimetre supprime :**
+- Table BDD : contrats (supprimee, etait vide)
+
+**Regle :** Ne jamais reintroduire sauf demande explicite du client.
+
+---
+
 ## 2026-02-12 : TODO avant mise en production
 
 **A faire avant de passer en production :**
