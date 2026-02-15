@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+import { geocodeAddress } from '@/lib/geocoding'
 
 export type OnboardingResult = {
   error?: string
@@ -58,6 +59,9 @@ export async function submitOnboarding(data: {
     return { error: 'Le code postal doit contenir 5 chiffres.' }
   }
 
+  // Geocoder l'adresse pour obtenir les coordonnees
+  const coords = await geocodeAddress(data.ville, data.code_postal)
+
   const { error } = await supabase
     .from('auxiliaires_profiles')
     .insert({
@@ -68,6 +72,8 @@ export async function submitOnboarding(data: {
       ville: data.ville,
       code_postal: data.code_postal,
       rayon_km: data.rayon_km,
+      latitude: coords?.lat ?? null,
+      longitude: coords?.lng ?? null,
       disponibilites: data.disponibilites,
       langues: data.langues,
       permis_conduire: data.permis_conduire,

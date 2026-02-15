@@ -72,6 +72,35 @@ export default async function AdminDashboard() {
     .select('id', { count: 'exact', head: true })
     .eq('status', 'en_attente')
 
+  // Nouvelles stats
+  const { count: activeSubsCount } = await supabaseAdmin
+    .from('subscriptions')
+    .select('id', { count: 'exact', head: true })
+    .in('status', ['active', 'trialing'])
+
+  const { data: subsData } = await supabaseAdmin
+    .from('subscriptions')
+    .select('plan_type')
+    .in('status', ['active', 'trialing'])
+
+  const mrr = (subsData || []).reduce((sum, s) => {
+    if (s.plan_type === 'annual' || s.plan_type === 'annuel') return sum + 49.99 / 12
+    return sum + 4.99
+  }, 0)
+
+  const firstOfMonth = new Date()
+  firstOfMonth.setDate(1)
+  firstOfMonth.setHours(0, 0, 0, 0)
+
+  const { count: newUsersCount } = await supabaseAdmin
+    .from('users')
+    .select('id', { count: 'exact', head: true })
+    .gte('created_at', firstOfMonth.toISOString())
+
+  const { count: messagesCount } = await supabaseAdmin
+    .from('messages')
+    .select('id', { count: 'exact', head: true })
+
   return (
     <main className="min-h-screen bg-gray-50">
       <header className="bg-white border-b">
@@ -127,6 +156,25 @@ export default async function AdminDashboard() {
           <div className="bg-white rounded-xl border p-5">
             <p className="text-sm text-gray-500">Annonces beneficiaires publiees</p>
             <p className="text-3xl font-bold mt-1">{annoncesBenCount || 0}</p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+          <div className="bg-white rounded-xl border p-5">
+            <p className="text-sm text-gray-500">Abonnes actifs</p>
+            <p className="text-3xl font-bold mt-1">{activeSubsCount || 0}</p>
+          </div>
+          <div className="bg-white rounded-xl border p-5">
+            <p className="text-sm text-gray-500">MRR estime</p>
+            <p className="text-3xl font-bold mt-1">{mrr.toFixed(2)} EUR</p>
+          </div>
+          <div className="bg-white rounded-xl border p-5">
+            <p className="text-sm text-gray-500">Inscriptions ce mois</p>
+            <p className="text-3xl font-bold mt-1">{newUsersCount || 0}</p>
+          </div>
+          <div className="bg-white rounded-xl border p-5">
+            <p className="text-sm text-gray-500">Messages echanges</p>
+            <p className="text-3xl font-bold mt-1">{messagesCount || 0}</p>
           </div>
         </div>
 

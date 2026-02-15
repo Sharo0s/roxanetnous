@@ -3,6 +3,8 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { hasActiveSubscription } from '@/lib/subscription-helpers'
+import { geocodeAddress } from '@/lib/geocoding'
+import { notifyMatchingUsers } from '@/lib/matching-notifications'
 
 export type AnnonceResult = {
   error?: string
@@ -47,7 +49,9 @@ export async function createAnnonceAuxiliaire(data: {
     return { error: 'La ville et le code postal sont requis.' }
   }
 
-  const { error } = await supabase
+  const coords = await geocodeAddress(data.ville.trim(), data.code_postal.trim())
+
+  const { data: insertedAnnonce, error } = await supabase
     .from('annonces_auxiliaires')
     .insert({
       auxiliaire_id: profile.id,
@@ -60,9 +64,28 @@ export async function createAnnonceAuxiliaire(data: {
       status: 'publiee',
       published_at: new Date().toISOString(),
     })
+    .select('id')
+    .single()
 
   if (error) {
     return { error: 'Erreur lors de la creation de l\'annonce.' }
+  }
+
+  // Mettre a jour lat/lng sur le profil auxiliaire si pas encore renseigne
+  if (coords) {
+    await supabase
+      .from('auxiliaires_profiles')
+      .update({ latitude: coords.lat, longitude: coords.lng })
+      .eq('id', profile.id)
+      .is('latitude', null)
+  }
+
+  // Notifier les beneficiaires dont l'annonce correspond (fire-and-forget)
+  if (insertedAnnonce) {
+    notifyMatchingUsers({
+      annonceType: 'auxiliaire',
+      annonceId: insertedAnnonce.id,
+    }).catch(() => {})
   }
 
   redirect('/auxiliaire/annonces')
@@ -173,7 +196,9 @@ export async function createAnnonceBeneficiaire(data: {
     return { error: 'La ville et au moins une specialite sont requis.' }
   }
 
-  const { error } = await supabase
+  const coords = await geocodeAddress(data.ville.trim(), data.code_postal.trim() || '')
+
+  const { data: insertedAnnonce, error } = await supabase
     .from('annonces_beneficiaires')
     .insert({
       beneficiaire_id: profile.id,
@@ -183,6 +208,8 @@ export async function createAnnonceBeneficiaire(data: {
       specialites_recherchees: data.specialites_recherchees,
       ville: data.ville.trim(),
       code_postal: data.code_postal.trim() || null,
+      latitude: coords?.lat ?? null,
+      longitude: coords?.lng ?? null,
       diplome_requis: data.diplome_requis || null,
       experience_min: data.experience_min || null,
       niveau_dependance: data.niveau_dependance,
@@ -195,9 +222,19 @@ export async function createAnnonceBeneficiaire(data: {
       status: 'publiee',
       published_at: new Date().toISOString(),
     })
+    .select('id')
+    .single()
 
   if (error) {
     return { error: 'Erreur lors de la creation de l\'annonce.' }
+  }
+
+  // Notifier les auxiliaires dont le profil correspond (fire-and-forget)
+  if (insertedAnnonce) {
+    notifyMatchingUsers({
+      annonceType: 'beneficiaire',
+      annonceId: insertedAnnonce.id,
+    }).catch(() => {})
   }
 
   redirect('/beneficiaire/annonces')

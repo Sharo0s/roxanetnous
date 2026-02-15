@@ -266,3 +266,67 @@ export async function sendSubscriptionCancelEmail(params: {
     })
   }
 }
+
+export async function sendMatchingNotificationEmail(params: {
+  email: string
+  firstName: string
+  type: 'nouvelle_annonce_beneficiaire' | 'nouveau_profil_auxiliaire'
+  annonceTitle: string
+  annonceId: string
+  score: number
+  userId?: string
+}) {
+  const isForAuxiliaire = params.type === 'nouvelle_annonce_beneficiaire'
+  const subject = isForAuxiliaire
+    ? 'Une nouvelle annonce correspond a votre profil'
+    : 'Un nouvel auxiliaire correspond a vos criteres'
+
+  const description = isForAuxiliaire
+    ? 'Une nouvelle annonce beneficiaire correspond a votre profil.'
+    : 'Un nouvel auxiliaire de vie correspond aux criteres de votre annonce.'
+
+  const linkUrl = isForAuxiliaire
+    ? `${BASE_URL}/recherche`
+    : `${BASE_URL}/beneficiaire/matching`
+
+  try {
+    await resend.emails.send({
+      from: FROM_EMAIL,
+      to: params.email,
+      subject,
+      html: `
+        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+          <h1 style="color: #000;">${subject}</h1>
+          <p>Bonjour ${params.firstName},</p>
+          <p>${description}</p>
+          <p style="margin: 16px 0; padding: 12px; background: #f5f5f5; border-radius: 8px;">
+            <strong>${params.annonceTitle}</strong><br/>
+            <span style="color: #666;">Score de compatibilite : ${params.score}/100</span>
+          </p>
+          <p style="margin-top: 24px;">
+            <a href="${linkUrl}" style="background: #000; color: #fff; padding: 12px 24px; text-decoration: none; display: inline-block;">
+              Voir le profil
+            </a>
+          </p>
+        </div>
+      `,
+    })
+
+    await logNotification({
+      userId: params.userId,
+      email: params.email,
+      type: `matching_${params.type}`,
+      subject,
+      status: 'sent',
+    })
+  } catch (error) {
+    await logNotification({
+      userId: params.userId,
+      email: params.email,
+      type: `matching_${params.type}`,
+      subject,
+      status: 'error',
+      error: error instanceof Error ? error.message : 'Erreur inconnue',
+    })
+  }
+}

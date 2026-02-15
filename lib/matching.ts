@@ -1,6 +1,8 @@
 // Algorithme de matching intelligent
 // Score sur 100 points base sur 5 criteres
 
+import { haversineDistance } from '@/lib/geocoding'
+
 type AuxiliaireProfile = {
   specialites: string[]
   ville: string
@@ -9,6 +11,8 @@ type AuxiliaireProfile = {
   diplome: string
   disponibilites: Record<string, string[]> | null
   rayon_km: number
+  latitude?: number | null
+  longitude?: number | null
 }
 
 type MatchCriteria = {
@@ -18,6 +22,8 @@ type MatchCriteria = {
   experience_min?: string
   diplome_requis?: string
   disponibilites?: Record<string, string[]>
+  latitude?: number | null
+  longitude?: number | null
 }
 
 const EXPERIENCE_ORDER = ['moins_3_ans', '3_10_ans', 'plus_10_ans']
@@ -40,8 +46,31 @@ export function calculateMatchScore(
   }
 
   // 2. Localisation (25 points max)
-  // Meme ville = 25 points, meme departement = 15 points, sinon 0
-  if (auxiliaire.ville.toLowerCase() === criteria.ville.toLowerCase()) {
+  // Si lat/lng disponibles : scoring Haversine, sinon fallback ville/departement
+  if (
+    auxiliaire.latitude != null &&
+    auxiliaire.longitude != null &&
+    criteria.latitude != null &&
+    criteria.longitude != null
+  ) {
+    const distance = haversineDistance(
+      auxiliaire.latitude,
+      auxiliaire.longitude,
+      criteria.latitude,
+      criteria.longitude
+    )
+    const rayon = auxiliaire.rayon_km || 10
+
+    if (distance <= rayon / 2) {
+      details.localisation = 25
+    } else if (distance <= rayon) {
+      details.localisation = 20
+    } else if (distance <= rayon * 1.5) {
+      details.localisation = 10
+    } else {
+      details.localisation = 0
+    }
+  } else if (auxiliaire.ville.toLowerCase() === criteria.ville.toLowerCase()) {
     details.localisation = 25
   } else if (
     criteria.code_postal &&

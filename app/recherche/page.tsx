@@ -2,6 +2,8 @@ import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import { SPECIALITES, DIPLOMES, EXPERIENCE_LEVELS } from '@/lib/constants'
 import { SearchFilters } from '@/components/recherche/search-filters'
+import { getBadges } from '@/lib/badges'
+import { BadgesDisplay } from '@/components/badges-display'
 
 type SearchParams = {
   ville?: string
@@ -90,6 +92,10 @@ export default async function RecherchePage({
     annonces = annonces.filter((a: any) => activeUserIds.has(a.auxiliaires_profiles?.user_id))
   }
 
+  // Fetch des badges
+  const badgeUserIds = annonces.map((a: any) => a.auxiliaires_profiles?.user_id).filter(Boolean)
+  const badgesMap = await getBadges(badgeUserIds)
+
   // Manual pagination after filtering
   const count = annonces.length
   const paginatedAnnonces = annonces.slice(from, to + 1)
@@ -166,9 +172,12 @@ export default async function RecherchePage({
                         {u?.first_name?.[0]}{u?.last_name?.[0]}
                       </div>
                       <div>
-                        <p className="font-semibold text-gray-900">
-                          {u?.first_name} {u?.last_name?.[0]}.
-                        </p>
+                        <div className="flex items-center gap-2">
+                          <p className="font-semibold text-gray-900">
+                            {u?.first_name} {u?.last_name?.[0]}.
+                          </p>
+                          <BadgesDisplay badges={badgesMap[profile?.user_id]} />
+                        </div>
                         <p className="text-xs text-gray-500">{diplomeLabel}</p>
                       </div>
                     </div>

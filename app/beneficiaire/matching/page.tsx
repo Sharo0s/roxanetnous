@@ -4,6 +4,8 @@ import { LogoutButton } from '@/components/auth/logout-button'
 import Link from 'next/link'
 import { SPECIALITES, DIPLOMES, EXPERIENCE_LEVELS } from '@/lib/constants'
 import { calculateMatchScore } from '@/lib/matching'
+import { getBadges } from '@/lib/badges'
+import { BadgesDisplay } from '@/components/badges-display'
 
 export default async function MatchingPage({
   searchParams,
@@ -35,7 +37,7 @@ export default async function MatchingPage({
   // Recuperer les annonces du beneficiaire
   const { data: mesAnnonces } = await supabase
     .from('annonces_beneficiaires')
-    .select('id, titre, specialites_recherchees, ville, code_postal, diplome_requis, experience_min, disponibilites')
+    .select('id, titre, specialites_recherchees, ville, code_postal, latitude, longitude, diplome_requis, experience_min, disponibilites')
     .eq('beneficiaire_id', profile.id)
     .eq('status', 'publiee')
     .order('created_at', { ascending: false })
@@ -50,8 +52,8 @@ export default async function MatchingPage({
     .select(`
       id, titre, description, ville, code_postal, rayon_km, disponibilites,
       auxiliaires_profiles:auxiliaire_id!inner (
-        id, diplome, experience, specialites, ville, code_postal, rayon_km,
-        disponibilites, validation_status,
+        id, user_id, diplome, experience, specialites, ville, code_postal, rayon_km,
+        latitude, longitude, disponibilites, validation_status,
         users:user_id (first_name, last_name)
       )
     `)
@@ -66,6 +68,7 @@ export default async function MatchingPage({
   }
 
   let scoredResults: ScoredAnnonce[] = []
+  let badgesMap: Record<string, any> = {}
 
   if (selectedAnnonce && auxAnnonces) {
     const criteria = {
@@ -75,6 +78,8 @@ export default async function MatchingPage({
       experience_min: selectedAnnonce.experience_min || undefined,
       diplome_requis: selectedAnnonce.diplome_requis || undefined,
       disponibilites: (selectedAnnonce.disponibilites as Record<string, string[]>) || undefined,
+      latitude: (selectedAnnonce as any).latitude ? Number((selectedAnnonce as any).latitude) : undefined,
+      longitude: (selectedAnnonce as any).longitude ? Number((selectedAnnonce as any).longitude) : undefined,
     }
 
     scoredResults = auxAnnonces.map((annonce: any) => {
@@ -88,11 +93,19 @@ export default async function MatchingPage({
           diplome: auxProfile.diplome,
           disponibilites: (annonce.disponibilites || auxProfile.disponibilites) as Record<string, string[]>,
           rayon_km: annonce.rayon_km || auxProfile.rayon_km || 10,
+          latitude: auxProfile.latitude ? Number(auxProfile.latitude) : undefined,
+          longitude: auxProfile.longitude ? Number(auxProfile.longitude) : undefined,
         },
         criteria
       )
       return { annonce, score, details }
     })
+
+    // Fetch des badges pour les auxiliaires
+    const auxUserIds = auxAnnonces
+      .map((a: any) => a.auxiliaires_profiles?.user_id)
+      .filter(Boolean)
+    badgesMap = await getBadges(auxUserIds)
 
     scoredResults.sort((a, b) => b.score - a.score)
   }
@@ -194,6 +207,7 @@ export default async function MatchingPage({
                           <h3 className="font-semibold text-gray-900 truncate">
                             {u?.first_name} {u?.last_name?.[0]}. — {annonce.titre}
                           </h3>
+                          <BadgesDisplay badges={badgesMap[profile?.user_id]} />
                         </div>
                         <p className="text-sm text-gray-500 mb-2">
                           {diplomeLabel} — {expLabel} — {annonce.ville} ({annonce.code_postal})

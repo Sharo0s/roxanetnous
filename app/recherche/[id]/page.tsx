@@ -6,6 +6,8 @@ import { ContactButton } from '@/components/messages/contact-button'
 import { FavoriButton } from '@/components/recherche/favori-button'
 import { AvisSection } from '@/components/recherche/avis-section'
 import { SignalementButton } from '@/components/signalement-button'
+import { getBadges } from '@/lib/badges'
+import { BadgesDisplay } from '@/components/badges-display'
 
 export default async function AnnonceDetailPage({
   params,
@@ -96,6 +98,9 @@ export default async function AnnonceDetailPage({
 
   const canLeaveAvis = !!user && userData?.role === 'beneficiaire' && auxUserId !== user.id
 
+  // Fetch des badges
+  const badgesMap = auxUserId ? await getBadges([auxUserId]) : {}
+
   const diplomeLabel = DIPLOMES.find((d) => d.value === profile?.diplome)?.label || profile?.diplome
   const expLabel = EXPERIENCE_LEVELS.find((e) => e.value === profile?.experience)?.label || profile?.experience
   const specLabels = (profile?.specialites as string[] || []).map(
@@ -124,9 +129,12 @@ export default async function AnnonceDetailPage({
               {u?.first_name?.[0]}{u?.last_name?.[0]}
             </div>
             <div>
-              <h2 className="text-2xl font-bold text-gray-900">
-                {u?.first_name} {u?.last_name?.[0]}.
-              </h2>
+              <div className="flex items-center gap-3">
+                <h2 className="text-2xl font-bold text-gray-900">
+                  {u?.first_name} {u?.last_name?.[0]}.
+                </h2>
+                <BadgesDisplay badges={badgesMap[auxUserId]} />
+              </div>
               <p className="text-gray-500">
                 {diplomeLabel} — {expLabel}
                 {moyenneNote !== null && ` — ${moyenneNote.toFixed(1)}/5 (${avisFormatted.length} avis)`}
