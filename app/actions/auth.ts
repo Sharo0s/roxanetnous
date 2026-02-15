@@ -136,6 +136,42 @@ export async function logout() {
   redirect('/login')
 }
 
+export async function resetPassword(formData: FormData): Promise<AuthResult> {
+  const supabase = await createClient()
+  const email = formData.get('email') as string
+
+  if (!email) {
+    return { error: 'Adresse email requise.' }
+  }
+
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/auth/callback?next=/reset-password`,
+  })
+
+  if (error) {
+    return { error: 'Erreur lors de l\'envoi du lien. Verifiez votre adresse email.' }
+  }
+
+  return {}
+}
+
+export async function updatePassword(formData: FormData): Promise<AuthResult> {
+  const supabase = await createClient()
+  const password = formData.get('password') as string
+
+  if (!password || password.length < 8) {
+    return { error: 'Le mot de passe doit contenir au moins 8 caracteres.' }
+  }
+
+  const { error } = await supabase.auth.updateUser({ password })
+
+  if (error) {
+    return { error: 'Erreur lors de la mise a jour du mot de passe.' }
+  }
+
+  return {}
+}
+
 export async function deleteAccount(): Promise<AuthResult> {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
