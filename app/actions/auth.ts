@@ -62,7 +62,10 @@ export async function signup(formData: FormData): Promise<AuthResult> {
     })
 
   if (userError) {
-    return { error: 'Erreur lors de la création du profil.' }
+    console.error('Erreur insertion public.users:', userError.message, userError.code, userError.details)
+    // Supprimer le user auth orphelin pour permettre une nouvelle tentative
+    await supabaseAdmin.auth.admin.deleteUser(authData.user.id)
+    return { error: 'Erreur lors de la création du profil. Veuillez réessayer.' }
   }
 
   // Envoyer l'email de bienvenue (non-bloquant)
