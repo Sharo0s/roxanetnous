@@ -8,6 +8,7 @@ import { getSubscriptionStatus } from '@/lib/subscription-helpers'
 
 export type AuthResult = {
   error?: string
+  success?: boolean
 }
 
 export async function signup(formData: FormData): Promise<AuthResult> {
@@ -50,24 +51,33 @@ export async function signup(formData: FormData): Promise<AuthResult> {
     return { error: 'Erreur lors de la création du compte.' }
   }
 
-  // Créer l'entrée dans public.users via service role (bypass RLS)
+  // Le trigger handle_new_user insère automatiquement dans public.users
+  // On vérifie simplement que la ligne existe
   const supabaseAdmin = await createClient({ serviceRole: true })
 
-  const { error: userError } = await supabaseAdmin
+  const { data: userRow } = await supabaseAdmin
     .from('users')
-    .insert({
-      id: authData.user.id,
-      email,
-      role,
-      first_name: firstName,
-      last_name: lastName,
-    })
+    .select('id')
+    .eq('id', authData.user.id)
+    .single()
 
-  if (userError) {
-    console.error('Erreur insertion public.users:', userError.message, userError.code, userError.details)
-    // Supprimer le user auth orphelin pour permettre une nouvelle tentative
-    await supabaseAdmin.auth.admin.deleteUser(authData.user.id)
-    return { error: 'Erreur lors de la création du profil. Veuillez réessayer.' }
+  if (!userRow) {
+    // Le trigger n'a pas fonctionné, on insère manuellement
+    const { error: userError } = await supabaseAdmin
+      .from('users')
+      .insert({
+        id: authData.user.id,
+        email,
+        role,
+        first_name: firstName,
+        last_name: lastName,
+      })
+
+    if (userError) {
+      console.error('Erreur insertion public.users:', userError.message, userError.code, userError.details)
+      await supabaseAdmin.auth.admin.deleteUser(authData.user.id)
+      return { error: 'Erreur lors de la création du profil. Veuillez réessayer.' }
+    }
   }
 
   // Envoyer l'email de bienvenue (non-bloquant)
@@ -78,11 +88,7 @@ export async function signup(formData: FormData): Promise<AuthResult> {
     userId: authData.user.id,
   }).catch(() => {})
 
-  if (role === 'auxiliaire') {
-    redirect('/auxiliaire/dashboard')
-  } else {
-    redirect('/beneficiaire/dashboard')
-  }
+  return { success: true }
 }
 
 export async function login(formData: FormData): Promise<AuthResult> {
@@ -177,70 +183,69 @@ export async function deleteAccount(): Promise<AuthResult> {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const supabaseAdmin = await createClient({ serviceRole: true })
+  try {
+    const supabaseAdmin = await createClient({ serviceRole: true })
 
-  // 1. Cancel Stripe subscription if active
-  const subStatus = await getSubscriptionStatus(user.id)
-  if (subStatus.stripeSubscriptionId) {
+    // 1. Cancel Stripe subscription if active
     try {
-      await stripe.subscriptions.cancel(subStatus.stripeSubscriptionId)
-    } catch {
-      // Subscription may already be cancelled
-    }
-  }
-  if (subStatus.stripeCustomerId) {
-    try {
-      await stripe.customers.del(subStatus.stripeCustomerId)
-    } catch {
-      // Customer may already be deleted
-    }
-  }
-
-  // 2. Delete Storage files (justificatifs)
-  const { data: profile } = await supabaseAdmin
-    .from('auxiliaires_profiles')
-    .select('justificatif_identite_url, justificatif_diplome_url, justificatifs_autres')
-    .eq('user_id', user.id)
-    .single()
-
-  if (profile) {
-    const filesToDelete: string[] = []
-    if (profile.justificatif_identite_url) filesToDelete.push(profile.justificatif_identite_url)
-    if (profile.justificatif_diplome_url) filesToDelete.push(profile.justificatif_diplome_url)
-    if (profile.justificatifs_autres) {
-      filesToDelete.push(...(profile.justificatifs_autres as string[]))
-    }
-
-    for (const fileUrl of filesToDelete) {
-      // Extract path from URL (format: bucket/path)
-      const match = fileUrl.match(/\/storage\/v1\/object\/public\/(.+)/)
-      if (match) {
-        const fullPath = match[1]
-        const bucketEnd = fullPath.indexOf('/')
-        const bucket = fullPath.substring(0, bucketEnd)
-        const path = fullPath.substring(bucketEnd + 1)
-        await supabaseAdmin.storage.from(bucket).remove([path])
+      const subStatus = await getSubscriptionStatus(user.id)
+      if (subStatus.stripeSubscriptionId) {
+        await stripe.subscriptions.cancel(subStatus.stripeSubscriptionId).catch(() => {})
       }
+      if (subStatus.stripeCustomerId) {
+        await stripe.customers.del(subStatus.stripeCustomerId).catch(() => {})
+      }
+    } catch {
+      // Stripe errors should not block account deletion
     }
+
+    // 2. Delete Storage files (justificatifs)
+    try {
+      const { data: profile } = await supabaseAdmin
+        .from('auxiliaires_profiles')
+        .select('justificatif_identite_url, justificatif_diplome_url, justificatifs_autres')
+        .eq('user_id', user.id)
+        .single()
+
+      if (profile) {
+        const filesToDelete: string[] = []
+        if (profile.justificatif_identite_url) filesToDelete.push(profile.justificatif_identite_url)
+        if (profile.justificatif_diplome_url) filesToDelete.push(profile.justificatif_diplome_url)
+        if (profile.justificatifs_autres) {
+          filesToDelete.push(...(profile.justificatifs_autres as string[]))
+        }
+        if (filesToDelete.length > 0) {
+          await supabaseAdmin.storage.from('justificatifs').remove(filesToDelete)
+        }
+      }
+    } catch {
+      // Storage errors should not block account deletion
+    }
+
+    // 3. Delete from public.users (CASCADE handles profiles, subscriptions, favoris, etc.)
+    const { error: deleteError } = await supabaseAdmin
+      .from('users')
+      .delete()
+      .eq('id', user.id)
+
+    if (deleteError) {
+      return { error: 'Erreur lors de la suppression du compte. Veuillez contacter le support.' }
+    }
+
+    // 4. Delete from auth.users
+    const { error: authDeleteError } = await supabaseAdmin.auth.admin.deleteUser(user.id)
+    if (authDeleteError) {
+      return { error: "Erreur lors de la suppression de l'authentification." }
+    }
+
+    // 5. Sign out and redirect
+    await supabase.auth.signOut()
+  } catch (e) {
+    // Re-throw redirect exceptions from Next.js
+    if (e && typeof e === 'object' && 'digest' in e) throw e
+    console.error('deleteAccount error:', e)
+    return { error: 'Erreur inattendue lors de la suppression. Veuillez contacter le support.' }
   }
 
-  // 3. Delete from public.users (CASCADE handles profiles, subscriptions, favoris, etc.)
-  const { error: deleteError } = await supabaseAdmin
-    .from('users')
-    .delete()
-    .eq('id', user.id)
-
-  if (deleteError) {
-    return { error: 'Erreur lors de la suppression du compte. Veuillez contacter le support.' }
-  }
-
-  // 4. Delete from auth.users
-  const { error: authDeleteError } = await supabaseAdmin.auth.admin.deleteUser(user.id)
-  if (authDeleteError) {
-    return { error: 'Erreur lors de la suppression de l\'authentification.' }
-  }
-
-  // 5. Sign out and redirect
-  await supabase.auth.signOut()
   redirect('/')
 }

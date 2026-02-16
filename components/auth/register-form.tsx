@@ -15,6 +15,8 @@ export function RegisterForm() {
   )
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  const [emailSent, setEmailSent] = useState(false)
+  const [registeredEmail, setRegisteredEmail] = useState('')
 
   async function handleSubmit(formData: FormData) {
     if (!role) return
@@ -25,7 +27,41 @@ export function RegisterForm() {
     if (result?.error) {
       setError(result.error)
       setLoading(false)
+    } else if (result?.success) {
+      setRegisteredEmail(formData.get('email') as string)
+      setEmailSent(true)
+      setLoading(false)
     }
+  }
+
+  if (emailSent) {
+    return (
+      <main className="min-h-screen flex items-center justify-center p-4 bg-gray-50">
+        <div className="w-full max-w-md text-center">
+          <Link href="/" className="text-3xl font-bold text-black">
+            roxanetnous
+          </Link>
+          <div className="mt-8 bg-white p-8 rounded-xl shadow-sm border">
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">
+              Verifiez votre email
+            </h2>
+            <p className="text-gray-600 mb-2">
+              Un email de confirmation a ete envoye a :
+            </p>
+            <p className="font-medium text-black mb-6">{registeredEmail}</p>
+            <p className="text-sm text-gray-500 mb-6">
+              Cliquez sur le lien dans le mail pour activer votre compte, puis connectez-vous.
+            </p>
+            <Link
+              href="/login"
+              className="inline-block px-6 py-2.5 bg-black text-white rounded-lg text-sm font-medium hover:bg-gray-800 transition"
+            >
+              Aller a la page de connexion
+            </Link>
+          </div>
+        </div>
+      </main>
+    )
   }
 
   if (!role) {

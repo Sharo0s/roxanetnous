@@ -22,12 +22,12 @@ export default async function AdminUtilisateursPage() {
   const { data: users } = await supabaseAdmin
     .from('users')
     .select('id, email, first_name, last_name, role, created_at')
+    .neq('role', 'admin')
     .order('created_at', { ascending: false })
 
   // Compter par role
   const auxCount = users?.filter((u) => u.role === 'auxiliaire').length || 0
   const benCount = users?.filter((u) => u.role === 'beneficiaire').length || 0
-  const adminCount = users?.filter((u) => u.role === 'admin').length || 0
 
   return (
     <main className="min-h-screen bg-gray-50">
@@ -48,7 +48,7 @@ export default async function AdminUtilisateursPage() {
       <div className="max-w-6xl mx-auto px-4 py-8">
         <h2 className="text-2xl font-bold text-gray-900 mb-6">Utilisateurs</h2>
 
-        <div className="grid grid-cols-3 gap-4 mb-8">
+        <div className="grid grid-cols-2 gap-4 mb-8">
           <div className="bg-white rounded-xl border p-5">
             <p className="text-sm text-gray-500">Auxiliaires</p>
             <p className="text-3xl font-bold mt-1">{auxCount}</p>
@@ -56,10 +56,6 @@ export default async function AdminUtilisateursPage() {
           <div className="bg-white rounded-xl border p-5">
             <p className="text-sm text-gray-500">Beneficiaires</p>
             <p className="text-3xl font-bold mt-1">{benCount}</p>
-          </div>
-          <div className="bg-white rounded-xl border p-5">
-            <p className="text-sm text-gray-500">Admins</p>
-            <p className="text-3xl font-bold mt-1">{adminCount}</p>
           </div>
         </div>
 
