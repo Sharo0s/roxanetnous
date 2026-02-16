@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { geocodeAddress } from '@/lib/geocoding'
+import { analyzeDocument } from '@/lib/ocr'
 
 export type OnboardingResult = {
   error?: string
@@ -134,6 +135,19 @@ export async function uploadJustificatif(formData: FormData): Promise<Onboarding
 
   if (updateError) {
     return { error: 'Erreur lors de la mise a jour du profil.' }
+  }
+
+  // Lancer l'analyse OCR en arriere-plan (non-bloquant)
+  const { data: profileData } = await supabase
+    .from('auxiliaires_profiles')
+    .select('id')
+    .eq('user_id', user.id)
+    .single()
+
+  if (profileData) {
+    analyzeDocument(path, type as 'identite' | 'diplome', profileData.id).catch((err) =>
+      console.error('OCR: erreur analyse', err)
+    )
   }
 
   return { success: true }

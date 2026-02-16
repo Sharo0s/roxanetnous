@@ -63,6 +63,13 @@ export default async function ValidationDetailPage({
     diplomeUrl = data?.signedUrl || null
   }
 
+  // Recuperer les resultats OCR
+  const { data: ocrResults } = await supabaseAdmin
+    .from('ocr_results')
+    .select('*')
+    .eq('auxiliaire_profile_id', id)
+    .order('created_at', { ascending: false })
+
   // Logger la consultation
   await supabaseAdmin.from('admin_actions_log').insert({
     admin_id: user.id,
@@ -213,6 +220,105 @@ export default async function ValidationDetailPage({
                 )}
               </div>
             </div>
+          </div>
+
+          {/* Analyse OCR */}
+          <div className="bg-white rounded-xl border p-6 md:col-span-2">
+            <h3 className="font-semibold mb-4">Analyse OCR</h3>
+            {ocrResults && ocrResults.length > 0 ? (
+              <div className="space-y-4">
+                {ocrResults.map((ocr: any) => (
+                  <div key={ocr.id} className="border rounded-lg p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <span className="text-sm font-medium">
+                        {ocr.document_type === 'identite' ? "Piece d'identite" : 'Diplome'}
+                      </span>
+                      <span className="text-xs text-gray-500">
+                        {new Date(ocr.created_at).toLocaleDateString('fr-FR', {
+                          day: 'numeric',
+                          month: 'long',
+                          year: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })}
+                      </span>
+                    </div>
+
+                    {ocr.confidence_score !== null && (
+                      <div className="mb-3">
+                        <p className="text-xs text-gray-500 mb-1">Confiance</p>
+                        <div className="flex items-center gap-2">
+                          <div className="flex-1 bg-gray-100 rounded-full h-2">
+                            <div
+                              className="bg-gray-700 h-2 rounded-full"
+                              style={{ width: `${ocr.confidence_score}%` }}
+                            />
+                          </div>
+                          <span className="text-xs font-medium">{ocr.confidence_score}%</span>
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="flex gap-3 mb-3">
+                      {ocr.document_type === 'identite' && ocr.coherence_identite !== null && (
+                        <span
+                          className={`text-xs px-2 py-1 rounded-full font-medium ${
+                            ocr.coherence_identite
+                              ? 'bg-gray-100 text-gray-800'
+                              : 'bg-gray-200 text-gray-600'
+                          }`}
+                        >
+                          Identite : {ocr.coherence_identite ? 'coherent' : 'non coherent'}
+                        </span>
+                      )}
+                      {ocr.document_type === 'diplome' && ocr.coherence_diplome !== null && (
+                        <span
+                          className={`text-xs px-2 py-1 rounded-full font-medium ${
+                            ocr.coherence_diplome
+                              ? 'bg-gray-100 text-gray-800'
+                              : 'bg-gray-200 text-gray-600'
+                          }`}
+                        >
+                          Diplome : {ocr.coherence_diplome ? 'coherent' : 'non coherent'}
+                        </span>
+                      )}
+                    </div>
+
+                    {ocr.alerts && (ocr.alerts as string[]).length > 0 && (
+                      <div className="mb-3">
+                        <p className="text-xs text-gray-500 mb-1">Alertes</p>
+                        <ul className="space-y-1">
+                          {(ocr.alerts as string[]).map((alert: string, i: number) => (
+                            <li key={i} className="text-xs text-gray-600 bg-gray-50 px-2 py-1 rounded">
+                              {alert}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+
+                    {ocr.extracted_text && (
+                      <details className="mt-2">
+                        <summary className="text-xs text-gray-500 cursor-pointer hover:text-gray-700">
+                          Texte extrait
+                        </summary>
+                        <pre className="mt-2 text-xs text-gray-600 bg-gray-50 p-3 rounded-lg whitespace-pre-wrap max-h-48 overflow-y-auto">
+                          {ocr.extracted_text.length > 1000
+                            ? ocr.extracted_text.slice(0, 1000) + '...'
+                            : ocr.extracted_text}
+                        </pre>
+                      </details>
+                    )}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-gray-400">
+                {(profile.justificatif_identite_url || profile.justificatif_diplome_url)
+                  ? 'Analyse en cours ou non disponible.'
+                  : 'Aucun justificatif uploade.'}
+              </p>
+            )}
           </div>
         </div>
 
