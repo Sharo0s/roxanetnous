@@ -78,7 +78,7 @@ export default async function FavorisPage() {
                 const annonce = fav.annonces_auxiliaires
                 const profile = annonce.auxiliaires_profiles
                 const u = profile?.users
-                const diplomeLabel = DIPLOMES.find((d) => d.value === profile?.diplome)?.label || profile?.diplome
+                const diplomeLabel = (profile?.diplomes as string[] || []).map((d: string) => DIPLOMES.find((dp) => dp.value === d)?.label || d).join(', ')
 
                 return (
                   <Link

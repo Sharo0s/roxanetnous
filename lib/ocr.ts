@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { DIPLOMES } from '@/lib/constants'
 
-type DocumentType = 'identite' | 'diplome'
+type DocumentType = 'identite' | 'diplome' | 'permis' | 'cv'
 
 type CoherenceResult = {
   coherent: boolean
@@ -184,12 +184,15 @@ function checkCoherence(
   }
 
   if (documentType === 'diplome') {
-    const diplomeValue = profile.diplome as string
-    const diplomeInfo = DIPLOMES.find((d) => d.value === diplomeValue)
-
-    if (!diplomeInfo || diplomeValue === 'autre') {
+    const diplomesValues = (profile.diplomes as string[]) || []
+    if (diplomesValues.length === 0 || (diplomesValues.length === 1 && diplomesValues[0] === 'autre')) {
       return { coherent: false, alerts: ['Verification automatique non disponible pour ce type de diplome'] }
     }
+
+    // Verifier si au moins un diplome correspond
+    const diplomeInfo = diplomesValues
+      .map((v) => DIPLOMES.find((d) => d.value === v))
+      .find((d) => d && d.value !== 'autre')
 
     // Mots-cles associes aux diplomes
     const diplomeKeywords: Record<string, string[]> = {
@@ -203,7 +206,11 @@ function checkCoherence(
       bac_pro_assp: ['bac pro', 'assp', 'accompagnement', 'soins', 'services'],
     }
 
-    const keywords = diplomeKeywords[diplomeValue] || []
+    if (!diplomeInfo) {
+      return { coherent: false, alerts: ['Verification automatique non disponible pour ce type de diplome'] }
+    }
+
+    const keywords = diplomeKeywords[diplomeInfo.value] || []
     const matchedKeywords = keywords.filter((kw) => textLower.includes(kw))
 
     if (matchedKeywords.length === 0) {
@@ -212,6 +219,57 @@ function checkCoherence(
 
     return {
       coherent: matchedKeywords.length >= 1,
+      alerts,
+    }
+  }
+
+  if (documentType === 'cv') {
+    const firstName = user?.first_name?.toLowerCase() || ''
+    const lastName = user?.last_name?.toLowerCase() || ''
+
+    const firstNameFound = firstName.length > 1 && textLower.includes(firstName)
+    const lastNameFound = lastName.length > 1 && textLower.includes(lastName)
+
+    const cvKeywords = ['experience', 'expérience', 'formation', 'competence', 'compétence', 'curriculum', 'parcours']
+    const hasCvKeyword = cvKeywords.some((kw) => textLower.includes(kw))
+
+    if (!hasCvKeyword) {
+      alerts.push('Le document ne semble pas etre un CV')
+    }
+    if (!firstNameFound && firstName.length > 1) {
+      alerts.push(`Prenom "${user?.first_name}" non trouve dans le document`)
+    }
+    if (!lastNameFound && lastName.length > 1) {
+      alerts.push(`Nom "${user?.last_name}" non trouve dans le document`)
+    }
+
+    return {
+      coherent: hasCvKeyword && firstNameFound && lastNameFound,
+      alerts,
+    }
+  }
+
+  if (documentType === 'permis') {
+    const firstName = user?.first_name?.toLowerCase() || ''
+    const lastName = user?.last_name?.toLowerCase() || ''
+
+    const hasPermisKeyword = textLower.includes('permis') || textLower.includes('conduire') || textLower.includes('driving')
+
+    const firstNameFound = firstName.length > 1 && textLower.includes(firstName)
+    const lastNameFound = lastName.length > 1 && textLower.includes(lastName)
+
+    if (!hasPermisKeyword) {
+      alerts.push('Le document ne semble pas etre un permis de conduire')
+    }
+    if (!firstNameFound && firstName.length > 1) {
+      alerts.push(`Prenom "${user?.first_name}" non trouve dans le document`)
+    }
+    if (!lastNameFound && lastName.length > 1) {
+      alerts.push(`Nom "${user?.last_name}" non trouve dans le document`)
+    }
+
+    return {
+      coherent: hasPermisKeyword && firstNameFound && lastNameFound,
       alerts,
     }
   }

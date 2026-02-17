@@ -35,7 +35,7 @@ export async function notifyMatchingUsers(params: {
     // Recuperer les auxiliaires valides avec abonnement actif
     const { data: auxProfiles } = await supabase
       .from('auxiliaires_profiles')
-      .select('user_id, specialites, ville, code_postal, experience, diplome, disponibilites, rayon_km, latitude, longitude')
+      .select('user_id, specialites, ville, code_postal, experience, diplomes, disponibilites, rayon_km, latitude, longitude')
       .eq('validation_status', 'valide')
 
     if (!auxProfiles || auxProfiles.length === 0) return
@@ -60,7 +60,7 @@ export async function notifyMatchingUsers(params: {
             ville: p.ville || '',
             code_postal: p.code_postal || '',
             experience: p.experience,
-            diplome: p.diplome,
+            diplomes: p.diplomes,
             disponibilites: p.disponibilites as Record<string, string[]>,
             rayon_km: p.rayon_km || 10,
             latitude: p.latitude ? Number(p.latitude) : undefined,
@@ -101,7 +101,7 @@ export async function notifyMatchingUsers(params: {
       .select(`
         id, titre, ville, code_postal, rayon_km, disponibilites,
         auxiliaires_profiles:auxiliaire_id!inner (
-          user_id, specialites, ville, code_postal, experience, diplome,
+          user_id, specialites, ville, code_postal, experience, diplomes,
           disponibilites, rayon_km, latitude, longitude
         )
       `)
@@ -125,7 +125,7 @@ export async function notifyMatchingUsers(params: {
       ville: auxProfile.ville || auxAnnonce.ville || '',
       code_postal: auxProfile.code_postal || auxAnnonce.code_postal || '',
       experience: auxProfile.experience,
-      diplome: auxProfile.diplome,
+      diplomes: auxProfile.diplomes || [],
       disponibilites: (auxAnnonce.disponibilites || auxProfile.disponibilites) as Record<string, string[]>,
       rayon_km: auxAnnonce.rayon_km || auxProfile.rayon_km || 10,
       latitude: auxProfile.latitude ? Number(auxProfile.latitude) : undefined,

@@ -52,7 +52,7 @@ export default async function MatchingPage({
     .select(`
       id, titre, description, ville, code_postal, rayon_km, disponibilites,
       auxiliaires_profiles:auxiliaire_id!inner (
-        id, user_id, diplome, experience, specialites, ville, code_postal, rayon_km,
+        id, user_id, diplomes, experience, specialites, ville, code_postal, rayon_km,
         latitude, longitude, disponibilites, validation_status,
         users:user_id (first_name, last_name)
       )
@@ -90,7 +90,7 @@ export default async function MatchingPage({
           ville: auxProfile.ville || annonce.ville,
           code_postal: auxProfile.code_postal || annonce.code_postal,
           experience: auxProfile.experience,
-          diplome: auxProfile.diplome,
+          diplomes: auxProfile.diplomes,
           disponibilites: (annonce.disponibilites || auxProfile.disponibilites) as Record<string, string[]>,
           rayon_km: annonce.rayon_km || auxProfile.rayon_km || 10,
           latitude: auxProfile.latitude ? Number(auxProfile.latitude) : undefined,
@@ -180,7 +180,7 @@ export default async function MatchingPage({
                 {scoredResults.map(({ annonce, score, details }, index) => {
                   const profile = annonce.auxiliaires_profiles
                   const u = profile?.users
-                  const diplomeLabel = DIPLOMES.find((d) => d.value === profile?.diplome)?.label || profile?.diplome
+                  const diplomeLabels = (profile?.diplomes as string[] || []).map((v: string) => DIPLOMES.find((d) => d.value === v)?.label || v).join(', ')
                   const expLabel = EXPERIENCE_LEVELS.find((e) => e.value === profile?.experience)?.label || profile?.experience
                   const specs = (profile?.specialites as string[] || []).slice(0, 4)
 
@@ -210,7 +210,7 @@ export default async function MatchingPage({
                           <BadgesDisplay badges={badgesMap[profile?.user_id]} />
                         </div>
                         <p className="text-sm text-gray-500 mb-2">
-                          {diplomeLabel} — {expLabel} — {annonce.ville} ({annonce.code_postal})
+                          {diplomeLabels} — {expLabel} — {annonce.ville} ({annonce.code_postal})
                         </p>
 
                         <div className="flex flex-wrap gap-1 mb-2">

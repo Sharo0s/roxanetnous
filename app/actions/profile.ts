@@ -9,7 +9,7 @@ export type ProfileResult = {
 }
 
 export async function updateAuxiliaireProfile(data: {
-  diplome: string
+  diplomes: string[]
   experience: string
   specialites: string[]
   ville: string
@@ -36,8 +36,8 @@ export async function updateAuxiliaireProfile(data: {
     return { error: 'Acces non autorise.' }
   }
 
-  if (!data.diplome || !data.experience || data.specialites.length === 0) {
-    return { error: 'Diplome, experience et specialites sont requis.' }
+  if (data.diplomes.length === 0 || !data.experience || data.specialites.length === 0) {
+    return { error: 'Diplomes, experience et specialites sont requis.' }
   }
 
   if (!data.ville || !data.code_postal) {
@@ -47,7 +47,7 @@ export async function updateAuxiliaireProfile(data: {
   const { error } = await supabase
     .from('auxiliaires_profiles')
     .update({
-      diplome: data.diplome,
+      diplomes: data.diplomes,
       experience: data.experience,
       specialites: data.specialites,
       ville: data.ville,

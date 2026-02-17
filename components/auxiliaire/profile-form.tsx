@@ -1,9 +1,12 @@
 'use client'
 
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { updateAuxiliaireProfile, updateUserInfo } from '@/app/actions/profile'
+import { uploadJustificatif } from '@/app/actions/auxiliaire'
 import { Button } from '@/components/ui/button'
+import { CityAutocomplete } from '@/components/ui/city-autocomplete'
 import { DIPLOMES, EXPERIENCE_LEVELS, SPECIALITES, JOURS_SEMAINE, CRENEAUX } from '@/lib/constants'
+import { MapRadius } from '@/components/ui/map-radius'
 
 type Props = {
   userInfo: {
@@ -13,7 +16,7 @@ type Props = {
     phone: string
   }
   profile: {
-    diplome: string
+    diplomes: string[]
     experience: string
     specialites: string[]
     ville: string
@@ -24,6 +27,9 @@ type Props = {
     permis_conduire: boolean
     vehicule: boolean
     description: string
+    justificatif_permis_url: string | null
+    justificatifs_diplomes: Record<string, string>
+    justificatif_cv_url: string | null
   }
 }
 
@@ -32,7 +38,7 @@ export function AuxiliaireProfileForm({ userInfo, profile }: Props) {
   const [lastName, setLastName] = useState(userInfo.last_name)
   const [phone, setPhone] = useState(userInfo.phone)
 
-  const [diplome, setDiplome] = useState(profile.diplome)
+  const [diplomes, setDiplomes] = useState<string[]>(profile.diplomes)
   const [experience, setExperience] = useState(profile.experience)
   const [specialites, setSpecialites] = useState<string[]>(profile.specialites)
   const [ville, setVille] = useState(profile.ville)
@@ -47,6 +53,74 @@ export function AuxiliaireProfileForm({ userInfo, profile }: Props) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
+  const [uploadingPermis, setUploadingPermis] = useState(false)
+  const [permisFileName, setPermisFileName] = useState<string | null>(
+    profile.justificatif_permis_url ? profile.justificatif_permis_url.split('/').pop() || null : null
+  )
+  const permisFileRef = useRef<HTMLInputElement>(null)
+  const [uploadingDiplome, setUploadingDiplome] = useState<string | null>(null)
+  const [diplomeFileNames, setDiplomeFileNames] = useState<Record<string, string>>(
+    Object.fromEntries(
+      Object.entries(profile.justificatifs_diplomes).map(([k, v]) => [k, v.split('/').pop() || v])
+    )
+  )
+  const diplomeFileRefs = useRef<Record<string, HTMLInputElement | null>>({})
+  const [uploadingCv, setUploadingCv] = useState(false)
+  const [cvFileName, setCvFileName] = useState<string | null>(
+    profile.justificatif_cv_url ? profile.justificatif_cv_url.split('/').pop() || null : null
+  )
+  const cvFileRef = useRef<HTMLInputElement>(null)
+
+  async function handleCvUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setUploadingCv(true)
+    setError(null)
+    const formData = new FormData()
+    formData.set('file', file)
+    formData.set('type', 'cv')
+    const result = await uploadJustificatif(formData)
+    if (result?.error) {
+      setError(result.error)
+    } else {
+      setCvFileName(file.name)
+    }
+    setUploadingCv(false)
+  }
+
+  async function handleDiplomeUpload(e: React.ChangeEvent<HTMLInputElement>, diplomeValue: string) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setUploadingDiplome(diplomeValue)
+    setError(null)
+    const formData = new FormData()
+    formData.set('file', file)
+    formData.set('type', `diplome:${diplomeValue}`)
+    const result = await uploadJustificatif(formData)
+    if (result?.error) {
+      setError(result.error)
+    } else {
+      setDiplomeFileNames((prev) => ({ ...prev, [diplomeValue]: file.name }))
+    }
+    setUploadingDiplome(null)
+  }
+
+  async function handlePermisUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setUploadingPermis(true)
+    setError(null)
+    const formData = new FormData()
+    formData.set('file', file)
+    formData.set('type', 'permis')
+    const result = await uploadJustificatif(formData)
+    if (result?.error) {
+      setError(result.error)
+    } else {
+      setPermisFileName(file.name)
+    }
+    setUploadingPermis(false)
+  }
 
   function toggleSpecialite(value: string) {
     setSpecialites((prev) =>
@@ -84,7 +158,7 @@ export function AuxiliaireProfileForm({ userInfo, profile }: Props) {
 
     // Mise a jour du profil auxiliaire
     const profileResult = await updateAuxiliaireProfile({
-      diplome,
+      diplomes,
       experience,
       specialites,
       ville,
@@ -163,31 +237,117 @@ export function AuxiliaireProfileForm({ userInfo, profile }: Props) {
 
       <div className="bg-white rounded-xl border p-6">
         <h3 className="font-semibold mb-4">Formation</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Diplome</label>
-            <select
-              value={diplome}
-              onChange={(e) => setDiplome(e.target.value)}
-              className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
-            >
-              {DIPLOMES.map((d) => (
-                <option key={d.value} value={d.value}>{d.label}</option>
-              ))}
-            </select>
+
+        {/* CV upload */}
+        <div className="space-y-2 mb-6">
+          <label className="block text-sm font-medium text-gray-700">
+            Curriculum vitae (CV) <span className="text-red-500">*</span>
+          </label>
+          <input
+            ref={cvFileRef}
+            type="file"
+            accept=".pdf,.jpg,.jpeg,.png,.webp"
+            onChange={handleCvUpload}
+            className="hidden"
+          />
+          <button
+            type="button"
+            onClick={() => cvFileRef.current?.click()}
+            disabled={uploadingCv}
+            className={`w-full p-4 rounded-lg border-2 border-dashed transition text-sm ${
+              cvFileName
+                ? 'border-black bg-gray-50'
+                : 'border-gray-300 hover:border-gray-500'
+            }`}
+          >
+            {uploadingCv
+              ? 'Upload en cours...'
+              : cvFileName
+                ? `Fichier : ${cvFileName}`
+                : 'Cliquez pour selectionner un fichier'}
+          </button>
+          <p className="text-xs text-gray-400">PDF, JPG, PNG ou WebP (max. 10 Mo)</p>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Diplomes</label>
+          <div className="space-y-2 mb-4">
+            {DIPLOMES.map((d) => {
+              const isSelected = diplomes.includes(d.value)
+              return (
+                <div key={d.value}>
+                  <label
+                    className={`flex items-center p-3 rounded-lg border cursor-pointer transition ${
+                      isSelected
+                        ? 'border-black bg-gray-50'
+                        : 'border-gray-200 hover:border-gray-400'
+                    }`}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={isSelected}
+                      onChange={() => {
+                        if (d.value === 'sans_diplome') {
+                          setDiplomes((prev) => prev.includes('sans_diplome') ? prev.filter((v) => v !== 'sans_diplome') : ['sans_diplome'])
+                          setDiplomeFileNames({})
+                        } else {
+                          setDiplomes((prev) =>
+                            prev.includes(d.value)
+                              ? prev.filter((v) => v !== d.value)
+                              : [...prev.filter((v) => v !== 'sans_diplome'), d.value]
+                          )
+                        }
+                      }}
+                      className="sr-only"
+                    />
+                    <span className="text-sm">{d.label}</span>
+                  </label>
+
+                  {isSelected && d.value !== 'sans_diplome' && (
+                    <div className="mt-2 ml-4 mb-3">
+                      <input
+                        ref={(el) => { diplomeFileRefs.current[d.value] = el }}
+                        type="file"
+                        accept=".pdf,.jpg,.jpeg,.png,.webp"
+                        onChange={(e) => handleDiplomeUpload(e, d.value)}
+                        className="hidden"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => diplomeFileRefs.current[d.value]?.click()}
+                        disabled={uploadingDiplome === d.value}
+                        className={`w-full rounded-lg border-2 border-dashed px-4 py-3 text-sm transition ${
+                          diplomeFileNames[d.value]
+                            ? 'border-black bg-gray-50 text-gray-700'
+                            : 'border-gray-300 text-gray-500 hover:border-gray-400'
+                        }`}
+                      >
+                        {uploadingDiplome === d.value
+                          ? 'Upload en cours...'
+                          : diplomeFileNames[d.value]
+                            ? `Fichier : ${diplomeFileNames[d.value]}`
+                            : `Justificatif ${d.label} *`}
+                      </button>
+                      <p className="text-xs text-gray-400 mt-1">PDF, JPG, PNG ou WebP (max. 10 Mo)</p>
+                    </div>
+                  )}
+                </div>
+              )
+            })}
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Experience</label>
-            <select
-              value={experience}
-              onChange={(e) => setExperience(e.target.value)}
-              className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
-            >
-              {EXPERIENCE_LEVELS.map((e) => (
-                <option key={e.value} value={e.value}>{e.label}</option>
-              ))}
-            </select>
-          </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Experience</label>
+          <select
+            value={experience}
+            onChange={(e) => setExperience(e.target.value)}
+            className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
+          >
+            {EXPERIENCE_LEVELS.map((e) => (
+              <option key={e.value} value={e.value}>{e.label}</option>
+            ))}
+          </select>
         </div>
       </div>
 
@@ -213,24 +373,13 @@ export function AuxiliaireProfileForm({ userInfo, profile }: Props) {
 
       <div className="bg-white rounded-xl border p-6">
         <h3 className="font-semibold mb-4">Localisation</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Ville</label>
-            <input
-              type="text"
-              value={ville}
-              onChange={(e) => setVille(e.target.value)}
-              className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Code postal</label>
-            <input
-              type="text"
-              value={codePostal}
-              onChange={(e) => setCodePostal(e.target.value)}
-              maxLength={5}
-              className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
+          <div className="sm:col-span-2">
+            <CityAutocomplete
+              ville={ville}
+              codePostal={codePostal}
+              onVilleChange={setVille}
+              onCodePostalChange={setCodePostal}
             />
           </div>
           <div>
@@ -245,16 +394,46 @@ export function AuxiliaireProfileForm({ userInfo, profile }: Props) {
             />
           </div>
         </div>
+        <div className="mt-4">
+          <MapRadius ville={ville} codePostal={codePostal} rayonKm={rayonKm} />
+        </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
-          <label className="flex items-center gap-2 text-sm">
-            <input
-              type="checkbox"
-              checked={permisConduire}
-              onChange={(e) => setPermisConduire(e.target.checked)}
-              className="rounded border-gray-300"
-            />
-            Permis de conduire
-          </label>
+          <div>
+            <label className="flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                checked={permisConduire}
+                onChange={(e) => setPermisConduire(e.target.checked)}
+                className="rounded border-gray-300"
+              />
+              Permis de conduire
+            </label>
+
+            {permisConduire && (
+              <div className="mt-3 ml-6">
+                <input
+                  ref={permisFileRef}
+                  type="file"
+                  accept=".pdf,.jpg,.jpeg,.png,.webp"
+                  onChange={handlePermisUpload}
+                  className="hidden"
+                />
+                <button
+                  type="button"
+                  onClick={() => permisFileRef.current?.click()}
+                  disabled={uploadingPermis}
+                  className="w-full rounded-lg border-2 border-dashed border-gray-300 px-4 py-3 text-sm text-gray-500 hover:border-gray-400 transition"
+                >
+                  {uploadingPermis
+                    ? 'Upload en cours...'
+                    : permisFileName
+                      ? `Fichier : ${permisFileName}`
+                      : 'Joindre un scan du permis de conduire'}
+                </button>
+                <p className="text-xs text-gray-400 mt-1">PDF, JPG, PNG ou WebP (max. 10 Mo)</p>
+              </div>
+            )}
+          </div>
           <label className="flex items-center gap-2 text-sm">
             <input
               type="checkbox"

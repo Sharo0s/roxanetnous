@@ -1,13 +1,14 @@
 export const DIPLOMES = [
-  { value: 'deaes', label: 'DEAES (Accompagnant Educatif et Social)' },
-  { value: 'de_auxiliaire_vie', label: "Diplome d'Etat Auxiliaire de Vie" },
-  { value: 'aide_soignante', label: 'Aide-soignante' },
-  { value: 'auxiliaire_gerontologie', label: 'Auxiliaire en gerontologie' },
   { value: 'aide_medico_psychologique', label: 'Aide medico-psychologique' },
+  { value: 'aide_soignante', label: 'Aide-soignante' },
   { value: 'assistant_soin_gerontologie', label: 'Assistant de soin en gerontologie' },
   { value: 'assistant_vie_familles', label: 'Assistant de vie aux familles' },
+  { value: 'auxiliaire_gerontologie', label: 'Auxiliaire en gerontologie' },
   { value: 'bac_pro_assp', label: 'BAC PRO ASSP' },
+  { value: 'deaes', label: 'DEAES (Accompagnant Educatif et Social)' },
+  { value: 'de_auxiliaire_vie', label: "Diplome d'Etat Auxiliaire de Vie" },
   { value: 'autre', label: 'Autre diplome' },
+  { value: 'sans_diplome', label: 'Sans diplome' },
 ] as const
 
 export const EXPERIENCE_LEVELS = [

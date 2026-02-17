@@ -29,7 +29,7 @@ export function StepSpecialites({ data, onChange }: Props) {
         {SPECIALITES.map((spec) => (
           <label
             key={spec.value}
-            className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition ${
+            className={`flex items-center p-3 rounded-lg border cursor-pointer transition ${
               data.specialites.includes(spec.value)
                 ? 'border-black bg-gray-50'
                 : 'border-gray-200 hover:border-gray-400'
@@ -39,7 +39,7 @@ export function StepSpecialites({ data, onChange }: Props) {
               type="checkbox"
               checked={data.specialites.includes(spec.value)}
               onChange={() => toggle(spec.value)}
-              className="h-4 w-4 rounded border-gray-300 accent-black"
+              className="sr-only"
             />
             <span className="text-sm">{spec.label}</span>
           </label>

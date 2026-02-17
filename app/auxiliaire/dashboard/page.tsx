@@ -23,7 +23,7 @@ export default async function AuxiliaireDashboard() {
 
   const { data: profile } = await supabase
     .from('auxiliaires_profiles')
-    .select('id, validation_status')
+    .select('id, validation_status, diplomes')
     .eq('user_id', user.id)
     .single()
 
@@ -70,7 +70,7 @@ export default async function AuxiliaireDashboard() {
           Bonjour {userData.first_name}
         </h2>
 
-        {!profile ? (
+        {!profile || !profile.diplomes || profile.diplomes.length === 0 ? (
           <div className="bg-white rounded-xl border p-6">
             <h3 className="font-semibold text-lg mb-2">Completez votre profil</h3>
             <p className="text-gray-600 mb-4">

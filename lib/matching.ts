@@ -8,7 +8,7 @@ type AuxiliaireProfile = {
   ville: string
   code_postal: string
   experience: string
-  diplome: string
+  diplomes: string[]
   disponibilites: Record<string, string[]> | null
   rayon_km: number
   latitude?: number | null
@@ -99,7 +99,7 @@ export function calculateMatchScore(
 
   // 4. Diplome (10 points max)
   if (criteria.diplome_requis) {
-    details.diplome = auxiliaire.diplome === criteria.diplome_requis ? 10 : 3
+    details.diplome = (auxiliaire.diplomes || []).includes(criteria.diplome_requis) ? 10 : 3
   } else {
     details.diplome = 10
   }

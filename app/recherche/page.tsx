@@ -163,7 +163,7 @@ export default async function RecherchePage({
               {paginatedAnnonces.map((annonce: any) => {
                 const profile = annonce.auxiliaires_profiles
                 const u = profile?.users
-                const diplomeLabel = DIPLOMES.find((d) => d.value === profile?.diplome)?.label || profile?.diplome
+                const diplomeLabel = (profile?.diplomes as string[] || []).map((d: string) => DIPLOMES.find((dp) => dp.value === d)?.label || d).join(', ')
                 const expLabel = EXPERIENCE_LEVELS.find((e) => e.value === profile?.experience)?.label || profile?.experience
                 const specs = (profile?.specialites as string[] || []).slice(0, 3)
 

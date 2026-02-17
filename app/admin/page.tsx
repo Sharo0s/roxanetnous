@@ -204,7 +204,7 @@ export default async function AdminDashboard() {
                         {u?.email}
                       </p>
                       <p className="text-sm text-gray-500 mt-1">
-                        {profile.ville} ({profile.code_postal}) — {profile.diplome} — {profile.experience}
+                        {profile.ville} ({profile.code_postal}) — {(profile.diplomes as string[] || []).join(', ')} — {profile.experience}
                       </p>
                     </div>
                     <div className="text-sm text-gray-400">

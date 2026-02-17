@@ -101,7 +101,7 @@ export default async function AnnonceDetailPage({
   // Fetch des badges
   const badgesMap = auxUserId ? await getBadges([auxUserId]) : {}
 
-  const diplomeLabel = DIPLOMES.find((d) => d.value === profile?.diplome)?.label || profile?.diplome
+  const diplomeLabel = (profile?.diplomes as string[] || []).map((d: string) => DIPLOMES.find((dp) => dp.value === d)?.label || d).join(', ')
   const expLabel = EXPERIENCE_LEVELS.find((e) => e.value === profile?.experience)?.label || profile?.experience
   const specLabels = (profile?.specialites as string[] || []).map(
     (s: string) => SPECIALITES.find((sp) => sp.value === s)?.label || s

@@ -19,7 +19,7 @@ const STEPS = [
 ]
 
 export type OnboardingData = {
-  diplome: string
+  diplomes: string[]
   experience: string
   specialites: string[]
   ville: string
@@ -33,7 +33,7 @@ export type OnboardingData = {
 }
 
 const initialData: OnboardingData = {
-  diplome: '',
+  diplomes: [],
   experience: '',
   specialites: [],
   ville: '',
@@ -51,6 +51,7 @@ export default function OnboardingPage() {
   const [data, setData] = useState<OnboardingData>(initialData)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  const [uploads, setUploads] = useState<{ cv: boolean; diplomes: Record<string, boolean> }>({ cv: false, diplomes: {} })
 
   function updateData(partial: Partial<OnboardingData>) {
     setData((prev) => ({ ...prev, ...partial }))
@@ -58,8 +59,11 @@ export default function OnboardingPage() {
 
   function canProceed(): boolean {
     switch (step) {
-      case 0:
-        return !!data.diplome && !!data.experience
+      case 0: {
+        const isSansDiplome = data.diplomes.includes('sans_diplome')
+        const hasAllDiplomeUploads = isSansDiplome || (data.diplomes.length > 0 && data.diplomes.every((d) => uploads.diplomes[d]))
+        return data.diplomes.length > 0 && !!data.experience && uploads.cv && hasAllDiplomeUploads
+      }
       case 1:
         return data.specialites.length > 0
       case 2:
@@ -83,7 +87,7 @@ export default function OnboardingPage() {
     }
   }
 
-  async function handleUpload(file: File, type: 'identite' | 'diplome') {
+  async function handleUpload(file: File, type: string) {
     const formData = new FormData()
     formData.set('file', file)
     formData.set('type', type)
@@ -131,9 +135,9 @@ export default function OnboardingPage() {
         )}
 
         <div className="bg-white rounded-xl border p-6">
-          {step === 0 && <StepDiplome data={data} onChange={updateData} />}
+          {step === 0 && <StepDiplome data={data} onChange={updateData} onUpload={handleUpload} onUploadsChange={setUploads} />}
           {step === 1 && <StepSpecialites data={data} onChange={updateData} />}
-          {step === 2 && <StepLocalisation data={data} onChange={updateData} />}
+          {step === 2 && <StepLocalisation data={data} onChange={updateData} onUpload={handleUpload} />}
           {step === 3 && <StepDisponibilites data={data} onChange={updateData} />}
           {step === 4 && <StepJustificatifs onUpload={handleUpload} />}
         </div>

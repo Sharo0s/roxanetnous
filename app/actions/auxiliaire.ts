@@ -11,7 +11,7 @@ export type OnboardingResult = {
 }
 
 export async function submitOnboarding(data: {
-  diplome: string
+  diplomes: string[]
   experience: string
   specialites: string[]
   ville: string
@@ -38,18 +38,8 @@ export async function submitOnboarding(data: {
     return { error: 'Acces non autorise.' }
   }
 
-  const { data: existingProfile } = await supabase
-    .from('auxiliaires_profiles')
-    .select('id')
-    .eq('user_id', user.id)
-    .single()
-
-  if (existingProfile) {
-    return { error: 'Profil deja existant.' }
-  }
-
-  if (!data.diplome || !data.experience || data.specialites.length === 0) {
-    return { error: 'Diplome, experience et specialites sont requis.' }
+  if (data.diplomes.length === 0 || !data.experience || data.specialites.length === 0) {
+    return { error: 'Diplomes, experience et specialites sont requis.' }
   }
 
   if (!data.ville || !data.code_postal) {
@@ -63,25 +53,43 @@ export async function submitOnboarding(data: {
   // Geocoder l'adresse pour obtenir les coordonnees
   const coords = await geocodeAddress(data.ville, data.code_postal)
 
-  const { error } = await supabase
+  const profileData = {
+    diplomes: data.diplomes,
+    experience: data.experience,
+    specialites: data.specialites,
+    ville: data.ville,
+    code_postal: data.code_postal,
+    rayon_km: data.rayon_km,
+    latitude: coords?.lat ?? null,
+    longitude: coords?.lng ?? null,
+    disponibilites: data.disponibilites,
+    langues: data.langues,
+    permis_conduire: data.permis_conduire,
+    vehicule: data.vehicule,
+    description: data.description,
+    validation_status: 'en_attente' as const,
+  }
+
+  // Le trigger handle_new_user cree deja un profil vide, on fait un upsert
+  const { data: existingProfile } = await supabase
     .from('auxiliaires_profiles')
-    .insert({
-      user_id: user.id,
-      diplome: data.diplome,
-      experience: data.experience,
-      specialites: data.specialites,
-      ville: data.ville,
-      code_postal: data.code_postal,
-      rayon_km: data.rayon_km,
-      latitude: coords?.lat ?? null,
-      longitude: coords?.lng ?? null,
-      disponibilites: data.disponibilites,
-      langues: data.langues,
-      permis_conduire: data.permis_conduire,
-      vehicule: data.vehicule,
-      description: data.description,
-      validation_status: 'en_attente',
-    })
+    .select('id')
+    .eq('user_id', user.id)
+    .single()
+
+  let error
+  if (existingProfile) {
+    const result = await supabase
+      .from('auxiliaires_profiles')
+      .update(profileData)
+      .eq('user_id', user.id)
+    error = result.error
+  } else {
+    const result = await supabase
+      .from('auxiliaires_profiles')
+      .insert({ user_id: user.id, ...profileData })
+    error = result.error
+  }
 
   if (error) {
     return { error: 'Erreur lors de la creation du profil.' }
@@ -126,15 +134,48 @@ export async function uploadJustificatif(formData: FormData): Promise<Onboarding
     return { error: 'Erreur lors de l\'upload du fichier.' }
   }
 
-  const field = type === 'identite' ? 'justificatif_identite_url' : 'justificatif_diplome_url'
+  // Gerer les types diplome:xxx (upload par diplome)
+  const isDiplomeType = type.startsWith('diplome:')
+  const diplomeKey = isDiplomeType ? type.split(':')[1] : null
 
-  const { error: updateError } = await supabase
-    .from('auxiliaires_profiles')
-    .update({ [field]: path })
-    .eq('user_id', user.id)
+  if (isDiplomeType && diplomeKey) {
+    // Recuperer le profil pour merger dans le jsonb
+    const { data: currentProfile } = await supabase
+      .from('auxiliaires_profiles')
+      .select('justificatifs_diplomes')
+      .eq('user_id', user.id)
+      .single()
 
-  if (updateError) {
-    return { error: 'Erreur lors de la mise a jour du profil.' }
+    const current = (currentProfile?.justificatifs_diplomes as Record<string, string>) || {}
+    const updated = { ...current, [diplomeKey]: path }
+
+    const { error: updateError } = await supabase
+      .from('auxiliaires_profiles')
+      .update({ justificatifs_diplomes: updated })
+      .eq('user_id', user.id)
+
+    if (updateError) {
+      return { error: 'Erreur lors de la mise a jour du profil.' }
+    }
+  } else {
+    const fieldMap: Record<string, string> = {
+      identite: 'justificatif_identite_url',
+      permis: 'justificatif_permis_url',
+      cv: 'justificatif_cv_url',
+    }
+    const field = fieldMap[type]
+    if (!field) {
+      return { error: 'Type de justificatif non reconnu.' }
+    }
+
+    const { error: updateError } = await supabase
+      .from('auxiliaires_profiles')
+      .update({ [field]: path })
+      .eq('user_id', user.id)
+
+    if (updateError) {
+      return { error: 'Erreur lors de la mise a jour du profil.' }
+    }
   }
 
   // Lancer l'analyse OCR en arriere-plan (non-bloquant)
@@ -144,8 +185,9 @@ export async function uploadJustificatif(formData: FormData): Promise<Onboarding
     .eq('user_id', user.id)
     .single()
 
+  const ocrType = isDiplomeType ? 'diplome' : type
   if (profileData) {
-    analyzeDocument(path, type as 'identite' | 'diplome', profileData.id).catch((err) =>
+    analyzeDocument(path, ocrType as 'identite' | 'diplome' | 'permis' | 'cv', profileData.id).catch((err) =>
       console.error('OCR: erreur analyse', err)
     )
   }

@@ -1,12 +1,29 @@
-import { Input } from '@/components/ui/input'
+import { useRef, useState } from 'react'
+import { CityAutocomplete } from '@/components/ui/city-autocomplete'
+import { MapRadius } from '@/components/ui/map-radius'
 import type { OnboardingData } from '@/app/auxiliaire/onboarding/page'
 
 type Props = {
   data: OnboardingData
   onChange: (partial: Partial<OnboardingData>) => void
+  onUpload?: (file: File, type: 'permis') => Promise<boolean>
 }
 
-export function StepLocalisation({ data, onChange }: Props) {
+export function StepLocalisation({ data, onChange, onUpload }: Props) {
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [uploading, setUploading] = useState(false)
+  const [uploadedFileName, setUploadedFileName] = useState<string | null>(null)
+
+  async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file || !onUpload) return
+    setUploading(true)
+    const success = await onUpload(file, 'permis')
+    if (success) {
+      setUploadedFileName(file.name)
+    }
+    setUploading(false)
+  }
   return (
     <div className="space-y-6">
       <div>
@@ -14,23 +31,13 @@ export function StepLocalisation({ data, onChange }: Props) {
         <p className="text-sm text-gray-500">Indiquez votre zone d'intervention.</p>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        <Input
-          label="Ville"
-          value={data.ville}
-          onChange={(e) => onChange({ ville: e.target.value })}
-          placeholder="Paris"
-          required
-        />
-        <Input
-          label="Code postal"
-          value={data.code_postal}
-          onChange={(e) => onChange({ code_postal: e.target.value })}
-          placeholder="75001"
-          maxLength={5}
-          required
-        />
-      </div>
+      <CityAutocomplete
+        ville={data.ville}
+        codePostal={data.code_postal}
+        onVilleChange={(ville) => onChange({ ville })}
+        onCodePostalChange={(code_postal) => onChange({ code_postal })}
+        required
+      />
 
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -50,16 +57,45 @@ export function StepLocalisation({ data, onChange }: Props) {
         </div>
       </div>
 
+      <MapRadius ville={data.ville} codePostal={data.code_postal} rayonKm={data.rayon_km} />
+
       <div className="space-y-3">
-        <label className="flex items-center gap-3">
-          <input
-            type="checkbox"
-            checked={data.permis_conduire}
-            onChange={(e) => onChange({ permis_conduire: e.target.checked })}
-            className="h-4 w-4 rounded border-gray-300 accent-black"
-          />
-          <span className="text-sm">Permis de conduire</span>
-        </label>
+        <div>
+          <label className="flex items-center gap-3">
+            <input
+              type="checkbox"
+              checked={data.permis_conduire}
+              onChange={(e) => onChange({ permis_conduire: e.target.checked })}
+              className="h-4 w-4 rounded border-gray-300 accent-black"
+            />
+            <span className="text-sm">Permis de conduire</span>
+          </label>
+
+          {data.permis_conduire && onUpload && (
+            <div className="mt-3 ml-7">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".pdf,.jpg,.jpeg,.png,.webp"
+                onChange={handleFileChange}
+                className="hidden"
+              />
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploading}
+                className="w-full rounded-lg border-2 border-dashed border-gray-300 px-4 py-3 text-sm text-gray-500 hover:border-gray-400 transition"
+              >
+                {uploading
+                  ? 'Upload en cours...'
+                  : uploadedFileName
+                    ? `Fichier : ${uploadedFileName}`
+                    : 'Joindre un scan du permis de conduire'}
+              </button>
+              <p className="text-xs text-gray-400 mt-1">PDF, JPG, PNG ou WebP (max. 10 Mo)</p>
+            </div>
+          )}
+        </div>
 
         <label className="flex items-center gap-3">
           <input

@@ -39,7 +39,9 @@ export default async function ValidationDetailPage({
 
   const u = profile.users as any
 
-  const diplomeLabel = DIPLOMES.find((d) => d.value === profile.diplome)?.label || profile.diplome
+  const diplomeLabels = (profile.diplomes as string[] || []).map(
+    (d) => DIPLOMES.find((dp) => dp.value === d)?.label || d
+  )
   const experienceLabel = EXPERIENCE_LEVELS.find((e) => e.value === profile.experience)?.label || profile.experience
   const specialiteLabels = (profile.specialites as string[]).map(
     (s) => SPECIALITES.find((sp) => sp.value === s)?.label || s
@@ -47,7 +49,9 @@ export default async function ValidationDetailPage({
 
   // Generer les URLs signees pour les justificatifs
   let identiteUrl: string | null = null
-  let diplomeUrl: string | null = null
+  const diplomeUrls: { label: string; url: string }[] = []
+  let permisUrl: string | null = null
+  let cvUrl: string | null = null
 
   if (profile.justificatif_identite_url) {
     const { data } = await supabaseAdmin.storage
@@ -56,11 +60,30 @@ export default async function ValidationDetailPage({
     identiteUrl = data?.signedUrl || null
   }
 
-  if (profile.justificatif_diplome_url) {
+  const justificatifsDiplomes = (profile.justificatifs_diplomes as Record<string, string>) || {}
+  for (const [diplomeValue, storagePath] of Object.entries(justificatifsDiplomes)) {
+    if (!storagePath) continue
     const { data } = await supabaseAdmin.storage
       .from('justificatifs')
-      .createSignedUrl(profile.justificatif_diplome_url, 3600)
-    diplomeUrl = data?.signedUrl || null
+      .createSignedUrl(storagePath, 3600)
+    if (data?.signedUrl) {
+      const label = DIPLOMES.find((d) => d.value === diplomeValue)?.label || diplomeValue
+      diplomeUrls.push({ label, url: data.signedUrl })
+    }
+  }
+
+  if (profile.justificatif_permis_url) {
+    const { data } = await supabaseAdmin.storage
+      .from('justificatifs')
+      .createSignedUrl(profile.justificatif_permis_url, 3600)
+    permisUrl = data?.signedUrl || null
+  }
+
+  if (profile.justificatif_cv_url) {
+    const { data } = await supabaseAdmin.storage
+      .from('justificatifs')
+      .createSignedUrl(profile.justificatif_cv_url, 3600)
+    cvUrl = data?.signedUrl || null
   }
 
   // Recuperer les resultats OCR
@@ -139,8 +162,8 @@ export default async function ValidationDetailPage({
             <h3 className="font-semibold mb-4">Profil professionnel</h3>
             <dl className="space-y-3 text-sm">
               <div>
-                <dt className="text-gray-500">Diplome</dt>
-                <dd className="font-medium">{diplomeLabel}</dd>
+                <dt className="text-gray-500">Diplomes</dt>
+                <dd className="font-medium">{diplomeLabels.join(', ')}</dd>
               </div>
               <div>
                 <dt className="text-gray-500">Experience</dt>
@@ -188,7 +211,22 @@ export default async function ValidationDetailPage({
           {/* Justificatifs */}
           <div className="bg-white rounded-xl border p-6 md:col-span-2">
             <h3 className="font-semibold mb-4">Justificatifs</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div>
+                <p className="text-sm text-gray-500 mb-2">CV</p>
+                {cvUrl ? (
+                  <a
+                    href={cvUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-sm hover:border-black transition"
+                  >
+                    Voir le document
+                  </a>
+                ) : (
+                  <p className="text-sm text-gray-400">Non fourni</p>
+                )}
+              </div>
               <div>
                 <p className="text-sm text-gray-500 mb-2">Piece d'identite</p>
                 {identiteUrl ? (
@@ -205,10 +243,10 @@ export default async function ValidationDetailPage({
                 )}
               </div>
               <div>
-                <p className="text-sm text-gray-500 mb-2">Diplome</p>
-                {diplomeUrl ? (
+                <p className="text-sm text-gray-500 mb-2">Permis de conduire</p>
+                {permisUrl ? (
                   <a
-                    href={diplomeUrl}
+                    href={permisUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-sm hover:border-black transition"
@@ -219,6 +257,25 @@ export default async function ValidationDetailPage({
                   <p className="text-sm text-gray-400">Non fourni</p>
                 )}
               </div>
+              {diplomeUrls.map((d, i) => (
+                <div key={i}>
+                  <p className="text-sm text-gray-500 mb-2">Diplome : {d.label}</p>
+                  <a
+                    href={d.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-sm hover:border-black transition"
+                  >
+                    Voir le document
+                  </a>
+                </div>
+              ))}
+              {diplomeUrls.length === 0 && (
+                <div>
+                  <p className="text-sm text-gray-500 mb-2">Diplomes</p>
+                  <p className="text-sm text-gray-400">Non fourni</p>
+                </div>
+              )}
             </div>
           </div>
 
@@ -231,7 +288,7 @@ export default async function ValidationDetailPage({
                   <div key={ocr.id} className="border rounded-lg p-4">
                     <div className="flex items-center justify-between mb-3">
                       <span className="text-sm font-medium">
-                        {ocr.document_type === 'identite' ? "Piece d'identite" : 'Diplome'}
+                        {ocr.document_type === 'identite' ? "Piece d'identite" : ocr.document_type === 'permis' ? 'Permis de conduire' : ocr.document_type === 'cv' ? 'CV' : 'Diplome'}
                       </span>
                       <span className="text-xs text-gray-500">
                         {new Date(ocr.created_at).toLocaleDateString('fr-FR', {
@@ -314,7 +371,7 @@ export default async function ValidationDetailPage({
               </div>
             ) : (
               <p className="text-sm text-gray-400">
-                {(profile.justificatif_identite_url || profile.justificatif_diplome_url)
+                {(profile.justificatif_identite_url || diplomeUrls.length > 0 || profile.justificatif_permis_url || profile.justificatif_cv_url)
                   ? 'Analyse en cours ou non disponible.'
                   : 'Aucun justificatif uploade.'}
               </p>

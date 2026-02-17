@@ -54,7 +54,7 @@ export default async function AuxiliaireProfilPage() {
             phone: userData.phone || '',
           }}
           profile={{
-            diplome: profile.diplome,
+            diplomes: (profile.diplomes as string[]) || [],
             experience: profile.experience,
             specialites: profile.specialites as string[],
             ville: profile.ville || '',
@@ -65,6 +65,9 @@ export default async function AuxiliaireProfilPage() {
             permis_conduire: profile.permis_conduire || false,
             vehicule: profile.vehicule || false,
             description: profile.description || '',
+            justificatif_permis_url: profile.justificatif_permis_url || null,
+            justificatifs_diplomes: (profile.justificatifs_diplomes as Record<string, string>) || {},
+            justificatif_cv_url: profile.justificatif_cv_url || null,
           }}
         />
 
