@@ -287,7 +287,7 @@ export async function sendMatchingNotificationEmail(params: {
 
   const linkUrl = isForAuxiliaire
     ? `${BASE_URL}/recherche`
-    : `${BASE_URL}/beneficiaire/matching`
+    : `${BASE_URL}/recherche`
 
   try {
     await resend.emails.send({

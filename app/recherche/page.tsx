@@ -20,6 +20,7 @@ type SearchParams = {
   specialite?: string
   experience?: string
   page?: string
+  annonce?: string
 }
 
 export default async function RecherchePage({
@@ -117,6 +118,8 @@ export default async function RecherchePage({
   let matchResults: ScoredAnnonce[] = []
   let matchAnnonce: any = null
 
+  let allBenAnnonces: any[] = []
+
   if (userData?.role === 'beneficiaire' && user) {
     const { data: benProfile } = await supabase
       .from('beneficiaires_profiles')
@@ -131,10 +134,12 @@ export default async function RecherchePage({
         .eq('beneficiaire_id', benProfile.id)
         .eq('status', 'publiee')
         .order('created_at', { ascending: false })
-        .limit(1)
 
-      if (mesAnnonces && mesAnnonces.length > 0) {
-        matchAnnonce = mesAnnonces[0]
+      allBenAnnonces = mesAnnonces || []
+
+      if (allBenAnnonces.length > 0) {
+        const selectedId = params.annonce || allBenAnnonces[0].id
+        matchAnnonce = allBenAnnonces.find((a) => a.id === selectedId) || allBenAnnonces[0]
         const criteria = {
           specialites_recherchees: (matchAnnonce.specialites_recherchees as string[]) || [],
           ville: matchAnnonce.ville,
@@ -231,13 +236,34 @@ export default async function RecherchePage({
             <div className="flex items-center justify-between mb-4">
               <div>
                 <h3 className="text-lg font-semibold text-gray-900">Vos meilleurs matchs</h3>
-                <p className="text-xs text-gray-500">
-                  Bases sur votre annonce : {matchAnnonce.titre}
-                </p>
+                {allBenAnnonces.length > 1 ? (
+                  <form className="flex items-center gap-2 mt-1">
+                    <label className="text-xs text-gray-500">Annonce de reference :</label>
+                    <select
+                      name="annonce"
+                      defaultValue={matchAnnonce.id}
+                      className="rounded-lg border border-gray-300 bg-white px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-black"
+                    >
+                      {allBenAnnonces.map((a: any) => (
+                        <option key={a.id} value={a.id}>{a.titre}</option>
+                      ))}
+                    </select>
+                    <button
+                      type="submit"
+                      className="px-3 py-1 bg-black text-white rounded-lg text-xs hover:bg-gray-800 transition"
+                    >
+                      Actualiser
+                    </button>
+                  </form>
+                ) : (
+                  <p className="text-xs text-gray-500">
+                    Bases sur votre annonce : {matchAnnonce.titre}
+                  </p>
+                )}
               </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {matchResults.map(({ annonce, score }) => {
+              {matchResults.map(({ annonce, score, details }) => {
                 const profile = annonce.auxiliaires_profiles
                 const u = profile?.users
                 const diplomeLabel = (profile?.diplomes as string[] || []).map((d: string) => DIPLOMES.find((dp) => dp.value === d)?.label || d).join(', ')
@@ -283,9 +309,17 @@ export default async function RecherchePage({
                       ))}
                     </div>
 
-                    <div className="flex items-center justify-between text-xs text-gray-500">
+                    <div className="flex items-center justify-between text-xs text-gray-500 mb-2">
                       <span>{annonce.ville} ({annonce.code_postal})</span>
                       <span>{expLabel}</span>
+                    </div>
+
+                    <div className="flex flex-wrap gap-2 text-xs text-gray-400">
+                      <span>Spec. {details.specialites}/40</span>
+                      <span>Loc. {details.localisation}/25</span>
+                      <span>Exp. {details.experience}/15</span>
+                      <span>Dipl. {details.diplome}/10</span>
+                      <span>Dispo. {details.disponibilites}/10</span>
                     </div>
                   </Link>
                 )

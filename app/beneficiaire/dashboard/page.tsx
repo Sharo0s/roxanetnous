@@ -109,7 +109,7 @@ export default async function BeneficiaireDashboard() {
               Trouvez les auxiliaires les plus compatibles avec votre annonce.
             </p>
             <Link
-              href="/beneficiaire/matching"
+              href="/recherche"
               className="inline-flex items-center px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition text-sm font-medium"
             >
               Voir les matchs

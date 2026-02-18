@@ -7,7 +7,7 @@ type Props = {
   unreadCount: number
   firstName: string
   lastName: string
-  currentPage?: 'dashboard' | 'profil' | 'messages' | 'annonces' | 'matching' | 'abonnement' | 'other'
+  currentPage?: 'dashboard' | 'profil' | 'messages' | 'annonces' | 'abonnement' | 'other'
 }
 
 export function BeneficiaireHeader({
