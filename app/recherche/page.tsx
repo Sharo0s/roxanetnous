@@ -7,6 +7,7 @@ import { BadgesDisplay } from '@/components/badges-display'
 import { AuxiliaireHeader } from '@/components/layout/auxiliaire-header'
 import { BeneficiaireHeader } from '@/components/layout/beneficiaire-header'
 import { getUnreadCount } from '@/lib/unread-count'
+import { calculateMatchScore } from '@/lib/matching'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
@@ -107,6 +108,69 @@ export default async function RecherchePage({
   const badgeUserIds = annonces.map((a: any) => a.auxiliaires_profiles?.user_id).filter(Boolean)
   const badgesMap = await getBadges(badgeUserIds)
 
+  // Matching pour les beneficiaires avec annonce publiee
+  type ScoredAnnonce = {
+    annonce: any
+    score: number
+    details: Record<string, number>
+  }
+  let matchResults: ScoredAnnonce[] = []
+  let matchAnnonce: any = null
+
+  if (userData?.role === 'beneficiaire' && user) {
+    const { data: benProfile } = await supabase
+      .from('beneficiaires_profiles')
+      .select('id')
+      .eq('user_id', user.id)
+      .single()
+
+    if (benProfile) {
+      const { data: mesAnnonces } = await supabase
+        .from('annonces_beneficiaires')
+        .select('id, titre, specialites_recherchees, ville, code_postal, latitude, longitude, diplome_requis, experience_min, disponibilites')
+        .eq('beneficiaire_id', benProfile.id)
+        .eq('status', 'publiee')
+        .order('created_at', { ascending: false })
+        .limit(1)
+
+      if (mesAnnonces && mesAnnonces.length > 0) {
+        matchAnnonce = mesAnnonces[0]
+        const criteria = {
+          specialites_recherchees: (matchAnnonce.specialites_recherchees as string[]) || [],
+          ville: matchAnnonce.ville,
+          code_postal: matchAnnonce.code_postal || undefined,
+          experience_min: matchAnnonce.experience_min || undefined,
+          diplome_requis: matchAnnonce.diplome_requis || undefined,
+          disponibilites: (matchAnnonce.disponibilites as Record<string, string[]>) || undefined,
+          latitude: matchAnnonce.latitude ? Number(matchAnnonce.latitude) : undefined,
+          longitude: matchAnnonce.longitude ? Number(matchAnnonce.longitude) : undefined,
+        }
+
+        matchResults = annonces.map((a: any) => {
+          const auxProfile = a.auxiliaires_profiles
+          const { score, details } = calculateMatchScore(
+            {
+              specialites: auxProfile.specialites || [],
+              ville: auxProfile.ville || a.ville,
+              code_postal: auxProfile.code_postal || a.code_postal,
+              experience: auxProfile.experience,
+              diplomes: auxProfile.diplomes || [],
+              disponibilites: (a.disponibilites || auxProfile.disponibilites) as Record<string, string[]>,
+              rayon_km: a.rayon_km || auxProfile.rayon_km || 10,
+              latitude: auxProfile.latitude ? Number(auxProfile.latitude) : undefined,
+              longitude: auxProfile.longitude ? Number(auxProfile.longitude) : undefined,
+            },
+            criteria
+          )
+          return { annonce: a, score, details }
+        })
+
+        matchResults.sort((a, b) => b.score - a.score)
+        matchResults = matchResults.slice(0, 6)
+      }
+    }
+  }
+
   const unreadCount = user ? await getUnreadCount(user.id) : 0
 
   // Manual pagination after filtering
@@ -161,6 +225,74 @@ export default async function RecherchePage({
           currentSpecialite={params.specialite || ''}
           currentExperience={params.experience || ''}
         />
+
+        {matchResults.length > 0 && matchAnnonce && (
+          <div className="mt-6 mb-8">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">Vos meilleurs matchs</h3>
+                <p className="text-xs text-gray-500">
+                  Bases sur votre annonce : {matchAnnonce.titre}
+                </p>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {matchResults.map(({ annonce, score }) => {
+                const profile = annonce.auxiliaires_profiles
+                const u = profile?.users
+                const diplomeLabel = (profile?.diplomes as string[] || []).map((d: string) => DIPLOMES.find((dp) => dp.value === d)?.label || d).join(', ')
+                const expLabel = EXPERIENCE_LEVELS.find((e) => e.value === profile?.experience)?.label || profile?.experience
+                const specs = (profile?.specialites as string[] || []).slice(0, 3)
+
+                return (
+                  <Link
+                    key={`match-${annonce.id}`}
+                    href={`/recherche/${annonce.id}`}
+                    className="bg-white rounded-xl border-2 border-gray-200 p-5 hover:border-black transition block relative"
+                  >
+                    <div className="absolute top-3 right-3">
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold ${
+                        score >= 70 ? 'bg-black text-white' :
+                        score >= 40 ? 'bg-gray-200 text-gray-700' :
+                        'bg-gray-100 text-gray-400'
+                      }`}>
+                        {score}
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-sm font-bold text-gray-600">
+                        {u?.first_name?.[0]}{u?.last_name?.[0]}
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <p className="font-semibold text-gray-900">
+                            {u?.first_name} {u?.last_name?.[0]}.
+                          </p>
+                          <BadgesDisplay badges={badgesMap[profile?.user_id]} />
+                        </div>
+                        <p className="text-xs text-gray-500">{diplomeLabel}</p>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-wrap gap-1 mb-2">
+                      {specs.map((s: string) => (
+                        <span key={s} className="px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full text-xs">
+                          {SPECIALITES.find((sp) => sp.value === s)?.label || s}
+                        </span>
+                      ))}
+                    </div>
+
+                    <div className="flex items-center justify-between text-xs text-gray-500">
+                      <span>{annonce.ville} ({annonce.code_postal})</span>
+                      <span>{expLabel}</span>
+                    </div>
+                  </Link>
+                )
+              })}
+            </div>
+          </div>
+        )}
 
         {!paginatedAnnonces || paginatedAnnonces.length === 0 ? (
           <div className="bg-white rounded-xl border p-8 text-center mt-6">
