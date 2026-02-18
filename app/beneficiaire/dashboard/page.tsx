@@ -60,11 +60,11 @@ export default async function BeneficiaireDashboard() {
           </div>
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="bg-white rounded-xl border p-6">
             <h3 className="font-semibold text-lg mb-2">Rechercher un auxiliaire</h3>
             <p className="text-gray-600 mb-4">
-              Trouvez l&#39;auxiliaire de vie ideal pour vos besoins.
+              Trouvez l&#39;auxiliaire de vie ideal grace au matching intelligent.
             </p>
             <Link
               href="/recherche"
@@ -100,21 +100,7 @@ export default async function BeneficiaireDashboard() {
               Voir mes annonces
             </Link>
           </div>
-        </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-          <div className="bg-white rounded-xl border p-6">
-            <h3 className="font-semibold text-lg mb-2">Matching intelligent</h3>
-            <p className="text-gray-600 mb-4">
-              Trouvez les auxiliaires les plus compatibles avec votre annonce.
-            </p>
-            <Link
-              href="/recherche"
-              className="inline-flex items-center px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition text-sm font-medium"
-            >
-              Voir les matchs
-            </Link>
-          </div>
           <div className="bg-white rounded-xl border p-6">
             <h3 className="font-semibold text-lg mb-2">Mes favoris</h3>
             <p className="text-gray-600 mb-4">
