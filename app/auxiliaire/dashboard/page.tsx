@@ -1,11 +1,10 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { LogoutButton } from '@/components/auth/logout-button'
 import Link from 'next/link'
-import { UnreadBadge } from '@/components/layout/unread-badge'
 import { getUnreadCount } from '@/lib/unread-count'
 import { hasActiveSubscription } from '@/lib/subscription-helpers'
 import { SubscriptionBanner } from '@/components/auxiliaire/subscription-banner'
+import { AuxiliaireHeader } from '@/components/layout/auxiliaire-header'
 
 export default async function AuxiliaireDashboard() {
   const supabase = await createClient()
@@ -23,7 +22,7 @@ export default async function AuxiliaireDashboard() {
 
   const { data: profile } = await supabase
     .from('auxiliaires_profiles')
-    .select('id, validation_status, diplomes')
+    .select('id, validation_status, diplomes, refus_motif')
     .eq('user_id', user.id)
     .single()
 
@@ -49,21 +48,13 @@ export default async function AuxiliaireDashboard() {
 
   return (
     <main className="min-h-screen bg-gray-50">
-      <header className="bg-white border-b">
-        <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
-          <Link href="/auxiliaire/dashboard" className="text-xl font-bold text-black">roxanetnous</Link>
-          <div className="flex items-center gap-4">
-            <UnreadBadge userId={user.id} initialCount={unreadCount} />
-            <Link href="/auxiliaire/profil" className="text-sm text-gray-600 hover:text-black">
-              Mon profil
-            </Link>
-            <span className="text-sm text-gray-600">
-              {userData.first_name} {userData.last_name}
-            </span>
-            <LogoutButton />
-          </div>
-        </div>
-      </header>
+      <AuxiliaireHeader
+        userId={user.id}
+        unreadCount={unreadCount}
+        firstName={userData.first_name}
+        lastName={userData.last_name}
+        currentPage="dashboard"
+      />
 
       <div className="max-w-5xl mx-auto px-4 py-8">
         <h2 className="text-2xl font-bold text-gray-900 mb-6">
@@ -101,14 +92,40 @@ export default async function AuxiliaireDashboard() {
                 </p>
               )}
               {profile.validation_status === 'refuse' && (
-                <p className="text-gray-900 font-medium">
-                  Votre profil a ete refuse. Veuillez corriger les informations demandees.
-                </p>
+                <div>
+                  <p className="text-red-800 font-medium">
+                    Votre profil a ete refuse. Veuillez corriger les informations demandees.
+                  </p>
+                  {profile.refus_motif && (
+                    <p className="text-sm text-red-700 mt-2 p-3 bg-red-50 rounded-lg">
+                      Motif : {profile.refus_motif}
+                    </p>
+                  )}
+                  <Link
+                    href="/auxiliaire/profil"
+                    className="inline-flex items-center px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition text-sm font-medium mt-3"
+                  >
+                    Modifier mon profil
+                  </Link>
+                </div>
               )}
               {profile.validation_status === 'a_completer' && (
-                <p className="text-gray-900 font-medium">
-                  Des informations complementaires sont demandees. Veuillez mettre a jour votre profil.
-                </p>
+                <div>
+                  <p className="text-red-800 font-medium">
+                    Des informations complementaires sont demandees. Veuillez mettre a jour votre profil.
+                  </p>
+                  {profile.refus_motif && (
+                    <p className="text-sm text-red-700 mt-2 p-3 bg-red-50 rounded-lg">
+                      Details : {profile.refus_motif}
+                    </p>
+                  )}
+                  <Link
+                    href="/auxiliaire/profil"
+                    className="inline-flex items-center px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition text-sm font-medium mt-3"
+                  >
+                    Modifier mon profil
+                  </Link>
+                </div>
               )}
             </div>
 
@@ -120,16 +137,24 @@ export default async function AuxiliaireDashboard() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="bg-white rounded-xl border p-6">
                   <h3 className="font-semibold text-lg mb-2">Mes annonces</h3>
-                  <p className="text-gray-600 mb-1">
-                    {annoncesPubliees} annonce{annoncesPubliees > 1 ? 's' : ''} publiee{annoncesPubliees > 1 ? 's' : ''}
-                  </p>
-                  <p className="text-sm text-gray-400 mb-4">{annoncesCount} au total</p>
-                  <Link
-                    href="/auxiliaire/annonces"
-                    className="inline-flex items-center px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition text-sm font-medium"
-                  >
-                    Gerer mes annonces
-                  </Link>
+                  {subscribed ? (
+                    <>
+                      <p className="text-gray-600 mb-1">
+                        {annoncesPubliees} annonce{annoncesPubliees > 1 ? 's' : ''} publiee{annoncesPubliees > 1 ? 's' : ''}
+                      </p>
+                      <p className="text-sm text-gray-400 mb-4">{annoncesCount} au total</p>
+                      <Link
+                        href="/auxiliaire/annonces"
+                        className="inline-flex items-center px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition text-sm font-medium"
+                      >
+                        Gerer mes annonces
+                      </Link>
+                    </>
+                  ) : (
+                    <p className="text-gray-500 text-sm">
+                      Un abonnement est requis pour publier des annonces.
+                    </p>
+                  )}
                 </div>
                 <div className="bg-white rounded-xl border p-6">
                   <h3 className="font-semibold text-lg mb-2">Annonces beneficiaires</h3>
@@ -156,8 +181,8 @@ function StatusBadge({ status }: { status: string }) {
   const styles: Record<string, string> = {
     en_attente: 'bg-gray-200 text-gray-700',
     valide: 'bg-black text-white',
-    refuse: 'bg-gray-100 text-gray-900 border border-gray-300',
-    a_completer: 'bg-gray-100 text-gray-700 border border-gray-300',
+    refuse: 'bg-red-50 text-red-800 border border-red-200',
+    a_completer: 'bg-red-50 text-red-800 border border-red-200',
   }
 
   const labels: Record<string, string> = {

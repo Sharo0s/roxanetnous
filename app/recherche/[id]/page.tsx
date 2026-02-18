@@ -8,6 +8,9 @@ import { AvisSection } from '@/components/recherche/avis-section'
 import { SignalementButton } from '@/components/signalement-button'
 import { getBadges } from '@/lib/badges'
 import { BadgesDisplay } from '@/components/badges-display'
+import { AuxiliaireHeader } from '@/components/layout/auxiliaire-header'
+import { BeneficiaireHeader } from '@/components/layout/beneficiaire-header'
+import { getUnreadCount } from '@/lib/unread-count'
 
 export default async function AnnonceDetailPage({
   params,
@@ -35,7 +38,7 @@ export default async function AnnonceDetailPage({
       *,
       auxiliaires_profiles!inner (
         user_id,
-        diplome,
+        diplomes,
         experience,
         specialites,
         description,
@@ -101,6 +104,8 @@ export default async function AnnonceDetailPage({
   // Fetch des badges
   const badgesMap = auxUserId ? await getBadges([auxUserId]) : {}
 
+  const unreadCount = user ? await getUnreadCount(user.id) : 0
+
   const diplomeLabel = (profile?.diplomes as string[] || []).map((d: string) => DIPLOMES.find((dp) => dp.value === d)?.label || d).join(', ')
   const expLabel = EXPERIENCE_LEVELS.find((e) => e.value === profile?.experience)?.label || profile?.experience
   const specLabels = (profile?.specialites as string[] || []).map(
@@ -111,16 +116,34 @@ export default async function AnnonceDetailPage({
 
   return (
     <main className="min-h-screen bg-gray-50">
-      <header className="bg-white border-b">
-        <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
-          <Link href="/" className="text-xl font-bold text-black">
-            roxanetnous
-          </Link>
-          <Link href="/recherche" className="text-sm text-gray-500 hover:text-black">
-            Retour a la recherche
-          </Link>
-        </div>
-      </header>
+      {userData?.role === 'auxiliaire' && user ? (
+        <AuxiliaireHeader
+          userId={user.id}
+          unreadCount={unreadCount}
+          firstName={userData.first_name}
+          lastName={userData.last_name}
+          currentPage="other"
+        />
+      ) : userData?.role === 'beneficiaire' && user ? (
+        <BeneficiaireHeader
+          userId={user.id}
+          unreadCount={unreadCount}
+          firstName={userData.first_name}
+          lastName={userData.last_name}
+          currentPage="other"
+        />
+      ) : (
+        <header className="bg-white border-b">
+          <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
+            <Link href="/" className="text-xl font-bold text-black">
+              roxanetnous
+            </Link>
+            <Link href="/recherche" className="text-sm text-gray-500 hover:text-black">
+              Retour a la recherche
+            </Link>
+          </div>
+        </header>
+      )}
 
       <div className="max-w-4xl mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-6">
@@ -136,7 +159,7 @@ export default async function AnnonceDetailPage({
                 <BadgesDisplay badges={badgesMap[auxUserId]} />
               </div>
               <p className="text-gray-500">
-                {diplomeLabel} — {expLabel}
+                {diplomeLabel} — Experience : {expLabel}
                 {moyenneNote !== null && ` — ${moyenneNote.toFixed(1)}/5 (${avisFormatted.length} avis)`}
               </p>
             </div>
@@ -149,14 +172,14 @@ export default async function AnnonceDetailPage({
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="md:col-span-2 space-y-6">
             <div className="bg-white rounded-xl border p-6">
-              <h3 className="font-semibold mb-3">{annonce.titre}</h3>
-              <p className="text-sm text-gray-700 whitespace-pre-wrap">{annonce.description}</p>
+              <h3 className="font-semibold mb-3">Description</h3>
+              <p className="text-sm text-gray-700 whitespace-pre-wrap break-words overflow-hidden">{annonce.description}</p>
             </div>
 
             {profile?.description && (
               <div className="bg-white rounded-xl border p-6">
                 <h3 className="font-semibold mb-3">A propos</h3>
-                <p className="text-sm text-gray-700 whitespace-pre-wrap">{profile.description}</p>
+                <p className="text-sm text-gray-700 whitespace-pre-wrap break-words overflow-hidden">{profile.description}</p>
               </div>
             )}
 
@@ -194,9 +217,15 @@ export default async function AnnonceDetailPage({
                             const available = (dispos[jour.value] || []).includes(creneau.value)
                             return (
                               <td key={creneau.value} className="py-2 px-2 text-center">
-                                <div className={`w-6 h-6 mx-auto rounded-md ${
-                                  available ? 'bg-black' : 'bg-gray-100'
-                                }`} />
+                                <div className={`w-8 h-8 mx-auto rounded-md border flex items-center justify-center ${
+                                  available ? 'border-black bg-white text-black' : 'border-gray-200 bg-gray-50'
+                                }`}>
+                                  {available && (
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                    </svg>
+                                  )}
+                                </div>
                               </td>
                             )
                           })}

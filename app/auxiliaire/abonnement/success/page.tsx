@@ -22,7 +22,7 @@ export default async function AbonnementSuccessPage() {
         <div className="bg-white rounded-xl border p-8">
           <h1 className="text-2xl font-bold text-gray-900 mb-4">Abonnement active</h1>
           <p className="text-gray-600 mb-6">
-            Votre abonnement a ete active avec succes. Vos annonces sont desormais visibles dans les recherches.
+            Votre abonnement a ete active avec succes. Vous pouvez desormais publier des annonces.
           </p>
           <div className="flex flex-col gap-3">
             <Link

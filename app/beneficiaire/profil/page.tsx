@@ -1,10 +1,10 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import Link from 'next/link'
-import { LogoutButton } from '@/components/auth/logout-button'
 import { BeneficiaireProfileForm } from '@/components/beneficiaire/profile-form'
 import { ExportDataButton } from '@/components/export-data-button'
 import { DeleteAccountButton } from '@/components/delete-account-button'
+import { BeneficiaireHeader } from '@/components/layout/beneficiaire-header'
+import { getUnreadCount } from '@/lib/unread-count'
 
 export default async function BeneficiaireProfilPage() {
   const supabase = await createClient()
@@ -26,20 +26,17 @@ export default async function BeneficiaireProfilPage() {
     .eq('user_id', user.id)
     .single()
 
+  const unreadCount = await getUnreadCount(user.id)
+
   return (
     <main className="min-h-screen bg-gray-50">
-      <header className="bg-white border-b">
-        <div className="max-w-3xl mx-auto px-4 py-4 flex items-center justify-between">
-          <Link href="/beneficiaire/dashboard" className="text-xl font-bold text-black">
-            roxanetnous
-          </Link>
-          <div className="flex items-center gap-4">
-            <Link href="/messages" className="text-sm text-gray-600 hover:text-black">Messages</Link>
-            <span className="text-sm text-gray-600">{userData.first_name} {userData.last_name}</span>
-            <LogoutButton />
-          </div>
-        </div>
-      </header>
+      <BeneficiaireHeader
+        userId={user.id}
+        unreadCount={unreadCount}
+        firstName={userData.first_name}
+        lastName={userData.last_name}
+        currentPage="profil"
+      />
 
       <div className="max-w-3xl mx-auto px-4 py-8">
         <h2 className="text-2xl font-bold text-gray-900 mb-6">Mon profil</h2>

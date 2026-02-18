@@ -32,8 +32,8 @@ export function FavoriButton({ annonceId, type, initialIsFavori }: Props) {
       disabled={loading}
       className={`w-8 h-8 rounded-full border flex items-center justify-center transition ${
         isFavori
-          ? 'bg-black border-black text-white'
-          : 'bg-white border-gray-300 text-gray-400 hover:border-gray-500'
+          ? 'bg-white border-red-500 text-red-500'
+          : 'bg-white border-gray-300 text-gray-400 hover:border-red-500 hover:text-red-500'
       }`}
       title={isFavori ? 'Retirer des favoris' : 'Ajouter aux favoris'}
     >

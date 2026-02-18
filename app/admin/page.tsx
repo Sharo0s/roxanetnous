@@ -24,7 +24,7 @@ export default async function AdminDashboard() {
     .from('auxiliaires_profiles')
     .select(`
       id,
-      diplome,
+      diplomes,
       experience,
       specialites,
       ville,
@@ -37,20 +37,10 @@ export default async function AdminDashboard() {
     .eq('validation_status', 'en_attente')
     .order('created_at', { ascending: true })
 
-  // Compter par statut
-  const { count: pendingCount } = await supabaseAdmin
-    .from('auxiliaires_profiles')
-    .select('id', { count: 'exact', head: true })
-    .eq('validation_status', 'en_attente')
-
   const { count: validatedCount } = await supabaseAdmin
     .from('auxiliaires_profiles')
     .select('id', { count: 'exact', head: true })
     .eq('validation_status', 'valide')
-
-  const { count: totalCount } = await supabaseAdmin
-    .from('auxiliaires_profiles')
-    .select('id', { count: 'exact', head: true })
 
   // Stats supplementaires
   const { count: usersCount } = await supabaseAdmin
@@ -110,15 +100,8 @@ export default async function AdminDashboard() {
             <span className="text-xs bg-gray-200 text-gray-700 px-2 py-1 rounded-full font-medium">Admin</span>
           </div>
           <div className="flex items-center gap-4">
-            <Link href="/admin/utilisateurs" className="text-sm text-gray-500 hover:text-black">Utilisateurs</Link>
-            <Link href="/admin/annonces" className="text-sm text-gray-500 hover:text-black">Annonces</Link>
-            <Link href="/admin/avis" className="text-sm text-gray-500 hover:text-black">Avis</Link>
-            <Link href="/admin/signalements" className="text-sm text-gray-500 hover:text-black">
-              Signalements{(signalementsCount || 0) > 0 && ` (${signalementsCount})`}
-            </Link>
-            <Link href="/admin/historique" className="text-sm text-gray-500 hover:text-black">Historique</Link>
             <span className="text-sm text-gray-600">
-              {userData.first_name} {userData.last_name}
+              Admin Roxanetnous
             </span>
             <LogoutButton />
           </div>
@@ -128,72 +111,22 @@ export default async function AdminDashboard() {
       <div className="max-w-6xl mx-auto px-4 py-8">
         <h2 className="text-2xl font-bold text-gray-900 mb-6">Tableau de bord</h2>
 
-        {/* Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <div className="bg-white rounded-xl border p-5">
-            <p className="text-sm text-gray-500">Validation en attente</p>
-            <p className="text-3xl font-bold mt-1">{pendingCount || 0}</p>
-          </div>
-          <div className="bg-white rounded-xl border p-5">
-            <p className="text-sm text-gray-500">Profils valides</p>
-            <p className="text-3xl font-bold mt-1">{validatedCount || 0}</p>
-          </div>
-          <div className="bg-white rounded-xl border p-5">
-            <p className="text-sm text-gray-500">Utilisateurs</p>
-            <p className="text-3xl font-bold mt-1">{usersCount || 0}</p>
-          </div>
-          <div className="bg-white rounded-xl border p-5">
-            <p className="text-sm text-gray-500">Signalements</p>
-            <p className="text-3xl font-bold mt-1">{signalementsCount || 0}</p>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 gap-4 mb-8">
-          <div className="bg-white rounded-xl border p-5">
-            <p className="text-sm text-gray-500">Annonces auxiliaires publiees</p>
-            <p className="text-3xl font-bold mt-1">{annoncesAuxCount || 0}</p>
-          </div>
-          <div className="bg-white rounded-xl border p-5">
-            <p className="text-sm text-gray-500">Annonces beneficiaires publiees</p>
-            <p className="text-3xl font-bold mt-1">{annoncesBenCount || 0}</p>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <div className="bg-white rounded-xl border p-5">
-            <p className="text-sm text-gray-500">Abonnes actifs</p>
-            <p className="text-3xl font-bold mt-1">{activeSubsCount || 0}</p>
-          </div>
-          <div className="bg-white rounded-xl border p-5">
-            <p className="text-sm text-gray-500">MRR estime</p>
-            <p className="text-3xl font-bold mt-1">{mrr.toFixed(2)} EUR</p>
-          </div>
-          <div className="bg-white rounded-xl border p-5">
-            <p className="text-sm text-gray-500">Inscriptions ce mois</p>
-            <p className="text-3xl font-bold mt-1">{newUsersCount || 0}</p>
-          </div>
-          <div className="bg-white rounded-xl border p-5">
-            <p className="text-sm text-gray-500">Messages echanges</p>
-            <p className="text-3xl font-bold mt-1">{messagesCount || 0}</p>
-          </div>
-        </div>
-
         {/* Queue de validation */}
         <h3 className="text-lg font-semibold mb-4">Auxiliaires en attente de validation</h3>
 
         {!pending || pending.length === 0 ? (
-          <div className="bg-white rounded-xl border p-8 text-center text-gray-500">
+          <div className="bg-white rounded-xl border p-8 text-center text-gray-500 mb-8">
             Aucun auxiliaire en attente de validation.
           </div>
         ) : (
-          <div className="space-y-3">
+          <div className="space-y-3 mb-8">
             {pending.map((profile: any) => {
               const u = profile.users as any
               return (
                 <Link
                   key={profile.id}
                   href={`/admin/validation/${profile.id}`}
-                  className="block bg-white rounded-xl border p-5 hover:border-black transition"
+                  className="block bg-white rounded-xl border p-5 hover:border-black hover:shadow-lg hover:-translate-y-1 transition-all duration-200"
                 >
                   <div className="flex items-center justify-between">
                     <div>
@@ -216,6 +149,53 @@ export default async function AdminDashboard() {
             })}
           </div>
         )}
+
+        {/* Stats */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+          <Link href="/admin/utilisateurs" className="bg-white rounded-xl border p-5 hover:border-black hover:shadow-lg hover:-translate-y-1 transition-all duration-200">
+            <p className="text-sm text-gray-500">Profils valides</p>
+            <p className="text-3xl font-bold mt-1">{validatedCount || 0}</p>
+          </Link>
+          <Link href="/admin/utilisateurs" className="bg-white rounded-xl border p-5 hover:border-black hover:shadow-lg hover:-translate-y-1 transition-all duration-200">
+            <p className="text-sm text-gray-500">Utilisateurs</p>
+            <p className="text-3xl font-bold mt-1">{usersCount || 0}</p>
+          </Link>
+          <Link href="/admin/signalements" className="bg-white rounded-xl border p-5 hover:border-black hover:shadow-lg hover:-translate-y-1 transition-all duration-200">
+            <p className="text-sm text-gray-500">Signalements</p>
+            <p className="text-3xl font-bold mt-1">{signalementsCount || 0}</p>
+          </Link>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4 mb-8">
+          <Link href="/admin/annonces" className="bg-white rounded-xl border p-5 hover:border-black hover:shadow-lg hover:-translate-y-1 transition-all duration-200">
+            <p className="text-sm text-gray-500">Annonces auxiliaires publiees</p>
+            <p className="text-3xl font-bold mt-1">{annoncesAuxCount || 0}</p>
+          </Link>
+          <Link href="/admin/annonces" className="bg-white rounded-xl border p-5 hover:border-black hover:shadow-lg hover:-translate-y-1 transition-all duration-200">
+            <p className="text-sm text-gray-500">Annonces beneficiaires publiees</p>
+            <p className="text-3xl font-bold mt-1">{annoncesBenCount || 0}</p>
+          </Link>
+        </div>
+
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+          <Link href="/admin/utilisateurs" className="bg-white rounded-xl border p-5 hover:border-black hover:shadow-lg hover:-translate-y-1 transition-all duration-200">
+            <p className="text-sm text-gray-500">Abonnes actifs</p>
+            <p className="text-3xl font-bold mt-1">{activeSubsCount || 0}</p>
+          </Link>
+          <Link href="/admin/utilisateurs" className="bg-white rounded-xl border p-5 hover:border-black hover:shadow-lg hover:-translate-y-1 transition-all duration-200">
+            <p className="text-sm text-gray-500">MRR estime</p>
+            <p className="text-3xl font-bold mt-1">{mrr.toFixed(2)} EUR</p>
+          </Link>
+          <Link href="/admin/utilisateurs" className="bg-white rounded-xl border p-5 hover:border-black hover:shadow-lg hover:-translate-y-1 transition-all duration-200">
+            <p className="text-sm text-gray-500">Inscriptions ce mois</p>
+            <p className="text-3xl font-bold mt-1">{newUsersCount || 0}</p>
+          </Link>
+          <Link href="/admin/historique" className="bg-white rounded-xl border p-5 hover:border-black hover:shadow-lg hover:-translate-y-1 transition-all duration-200">
+            <p className="text-sm text-gray-500">Messages echanges</p>
+            <p className="text-3xl font-bold mt-1">{messagesCount || 0}</p>
+          </Link>
+        </div>
+
       </div>
     </main>
   )

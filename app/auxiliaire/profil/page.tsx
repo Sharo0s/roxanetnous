@@ -1,10 +1,10 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import Link from 'next/link'
-import { LogoutButton } from '@/components/auth/logout-button'
 import { AuxiliaireProfileForm } from '@/components/auxiliaire/profile-form'
 import { ExportDataButton } from '@/components/export-data-button'
 import { DeleteAccountButton } from '@/components/delete-account-button'
+import { AuxiliaireHeader } from '@/components/layout/auxiliaire-header'
+import { getUnreadCount } from '@/lib/unread-count'
 
 export default async function AuxiliaireProfilPage() {
   const supabase = await createClient()
@@ -28,23 +28,42 @@ export default async function AuxiliaireProfilPage() {
 
   if (!profile) redirect('/auxiliaire/onboarding')
 
+  const unreadCount = await getUnreadCount(user.id)
+
   return (
     <main className="min-h-screen bg-gray-50">
-      <header className="bg-white border-b">
-        <div className="max-w-3xl mx-auto px-4 py-4 flex items-center justify-between">
-          <Link href="/auxiliaire/dashboard" className="text-xl font-bold text-black">
-            roxanetnous
-          </Link>
-          <div className="flex items-center gap-4">
-            <Link href="/messages" className="text-sm text-gray-600 hover:text-black">Messages</Link>
-            <span className="text-sm text-gray-600">{userData.first_name} {userData.last_name}</span>
-            <LogoutButton />
-          </div>
-        </div>
-      </header>
+      <AuxiliaireHeader
+        userId={user.id}
+        unreadCount={unreadCount}
+        firstName={userData.first_name}
+        lastName={userData.last_name}
+        currentPage="profil"
+      />
 
       <div className="max-w-3xl mx-auto px-4 py-8">
         <h2 className="text-2xl font-bold text-gray-900 mb-6">Mon profil</h2>
+
+        {profile.validation_status === 'en_attente' && (
+          <div className="mb-6 p-4 rounded-xl border bg-gray-50 text-sm text-gray-700">
+            Votre profil est en cours de verification par notre equipe.
+          </div>
+        )}
+        {profile.validation_status === 'a_completer' && (
+          <div className="mb-6 p-4 rounded-xl border border-red-200 bg-red-50 text-sm">
+            <p className="font-medium text-red-800">Des informations complementaires sont demandees.</p>
+            {profile.refus_motif && (
+              <p className="text-red-700 mt-1">Details : {profile.refus_motif}</p>
+            )}
+          </div>
+        )}
+        {profile.validation_status === 'refuse' && (
+          <div className="mb-6 p-4 rounded-xl border border-red-200 bg-red-50 text-sm">
+            <p className="font-medium text-red-800">Votre profil a ete refuse.</p>
+            {profile.refus_motif && (
+              <p className="text-red-700 mt-1">Motif : {profile.refus_motif}</p>
+            )}
+          </div>
+        )}
 
         <AuxiliaireProfileForm
           userInfo={{
@@ -61,7 +80,6 @@ export default async function AuxiliaireProfilPage() {
             code_postal: profile.code_postal || '',
             rayon_km: profile.rayon_km || 10,
             disponibilites: (profile.disponibilites as Record<string, string[]>) || {},
-            langues: (profile.langues as string[]) || [],
             permis_conduire: profile.permis_conduire || false,
             vehicule: profile.vehicule || false,
             description: profile.description || '',

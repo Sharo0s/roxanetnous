@@ -1,8 +1,10 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { LogoutButton } from '@/components/auth/logout-button'
 import Link from 'next/link'
 import { AnnonceStatusToggle } from '@/components/auxiliaire/annonce-status-toggle'
+import { hasActiveSubscription } from '@/lib/subscription-helpers'
+import { AuxiliaireHeader } from '@/components/layout/auxiliaire-header'
+import { getUnreadCount } from '@/lib/unread-count'
 
 export default async function MesAnnoncesAuxiliaire() {
   const supabase = await createClient()
@@ -26,6 +28,9 @@ export default async function MesAnnoncesAuxiliaire() {
 
   if (!profile || profile.validation_status !== 'valide') redirect('/auxiliaire/dashboard')
 
+  const subscribed = await hasActiveSubscription(user.id)
+  const unreadCount = await getUnreadCount(user.id)
+
   const { data: annonces } = await supabase
     .from('annonces_auxiliaires')
     .select('*')
@@ -34,42 +39,53 @@ export default async function MesAnnoncesAuxiliaire() {
 
   return (
     <main className="min-h-screen bg-gray-50">
-      <header className="bg-white border-b">
-        <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Link href="/auxiliaire/dashboard" className="text-xl font-bold text-black">
-              roxanetnous
-            </Link>
-          </div>
-          <div className="flex items-center gap-4">
-            <span className="text-sm text-gray-600">
-              {userData.first_name} {userData.last_name}
-            </span>
-            <LogoutButton />
-          </div>
-        </div>
-      </header>
+      <AuxiliaireHeader
+        userId={user.id}
+        unreadCount={unreadCount}
+        firstName={userData.first_name}
+        lastName={userData.last_name}
+        currentPage="annonces"
+      />
 
       <div className="max-w-5xl mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-bold text-gray-900">Mes annonces</h2>
-          <Link
-            href="/auxiliaire/annonces/nouvelle"
-            className="inline-flex items-center px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition text-sm font-medium"
-          >
-            Nouvelle annonce
-          </Link>
-        </div>
-
-        {!annonces || annonces.length === 0 ? (
-          <div className="bg-white rounded-xl border p-8 text-center">
-            <p className="text-gray-500 mb-4">Vous n&#39;avez pas encore d&#39;annonce.</p>
+          {subscribed && (
             <Link
               href="/auxiliaire/annonces/nouvelle"
               className="inline-flex items-center px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition text-sm font-medium"
             >
-              Creer ma premiere annonce
+              Nouvelle annonce
             </Link>
+          )}
+        </div>
+
+        {!subscribed && (
+          <div className="bg-white rounded-xl border-2 border-black p-6 mb-6">
+            <h3 className="font-semibold text-lg mb-2">Abonnement requis</h3>
+            <p className="text-gray-600 mb-4">
+              Souscrivez un abonnement pour publier vos annonces.
+            </p>
+            <Link
+              href="/auxiliaire/abonnement"
+              className="inline-flex items-center px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition text-sm font-medium"
+            >
+              Voir les offres
+            </Link>
+          </div>
+        )}
+
+        {!annonces || annonces.length === 0 ? (
+          <div className="bg-white rounded-xl border p-8 text-center">
+            <p className="text-gray-500 mb-4">Vous n&#39;avez pas encore d&#39;annonce.</p>
+            {subscribed && (
+              <Link
+                href="/auxiliaire/annonces/nouvelle"
+                className="inline-flex items-center px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition text-sm font-medium"
+              >
+                Creer ma premiere annonce
+              </Link>
+            )}
           </div>
         ) : (
           <div className="space-y-3">
@@ -78,7 +94,6 @@ export default async function MesAnnoncesAuxiliaire() {
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-1">
-                      <h3 className="font-semibold text-gray-900">{annonce.titre}</h3>
                       <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
                         annonce.status === 'publiee'
                           ? 'bg-black text-white'
@@ -97,11 +112,19 @@ export default async function MesAnnoncesAuxiliaire() {
                       <span>Publiee le {new Date(annonce.published_at || annonce.created_at).toLocaleDateString('fr-FR')}</span>
                     </div>
                   </div>
-                  <AnnonceStatusToggle
-                    annonceId={annonce.id}
-                    currentStatus={annonce.status}
-                    type="auxiliaire"
-                  />
+                  <div className="flex items-center gap-2">
+                    <Link
+                      href={`/auxiliaire/annonces/${annonce.id}/modifier`}
+                      className="px-3 py-1.5 border border-gray-300 text-gray-700 rounded-lg hover:border-black transition text-sm"
+                    >
+                      Modifier
+                    </Link>
+                    <AnnonceStatusToggle
+                      annonceId={annonce.id}
+                      currentStatus={annonce.status}
+                      type="auxiliaire"
+                    />
+                  </div>
                 </div>
               </div>
             ))}

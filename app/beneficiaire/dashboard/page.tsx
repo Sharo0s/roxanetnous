@@ -1,11 +1,10 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { LogoutButton } from '@/components/auth/logout-button'
 import Link from 'next/link'
-import { UnreadBadge } from '@/components/layout/unread-badge'
 import { getUnreadCount } from '@/lib/unread-count'
 import { hasActiveSubscription } from '@/lib/subscription-helpers'
 import { BeneficiaireSubscriptionBanner } from '@/components/beneficiaire/subscription-banner'
+import { BeneficiaireHeader } from '@/components/layout/beneficiaire-header'
 
 export default async function BeneficiaireDashboard() {
   const supabase = await createClient()
@@ -42,21 +41,13 @@ export default async function BeneficiaireDashboard() {
 
   return (
     <main className="min-h-screen bg-gray-50">
-      <header className="bg-white border-b">
-        <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
-          <Link href="/beneficiaire/dashboard" className="text-xl font-bold text-black">roxanetnous</Link>
-          <div className="flex items-center gap-4">
-            <UnreadBadge userId={user.id} initialCount={unreadCount} />
-            <Link href="/beneficiaire/profil" className="text-sm text-gray-600 hover:text-black">
-              Mon profil
-            </Link>
-            <span className="text-sm text-gray-600">
-              {userData.first_name} {userData.last_name}
-            </span>
-            <LogoutButton />
-          </div>
-        </div>
-      </header>
+      <BeneficiaireHeader
+        userId={user.id}
+        unreadCount={unreadCount}
+        firstName={userData.first_name}
+        lastName={userData.last_name}
+        currentPage="dashboard"
+      />
 
       <div className="max-w-5xl mx-auto px-4 py-8">
         <h2 className="text-2xl font-bold text-gray-900 mb-6">

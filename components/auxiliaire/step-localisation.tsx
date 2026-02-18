@@ -7,9 +7,10 @@ type Props = {
   data: OnboardingData
   onChange: (partial: Partial<OnboardingData>) => void
   onUpload?: (file: File, type: 'permis') => Promise<boolean>
+  onPermisUploaded?: (uploaded: boolean) => void
 }
 
-export function StepLocalisation({ data, onChange, onUpload }: Props) {
+export function StepLocalisation({ data, onChange, onUpload, onPermisUploaded }: Props) {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [uploading, setUploading] = useState(false)
   const [uploadedFileName, setUploadedFileName] = useState<string | null>(null)
@@ -21,6 +22,7 @@ export function StepLocalisation({ data, onChange, onUpload }: Props) {
     const success = await onUpload(file, 'permis')
     if (success) {
       setUploadedFileName(file.name)
+      onPermisUploaded?.(true)
     }
     setUploading(false)
   }
@@ -90,7 +92,7 @@ export function StepLocalisation({ data, onChange, onUpload }: Props) {
                   ? 'Upload en cours...'
                   : uploadedFileName
                     ? `Fichier : ${uploadedFileName}`
-                    : 'Joindre un scan du permis de conduire'}
+                    : 'Joindre un scan du permis de conduire *'}
               </button>
               <p className="text-xs text-gray-400 mt-1">PDF, JPG, PNG ou WebP (max. 10 Mo)</p>
             </div>

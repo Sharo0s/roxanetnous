@@ -44,22 +44,37 @@ export async function updateAuxiliaireProfile(data: {
     return { error: 'Ville et code postal sont requis.' }
   }
 
+  // Verifier le statut actuel pour remettre en attente si necessaire
+  const { data: currentProfile } = await supabase
+    .from('auxiliaires_profiles')
+    .select('validation_status')
+    .eq('user_id', user.id)
+    .single()
+
+  const updateData: Record<string, unknown> = {
+    diplomes: data.diplomes,
+    experience: data.experience,
+    specialites: data.specialites,
+    ville: data.ville,
+    code_postal: data.code_postal,
+    rayon_km: data.rayon_km,
+    disponibilites: data.disponibilites,
+    langues: data.langues,
+    permis_conduire: data.permis_conduire,
+    vehicule: data.vehicule,
+    description: data.description,
+    updated_at: new Date().toISOString(),
+  }
+
+  // Remettre en attente si le profil etait refuse ou a completer
+  if (currentProfile?.validation_status === 'a_completer' || currentProfile?.validation_status === 'refuse') {
+    updateData.validation_status = 'en_attente'
+    updateData.refus_motif = null
+  }
+
   const { error } = await supabase
     .from('auxiliaires_profiles')
-    .update({
-      diplomes: data.diplomes,
-      experience: data.experience,
-      specialites: data.specialites,
-      ville: data.ville,
-      code_postal: data.code_postal,
-      rayon_km: data.rayon_km,
-      disponibilites: data.disponibilites,
-      langues: data.langues,
-      permis_conduire: data.permis_conduire,
-      vehicule: data.vehicule,
-      description: data.description,
-      updated_at: new Date().toISOString(),
-    })
+    .update(updateData)
     .eq('user_id', user.id)
 
   if (error) {

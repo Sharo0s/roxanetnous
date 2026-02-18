@@ -4,6 +4,9 @@ import { SPECIALITES, DIPLOMES, EXPERIENCE_LEVELS } from '@/lib/constants'
 import { SearchFilters } from '@/components/recherche/search-filters'
 import { getBadges } from '@/lib/badges'
 import { BadgesDisplay } from '@/components/badges-display'
+import { AuxiliaireHeader } from '@/components/layout/auxiliaire-header'
+import { BeneficiaireHeader } from '@/components/layout/beneficiaire-header'
+import { getUnreadCount } from '@/lib/unread-count'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
@@ -46,7 +49,7 @@ export default async function RecherchePage({
     .select(`
       *,
       auxiliaires_profiles!inner (
-        diplome,
+        diplomes,
         experience,
         specialites,
         description,
@@ -84,10 +87,12 @@ export default async function RecherchePage({
   const { data: rawAnnonces } = await query
 
   // Filter to only show auxiliaires with active subscription
+  // Use service role to bypass RLS (beneficiaire can't read other users' subscriptions)
+  const supabaseAdmin = await createClient({ serviceRole: true })
   let annonces = rawAnnonces || []
   if (annonces.length > 0) {
     const userIds = annonces.map((a: any) => a.auxiliaires_profiles?.user_id).filter(Boolean)
-    const { data: activeSubs } = await supabase
+    const { data: activeSubs } = await supabaseAdmin
       .from('subscriptions')
       .select('user_id')
       .in('user_id', userIds)
@@ -102,6 +107,8 @@ export default async function RecherchePage({
   const badgeUserIds = annonces.map((a: any) => a.auxiliaires_profiles?.user_id).filter(Boolean)
   const badgesMap = await getBadges(badgeUserIds)
 
+  const unreadCount = user ? await getUnreadCount(user.id) : 0
+
   // Manual pagination after filtering
   const count = annonces.length
   const paginatedAnnonces = annonces.slice(from, to + 1)
@@ -109,35 +116,42 @@ export default async function RecherchePage({
 
   return (
     <main className="min-h-screen bg-gray-50">
-      <header className="bg-white border-b">
-        <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
-          <Link href="/" className="text-xl font-bold text-black">
-            roxanetnous
-          </Link>
-          <div className="flex items-center gap-4">
-            {userData ? (
-              <Link
-                href={userData.role === 'auxiliaire' ? '/auxiliaire/dashboard' : '/beneficiaire/dashboard'}
-                className="text-sm text-gray-600 hover:text-black"
-              >
-                Mon espace
+      {userData?.role === 'auxiliaire' && user ? (
+        <AuxiliaireHeader
+          userId={user.id}
+          unreadCount={unreadCount}
+          firstName={userData.first_name}
+          lastName={userData.last_name}
+          currentPage="other"
+        />
+      ) : userData?.role === 'beneficiaire' && user ? (
+        <BeneficiaireHeader
+          userId={user.id}
+          unreadCount={unreadCount}
+          firstName={userData.first_name}
+          lastName={userData.last_name}
+          currentPage="other"
+        />
+      ) : (
+        <header className="bg-white border-b">
+          <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
+            <Link href="/" className="text-xl font-bold text-black">
+              roxanetnous
+            </Link>
+            <div className="flex items-center gap-4">
+              <Link href="/login" className="text-sm text-gray-600 hover:text-black">
+                Connexion
               </Link>
-            ) : (
-              <>
-                <Link href="/login" className="text-sm text-gray-600 hover:text-black">
-                  Connexion
-                </Link>
-                <Link
-                  href="/register"
-                  className="text-sm px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition"
-                >
-                  Inscription
-                </Link>
-              </>
-            )}
+              <Link
+                href="/register"
+                className="text-sm px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition"
+              >
+                Inscription
+              </Link>
+            </div>
           </div>
-        </div>
-      </header>
+        </header>
+      )}
 
       <div className="max-w-6xl mx-auto px-4 py-8">
         <h2 className="text-2xl font-bold text-gray-900 mb-6">Trouver un auxiliaire de vie</h2>
@@ -188,8 +202,7 @@ export default async function RecherchePage({
                       </div>
                     </div>
 
-                    <h3 className="font-medium text-gray-900 mb-1 line-clamp-1">{annonce.titre}</h3>
-                    <p className="text-sm text-gray-600 line-clamp-2 mb-3">{annonce.description}</p>
+                    <p className="text-sm text-gray-600 line-clamp-3 mb-3">{annonce.description}</p>
 
                     <div className="flex flex-wrap gap-1 mb-3">
                       {specs.map((s: string) => (
@@ -206,7 +219,7 @@ export default async function RecherchePage({
 
                     <div className="flex items-center justify-between text-xs text-gray-500">
                       <span>{annonce.ville} ({annonce.code_postal})</span>
-                      <span>{expLabel}</span>
+                      <span>Experience : {expLabel}</span>
                     </div>
 
                     {(profile?.permis_conduire || profile?.vehicule) && (

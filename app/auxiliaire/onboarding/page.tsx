@@ -8,14 +8,12 @@ import { StepDiplome } from '@/components/auxiliaire/step-diplome'
 import { StepSpecialites } from '@/components/auxiliaire/step-specialites'
 import { StepLocalisation } from '@/components/auxiliaire/step-localisation'
 import { StepDisponibilites } from '@/components/auxiliaire/step-disponibilites'
-import { StepJustificatifs } from '@/components/auxiliaire/step-justificatifs'
 
 const STEPS = [
   'Diplome et experience',
   'Specialites',
   'Localisation',
   'Disponibilites',
-  'Justificatifs',
 ]
 
 export type OnboardingData = {
@@ -52,6 +50,7 @@ export default function OnboardingPage() {
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [uploads, setUploads] = useState<{ cv: boolean; diplomes: Record<string, boolean> }>({ cv: false, diplomes: {} })
+  const [permisUploaded, setPermisUploaded] = useState(false)
 
   function updateData(partial: Partial<OnboardingData>) {
     setData((prev) => ({ ...prev, ...partial }))
@@ -67,10 +66,8 @@ export default function OnboardingPage() {
       case 1:
         return data.specialites.length > 0
       case 2:
-        return !!data.ville && /^\d{5}$/.test(data.code_postal)
+        return !!data.ville && /^\d{5}$/.test(data.code_postal) && (!data.permis_conduire || permisUploaded)
       case 3:
-        return true
-      case 4:
         return true
       default:
         return false
@@ -137,9 +134,8 @@ export default function OnboardingPage() {
         <div className="bg-white rounded-xl border p-6">
           {step === 0 && <StepDiplome data={data} onChange={updateData} onUpload={handleUpload} onUploadsChange={setUploads} />}
           {step === 1 && <StepSpecialites data={data} onChange={updateData} />}
-          {step === 2 && <StepLocalisation data={data} onChange={updateData} onUpload={handleUpload} />}
+          {step === 2 && <StepLocalisation data={data} onChange={updateData} onUpload={handleUpload} onPermisUploaded={setPermisUploaded} />}
           {step === 3 && <StepDisponibilites data={data} onChange={updateData} />}
-          {step === 4 && <StepJustificatifs onUpload={handleUpload} />}
         </div>
 
         <div className="flex justify-between mt-6">

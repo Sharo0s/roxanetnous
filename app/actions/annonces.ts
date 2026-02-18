@@ -12,7 +12,6 @@ export type AnnonceResult = {
 }
 
 export async function createAnnonceAuxiliaire(data: {
-  titre: string
   description: string
   ville: string
   code_postal: string
@@ -41,8 +40,8 @@ export async function createAnnonceAuxiliaire(data: {
     return { error: 'Un abonnement actif est requis pour publier une annonce.' }
   }
 
-  if (!data.titre.trim() || !data.description.trim()) {
-    return { error: 'Le titre et la description sont requis.' }
+  if (!data.description.trim()) {
+    return { error: 'La description est requise.' }
   }
 
   if (!data.ville.trim() || !data.code_postal.trim()) {
@@ -55,7 +54,7 @@ export async function createAnnonceAuxiliaire(data: {
     .from('annonces_auxiliaires')
     .insert({
       auxiliaire_id: profile.id,
-      titre: data.titre.trim(),
+      titre: '',
       description: data.description.trim(),
       ville: data.ville.trim(),
       code_postal: data.code_postal.trim(),
@@ -86,6 +85,52 @@ export async function createAnnonceAuxiliaire(data: {
       annonceType: 'auxiliaire',
       annonceId: insertedAnnonce.id,
     }).catch(() => {})
+  }
+
+  redirect('/auxiliaire/annonces')
+}
+
+export async function updateAnnonceAuxiliaire(
+  annonceId: string,
+  data: {
+    description: string
+    ville: string
+    code_postal: string
+    rayon_km: number
+    disponibilites: Record<string, string[]>
+  }
+): Promise<AnnonceResult> {
+  const supabase = await createClient()
+
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Non connecte.' }
+
+  const { data: profile } = await supabase
+    .from('auxiliaires_profiles')
+    .select('id')
+    .eq('user_id', user.id)
+    .single()
+
+  if (!profile) return { error: 'Profil non trouve.' }
+
+  if (!data.description.trim()) {
+    return { error: 'La description est requise.' }
+  }
+
+  const { error } = await supabase
+    .from('annonces_auxiliaires')
+    .update({
+      description: data.description.trim(),
+      ville: data.ville.trim(),
+      code_postal: data.code_postal.trim(),
+      rayon_km: data.rayon_km,
+      disponibilites: data.disponibilites,
+    })
+    .eq('id', annonceId)
+    .eq('auxiliaire_id', profile.id)
+
+  if (error) {
+    return { error: 'Erreur lors de la mise a jour.' }
   }
 
   redirect('/auxiliaire/annonces')

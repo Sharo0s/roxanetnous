@@ -1,11 +1,15 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { getSubscriptionStatus } from '@/lib/subscription-helpers'
-import { SubscriptionPageContent } from '@/components/abonnement/subscription-page-content'
+import { ModifierAnnonceForm } from '@/components/auxiliaire/modifier-annonce-form'
 import { AuxiliaireHeader } from '@/components/layout/auxiliaire-header'
 import { getUnreadCount } from '@/lib/unread-count'
 
-export default async function AbonnementAuxiliairePage() {
+export default async function ModifierAnnoncePage({
+  params,
+}: {
+  params: Promise<{ id: string }>
+}) {
+  const { id } = await params
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
@@ -19,7 +23,23 @@ export default async function AbonnementAuxiliairePage() {
 
   if (!userData || userData.role !== 'auxiliaire') redirect('/')
 
-  const subscription = await getSubscriptionStatus(user.id)
+  const { data: profile } = await supabase
+    .from('auxiliaires_profiles')
+    .select('id')
+    .eq('user_id', user.id)
+    .single()
+
+  if (!profile) redirect('/auxiliaire/dashboard')
+
+  const { data: annonce } = await supabase
+    .from('annonces_auxiliaires')
+    .select('*')
+    .eq('id', id)
+    .eq('auxiliaire_id', profile.id)
+    .single()
+
+  if (!annonce) redirect('/auxiliaire/annonces')
+
   const unreadCount = await getUnreadCount(user.id)
 
   return (
@@ -29,12 +49,12 @@ export default async function AbonnementAuxiliairePage() {
         unreadCount={unreadCount}
         firstName={userData.first_name}
         lastName={userData.last_name}
-        currentPage="abonnement"
+        currentPage="annonces"
       />
 
-      <div className="max-w-2xl mx-auto px-4 py-8">
-        <h2 className="text-2xl font-bold text-gray-900 mb-6">Mon abonnement</h2>
-        <SubscriptionPageContent subscription={subscription} />
+      <div className="max-w-3xl mx-auto px-4 py-8">
+        <h2 className="text-2xl font-bold text-gray-900 mb-6">Modifier l'annonce</h2>
+        <ModifierAnnonceForm annonce={annonce} />
       </div>
     </main>
   )

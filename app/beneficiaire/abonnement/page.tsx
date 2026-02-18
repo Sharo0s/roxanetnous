@@ -1,9 +1,9 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { getSubscriptionStatus } from '@/lib/subscription-helpers'
-import { LogoutButton } from '@/components/auth/logout-button'
-import Link from 'next/link'
 import { SubscriptionPageContent } from '@/components/abonnement/subscription-page-content'
+import { BeneficiaireHeader } from '@/components/layout/beneficiaire-header'
+import { getUnreadCount } from '@/lib/unread-count'
 
 export default async function AbonnementBeneficiairePage() {
   const supabase = await createClient()
@@ -20,23 +20,17 @@ export default async function AbonnementBeneficiairePage() {
   if (!userData || userData.role !== 'beneficiaire') redirect('/')
 
   const subscription = await getSubscriptionStatus(user.id)
+  const unreadCount = await getUnreadCount(user.id)
 
   return (
     <main className="min-h-screen bg-gray-50">
-      <header className="bg-white border-b">
-        <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
-          <Link href="/beneficiaire/dashboard" className="text-xl font-bold text-black">roxanetnous</Link>
-          <div className="flex items-center gap-4">
-            <Link href="/beneficiaire/dashboard" className="text-sm text-gray-600 hover:text-black">
-              Tableau de bord
-            </Link>
-            <span className="text-sm text-gray-600">
-              {userData.first_name} {userData.last_name}
-            </span>
-            <LogoutButton />
-          </div>
-        </div>
-      </header>
+      <BeneficiaireHeader
+        userId={user.id}
+        unreadCount={unreadCount}
+        firstName={userData.first_name}
+        lastName={userData.last_name}
+        currentPage="abonnement"
+      />
 
       <div className="max-w-2xl mx-auto px-4 py-8">
         <h2 className="text-2xl font-bold text-gray-900 mb-6">Mon abonnement</h2>

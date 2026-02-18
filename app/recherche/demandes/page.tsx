@@ -1,6 +1,8 @@
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import { SPECIALITES, DIPLOMES, EXPERIENCE_LEVELS } from '@/lib/constants'
+import { AuxiliaireHeader } from '@/components/layout/auxiliaire-header'
+import { getUnreadCount } from '@/lib/unread-count'
 
 type SearchParams = {
   ville?: string
@@ -49,29 +51,41 @@ export default async function DemandesBeneficiairesPage({
 
   const { data: annonces } = await query.range(from, to)
 
+  const unreadCount = user ? await getUnreadCount(user.id) : 0
+
   return (
     <main className="min-h-screen bg-gray-50">
-      <header className="bg-white border-b">
-        <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
-          <Link href="/" className="text-xl font-bold text-black">
-            roxanetnous
-          </Link>
-          <div className="flex items-center gap-4">
-            {userData ? (
-              <Link
-                href={userData.role === 'auxiliaire' ? '/auxiliaire/dashboard' : '/beneficiaire/dashboard'}
-                className="text-sm text-gray-600 hover:text-black"
-              >
-                Mon espace
-              </Link>
-            ) : (
-              <Link href="/login" className="text-sm text-gray-600 hover:text-black">
-                Connexion
-              </Link>
-            )}
+      {userData?.role === 'auxiliaire' && user ? (
+        <AuxiliaireHeader
+          userId={user.id}
+          unreadCount={unreadCount}
+          firstName={userData.first_name}
+          lastName={userData.last_name}
+          currentPage="other"
+        />
+      ) : (
+        <header className="bg-white border-b">
+          <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
+            <Link href="/" className="text-xl font-bold text-black">
+              roxanetnous
+            </Link>
+            <div className="flex items-center gap-4">
+              {userData ? (
+                <Link
+                  href="/beneficiaire/dashboard"
+                  className="text-sm text-gray-600 hover:text-black"
+                >
+                  Mon espace
+                </Link>
+              ) : (
+                <Link href="/login" className="text-sm text-gray-600 hover:text-black">
+                  Connexion
+                </Link>
+              )}
+            </div>
           </div>
-        </div>
-      </header>
+        </header>
+      )}
 
       <div className="max-w-6xl mx-auto px-4 py-8">
         <h2 className="text-2xl font-bold text-gray-900 mb-6">Demandes des beneficiaires</h2>

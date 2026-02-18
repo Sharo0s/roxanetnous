@@ -66,30 +66,34 @@ export async function validateAuxiliaire(
     details: { motif: motif || null, decision },
   })
 
-  // Envoyer l'email de resultat de validation
-  const { data: auxProfile } = await supabaseAdmin
-    .from('auxiliaires_profiles')
-    .select('user_id')
-    .eq('id', profileId)
-    .single()
+  // Envoyer l'email de resultat de validation (non-bloquant)
+  void (async () => {
+    try {
+      const { data: auxProfile } = await supabaseAdmin
+        .from('auxiliaires_profiles')
+        .select('user_id')
+        .eq('id', profileId)
+        .single()
 
-  if (auxProfile) {
-    const { data: auxUser } = await supabaseAdmin
-      .from('users')
-      .select('email, first_name')
-      .eq('id', auxProfile.user_id)
-      .single()
+      if (!auxProfile) return
 
-    if (auxUser) {
-      sendValidationResultEmail({
+      const { data: auxUser } = await supabaseAdmin
+        .from('users')
+        .select('email, first_name')
+        .eq('id', auxProfile.user_id)
+        .single()
+
+      if (!auxUser) return
+
+      await sendValidationResultEmail({
         email: auxUser.email,
         firstName: auxUser.first_name || '',
         decision,
         motif,
         userId: auxProfile.user_id,
-      }).catch(() => {})
-    }
-  }
+      })
+    } catch {}
+  })()
 
   redirect('/admin')
 }

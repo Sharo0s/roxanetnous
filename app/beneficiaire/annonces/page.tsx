@@ -1,9 +1,10 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { LogoutButton } from '@/components/auth/logout-button'
 import Link from 'next/link'
 import { AnnonceStatusToggle } from '@/components/auxiliaire/annonce-status-toggle'
 import { SPECIALITES } from '@/lib/constants'
+import { BeneficiaireHeader } from '@/components/layout/beneficiaire-header'
+import { getUnreadCount } from '@/lib/unread-count'
 
 export default async function MesAnnoncesBeneficiaire() {
   const supabase = await createClient()
@@ -34,23 +35,17 @@ export default async function MesAnnoncesBeneficiaire() {
       ).data
     : null
 
+  const unreadCount = await getUnreadCount(user.id)
+
   return (
     <main className="min-h-screen bg-gray-50">
-      <header className="bg-white border-b">
-        <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Link href="/beneficiaire/dashboard" className="text-xl font-bold text-black">
-              roxanetnous
-            </Link>
-          </div>
-          <div className="flex items-center gap-4">
-            <span className="text-sm text-gray-600">
-              {userData.first_name} {userData.last_name}
-            </span>
-            <LogoutButton />
-          </div>
-        </div>
-      </header>
+      <BeneficiaireHeader
+        userId={user.id}
+        unreadCount={unreadCount}
+        firstName={userData.first_name}
+        lastName={userData.last_name}
+        currentPage="annonces"
+      />
 
       <div className="max-w-5xl mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-6">

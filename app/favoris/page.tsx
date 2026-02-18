@@ -1,8 +1,10 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { LogoutButton } from '@/components/auth/logout-button'
 import Link from 'next/link'
 import { SPECIALITES, DIPLOMES, EXPERIENCE_LEVELS } from '@/lib/constants'
+import { AuxiliaireHeader } from '@/components/layout/auxiliaire-header'
+import { BeneficiaireHeader } from '@/components/layout/beneficiaire-header'
+import { getUnreadCount } from '@/lib/unread-count'
 
 export default async function FavorisPage() {
   const supabase = await createClient()
@@ -26,9 +28,9 @@ export default async function FavorisPage() {
       annonce_beneficiaire_id,
       created_at,
       annonces_auxiliaires:annonce_auxiliaire_id (
-        id, titre, description, ville, code_postal, status,
+        id, description, ville, code_postal, status,
         auxiliaires_profiles:auxiliaire_id (
-          diplome, experience, specialites,
+          diplomes, experience, specialites,
           users:user_id (first_name, last_name)
         )
       ),
@@ -40,26 +42,27 @@ export default async function FavorisPage() {
     .eq('user_id', user.id)
     .order('created_at', { ascending: false })
 
-  const dashboardUrl = userData.role === 'auxiliaire' ? '/auxiliaire/dashboard' : '/beneficiaire/dashboard'
+  const unreadCount = await getUnreadCount(user.id)
 
   return (
     <main className="min-h-screen bg-gray-50">
-      <header className="bg-white border-b">
-        <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
-          <Link href={dashboardUrl} className="text-xl font-bold text-black">
-            roxanetnous
-          </Link>
-          <div className="flex items-center gap-4">
-            <Link href="/messages" className="text-sm text-gray-600 hover:text-black">
-              Messages
-            </Link>
-            <span className="text-sm text-gray-600">
-              {userData.first_name} {userData.last_name}
-            </span>
-            <LogoutButton />
-          </div>
-        </div>
-      </header>
+      {userData.role === 'auxiliaire' ? (
+        <AuxiliaireHeader
+          userId={user.id}
+          unreadCount={unreadCount}
+          firstName={userData.first_name}
+          lastName={userData.last_name}
+          currentPage="other"
+        />
+      ) : (
+        <BeneficiaireHeader
+          userId={user.id}
+          unreadCount={unreadCount}
+          firstName={userData.first_name}
+          lastName={userData.last_name}
+          currentPage="other"
+        />
+      )}
 
       <div className="max-w-5xl mx-auto px-4 py-8">
         <h2 className="text-2xl font-bold text-gray-900 mb-6">Mes favoris</h2>
@@ -97,7 +100,7 @@ export default async function FavorisPage() {
                         <p className="text-xs text-gray-500">{diplomeLabel}</p>
                       </div>
                     </div>
-                    <h3 className="font-medium text-gray-900 mb-1 line-clamp-1">{annonce.titre}</h3>
+                    <p className="text-sm text-gray-600 line-clamp-2 mb-2">{annonce.description}</p>
                     <p className="text-sm text-gray-500">
                       {annonce.ville} ({annonce.code_postal})
                     </p>

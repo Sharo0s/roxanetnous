@@ -23,7 +23,6 @@ type Props = {
     code_postal: string
     rayon_km: number
     disponibilites: Record<string, string[]>
-    langues: string[]
     permis_conduire: boolean
     vehicule: boolean
     description: string
@@ -45,7 +44,6 @@ export function AuxiliaireProfileForm({ userInfo, profile }: Props) {
   const [codePostal, setCodePostal] = useState(profile.code_postal)
   const [rayonKm, setRayonKm] = useState(profile.rayon_km)
   const [disponibilites, setDisponibilites] = useState<Record<string, string[]>>(profile.disponibilites)
-  const [langues, setLangues] = useState(profile.langues.join(', '))
   const [permisConduire, setPermisConduire] = useState(profile.permis_conduire)
   const [vehicule, setVehicule] = useState(profile.vehicule)
   const [description, setDescription] = useState(profile.description)
@@ -165,7 +163,7 @@ export function AuxiliaireProfileForm({ userInfo, profile }: Props) {
       code_postal: codePostal,
       rayon_km: rayonKm,
       disponibilites,
-      langues: langues.split(',').map((l) => l.trim()).filter(Boolean),
+      langues: [],
       permis_conduire: permisConduire,
       vehicule,
       description,
@@ -175,6 +173,9 @@ export function AuxiliaireProfileForm({ userInfo, profile }: Props) {
       setError(profileResult.error)
     } else {
       setSuccess(true)
+      setTimeout(() => {
+        window.location.reload()
+      }, 2000)
     }
 
     setLoading(false)
@@ -182,17 +183,6 @@ export function AuxiliaireProfileForm({ userInfo, profile }: Props) {
 
   return (
     <div className="space-y-6">
-      {error && (
-        <div className="p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
-          {error}
-        </div>
-      )}
-      {success && (
-        <div className="p-3 rounded-lg bg-gray-50 border text-gray-700 text-sm">
-          Profil mis a jour avec succes.
-        </div>
-      )}
-
       <div className="bg-white rounded-xl border p-6">
         <h3 className="font-semibold mb-4">Informations personnelles</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -444,16 +434,6 @@ export function AuxiliaireProfileForm({ userInfo, profile }: Props) {
             Vehicule personnel
           </label>
         </div>
-        <div className="mt-4">
-          <label className="block text-sm font-medium text-gray-700 mb-1">Langues (separees par des virgules)</label>
-          <input
-            type="text"
-            value={langues}
-            onChange={(e) => setLangues(e.target.value)}
-            placeholder="Francais, Anglais, Arabe..."
-            className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
-          />
-        </div>
       </div>
 
       <div className="bg-white rounded-xl border p-6">
@@ -507,6 +487,17 @@ export function AuxiliaireProfileForm({ userInfo, profile }: Props) {
           className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black resize-none"
         />
       </div>
+
+      {success && (
+        <div className="p-4 rounded-lg bg-black text-white text-sm font-medium">
+          Profil mis a jour avec succes.
+        </div>
+      )}
+      {error && (
+        <div className="p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
+          {error}
+        </div>
+      )}
 
       <Button onClick={handleSave} disabled={loading}>
         {loading ? 'Enregistrement...' : 'Enregistrer les modifications'}
