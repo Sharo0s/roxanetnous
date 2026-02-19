@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import { SPECIALITES, DIPLOMES, EXPERIENCE_LEVELS } from '@/lib/constants'
 import { SearchFilters } from '@/components/recherche/search-filters'
+import { InfiniteAnnoncesGrid } from '@/components/recherche/infinite-annonces-grid'
 import { getBadges } from '@/lib/badges'
 import { BadgesDisplay } from '@/components/badges-display'
 import { AuxiliaireHeader } from '@/components/layout/auxiliaire-header'
@@ -19,7 +20,6 @@ type SearchParams = {
   ville?: string
   specialite?: string
   experience?: string
-  page?: string
   annonce?: string
 }
 
@@ -80,11 +80,6 @@ export default async function RecherchePage({
   if (params.experience) {
     query = query.eq('auxiliaires_profiles.experience', params.experience)
   }
-
-  const page = Number(params.page) || 1
-  const perPage = 12
-  const from = (page - 1) * perPage
-  const to = from + perPage - 1
 
   const { data: rawAnnonces } = await query
 
@@ -176,12 +171,18 @@ export default async function RecherchePage({
     }
   }
 
-  const unreadCount = user ? await getUnreadCount(user.id) : 0
+  // Fetch favoris de l'utilisateur
+  let favorisIds: string[] = []
+  if (user) {
+    const { data: favs } = await supabase
+      .from('favoris')
+      .select('annonce_auxiliaire_id')
+      .eq('user_id', user.id)
+      .not('annonce_auxiliaire_id', 'is', null)
+    favorisIds = (favs || []).map((f) => f.annonce_auxiliaire_id).filter(Boolean)
+  }
 
-  // Manual pagination after filtering
-  const count = annonces.length
-  const paginatedAnnonces = annonces.slice(from, to + 1)
-  const totalPages = count ? Math.ceil(count / perPage) : 1
+  const unreadCount = user ? await getUnreadCount(user.id) : 0
 
   return (
     <main className="min-h-screen bg-gray-50">
@@ -235,7 +236,7 @@ export default async function RecherchePage({
           <div className="mt-6 mb-8">
             <div className="flex items-center justify-between mb-4">
               <div>
-                <h3 className="text-lg font-semibold text-gray-900">Vos meilleurs matchs</h3>
+                <h3 className="text-lg font-semibold text-gray-900">Les profils que nous vous recommandons</h3>
                 {allBenAnnonces.length > 1 ? (
                   <form className="flex items-center gap-2 mt-1">
                     <label className="text-xs text-gray-500">Annonce de reference :</label>
@@ -310,13 +311,20 @@ export default async function RecherchePage({
                       </div>
 
                       <div className="w-48 flex-shrink-0 border-l border-gray-200 p-4 flex flex-col items-center justify-center bg-gray-50 rounded-r-xl">
-                        <div className={`w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold mb-3 ${
+                        <div className={`w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold mb-1 ${
                           score >= 70 ? 'bg-black text-white' :
                           score >= 40 ? 'bg-gray-300 text-gray-700' :
                           'bg-gray-100 text-gray-400'
                         }`}>
                           {score}
                         </div>
+                        <p className={`text-xs font-medium mb-2 ${
+                          score >= 70 ? 'text-gray-900' :
+                          score >= 40 ? 'text-gray-600' :
+                          'text-gray-400'
+                        }`}>
+                          {score >= 70 ? 'Fortement recommande' : score >= 40 ? 'Recommande' : 'Peu recommande'}
+                        </p>
                         <div className="w-full space-y-1 text-xs">
                           <div className="flex justify-between text-gray-500">
                             <span>Specialites</span>
@@ -354,7 +362,7 @@ export default async function RecherchePage({
           </div>
         )}
 
-        {!paginatedAnnonces || paginatedAnnonces.length === 0 ? (
+        {!annonces || annonces.length === 0 ? (
           <div className="bg-white rounded-xl border p-8 text-center mt-6">
             <p className="text-gray-500">Aucun resultat pour votre recherche.</p>
             {(params.ville || params.specialite || params.experience) && (
@@ -364,95 +372,12 @@ export default async function RecherchePage({
             )}
           </div>
         ) : (
-          <>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
-              {paginatedAnnonces.map((annonce: any) => {
-                const profile = annonce.auxiliaires_profiles
-                const u = profile?.users
-                const diplomeLabel = (profile?.diplomes as string[] || []).map((d: string) => DIPLOMES.find((dp) => dp.value === d)?.label || d).join(', ')
-                const expLabel = EXPERIENCE_LEVELS.find((e) => e.value === profile?.experience)?.label || profile?.experience
-                const specs = (profile?.specialites as string[] || []).slice(0, 3)
-
-                return (
-                  <Link
-                    key={annonce.id}
-                    href={`/recherche/${annonce.id}`}
-                    className="bg-white rounded-xl border p-5 hover:border-black transition block"
-                  >
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-sm font-bold text-gray-600">
-                        {u?.first_name?.[0]}{u?.last_name?.[0]}
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <p className="font-semibold text-gray-900">
-                            {u?.first_name} {u?.last_name?.[0]}.
-                          </p>
-                          <BadgesDisplay badges={badgesMap[profile?.user_id]} />
-                        </div>
-                        <p className="text-xs text-gray-500">{diplomeLabel}</p>
-                      </div>
-                    </div>
-
-                    <p className="text-sm text-gray-600 line-clamp-3 mb-3">{annonce.description}</p>
-
-                    <div className="flex flex-wrap gap-1 mb-3">
-                      {specs.map((s: string) => (
-                        <span key={s} className="px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full text-xs">
-                          {SPECIALITES.find((sp) => sp.value === s)?.label || s}
-                        </span>
-                      ))}
-                      {(profile?.specialites?.length || 0) > 3 && (
-                        <span className="px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full text-xs">
-                          +{profile.specialites.length - 3}
-                        </span>
-                      )}
-                    </div>
-
-                    <div className="flex items-center justify-between text-xs text-gray-500">
-                      <span>{annonce.ville} ({annonce.code_postal})</span>
-                      <span>Experience : {expLabel}</span>
-                    </div>
-
-                    {(profile?.permis_conduire || profile?.vehicule) && (
-                      <div className="flex gap-2 mt-2">
-                        {profile.permis_conduire && (
-                          <span className="text-xs text-gray-500">Permis B</span>
-                        )}
-                        {profile.vehicule && (
-                          <span className="text-xs text-gray-500">Vehicule</span>
-                        )}
-                      </div>
-                    )}
-                  </Link>
-                )
-              })}
-            </div>
-
-            {totalPages > 1 && (
-              <div className="flex justify-center gap-2 mt-8">
-                {page > 1 && (
-                  <Link
-                    href={`/recherche?${new URLSearchParams({ ...params, page: String(page - 1) }).toString()}`}
-                    className="px-4 py-2 border border-gray-300 rounded-lg text-sm hover:border-black transition"
-                  >
-                    Precedent
-                  </Link>
-                )}
-                <span className="px-4 py-2 text-sm text-gray-500">
-                  Page {page} sur {totalPages}
-                </span>
-                {page < totalPages && (
-                  <Link
-                    href={`/recherche?${new URLSearchParams({ ...params, page: String(page + 1) }).toString()}`}
-                    className="px-4 py-2 border border-gray-300 rounded-lg text-sm hover:border-black transition"
-                  >
-                    Suivant
-                  </Link>
-                )}
-              </div>
-            )}
-          </>
+          <InfiniteAnnoncesGrid
+            annonces={annonces}
+            badgesMap={badgesMap}
+            userId={user?.id}
+            favorisIds={favorisIds}
+          />
         )}
       </div>
     </main>

@@ -1,9 +1,11 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { SPECIALITES, EXPERIENCE_LEVELS } from '@/lib/constants'
 import { Button } from '@/components/ui/button'
+import { useDebounce } from '@/hooks/use-debounce'
+import { searchCommunes, type CommuneResult } from '@/lib/adresse-api'
 
 type Props = {
   currentVille: string
@@ -16,6 +18,44 @@ export function SearchFilters({ currentVille, currentSpecialite, currentExperien
   const [ville, setVille] = useState(currentVille)
   const [specialite, setSpecialite] = useState(currentSpecialite)
   const [experience, setExperience] = useState(currentExperience)
+  const [suggestions, setSuggestions] = useState<CommuneResult[]>([])
+  const [open, setOpen] = useState(false)
+  const [activeIndex, setActiveIndex] = useState(-1)
+  const containerRef = useRef<HTMLDivElement>(null)
+
+  const debouncedVille = useDebounce(ville, 300)
+
+  useEffect(() => {
+    if (debouncedVille.length < 2 || debouncedVille === currentVille) {
+      setSuggestions([])
+      return
+    }
+    let cancelled = false
+    searchCommunes(debouncedVille).then((results) => {
+      if (!cancelled) {
+        setSuggestions(results)
+        setOpen(results.length > 0)
+        setActiveIndex(-1)
+      }
+    })
+    return () => { cancelled = true }
+  }, [debouncedVille, currentVille])
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
+  const selectSuggestion = useCallback((s: CommuneResult) => {
+    setVille(s.city)
+    setOpen(false)
+    setSuggestions([])
+  }, [])
 
   function handleSearch() {
     const params = new URLSearchParams()
@@ -32,19 +72,62 @@ export function SearchFilters({ currentVille, currentSpecialite, currentExperien
     router.push('/recherche')
   }
 
+  function handleKeyDown(e: React.KeyboardEvent) {
+    if (!open || suggestions.length === 0) return
+    switch (e.key) {
+      case 'ArrowDown':
+        e.preventDefault()
+        setActiveIndex((prev) => (prev < suggestions.length - 1 ? prev + 1 : 0))
+        break
+      case 'ArrowUp':
+        e.preventDefault()
+        setActiveIndex((prev) => (prev > 0 ? prev - 1 : suggestions.length - 1))
+        break
+      case 'Enter':
+        e.preventDefault()
+        if (activeIndex >= 0) {
+          selectSuggestion(suggestions[activeIndex])
+        } else {
+          handleSearch()
+        }
+        break
+      case 'Escape':
+        setOpen(false)
+        break
+    }
+  }
+
   return (
     <div className="bg-white rounded-xl border p-5">
       <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-        <div>
+        <div ref={containerRef} className="relative">
           <label className="block text-xs font-medium text-gray-500 mb-1">Ville</label>
           <input
             type="text"
             value={ville}
             onChange={(e) => setVille(e.target.value)}
+            onFocus={() => { if (suggestions.length > 0) setOpen(true) }}
+            onKeyDown={handleKeyDown}
             placeholder="Ex: Paris, Lyon..."
             className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
-            onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
           />
+          {open && suggestions.length > 0 && (
+            <ul className="absolute top-full left-0 right-0 z-50 mt-1 rounded-lg border border-gray-300 bg-white shadow-lg max-h-60 overflow-auto">
+              {suggestions.map((s, i) => (
+                <li
+                  key={`${s.postcode}-${s.city}`}
+                  onMouseDown={() => selectSuggestion(s)}
+                  onMouseEnter={() => setActiveIndex(i)}
+                  className={`px-3 py-2 text-sm cursor-pointer ${
+                    i === activeIndex ? 'bg-gray-100' : 'hover:bg-gray-50'
+                  }`}
+                >
+                  <span className="font-medium">{s.city}</span>
+                  <span className="text-gray-500 ml-2">{s.postcode}</span>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
         <div>
           <label className="block text-xs font-medium text-gray-500 mb-1">Specialite</label>
