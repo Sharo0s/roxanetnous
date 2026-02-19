@@ -268,7 +268,7 @@ export default async function RecherchePage({
               </div>
             </div>
             <div className="space-y-3">
-              {matchResults.map(({ annonce, score, details }) => {
+              {matchResults.map(({ annonce }) => {
                 const profile = annonce.auxiliaires_profiles
                 const u = profile?.users
                 const diplomeLabel = (profile?.diplomes as string[] || []).map((d: string) => DIPLOMES.find((dp) => dp.value === d)?.label || d).join(', ')
@@ -289,84 +289,43 @@ export default async function RecherchePage({
                         />
                       </div>
                     )}
-                    <div className="flex">
-                      <div className="flex-1 min-w-0 p-5 flex flex-col">
-                        <div className="flex items-center gap-3 mb-3">
-                          <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-sm font-bold text-gray-600 flex-shrink-0">
-                            {u?.first_name?.[0]}{u?.last_name?.[0]}
-                          </div>
-                          <div>
-                            <div className="flex items-center gap-2">
-                              <p className="font-semibold text-gray-900">
-                                {u?.first_name} {u?.last_name?.[0]}.
-                              </p>
-                              <BadgesDisplay badges={badgesMap[profile?.user_id]} />
-                            </div>
-                            <p className="text-xs text-gray-500">{diplomeLabel}</p>
-                          </div>
+                    <div className="p-5 flex flex-col">
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-sm font-bold text-gray-600 flex-shrink-0">
+                          {u?.first_name?.[0]}{u?.last_name?.[0]}
                         </div>
-
-                        <p className="text-sm text-gray-600 line-clamp-2 mb-2">{annonce.description}</p>
-
-                        <div className="flex flex-wrap gap-1 mb-2">
-                          {specs.map((s: string) => (
-                            <span key={s} className="px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full text-xs">
-                              {SPECIALITES.find((sp) => sp.value === s)?.label || s}
-                            </span>
-                          ))}
-                        </div>
-
-                        <div className="flex items-center justify-between text-xs text-gray-500 mb-3">
-                          <span>{annonce.ville} ({annonce.code_postal})</span>
-                          <span>{expLabel}</span>
-                        </div>
-
-                        <Link
-                          href={`/recherche/${annonce.id}`}
-                          className="mt-auto block w-full text-center px-4 py-2 border border-black text-black rounded-lg hover:bg-black hover:text-white transition text-sm font-medium"
-                        >
-                          Voir le profil
-                        </Link>
-                      </div>
-
-                      <div className="w-48 flex-shrink-0 border-l border-gray-200 p-4 flex flex-col items-center justify-center bg-gray-50 rounded-r-xl">
-                        <div className={`w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold mb-1 ${
-                          score >= 70 ? 'bg-black text-white' :
-                          score >= 40 ? 'bg-gray-300 text-gray-700' :
-                          'bg-gray-100 text-gray-400'
-                        }`}>
-                          {score}
-                        </div>
-                        <p className={`text-xs font-medium mb-2 ${
-                          score >= 70 ? 'text-gray-900' :
-                          score >= 40 ? 'text-gray-600' :
-                          'text-gray-400'
-                        }`}>
-                          {score >= 70 ? 'Fortement recommande' : score >= 40 ? 'Recommande' : 'Peu recommande'}
-                        </p>
-                        <div className="w-full space-y-1 text-xs">
-                          <div className="flex justify-between text-gray-500">
-                            <span>Specialites</span>
-                            <span className="font-medium text-gray-700">{details.specialites}/40</span>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <p className="font-semibold text-gray-900">
+                              {u?.first_name} {u?.last_name?.[0]}.
+                            </p>
+                            <BadgesDisplay badges={badgesMap[profile?.user_id]} />
                           </div>
-                          <div className="flex justify-between text-gray-500">
-                            <span>Localisation</span>
-                            <span className="font-medium text-gray-700">{details.localisation}/25</span>
-                          </div>
-                          <div className="flex justify-between text-gray-500">
-                            <span>Experience</span>
-                            <span className="font-medium text-gray-700">{details.experience}/15</span>
-                          </div>
-                          <div className="flex justify-between text-gray-500">
-                            <span>Diplome</span>
-                            <span className="font-medium text-gray-700">{details.diplome}/10</span>
-                          </div>
-                          <div className="flex justify-between text-gray-500">
-                            <span>Disponibilites</span>
-                            <span className="font-medium text-gray-700">{details.disponibilites}/10</span>
-                          </div>
+                          <p className="text-xs text-gray-500">{diplomeLabel}</p>
                         </div>
                       </div>
+
+                      <p className="text-sm text-gray-600 line-clamp-2 mb-2">{annonce.description}</p>
+
+                      <div className="flex flex-wrap gap-1 mb-2">
+                        {specs.map((s: string) => (
+                          <span key={s} className="px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full text-xs">
+                            {SPECIALITES.find((sp) => sp.value === s)?.label || s}
+                          </span>
+                        ))}
+                      </div>
+
+                      <div className="flex items-center justify-between text-xs text-gray-500 mb-3">
+                        <span>{annonce.ville} ({annonce.code_postal})</span>
+                        <span>{expLabel}</span>
+                      </div>
+
+                      <Link
+                        href={`/recherche/${annonce.id}`}
+                        className="mt-auto block w-full text-center px-4 py-2 border border-black text-black rounded-lg hover:bg-black hover:text-white transition text-sm font-medium"
+                      >
+                        Voir le profil
+                      </Link>
                     </div>
                   </div>
                 )
