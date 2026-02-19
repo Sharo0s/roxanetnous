@@ -293,6 +293,8 @@ export default async function RecherchePage({
                           </div>
                         </div>
 
+                        <p className="text-sm text-gray-600 line-clamp-2 mb-2">{annonce.description}</p>
+
                         <div className="flex flex-wrap gap-1 mb-2">
                           {specs.map((s: string) => (
                             <span key={s} className="px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full text-xs">
