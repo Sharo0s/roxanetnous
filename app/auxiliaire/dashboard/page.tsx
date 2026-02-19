@@ -157,9 +157,9 @@ export default async function AuxiliaireDashboard() {
                   )}
                 </div>
                 <div className="bg-white rounded-xl border p-6">
-                  <h3 className="font-semibold text-lg mb-2">Annonces beneficiaires</h3>
+                  <h3 className="font-semibold text-lg mb-2">Demandes beneficiaires</h3>
                   <p className="text-gray-600 mb-4">
-                    Consultez les demandes des beneficiaires proches de chez vous.
+                    Consultez les demandes des beneficiaires.
                   </p>
                   <Link
                     href="/recherche/demandes"
