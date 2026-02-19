@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { Footer } from '@/components/footer'
 import { ContactForm } from '@/components/contact-form'
+import { AvisMarquee } from '@/components/landing/avis-marquee'
 import { createClient } from '@/lib/supabase/server'
 
 export default async function HomePage() {
@@ -18,6 +19,38 @@ export default async function HomePage() {
     .eq('validation_status', 'valide')
 
   const villesUniques = new Set((villesData || []).map((v) => v.ville?.toLowerCase()).filter(Boolean))
+
+  // Avis recents (notes 4-5, non signales, non masques)
+  const { data: avisData } = await supabase
+    .from('avis')
+    .select('note, commentaire, auteur_id')
+    .eq('masque', false)
+    .eq('signale', false)
+    .gte('note', 4)
+    .order('created_at', { ascending: false })
+    .limit(20)
+
+  let avisWithNames: { note: number; commentaire: string; auteur_prenom: string; auteur_nom: string }[] = []
+  if (avisData && avisData.length > 0) {
+    const auteurIds = [...new Set(avisData.map((a) => a.auteur_id))]
+    const { data: auteursData } = await supabase
+      .from('users')
+      .select('id, first_name, last_name')
+      .in('id', auteurIds)
+
+    const auteursMap = new Map((auteursData || []).map((u) => [u.id, u]))
+    avisWithNames = avisData
+      .filter((a) => a.commentaire)
+      .map((a) => {
+        const auteur = auteursMap.get(a.auteur_id)
+        return {
+          note: a.note,
+          commentaire: a.commentaire!,
+          auteur_prenom: auteur?.first_name || 'Utilisateur',
+          auteur_nom: auteur?.last_name || '',
+        }
+      })
+  }
 
   const launchOfferEnd = process.env.LAUNCH_OFFER_END
   const launchOfferActive = launchOfferEnd ? new Date(launchOfferEnd) > new Date() : false
@@ -108,8 +141,19 @@ export default async function HomePage() {
           </div>
         </section>
 
+        {/* Avis */}
+        {avisWithNames.length > 0 && (
+          <section className="bg-gray-50 px-4 py-16">
+            <div className="max-w-4xl mx-auto mb-8">
+              <h2 className="text-2xl font-bold text-center mb-2">Ce qu'en disent nos utilisateurs</h2>
+              <p className="text-center text-sm text-gray-500">Avis verifies laisses sur la plateforme</p>
+            </div>
+            <AvisMarquee avis={avisWithNames} />
+          </section>
+        )}
+
         {/* Comment ca marche */}
-        <section className="bg-gray-50 px-4 py-16">
+        <section className="px-4 py-16">
           <div className="max-w-4xl mx-auto">
             <h2 className="text-2xl font-bold text-center mb-10">Comment ca marche</h2>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
@@ -132,7 +176,7 @@ export default async function HomePage() {
         </section>
 
         {/* Avantages */}
-        <section className="px-4 py-16">
+        <section className="bg-gray-50 px-4 py-16">
           <div className="max-w-4xl mx-auto">
             <h2 className="text-2xl font-bold text-center mb-10">Pourquoi roxanetnous</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -161,7 +205,7 @@ export default async function HomePage() {
         </section>
 
         {/* Offres d'abonnement */}
-        <section className="bg-gray-50 px-4 py-16">
+        <section className="px-4 py-16">
           <div className="max-w-4xl mx-auto">
             <h2 className="text-2xl font-bold text-center mb-3">Nos offres</h2>
             <p className="text-center text-gray-500 text-sm mb-10">
@@ -203,7 +247,7 @@ export default async function HomePage() {
         </section>
 
         {/* FAQ */}
-        <section className="px-4 py-16">
+        <section className="bg-gray-50 px-4 py-16">
           <div className="max-w-3xl mx-auto">
             <h2 className="text-2xl font-bold text-center mb-10">Questions frequentes</h2>
             <div className="space-y-6">
@@ -243,7 +287,7 @@ export default async function HomePage() {
         </section>
 
         {/* Contact */}
-        <section className="bg-gray-50 px-4 py-16">
+        <section className="px-4 py-16">
           <div className="max-w-md mx-auto">
             <h2 className="text-2xl font-bold text-center mb-2">Une question ?</h2>
             <p className="text-center text-gray-600 mb-6">
