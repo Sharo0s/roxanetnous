@@ -143,12 +143,20 @@ export async function toggleDisponible(): Promise<ProfileResult> {
 
   if (!profile) return { error: 'Profil introuvable.' }
 
+  const newValue = !profile.disponible
+
   const { error } = await supabase
     .from('auxiliaires_profiles')
-    .update({ disponible: !profile.disponible })
+    .update({ disponible: newValue })
     .eq('user_id', user.id)
 
   if (error) return { error: 'Erreur lors de la mise a jour.' }
+
+  // Mettre a jour badges_cache immediatement
+  await supabase
+    .from('badges_cache')
+    .update({ disponible: newValue, updated_at: new Date().toISOString() })
+    .eq('user_id', user.id)
 
   revalidatePath('/auxiliaire/profil')
   revalidatePath('/auxiliaire/dashboard')
