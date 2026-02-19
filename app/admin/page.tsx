@@ -109,7 +109,12 @@ export default async function AdminDashboard() {
       </header>
 
       <div className="max-w-6xl mx-auto px-4 py-8">
-        <h2 className="text-2xl font-bold text-gray-900 mb-6">Tableau de bord</h2>
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-2xl font-bold text-gray-900">Tableau de bord</h2>
+          <Link href="/admin/stats" className="text-sm text-gray-500 hover:text-black border border-gray-300 px-3 py-1.5 rounded-lg hover:border-black transition-colors">
+            Statistiques detaillees
+          </Link>
+        </div>
 
         {/* Queue de validation */}
         <h3 className="text-lg font-semibold mb-4">Auxiliaires en attente de validation</h3>
