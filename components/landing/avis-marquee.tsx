@@ -24,17 +24,14 @@ function Stars({ count }: { count: number }) {
   )
 }
 
-export function AvisMarquee({ avis }: { avis: Avis[] }) {
-  if (avis.length === 0) return null
-
-  // Doubler les avis pour l'effet de boucle infinie
+function AvisRow({ avis, reverse }: { avis: Avis[]; reverse?: boolean }) {
   const items = [...avis, ...avis]
 
   return (
     <div className="overflow-hidden relative">
       <div className="absolute left-0 top-0 bottom-0 w-16 bg-gradient-to-r from-gray-50 to-transparent z-10" />
       <div className="absolute right-0 top-0 bottom-0 w-16 bg-gradient-to-l from-gray-50 to-transparent z-10" />
-      <div className="flex gap-4 animate-marquee">
+      <div className={`flex gap-4 ${reverse ? 'animate-marquee-reverse' : 'animate-marquee'}`}>
         {items.map((a, i) => (
           <div
             key={i}
@@ -48,6 +45,22 @@ export function AvisMarquee({ avis }: { avis: Avis[] }) {
           </div>
         ))}
       </div>
+    </div>
+  )
+}
+
+export function AvisMarquee({ avis }: { avis: Avis[] }) {
+  if (avis.length === 0) return null
+
+  // Splitter les avis en deux lignes
+  const mid = Math.ceil(avis.length / 2)
+  const row1 = avis.slice(0, mid)
+  const row2 = avis.slice(mid)
+
+  return (
+    <div className="flex flex-col gap-4">
+      <AvisRow avis={row1} />
+      {row2.length > 0 && <AvisRow avis={row2} reverse />}
     </div>
   )
 }
