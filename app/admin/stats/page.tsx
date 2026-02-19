@@ -83,7 +83,7 @@ export default async function AdminStatsPage() {
           {/* KPI Cards */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
             <div className="bg-white rounded-xl border p-5">
-              <p className="text-sm text-gray-500">MRR</p>
+              <p className="text-sm text-gray-500">Revenu mensuel recurrent</p>
               <p className="text-3xl font-bold mt-1">{kpis.mrr.toFixed(2)} EUR</p>
             </div>
             <div className="bg-white rounded-xl border p-5">
@@ -97,7 +97,7 @@ export default async function AdminStatsPage() {
               <p className="text-xs text-gray-400 mt-1">{kpis.abonnesActifs} abonnes / {kpis.totalUsers}</p>
             </div>
             <div className="bg-white rounded-xl border p-5">
-              <p className="text-sm text-gray-500">Churn mensuel</p>
+              <p className="text-sm text-gray-500">Taux de resiliation</p>
               <p className="text-3xl font-bold mt-1">{kpis.churn.toFixed(1)}%</p>
             </div>
           </div>
@@ -189,14 +189,14 @@ export default async function AdminStatsPage() {
           {/* MRR par segment */}
           <div className="bg-white rounded-xl border overflow-hidden mb-8">
             <div className="px-4 py-3 border-b bg-gray-50">
-              <h4 className="font-medium text-gray-700 text-sm">MRR par segment</h4>
+              <h4 className="font-medium text-gray-700 text-sm">Revenu mensuel recurrent par segment</h4>
             </div>
             <table className="w-full text-sm">
               <thead className="bg-gray-50 border-b">
                 <tr>
                   <th className="text-left px-4 py-3 font-medium text-gray-500">Segment</th>
                   <th className="text-right px-4 py-3 font-medium text-gray-500">Abonnes</th>
-                  <th className="text-right px-4 py-3 font-medium text-gray-500">MRR</th>
+                  <th className="text-right px-4 py-3 font-medium text-gray-500">Revenu mensuel</th>
                 </tr>
               </thead>
               <tbody>
@@ -235,7 +235,7 @@ export default async function AdminStatsPage() {
               <p className="text-3xl font-bold mt-1">{mrrDetail.payants}</p>
             </div>
             <div className="bg-white rounded-xl border p-5">
-              <p className="text-sm text-gray-500">Churn ce mois</p>
+              <p className="text-sm text-gray-500">Resiliations ce mois</p>
               <p className="text-3xl font-bold mt-1">{churn.taux.toFixed(1)}%</p>
               <p className="text-xs text-gray-400 mt-1">
                 {churn.annulations} annulation{churn.annulations > 1 ? 's' : ''} / {churn.abonnesDebutMois} debut de mois
@@ -246,7 +246,7 @@ export default async function AdminStatsPage() {
           {/* Dernieres annulations */}
           <div className="bg-white rounded-xl border overflow-hidden">
             <div className="px-4 py-3 border-b bg-gray-50">
-              <h4 className="font-medium text-gray-700 text-sm">Dernieres annulations</h4>
+              <h4 className="font-medium text-gray-700 text-sm">Dernieres resiliations</h4>
             </div>
             {annulations.length === 0 ? (
               <div className="p-8 text-center text-gray-500 text-sm">
