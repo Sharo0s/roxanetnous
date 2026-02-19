@@ -1,22 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
-import { redirect } from 'next/navigation'
-import Link from 'next/link'
-import { LogoutButton } from '@/components/auth/logout-button'
 
 export default async function AdminUtilisateursPage() {
-  const supabase = await createClient()
-
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
-
-  const { data: adminData } = await supabase
-    .from('users')
-    .select('first_name, last_name, role')
-    .eq('id', user.id)
-    .single()
-
-  if (!adminData || adminData.role !== 'admin') redirect('/')
-
   const supabaseAdmin = await createClient({ serviceRole: true })
 
   const { data: users } = await supabaseAdmin
@@ -30,21 +14,6 @@ export default async function AdminUtilisateursPage() {
   const benCount = users?.filter((u) => u.role === 'beneficiaire').length || 0
 
   return (
-    <main className="min-h-screen bg-gray-50">
-      <header className="bg-white border-b">
-        <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Link href="/admin" className="text-xl font-bold text-black">roxanetnous</Link>
-            <span className="text-xs bg-gray-200 text-gray-700 px-2 py-1 rounded-full font-medium">Admin</span>
-          </div>
-          <div className="flex items-center gap-4">
-            <Link href="/admin" className="text-sm text-gray-500 hover:text-black">Tableau de bord</Link>
-            <span className="text-sm text-gray-600">{adminData.first_name} {adminData.last_name}</span>
-            <LogoutButton />
-          </div>
-        </div>
-      </header>
-
       <div className="max-w-6xl mx-auto px-4 py-8">
         <h2 className="text-2xl font-bold text-gray-900 mb-6">Utilisateurs</h2>
 
@@ -102,6 +71,5 @@ export default async function AdminUtilisateursPage() {
           </div>
         )}
       </div>
-    </main>
   )
 }
