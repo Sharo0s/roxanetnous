@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { AuxiliaireProfileForm } from '@/components/auxiliaire/profile-form'
+import { DisponibleToggle } from '@/components/auxiliaire/disponible-toggle'
 import { ExportDataButton } from '@/components/export-data-button'
 import { DeleteAccountButton } from '@/components/delete-account-button'
 import { AuxiliaireHeader } from '@/components/layout/auxiliaire-header'
@@ -64,6 +65,8 @@ export default async function AuxiliaireProfilPage() {
             )}
           </div>
         )}
+
+        <DisponibleToggle initial={profile.disponible ?? true} />
 
         <AuxiliaireProfileForm
           userInfo={{

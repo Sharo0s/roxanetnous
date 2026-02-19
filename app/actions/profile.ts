@@ -119,6 +119,43 @@ export async function updateUserInfo(data: {
   return { success: true }
 }
 
+export async function updateLastSeen(): Promise<void> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return
+
+  await supabase
+    .from('users')
+    .update({ last_seen_at: new Date().toISOString() })
+    .eq('id', user.id)
+}
+
+export async function toggleDisponible(): Promise<ProfileResult> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Non connecte.' }
+
+  const { data: profile } = await supabase
+    .from('auxiliaires_profiles')
+    .select('disponible')
+    .eq('user_id', user.id)
+    .single()
+
+  if (!profile) return { error: 'Profil introuvable.' }
+
+  const { error } = await supabase
+    .from('auxiliaires_profiles')
+    .update({ disponible: !profile.disponible })
+    .eq('user_id', user.id)
+
+  if (error) return { error: 'Erreur lors de la mise a jour.' }
+
+  revalidatePath('/auxiliaire/profil')
+  revalidatePath('/auxiliaire/dashboard')
+  revalidatePath('/recherche')
+  return { success: true }
+}
+
 export async function updateBeneficiaireProfile(data: {
   ville: string
   code_postal: string

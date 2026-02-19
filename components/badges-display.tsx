@@ -10,13 +10,14 @@ const ANCIENNETE_LABELS: Record<string, { label: string; variant: 'gold' | 'silv
 export function BadgesDisplay({ badges }: { badges: BadgeData | undefined }) {
   if (!badges) return null
 
-  const hasBadge = badges.annonce_active || badges.anciennete
-
-  if (!hasBadge) return null
-
   return (
     <div className="flex flex-wrap gap-1">
-      {badges.annonce_active && (
+      {badges.disponible ? (
+        <Badge variant="success">Disponible</Badge>
+      ) : (
+        <Badge variant="default">Indisponible</Badge>
+      )}
+      {badges.actif && (
         <Badge variant="success">Actif</Badge>
       )}
       {badges.anciennete && ANCIENNETE_LABELS[badges.anciennete] && (

@@ -1,30 +1,35 @@
 import { createClient } from '@/lib/supabase/server'
 
 export type BadgeData = {
-  annonce_active: boolean
+  disponible: boolean
+  actif: boolean
   anciennete: string | null
 }
 
 export async function calculateAndUpdateBadges(userId: string): Promise<void> {
   const supabase = await createClient({ serviceRole: true })
 
-  // Verifier annonce active
+  // Verifier disponibilite
   const { data: profile } = await supabase
     .from('auxiliaires_profiles')
-    .select('id')
+    .select('id, disponible')
     .eq('user_id', userId)
     .eq('validation_status', 'valide')
     .single()
 
-  let annonceActive = false
-  if (profile) {
-    const { count } = await supabase
-      .from('annonces_auxiliaires')
-      .select('id', { count: 'exact', head: true })
-      .eq('auxiliaire_id', profile.id)
-      .eq('status', 'publiee')
+  const disponible = profile?.disponible ?? false
 
-    annonceActive = (count || 0) > 0
+  // Verifier activite recente (connecte dans les 7 derniers jours)
+  const { data: userRow } = await supabase
+    .from('users')
+    .select('last_seen_at')
+    .eq('id', userId)
+    .single()
+
+  let actif = false
+  if (userRow?.last_seen_at) {
+    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+    actif = new Date(userRow.last_seen_at) > sevenDaysAgo
   }
 
   // Calculer anciennete depuis first_subscription_date
@@ -58,7 +63,8 @@ export async function calculateAndUpdateBadges(userId: string): Promise<void> {
     .upsert(
       {
         user_id: userId,
-        annonce_active: annonceActive,
+        disponible,
+        actif,
         anciennete,
         updated_at: new Date().toISOString(),
       },
@@ -93,13 +99,14 @@ export async function getBadges(
 
   const { data } = await supabase
     .from('badges_cache')
-    .select('user_id, annonce_active, anciennete')
+    .select('user_id, disponible, actif, anciennete')
     .in('user_id', userIds)
 
   const result: Record<string, BadgeData> = {}
   for (const row of data || []) {
     result[row.user_id] = {
-      annonce_active: row.annonce_active ?? false,
+      disponible: row.disponible ?? false,
+      actif: row.actif ?? false,
       anciennete: row.anciennete,
     }
   }
