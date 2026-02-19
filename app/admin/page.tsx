@@ -68,25 +68,6 @@ export default async function AdminDashboard() {
     .select('id', { count: 'exact', head: true })
     .in('status', ['active', 'trialing'])
 
-  const { data: subsData } = await supabaseAdmin
-    .from('subscriptions')
-    .select('plan_type')
-    .in('status', ['active', 'trialing'])
-
-  const mrr = (subsData || []).reduce((sum, s) => {
-    if (s.plan_type === 'annual' || s.plan_type === 'annuel') return sum + 49.99 / 12
-    return sum + 4.99
-  }, 0)
-
-  const firstOfMonth = new Date()
-  firstOfMonth.setDate(1)
-  firstOfMonth.setHours(0, 0, 0, 0)
-
-  const { count: newUsersCount } = await supabaseAdmin
-    .from('users')
-    .select('id', { count: 'exact', head: true })
-    .gte('created_at', firstOfMonth.toISOString())
-
   const { count: messagesCount } = await supabaseAdmin
     .from('messages')
     .select('id', { count: 'exact', head: true })
@@ -182,18 +163,10 @@ export default async function AdminDashboard() {
           </Link>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-2 gap-4 mb-8">
           <Link href="/admin/utilisateurs" className="bg-white rounded-xl border p-5 hover:border-black hover:shadow-lg hover:-translate-y-1 transition-all duration-200">
             <p className="text-sm text-gray-500">Abonnes actifs</p>
             <p className="text-3xl font-bold mt-1">{activeSubsCount || 0}</p>
-          </Link>
-          <Link href="/admin/utilisateurs" className="bg-white rounded-xl border p-5 hover:border-black hover:shadow-lg hover:-translate-y-1 transition-all duration-200">
-            <p className="text-sm text-gray-500">MRR estime</p>
-            <p className="text-3xl font-bold mt-1">{mrr.toFixed(2)} EUR</p>
-          </Link>
-          <Link href="/admin/utilisateurs" className="bg-white rounded-xl border p-5 hover:border-black hover:shadow-lg hover:-translate-y-1 transition-all duration-200">
-            <p className="text-sm text-gray-500">Inscriptions ce mois</p>
-            <p className="text-3xl font-bold mt-1">{newUsersCount || 0}</p>
           </Link>
           <Link href="/admin/historique" className="bg-white rounded-xl border p-5 hover:border-black hover:shadow-lg hover:-translate-y-1 transition-all duration-200">
             <p className="text-sm text-gray-500">Messages echanges</p>
