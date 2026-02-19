@@ -261,7 +261,7 @@ export default async function RecherchePage({
                     </button>
                   </form>
                 ) : (
-                  <p className="text-xs text-gray-500">
+                  <p className="text-sm text-gray-500">
                     Bases sur votre annonce : {matchAnnonce.titre}
                   </p>
                 )}
