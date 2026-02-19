@@ -4,6 +4,8 @@ import { useState } from 'react'
 import { createAnnonceBeneficiaire } from '@/app/actions/annonces'
 import { Button } from '@/components/ui/button'
 import { SPECIALITES, DIPLOMES, EXPERIENCE_LEVELS, JOURS_SEMAINE, CRENEAUX } from '@/lib/constants'
+import { CityAutocomplete } from '@/components/ui/city-autocomplete'
+import { MapRadius } from '@/components/ui/map-radius'
 import Link from 'next/link'
 
 export function NouvelleAnnonceBeneficiaireForm() {
@@ -17,7 +19,6 @@ export function NouvelleAnnonceBeneficiaireForm() {
   const [diplomeRequis, setDiplomeRequis] = useState('')
   const [experienceMin, setExperienceMin] = useState('')
   const [niveauDependance, setNiveauDependance] = useState<'forte' | 'moderee' | 'peu'>('moderee')
-  const [ouvertureAide, setOuvertureAide] = useState('')
   const [equipeEnPlace, setEquipeEnPlace] = useState('')
   const [disponibilites, setDisponibilites] = useState<Record<string, string[]>>({})
   const [dateDebut, setDateDebut] = useState('')
@@ -69,7 +70,7 @@ export function NouvelleAnnonceBeneficiaireForm() {
       diplome_requis: diplomeRequis,
       experience_min: experienceMin,
       niveau_dependance: niveauDependance,
-      ouverture_aide: ouvertureAide,
+      ouverture_aide: '',
       equipe_en_place: equipeEnPlace,
       disponibilites,
       date_debut: dateDebut,
@@ -205,18 +206,6 @@ export function NouvelleAnnonceBeneficiaireForm() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Ouverture des droits d&#39;aide
-                </label>
-                <input
-                  type="text"
-                  value={ouvertureAide}
-                  onChange={(e) => setOuvertureAide(e.target.value)}
-                  placeholder="Ex: APA accordee, dossier PCH en cours..."
-                  className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
                   Equipe en place
                 </label>
                 <input
@@ -277,33 +266,17 @@ export function NouvelleAnnonceBeneficiaireForm() {
         <div className="space-y-6">
           <div className="bg-white rounded-xl border p-6">
             <h3 className="font-semibold mb-4">Localisation et planning</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Ville <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  value={ville}
-                  onChange={(e) => setVille(e.target.value)}
-                  placeholder="Paris"
-                  className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Code postal
-                </label>
-                <input
-                  type="text"
-                  value={codePostal}
-                  onChange={(e) => setCodePostal(e.target.value)}
-                  placeholder="75001"
-                  maxLength={5}
-                  className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
-                />
-              </div>
+            <div className="mb-6">
+              <CityAutocomplete
+                ville={ville}
+                codePostal={codePostal}
+                onVilleChange={setVille}
+                onCodePostalChange={setCodePostal}
+                required
+              />
             </div>
+
+            <MapRadius ville={ville} codePostal={codePostal} rayonKm={5} />
 
             <div className="mb-6">
               <label className="block text-sm font-medium text-gray-700 mb-2">

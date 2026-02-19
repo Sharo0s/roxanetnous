@@ -26,10 +26,10 @@ export default async function AbonnementBeneficiaireSuccessPage() {
           </p>
           <div className="flex flex-col gap-3">
             <Link
-              href="/recherche"
+              href="/beneficiaire/annonces/nouvelle"
               className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition text-sm font-medium"
             >
-              Rechercher un auxiliaire
+              Publier votre premiere annonce
             </Link>
             <Link
               href="/beneficiaire/dashboard"
