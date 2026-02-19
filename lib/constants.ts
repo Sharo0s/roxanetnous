@@ -12,9 +12,9 @@ export const DIPLOMES = [
 ] as const
 
 export const EXPERIENCE_LEVELS = [
-  { value: 'moins_3_ans', label: 'Moins de 3 ans' },
-  { value: '3_10_ans', label: 'Entre 3 et 10 ans' },
-  { value: 'plus_10_ans', label: 'Plus de 10 ans' },
+  { value: 'moins_3_ans', label: 'Moins de 3 ans d\'experience' },
+  { value: '3_10_ans', label: 'Entre 3 et 10 ans d\'experience' },
+  { value: 'plus_10_ans', label: 'Plus de 10 ans d\'experience' },
 ] as const
 
 export const SPECIALITES = [
