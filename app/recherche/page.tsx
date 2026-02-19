@@ -262,7 +262,7 @@ export default async function RecherchePage({
                 )}
               </div>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="space-y-3">
               {matchResults.map(({ annonce, score, details }) => {
                 const profile = annonce.auxiliaires_profiles
                 const u = profile?.users
@@ -274,52 +274,70 @@ export default async function RecherchePage({
                   <Link
                     key={`match-${annonce.id}`}
                     href={`/recherche/${annonce.id}`}
-                    className="bg-white rounded-xl border-2 border-gray-200 p-5 hover:border-black transition block relative"
+                    className="bg-white rounded-xl border-2 border-gray-200 hover:border-black transition block"
                   >
-                    <div className="absolute top-3 right-3">
-                      <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold ${
-                        score >= 70 ? 'bg-black text-white' :
-                        score >= 40 ? 'bg-gray-200 text-gray-700' :
-                        'bg-gray-100 text-gray-400'
-                      }`}>
-                        {score}
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-sm font-bold text-gray-600">
-                        {u?.first_name?.[0]}{u?.last_name?.[0]}
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <p className="font-semibold text-gray-900">
-                            {u?.first_name} {u?.last_name?.[0]}.
-                          </p>
-                          <BadgesDisplay badges={badgesMap[profile?.user_id]} />
+                    <div className="flex">
+                      <div className="flex-1 min-w-0 p-5">
+                        <div className="flex items-center gap-3 mb-3">
+                          <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-sm font-bold text-gray-600 flex-shrink-0">
+                            {u?.first_name?.[0]}{u?.last_name?.[0]}
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <p className="font-semibold text-gray-900">
+                                {u?.first_name} {u?.last_name?.[0]}.
+                              </p>
+                              <BadgesDisplay badges={badgesMap[profile?.user_id]} />
+                            </div>
+                            <p className="text-xs text-gray-500">{diplomeLabel}</p>
+                          </div>
                         </div>
-                        <p className="text-xs text-gray-500">{diplomeLabel}</p>
+
+                        <div className="flex flex-wrap gap-1 mb-2">
+                          {specs.map((s: string) => (
+                            <span key={s} className="px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full text-xs">
+                              {SPECIALITES.find((sp) => sp.value === s)?.label || s}
+                            </span>
+                          ))}
+                        </div>
+
+                        <div className="flex items-center justify-between text-xs text-gray-500">
+                          <span>{annonce.ville} ({annonce.code_postal})</span>
+                          <span>{expLabel}</span>
+                        </div>
                       </div>
-                    </div>
 
-                    <div className="flex flex-wrap gap-1 mb-2">
-                      {specs.map((s: string) => (
-                        <span key={s} className="px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full text-xs">
-                          {SPECIALITES.find((sp) => sp.value === s)?.label || s}
-                        </span>
-                      ))}
-                    </div>
-
-                    <div className="flex items-center justify-between text-xs text-gray-500 mb-2">
-                      <span>{annonce.ville} ({annonce.code_postal})</span>
-                      <span>{expLabel}</span>
-                    </div>
-
-                    <div className="flex flex-wrap gap-2 text-xs text-gray-400">
-                      <span>Spec. {details.specialites}/40</span>
-                      <span>Loc. {details.localisation}/25</span>
-                      <span>Exp. {details.experience}/15</span>
-                      <span>Dipl. {details.diplome}/10</span>
-                      <span>Dispo. {details.disponibilites}/10</span>
+                      <div className="w-48 flex-shrink-0 border-l border-gray-200 p-4 flex flex-col items-center justify-center bg-gray-50 rounded-r-xl">
+                        <div className={`w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold mb-3 ${
+                          score >= 70 ? 'bg-black text-white' :
+                          score >= 40 ? 'bg-gray-300 text-gray-700' :
+                          'bg-gray-100 text-gray-400'
+                        }`}>
+                          {score}
+                        </div>
+                        <div className="w-full space-y-1 text-xs">
+                          <div className="flex justify-between text-gray-500">
+                            <span>Specialites</span>
+                            <span className="font-medium text-gray-700">{details.specialites}/40</span>
+                          </div>
+                          <div className="flex justify-between text-gray-500">
+                            <span>Localisation</span>
+                            <span className="font-medium text-gray-700">{details.localisation}/25</span>
+                          </div>
+                          <div className="flex justify-between text-gray-500">
+                            <span>Experience</span>
+                            <span className="font-medium text-gray-700">{details.experience}/15</span>
+                          </div>
+                          <div className="flex justify-between text-gray-500">
+                            <span>Diplome</span>
+                            <span className="font-medium text-gray-700">{details.diplome}/10</span>
+                          </div>
+                          <div className="flex justify-between text-gray-500">
+                            <span>Disponibilites</span>
+                            <span className="font-medium text-gray-700">{details.disponibilites}/10</span>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </Link>
                 )
