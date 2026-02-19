@@ -105,8 +105,11 @@ export function InfiniteAnnoncesGrid({ annonces, badgesMap, userId, favorisIds =
                   </span>
                 ))}
                 {(profile?.specialites?.length || 0) > 3 && (
-                  <span className="px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full text-xs">
+                  <span className="px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full text-xs cursor-default relative group">
                     +{profile.specialites.length - 3}
+                    <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block bg-black text-white text-xs rounded-lg px-3 py-2 whitespace-nowrap z-50">
+                      {(profile.specialites as string[]).slice(3).map((s: string) => SPECIALITES.find((sp) => sp.value === s)?.label || s).join(', ')}
+                    </span>
                   </span>
                 )}
               </div>
