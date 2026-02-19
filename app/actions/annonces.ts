@@ -285,6 +285,79 @@ export async function createAnnonceBeneficiaire(data: {
   redirect('/beneficiaire/annonces')
 }
 
+export async function updateAnnonceBeneficiaire(
+  annonceId: string,
+  data: {
+    titre: string
+    description: string
+    besoins_specifiques: string
+    specialites_recherchees: string[]
+    ville: string
+    code_postal: string
+    diplome_requis: string
+    experience_min: string
+    niveau_dependance: 'forte' | 'moderee' | 'peu'
+    equipe_en_place: string
+    disponibilites: Record<string, string[]>
+    date_debut: string
+    infos_complementaires: string
+    message_auxiliaires: string
+  }
+): Promise<AnnonceResult> {
+  const supabase = await createClient()
+
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Non connecte.' }
+
+  const { data: profile } = await supabase
+    .from('beneficiaires_profiles')
+    .select('id')
+    .eq('user_id', user.id)
+    .single()
+
+  if (!profile) return { error: 'Profil non trouve.' }
+
+  if (!data.titre.trim() || !data.description.trim()) {
+    return { error: 'Le titre et la description sont requis.' }
+  }
+
+  if (!data.ville.trim() || data.specialites_recherchees.length === 0) {
+    return { error: 'La ville et au moins une specialite sont requis.' }
+  }
+
+  const coords = await geocodeAddress(data.ville.trim(), data.code_postal.trim() || '')
+
+  const { error } = await supabase
+    .from('annonces_beneficiaires')
+    .update({
+      titre: data.titre.trim(),
+      description: data.description.trim(),
+      besoins_specifiques: data.besoins_specifiques.trim() || null,
+      specialites_recherchees: data.specialites_recherchees,
+      ville: data.ville.trim(),
+      code_postal: data.code_postal.trim() || null,
+      latitude: coords?.lat ?? null,
+      longitude: coords?.lng ?? null,
+      diplome_requis: data.diplome_requis || null,
+      experience_min: data.experience_min || null,
+      niveau_dependance: data.niveau_dependance,
+      equipe_en_place: data.equipe_en_place.trim(),
+      disponibilites: data.disponibilites,
+      date_debut: data.date_debut,
+      infos_complementaires: data.infos_complementaires.trim() || null,
+      message_auxiliaires: data.message_auxiliaires.trim() || null,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', annonceId)
+    .eq('beneficiaire_id', profile.id)
+
+  if (error) {
+    return { error: 'Erreur lors de la mise a jour de l\'annonce.' }
+  }
+
+  redirect('/beneficiaire/annonces')
+}
+
 export async function updateAnnonceBeneficiaireStatus(
   annonceId: string,
   status: 'publiee' | 'archivee'

@@ -99,17 +99,30 @@ export default async function MesAnnoncesBeneficiaire() {
                           </span>
                         ))}
                         {specLabels.length > 3 && (
-                          <span className="px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full text-xs">
+                          <span
+                            className="px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full text-xs cursor-default relative group"
+                          >
                             +{specLabels.length - 3}
+                            <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block bg-black text-white text-xs rounded-lg px-3 py-2 whitespace-nowrap z-50">
+                              {specLabels.slice(3).join(', ')}
+                            </span>
                           </span>
                         )}
                       </div>
                     </div>
-                    <AnnonceStatusToggle
-                      annonceId={annonce.id}
-                      currentStatus={annonce.status}
-                      type="beneficiaire"
-                    />
+                    <div className="flex items-center gap-2 flex-shrink-0 ml-4">
+                      <Link
+                        href={`/beneficiaire/annonces/${annonce.id}/modifier`}
+                        className="px-3 py-1.5 text-xs font-medium border border-gray-300 rounded-lg hover:border-black transition"
+                      >
+                        Modifier
+                      </Link>
+                      <AnnonceStatusToggle
+                        annonceId={annonce.id}
+                        currentStatus={annonce.status}
+                        type="beneficiaire"
+                      />
+                    </div>
                   </div>
                 </div>
               )
