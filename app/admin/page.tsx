@@ -95,6 +95,27 @@ export default async function AdminDashboard() {
         </div>
       </header>
 
+      <nav className="bg-white border-b">
+        <div className="max-w-6xl mx-auto px-4 flex gap-1 overflow-x-auto">
+          {[
+            { href: '/admin', label: 'Tableau de bord' },
+            { href: '/admin/utilisateurs', label: 'Utilisateurs' },
+            { href: '/admin/annonces', label: 'Annonces' },
+            { href: '/admin/signalements', label: 'Signalements' },
+            { href: '/admin/avis', label: 'Avis' },
+            { href: '/admin/historique', label: 'Historique' },
+          ].map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className="px-3 py-2.5 text-sm text-gray-600 hover:text-black whitespace-nowrap border-b-2 border-transparent hover:border-black transition-colors"
+            >
+              {item.label}
+            </Link>
+          ))}
+        </div>
+      </nav>
+
       <div className="max-w-6xl mx-auto px-4 py-8">
         <h2 className="text-2xl font-bold text-gray-900 mb-6">Tableau de bord</h2>
 
