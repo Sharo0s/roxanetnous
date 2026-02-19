@@ -72,9 +72,12 @@ export default async function RecherchePage({
     query = query.ilike('ville', `%${params.ville}%`)
   }
 
-  // Filtre par specialite
+  // Filtre par specialite(s)
   if (params.specialite) {
-    query = query.contains('auxiliaires_profiles.specialites', [params.specialite])
+    const specs = params.specialite.split(',').filter(Boolean)
+    if (specs.length > 0) {
+      query = query.overlaps('auxiliaires_profiles.specialites', specs)
+    }
   }
 
   // Filtre par experience

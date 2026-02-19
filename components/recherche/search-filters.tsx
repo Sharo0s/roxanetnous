@@ -16,8 +16,10 @@ type Props = {
 export function SearchFilters({ currentVille, currentSpecialite, currentExperience }: Props) {
   const router = useRouter()
   const [ville, setVille] = useState(currentVille)
-  const [specialite, setSpecialite] = useState(currentSpecialite)
+  const [specialites, setSpecialites] = useState<string[]>(currentSpecialite ? currentSpecialite.split(',') : [])
   const [experience, setExperience] = useState(currentExperience)
+  const [specOpen, setSpecOpen] = useState(false)
+  const specRef = useRef<HTMLDivElement>(null)
   const [suggestions, setSuggestions] = useState<CommuneResult[]>([])
   const [open, setOpen] = useState(false)
   const [activeIndex, setActiveIndex] = useState(-1)
@@ -46,6 +48,9 @@ export function SearchFilters({ currentVille, currentSpecialite, currentExperien
       if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
         setOpen(false)
       }
+      if (specRef.current && !specRef.current.contains(e.target as Node)) {
+        setSpecOpen(false)
+      }
     }
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
@@ -57,17 +62,23 @@ export function SearchFilters({ currentVille, currentSpecialite, currentExperien
     setSuggestions([])
   }, [])
 
+  function toggleSpecialite(value: string) {
+    setSpecialites((prev) =>
+      prev.includes(value) ? prev.filter((s) => s !== value) : [...prev, value]
+    )
+  }
+
   function handleSearch() {
     const params = new URLSearchParams()
     if (ville.trim()) params.set('ville', ville.trim())
-    if (specialite) params.set('specialite', specialite)
+    if (specialites.length > 0) params.set('specialite', specialites.join(','))
     if (experience) params.set('experience', experience)
     router.push(`/recherche?${params.toString()}`)
   }
 
   function handleReset() {
     setVille('')
-    setSpecialite('')
+    setSpecialites([])
     setExperience('')
     router.push('/recherche')
   }
@@ -129,18 +140,42 @@ export function SearchFilters({ currentVille, currentSpecialite, currentExperien
             </ul>
           )}
         </div>
-        <div>
-          <label className="block text-xs font-medium text-gray-500 mb-1">Specialite</label>
-          <select
-            value={specialite}
-            onChange={(e) => setSpecialite(e.target.value)}
-            className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
+        <div ref={specRef} className="relative">
+          <label className="block text-xs font-medium text-gray-500 mb-1">Specialites</label>
+          <button
+            type="button"
+            onClick={() => setSpecOpen(!specOpen)}
+            className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-left focus:outline-none focus:ring-2 focus:ring-black flex items-center justify-between"
           >
-            <option value="">Toutes</option>
-            {SPECIALITES.map((s) => (
-              <option key={s.value} value={s.value}>{s.label}</option>
-            ))}
-          </select>
+            <span className={specialites.length === 0 ? 'text-gray-400' : 'text-gray-900 truncate'}>
+              {specialites.length === 0
+                ? 'Toutes'
+                : specialites.length === 1
+                  ? SPECIALITES.find((s) => s.value === specialites[0])?.label || specialites[0]
+                  : `${specialites.length} selectionnees`}
+            </span>
+            <svg className={`w-4 h-4 text-gray-400 transition ${specOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+          {specOpen && (
+            <div className="absolute top-full left-0 right-0 z-50 mt-1 rounded-lg border border-gray-300 bg-white shadow-lg max-h-60 overflow-auto">
+              {SPECIALITES.map((s) => (
+                <label
+                  key={s.value}
+                  className="flex items-center gap-2 px-3 py-2 text-sm cursor-pointer hover:bg-gray-50"
+                >
+                  <input
+                    type="checkbox"
+                    checked={specialites.includes(s.value)}
+                    onChange={() => toggleSpecialite(s.value)}
+                    className="rounded border-gray-300 accent-black"
+                  />
+                  {s.label}
+                </label>
+              ))}
+            </div>
+          )}
         </div>
         <div>
           <label className="block text-xs font-medium text-gray-500 mb-1">Experience</label>
