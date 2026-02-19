@@ -76,6 +76,63 @@ export async function getOrCreateConversation(
   return { conversationId: conversation.id }
 }
 
+export async function getOrCreateConversationAsAuxiliaire(
+  beneficiaireProfileId: string
+): Promise<MessageResult> {
+  const supabase = await createClient()
+
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Non connecte.' }
+
+  const { data: userData } = await supabase
+    .from('users')
+    .select('role')
+    .eq('id', user.id)
+    .single()
+
+  if (!userData || userData.role !== 'auxiliaire') {
+    return { error: 'Seuls les auxiliaires peuvent utiliser cette fonction.' }
+  }
+
+  const { data: auxProfile } = await supabase
+    .from('auxiliaires_profiles')
+    .select('id')
+    .eq('user_id', user.id)
+    .single()
+
+  if (!auxProfile) {
+    return { error: 'Profil auxiliaire introuvable.' }
+  }
+
+  // Verifier si une conversation existe deja
+  const { data: existing } = await supabase
+    .from('conversations')
+    .select('id')
+    .eq('auxiliaire_id', auxProfile.id)
+    .eq('beneficiaire_id', beneficiaireProfileId)
+    .single()
+
+  if (existing) {
+    return { conversationId: existing.id }
+  }
+
+  // Creer la conversation
+  const { data: conversation, error } = await supabase
+    .from('conversations')
+    .insert({
+      auxiliaire_id: auxProfile.id,
+      beneficiaire_id: beneficiaireProfileId,
+    })
+    .select('id')
+    .single()
+
+  if (error || !conversation) {
+    return { error: 'Erreur lors de la creation de la conversation.' }
+  }
+
+  return { conversationId: conversation.id }
+}
+
 export async function sendMessage(
   conversationId: string,
   content: string

@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { SPECIALITES, DIPLOMES, EXPERIENCE_LEVELS } from '@/lib/constants'
 import { AuxiliaireHeader } from '@/components/layout/auxiliaire-header'
 import { getUnreadCount } from '@/lib/unread-count'
+import { ContactBeneficiaireButton } from '@/components/messages/contact-beneficiaire-button'
 
 type SearchParams = {
   ville?: string
@@ -108,7 +109,7 @@ export default async function DemandesBeneficiairesPage({
                 : null
 
               return (
-                <div key={annonce.id} className="bg-white rounded-xl border p-5">
+                <div key={annonce.id} className="bg-white rounded-xl border p-5 flex flex-col">
                   <h3 className="font-semibold text-gray-900 mb-1">{annonce.titre}</h3>
                   <p className="text-sm text-gray-500 mb-2">
                     {annonce.ville} {annonce.code_postal && `(${annonce.code_postal})`} — Debut: {new Date(annonce.date_debut).toLocaleDateString('fr-FR')}
@@ -122,17 +123,24 @@ export default async function DemandesBeneficiairesPage({
                       </span>
                     ))}
                     {specLabels.length > 3 && (
-                      <span className="px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full text-xs">
+                      <span className="px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full text-xs cursor-default relative group">
                         +{specLabels.length - 3}
+                        <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block bg-black text-white text-xs rounded-lg px-3 py-2 whitespace-nowrap z-50">
+                          {specLabels.slice(3).join(', ')}
+                        </span>
                       </span>
                     )}
                   </div>
 
-                  <div className="flex items-center gap-3 text-xs text-gray-400">
+                  <div className="flex items-center gap-3 text-xs text-gray-400 mb-4">
                     {diplomeLabel && <span>{diplomeLabel}</span>}
                     {expLabel && <span>{expLabel}</span>}
                     <span className="capitalize">Dependance {annonce.niveau_dependance}</span>
                   </div>
+
+                  {userData?.role === 'auxiliaire' && (
+                    <ContactBeneficiaireButton beneficiaireProfileId={annonce.beneficiaire_id} />
+                  )}
                 </div>
               )
             })}
