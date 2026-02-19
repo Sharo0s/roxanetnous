@@ -77,9 +77,9 @@ export default async function MesAnnoncesBeneficiaire() {
               return (
                 <div key={annonce.id} className="bg-white rounded-xl border p-5">
                   <div className="flex items-start justify-between">
-                    <div className="flex-1">
+                    <div className="flex-1 min-w-0 overflow-hidden">
                       <div className="flex items-center gap-3 mb-1">
-                        <h3 className="font-semibold text-gray-900">{annonce.titre}</h3>
+                        <h3 className="font-semibold text-gray-900 truncate">{annonce.titre}</h3>
                         <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
                           annonce.status === 'publiee'
                             ? 'bg-black text-white'
