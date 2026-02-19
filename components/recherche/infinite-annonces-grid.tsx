@@ -69,7 +69,7 @@ export function InfiniteAnnoncesGrid({ annonces, badgesMap, userId, favorisIds =
           return (
             <div
               key={annonce.id}
-              className="bg-white rounded-xl border p-5 hover:border-black transition relative"
+              className="bg-white rounded-xl border p-5 hover:border-black transition relative flex flex-col"
             >
               {userId && (
                 <div className="absolute top-3 right-3">
@@ -129,7 +129,7 @@ export function InfiniteAnnoncesGrid({ annonces, badgesMap, userId, favorisIds =
 
               <Link
                 href={`/recherche/${annonce.id}`}
-                className="block w-full text-center px-4 py-2 border border-black text-black rounded-lg hover:bg-black hover:text-white transition text-sm font-medium"
+                className="mt-auto block w-full text-center px-4 py-2 border border-black text-black rounded-lg hover:bg-black hover:text-white transition text-sm font-medium"
               >
                 Voir le profil
               </Link>

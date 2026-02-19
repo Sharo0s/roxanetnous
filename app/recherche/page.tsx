@@ -5,6 +5,7 @@ import { SearchFilters } from '@/components/recherche/search-filters'
 import { InfiniteAnnoncesGrid } from '@/components/recherche/infinite-annonces-grid'
 import { getBadges } from '@/lib/badges'
 import { BadgesDisplay } from '@/components/badges-display'
+import { FavoriButton } from '@/components/recherche/favori-button'
 import { AuxiliaireHeader } from '@/components/layout/auxiliaire-header'
 import { BeneficiaireHeader } from '@/components/layout/beneficiaire-header'
 import { getUnreadCount } from '@/lib/unread-count'
@@ -272,13 +273,21 @@ export default async function RecherchePage({
                 const specs = (profile?.specialites as string[] || []).slice(0, 3)
 
                 return (
-                  <Link
+                  <div
                     key={`match-${annonce.id}`}
-                    href={`/recherche/${annonce.id}`}
-                    className="bg-white rounded-xl border-2 border-gray-200 hover:border-black transition block"
+                    className="bg-white rounded-xl border-2 border-gray-200 hover:border-black transition relative"
                   >
+                    {user && (
+                      <div className="absolute top-3 right-3 z-10">
+                        <FavoriButton
+                          annonceId={annonce.id}
+                          type="auxiliaire"
+                          initialIsFavori={favorisIds.includes(annonce.id)}
+                        />
+                      </div>
+                    )}
                     <div className="flex">
-                      <div className="flex-1 min-w-0 p-5">
+                      <div className="flex-1 min-w-0 p-5 flex flex-col">
                         <div className="flex items-center gap-3 mb-3">
                           <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-sm font-bold text-gray-600 flex-shrink-0">
                             {u?.first_name?.[0]}{u?.last_name?.[0]}
@@ -304,10 +313,17 @@ export default async function RecherchePage({
                           ))}
                         </div>
 
-                        <div className="flex items-center justify-between text-xs text-gray-500">
+                        <div className="flex items-center justify-between text-xs text-gray-500 mb-3">
                           <span>{annonce.ville} ({annonce.code_postal})</span>
                           <span>{expLabel}</span>
                         </div>
+
+                        <Link
+                          href={`/recherche/${annonce.id}`}
+                          className="mt-auto block w-full text-center px-4 py-2 border border-black text-black rounded-lg hover:bg-black hover:text-white transition text-sm font-medium"
+                        >
+                          Voir le profil
+                        </Link>
                       </div>
 
                       <div className="w-48 flex-shrink-0 border-l border-gray-200 p-4 flex flex-col items-center justify-center bg-gray-50 rounded-r-xl">
@@ -349,7 +365,7 @@ export default async function RecherchePage({
                         </div>
                       </div>
                     </div>
-                  </Link>
+                  </div>
                 )
               })}
             </div>
