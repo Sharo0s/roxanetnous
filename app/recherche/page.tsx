@@ -348,6 +348,12 @@ export default async function RecherchePage({
           </div>
         )}
 
+        {matchResults.length > 0 && (
+          <div className="border-t border-gray-300 mt-8 mb-6 pt-6">
+            <h3 className="text-lg font-semibold text-gray-900">Tous les auxiliaires</h3>
+          </div>
+        )}
+
         {!paginatedAnnonces || paginatedAnnonces.length === 0 ? (
           <div className="bg-white rounded-xl border p-8 text-center mt-6">
             <p className="text-gray-500">Aucun resultat pour votre recherche.</p>
