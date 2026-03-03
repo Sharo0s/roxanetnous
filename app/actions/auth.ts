@@ -91,6 +91,15 @@ export async function signup(formData: FormData): Promise<AuthResult> {
   return { success: true }
 }
 
+export async function checkEmailExists(email: string): Promise<boolean> {
+  const supabase = await createClient({ serviceRole: true })
+  const { count } = await supabase
+    .from('users')
+    .select('id', { count: 'exact', head: true })
+    .eq('email', email)
+  return (count ?? 0) > 0
+}
+
 export async function login(formData: FormData): Promise<AuthResult> {
   const supabase = await createClient()
 

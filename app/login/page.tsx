@@ -1,18 +1,44 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { login } from '@/app/actions/auth'
+import { checkEmailExists } from '@/app/actions/auth'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import Link from 'next/link'
 
 export default function LoginPage() {
+  const router = useRouter()
+  const [step, setStep] = useState<'email' | 'password'>('email')
+  const [email, setEmail] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
 
-  async function handleSubmit(formData: FormData) {
+  async function handleEmailSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    if (!email.trim()) return
     setError(null)
     setLoading(true)
+
+    try {
+      const exists = await checkEmailExists(email.trim())
+      if (exists) {
+        setStep('password')
+      } else {
+        router.push(`/register?email=${encodeURIComponent(email.trim())}`)
+      }
+    } catch {
+      setError('Erreur lors de la verification. Reessayez.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  async function handleLoginSubmit(formData: FormData) {
+    setError(null)
+    setLoading(true)
+    formData.set('email', email)
     const result = await login(formData)
     if (result?.error) {
       setError(result.error)
@@ -27,49 +53,69 @@ export default function LoginPage() {
           <Link href="/" className="text-3xl font-bold text-black">
             roxanetnous
           </Link>
-          <p className="mt-2 text-gray-600">Connectez-vous a votre compte</p>
         </div>
 
-        <form action={handleSubmit} className="bg-white p-8 rounded-xl shadow-sm border space-y-5">
-          {error && (
-            <div className="p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
-              {error}
+        {step === 'email' ? (
+          <form onSubmit={handleEmailSubmit} className="bg-white p-8 rounded-xl shadow-sm border space-y-5">
+            {error && (
+              <div className="p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
+                {error}
+              </div>
+            )}
+
+            <Input
+              name="email"
+              type="email"
+              label="Adresse email"
+              placeholder="vous@exemple.com"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading ? 'Verification...' : 'Continuer'}
+            </Button>
+          </form>
+        ) : (
+          <form action={handleLoginSubmit} className="bg-white p-8 rounded-xl shadow-sm border space-y-5">
+            {error && (
+              <div className="p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
+                {error}
+              </div>
+            )}
+
+            <div className="text-sm text-black">
+              <span className="text-gray-500">Compte :</span>{' '}
+              <button
+                type="button"
+                onClick={() => { setStep('email'); setError(null) }}
+                className="font-medium underline"
+              >
+                {email}
+              </button>
             </div>
-          )}
 
-          <Input
-            name="email"
-            type="email"
-            label="Adresse email"
-            placeholder="vous@exemple.com"
-            required
-          />
+            <Input
+              name="password"
+              type="password"
+              label="Mot de passe"
+              placeholder="Votre mot de passe"
+              required
+              autoFocus
+            />
 
-          <Input
-            name="password"
-            type="password"
-            label="Mot de passe"
-            placeholder="Votre mot de passe"
-            required
-          />
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading ? 'Connexion...' : 'Se connecter'}
+            </Button>
 
-          <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? 'Connexion...' : 'Se connecter'}
-          </Button>
-
-          <div className="text-center">
-            <Link href="/forgot-password" className="text-sm text-gray-500 hover:text-black">
-              Mot de passe oublie ?
-            </Link>
-          </div>
-        </form>
-
-        <p className="text-center mt-6 text-sm text-gray-600">
-          Pas encore de compte ?{' '}
-          <Link href="/register" className="text-black font-medium hover:underline">
-            Creer un compte
-          </Link>
-        </p>
+            <div className="text-center">
+              <Link href="/forgot-password" className="text-sm text-gray-500 hover:text-black">
+                Mot de passe oublie ?
+              </Link>
+            </div>
+          </form>
+        )}
       </div>
     </main>
   )

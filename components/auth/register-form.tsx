@@ -1,38 +1,90 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { signup } from '@/app/actions/auth'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import Link from 'next/link'
 
+type Step = 'role' | 'name' | 'email' | 'password'
+
+const STEPS: Step[] = ['role', 'name', 'email', 'password']
+
 export function RegisterForm() {
   const searchParams = useSearchParams()
   const initialRole = searchParams.get('role')
+  const initialEmail = searchParams.get('email') || ''
+
+  const [step, setStep] = useState<Step>(
+    initialRole === 'auxiliaire' || initialRole === 'beneficiaire' ? 'name' : 'role'
+  )
   const [role, setRole] = useState<'auxiliaire' | 'beneficiaire' | null>(
     initialRole === 'auxiliaire' || initialRole === 'beneficiaire' ? initialRole : null
   )
+  const [firstName, setFirstName] = useState('')
+  const [lastName, setLastName] = useState('')
+  const [email, setEmail] = useState(initialEmail)
+  const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [emailSent, setEmailSent] = useState(false)
-  const [registeredEmail, setRegisteredEmail] = useState('')
 
-  async function handleSubmit(formData: FormData) {
-    if (!role) return
-    formData.set('role', role)
+  const bottomRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    // Scroll vers le bas quand on passe à l'étape suivante
+    setTimeout(() => {
+      bottomRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' })
+    }, 100)
+  }, [step])
+
+  function selectRole(r: 'auxiliaire' | 'beneficiaire') {
+    setRole(r)
+    setStep('name')
+  }
+
+  function submitName(e: React.FormEvent) {
+    e.preventDefault()
+    if (!firstName.trim() || !lastName.trim()) return
+    setStep('email')
+  }
+
+  function submitEmail(e: React.FormEvent) {
+    e.preventDefault()
+    if (!email.trim()) return
+    setStep('password')
+  }
+
+  async function submitPassword(e: React.FormEvent) {
+    e.preventDefault()
+    if (!password || password.length < 8) {
+      setError('Le mot de passe doit contenir au moins 8 caracteres.')
+      return
+    }
     setError(null)
     setLoading(true)
+
+    const formData = new FormData()
+    formData.set('email', email.trim())
+    formData.set('password', password)
+    formData.set('firstName', firstName.trim())
+    formData.set('lastName', lastName.trim())
+    formData.set('role', role!)
+
     const result = await signup(formData)
     if (result?.error) {
       setError(result.error)
       setLoading(false)
     } else if (result?.success) {
-      setRegisteredEmail(formData.get('email') as string)
       setEmailSent(true)
       setLoading(false)
     }
   }
+
+  const stepIndex = STEPS.indexOf(step)
+  const isVisible = (s: Step) => STEPS.indexOf(s) <= stepIndex
+  const isCurrent = (s: Step) => s === step
 
   if (emailSent) {
     return (
@@ -48,7 +100,7 @@ export function RegisterForm() {
             <p className="text-gray-600 mb-2">
               Un email de confirmation a ete envoye a :
             </p>
-            <p className="font-medium text-black mb-6">{registeredEmail}</p>
+            <p className="font-medium text-black mb-6">{email}</p>
             <p className="text-sm text-gray-500 mb-6">
               Cliquez sur le lien dans le mail pour activer votre compte, puis connectez-vous.
             </p>
@@ -64,50 +116,6 @@ export function RegisterForm() {
     )
   }
 
-  if (!role) {
-    return (
-      <main className="min-h-screen flex items-center justify-center p-4 bg-gray-50">
-        <div className="w-full max-w-lg">
-          <div className="text-center mb-8">
-            <Link href="/" className="text-3xl font-bold text-black">
-              roxanetnous
-            </Link>
-            <p className="mt-2 text-gray-600">Creez votre compte</p>
-          </div>
-
-          <div className="space-y-4">
-            <button
-              onClick={() => setRole('auxiliaire')}
-              className="w-full p-6 bg-white rounded-xl shadow-sm border-2 border-transparent hover:border-black transition text-left"
-            >
-              <h3 className="text-lg font-semibold text-gray-900">Je suis auxiliaire de vie</h3>
-              <p className="mt-1 text-sm text-gray-600">
-                Je souhaite proposer mes services et trouver des missions
-              </p>
-            </button>
-
-            <button
-              onClick={() => setRole('beneficiaire')}
-              className="w-full p-6 bg-white rounded-xl shadow-sm border-2 border-transparent hover:border-black transition text-left"
-            >
-              <h3 className="text-lg font-semibold text-gray-900">Je recherche un auxiliaire</h3>
-              <p className="mt-1 text-sm text-gray-600">
-                Je cherche un auxiliaire de vie pour moi ou un proche
-              </p>
-            </button>
-          </div>
-
-          <p className="text-center mt-6 text-sm text-gray-600">
-            Deja un compte ?{' '}
-            <Link href="/login" className="text-black font-medium hover:underline">
-              Se connecter
-            </Link>
-          </p>
-        </div>
-      </main>
-    )
-  }
-
   return (
     <main className="min-h-screen flex items-center justify-center p-4 bg-gray-50">
       <div className="w-full max-w-md">
@@ -115,69 +123,126 @@ export function RegisterForm() {
           <Link href="/" className="text-3xl font-bold text-black">
             roxanetnous
           </Link>
-          <p className="mt-2 text-gray-600">
-            Inscription {role === 'auxiliaire' ? 'auxiliaire de vie' : 'beneficiaire'}
-          </p>
+          <p className="mt-2 text-gray-600">Creez votre compte</p>
         </div>
 
-        <form action={handleSubmit} className="bg-white p-8 rounded-xl shadow-sm border space-y-5">
+        <div className="bg-white p-8 rounded-xl shadow-sm border space-y-6">
           {error && (
-            <div className="p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
+            <div className="p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm animate-fade-in">
               {error}
             </div>
           )}
 
-          <div className="grid grid-cols-2 gap-4">
-            <Input
-              name="firstName"
-              label="Prenom"
-              placeholder="Prenom"
-              required
-            />
-            <Input
-              name="lastName"
-              label="Nom"
-              placeholder="Nom"
-              required
-            />
+          {/* Step 1 : Role */}
+          <div className="animate-fade-in">
+            <label className="block text-sm font-medium text-gray-700 mb-3">
+              Vous etes
+            </label>
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={() => selectRole('auxiliaire')}
+                className={`p-4 rounded-lg border-2 text-left transition ${
+                  role === 'auxiliaire'
+                    ? 'border-black bg-black text-white'
+                    : 'border-gray-200 hover:border-gray-400'
+                }`}
+              >
+                <p className="font-semibold text-sm">Vos competences meritent que vous soyez trouve(e)</p>
+                <p className={`text-xs mt-1 ${role === 'auxiliaire' ? 'text-gray-300' : 'text-gray-500'}`}>
+                  Au bon moment, au bon endroit
+                </p>
+              </button>
+              <button
+                type="button"
+                onClick={() => selectRole('beneficiaire')}
+                className={`p-4 rounded-lg border-2 text-left transition ${
+                  role === 'beneficiaire'
+                    ? 'border-black bg-black text-white'
+                    : 'border-gray-200 hover:border-gray-400'
+                }`}
+              >
+                <p className="font-semibold text-sm">Choisissez votre accompagnant(e)</p>
+                <p className={`text-xs mt-1 ${role === 'beneficiaire' ? 'text-gray-300' : 'text-gray-500'}`}>
+                  On s'occupe de tout
+                </p>
+              </button>
+            </div>
           </div>
 
-          <Input
-            name="email"
-            type="email"
-            label="Adresse email"
-            placeholder="vous@exemple.com"
-            required
-          />
+          {/* Step 2 : Prenom / Nom */}
+          {isVisible('name') && (
+            <form onSubmit={submitName} className="space-y-4 animate-fade-in">
+              <div className="grid grid-cols-2 gap-4">
+                <Input
+                  name="firstName"
+                  label="Prenom"
+                  placeholder="Prenom"
+                  required
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  autoFocus={isCurrent('name')}
+                />
+                <Input
+                  name="lastName"
+                  label="Nom"
+                  placeholder="Nom"
+                  required
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                />
+              </div>
+              {isCurrent('name') && (
+                <Button type="submit" className="w-full">
+                  Continuer
+                </Button>
+              )}
+            </form>
+          )}
 
-          <Input
-            name="password"
-            type="password"
-            label="Mot de passe"
-            placeholder="8 caracteres minimum"
-            minLength={8}
-            required
-          />
+          {/* Step 3 : Email */}
+          {isVisible('email') && (
+            <form onSubmit={submitEmail} className="space-y-4 animate-fade-in">
+              <Input
+                name="email"
+                type="email"
+                label="Adresse email"
+                placeholder="vous@exemple.com"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                autoFocus={isCurrent('email')}
+              />
+              {isCurrent('email') && (
+                <Button type="submit" className="w-full">
+                  Continuer
+                </Button>
+              )}
+            </form>
+          )}
 
-          <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? 'Creation du compte...' : 'Creer mon compte'}
-          </Button>
+          {/* Step 4 : Mot de passe */}
+          {isVisible('password') && (
+            <form onSubmit={submitPassword} className="space-y-4 animate-fade-in">
+              <Input
+                name="password"
+                type="password"
+                label="Mot de passe"
+                placeholder="8 caracteres minimum"
+                minLength={8}
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                autoFocus={isCurrent('password')}
+              />
+              <Button type="submit" className="w-full" disabled={loading}>
+                {loading ? 'Creation du compte...' : 'Creer mon compte'}
+              </Button>
+            </form>
+          )}
 
-          <button
-            type="button"
-            onClick={() => { setRole(null); setError(null) }}
-            className="w-full text-sm text-gray-500 hover:text-gray-700"
-          >
-            Changer de role
-          </button>
-        </form>
-
-        <p className="text-center mt-6 text-sm text-gray-600">
-          Deja un compte ?{' '}
-          <Link href="/login" className="text-black font-medium hover:underline">
-            Se connecter
-          </Link>
-        </p>
+          <div ref={bottomRef} />
+        </div>
       </div>
     </main>
   )
