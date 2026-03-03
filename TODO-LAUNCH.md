@@ -22,6 +22,10 @@
 - [ ] Generer une vraie ENCRYPTION_KEY aleatoire (64 hex)
 - [ ] S'assurer que toutes les variables d'environnement Vercel sont a jour
 
+## Nettoyage BDD
+- [ ] Supprimer tous les avis
+- [ ] Supprimer tous les comptes utilisateurs sauf l'admin
+
 ## Contenu
 - [ ] Relire et personnaliser les emails dans lib/emails.ts (accents, ton, branding)
 - [ ] Verifier les textes de l'interface (CGU, mentions legales, etc.)
