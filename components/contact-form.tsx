@@ -34,7 +34,7 @@ export function ContactForm() {
         <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg p-3">{error}</p>
       )}
       <div>
-        <label htmlFor="contact-name" className="block text-sm font-medium text-gray-700 mb-1">Nom</label>
+        <label htmlFor="contact-name" className="block text-sm font-medium text-black mb-1">Nom</label>
         <input
           id="contact-name"
           name="name"
@@ -45,7 +45,7 @@ export function ContactForm() {
         />
       </div>
       <div>
-        <label htmlFor="contact-email" className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+        <label htmlFor="contact-email" className="block text-sm font-medium text-black mb-1">Email</label>
         <input
           id="contact-email"
           name="email"
@@ -56,7 +56,7 @@ export function ContactForm() {
         />
       </div>
       <div>
-        <label htmlFor="contact-message" className="block text-sm font-medium text-gray-700 mb-1">Message</label>
+        <label htmlFor="contact-message" className="block text-sm font-medium text-black mb-1">Message</label>
         <textarea
           id="contact-message"
           name="message"
@@ -70,7 +70,8 @@ export function ContactForm() {
       <button
         type="submit"
         disabled={status === 'loading'}
-        className="w-full px-4 py-2 bg-black text-white rounded-lg text-sm font-medium hover:bg-gray-800 transition disabled:opacity-50"
+        className="w-full px-4 py-2 rounded-lg text-sm font-medium text-black btn-hover disabled:opacity-50"
+        style={{ backgroundColor: '#FFB06E' }}
       >
         {status === 'loading' ? 'Envoi en cours...' : 'Envoyer'}
       </button>

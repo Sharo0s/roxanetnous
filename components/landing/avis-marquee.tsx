@@ -13,7 +13,8 @@ function Stars({ count }: { count: number }) {
       {Array.from({ length: 5 }).map((_, i) => (
         <svg
           key={i}
-          className={`w-4 h-4 ${i < count ? 'text-black' : 'text-gray-200'}`}
+          className="w-4 h-4"
+          style={{ color: i < count ? '#FFB06E' : 'white' }}
           fill="currentColor"
           viewBox="0 0 20 20"
         >
@@ -29,17 +30,18 @@ function AvisRow({ avis, reverse }: { avis: Avis[]; reverse?: boolean }) {
 
   return (
     <div className="overflow-hidden relative">
-      <div className="absolute left-0 top-0 bottom-0 w-16 bg-gradient-to-r from-gray-50 to-transparent z-10" />
-      <div className="absolute right-0 top-0 bottom-0 w-16 bg-gradient-to-l from-gray-50 to-transparent z-10" />
+      <div className="absolute left-0 top-0 bottom-0 w-16 bg-gradient-to-r from-white to-transparent z-10" />
+      <div className="absolute right-0 top-0 bottom-0 w-16 bg-gradient-to-l from-white to-transparent z-10" />
       <div className={`flex gap-4 ${reverse ? 'animate-marquee-reverse' : 'animate-marquee'}`}>
         {items.map((a, i) => (
           <div
             key={i}
-            className="flex-shrink-0 w-80 bg-white border rounded-xl p-5"
+            className="flex-shrink-0 w-80 rounded-xl p-5"
+            style={{ backgroundColor: '#F5E1C8', border: '1px solid #FFB06E' }}
           >
             <Stars count={a.note} />
-            <p className="text-sm text-gray-700 mt-3 line-clamp-3">{a.commentaire}</p>
-            <p className="text-xs text-gray-500 mt-3 font-medium">
+            <p className="text-sm text-black mt-3 line-clamp-3">{a.commentaire}</p>
+            <p className="text-xs text-black/50 mt-3 font-medium">
               {a.auteur_prenom} {a.auteur_nom[0]}.
             </p>
           </div>

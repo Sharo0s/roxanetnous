@@ -17,8 +17,10 @@ const PUBLIC_PATHS = new Set([
 function isPublicPath(pathname: string): boolean {
   return (
     PUBLIC_PATHS.has(pathname) ||
+    pathname === '/recherche' ||
     pathname.startsWith('/auth/') ||
-    pathname.startsWith('/api/')
+    pathname.startsWith('/api/') ||
+    pathname.startsWith('/landing-')
   )
 }
 
