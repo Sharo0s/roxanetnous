@@ -61,15 +61,17 @@ export async function POST(request: NextRequest) {
 
       const subscriptionResponse = await stripe.subscriptions.retrieve(session.subscription as string)
       const period = getSubscriptionPeriod(subscriptionResponse)
+      const isPlanning = session.metadata?.type === 'planning'
+      const table = isPlanning ? 'planning_subscriptions' : 'subscriptions'
 
-      await supabase.from('subscriptions').upsert(
+      await supabase.from(table).upsert(
         {
           user_id: userId,
           stripe_customer_id: session.customer as string,
           stripe_subscription_id: subscriptionResponse.id,
           stripe_price_id: subscriptionResponse.items.data[0]?.price.id || null,
           status: 'active',
-          plan_type: 'mensuel',
+          plan_type: session.metadata?.plan || 'mensuel',
           current_period_start: period.currentPeriodStart,
           current_period_end: period.currentPeriodEnd,
           first_subscription_date: new Date().toISOString(),
@@ -97,13 +99,24 @@ export async function POST(request: NextRequest) {
     case 'customer.subscription.updated': {
       const subscription = event.data.object as Stripe.Subscription
 
+      // Chercher dans subscriptions d'abord, puis planning_subscriptions
       const { data: existing } = await supabase
         .from('subscriptions')
         .select('user_id')
         .eq('stripe_subscription_id', subscription.id)
         .single()
 
-      if (!existing) break
+      let targetTable = 'subscriptions'
+      if (!existing) {
+        const { data: planningExisting } = await supabase
+          .from('planning_subscriptions')
+          .select('user_id')
+          .eq('stripe_subscription_id', subscription.id)
+          .single()
+
+        if (!planningExisting) break
+        targetTable = 'planning_subscriptions'
+      }
 
       const period = getSubscriptionPeriod(subscription)
       const updateData: Record<string, unknown> = {
@@ -121,7 +134,7 @@ export async function POST(request: NextRequest) {
       }
 
       await supabase
-        .from('subscriptions')
+        .from(targetTable)
         .update(updateData)
         .eq('stripe_subscription_id', subscription.id)
 
@@ -131,16 +144,29 @@ export async function POST(request: NextRequest) {
     case 'customer.subscription.deleted': {
       const subscription = event.data.object as Stripe.Subscription
 
+      // Chercher dans subscriptions d'abord, puis planning_subscriptions
       const { data: existing } = await supabase
         .from('subscriptions')
         .select('user_id')
         .eq('stripe_subscription_id', subscription.id)
         .single()
 
-      if (!existing) break
+      let targetTable = 'subscriptions'
+      let deletedUserId: string | null = existing?.user_id || null
+      if (!existing) {
+        const { data: planningExisting } = await supabase
+          .from('planning_subscriptions')
+          .select('user_id')
+          .eq('stripe_subscription_id', subscription.id)
+          .single()
+
+        if (!planningExisting) break
+        targetTable = 'planning_subscriptions'
+        deletedUserId = planningExisting.user_id
+      }
 
       await supabase
-        .from('subscriptions')
+        .from(targetTable)
         .update({
           status: 'cancelled',
           cancelled_at: new Date().toISOString(),
@@ -149,18 +175,20 @@ export async function POST(request: NextRequest) {
         .eq('stripe_subscription_id', subscription.id)
 
       // Send cancellation email
-      const { data: userData } = await supabase
-        .from('users')
-        .select('email, first_name')
-        .eq('id', existing.user_id)
-        .single()
+      if (deletedUserId) {
+        const { data: userData } = await supabase
+          .from('users')
+          .select('email, first_name')
+          .eq('id', deletedUserId)
+          .single()
 
-      if (userData) {
-        await sendSubscriptionCancelEmail({
-          email: userData.email,
-          firstName: userData.first_name || '',
-          userId: existing.user_id,
-        })
+        if (userData) {
+          await sendSubscriptionCancelEmail({
+            email: userData.email,
+            firstName: userData.first_name || '',
+            userId: deletedUserId,
+          })
+        }
       }
       break
     }
@@ -171,13 +199,24 @@ export async function POST(request: NextRequest) {
       const subscriptionId = (invoice.parent as any)?.subscription_details?.subscription
       if (!subscriptionId) break
 
-      await supabase
+      const subId = typeof subscriptionId === 'string' ? subscriptionId : subscriptionId.id
+
+      // Essayer subscriptions d'abord
+      const { data: subExists } = await supabase
         .from('subscriptions')
+        .select('id')
+        .eq('stripe_subscription_id', subId)
+        .single()
+
+      const failTable = subExists ? 'subscriptions' : 'planning_subscriptions'
+
+      await supabase
+        .from(failTable)
         .update({
           status: 'past_due',
           updated_at: new Date().toISOString(),
         })
-        .eq('stripe_subscription_id', typeof subscriptionId === 'string' ? subscriptionId : subscriptionId.id)
+        .eq('stripe_subscription_id', subId)
 
       break
     }

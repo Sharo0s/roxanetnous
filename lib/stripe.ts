@@ -34,6 +34,16 @@ export function getTrialDays(plan: PlanType): number | undefined {
   return undefined
 }
 
+export type PlanningPlanType = 'mensuel' | 'annuel'
+
+export function getPlanningPriceId(plan: PlanningPlanType): string {
+  const prices: Record<string, string> = {
+    mensuel: process.env.STRIPE_PRICE_PLANNING_MENSUEL!,
+    annuel: process.env.STRIPE_PRICE_PLANNING_ANNUEL!,
+  }
+  return prices[plan]
+}
+
 export function isLaunchOffer(): boolean {
   const launchEnd = process.env.LAUNCH_OFFER_END
   if (!launchEnd) return false

@@ -29,6 +29,32 @@ export default async function AuxiliaireDashboard() {
   const unreadCount = await getUnreadCount(user.id)
   const subscribed = await hasActiveSubscription(user.id)
 
+  // Verifier si l'auxiliaire est dans une equipe planning
+  const { data: planningTeam } = await supabase
+    .from('beneficiaire_auxiliaires')
+    .select('id')
+    .eq('auxiliaire_user_id', user.id)
+    .limit(1)
+  const hasPlanning = (planningTeam?.length || 0) > 0
+
+  let planningShiftsCount = 0
+  if (hasPlanning) {
+    const now = new Date()
+    const day = now.getDay()
+    const monday = new Date(now)
+    monday.setDate(now.getDate() - day + (day === 0 ? -6 : 1))
+    const sunday = new Date(monday)
+    sunday.setDate(monday.getDate() + 6)
+
+    const { count } = await supabase
+      .from('planning_shifts')
+      .select('id', { count: 'exact', head: true })
+      .eq('auxiliaire_user_id', user.id)
+      .gte('date', monday.toISOString().split('T')[0])
+      .lte('date', sunday.toISOString().split('T')[0])
+    planningShiftsCount = count || 0
+  }
+
   let annoncesCount = 0
   let annoncesPubliees = 0
   if (profile) {
@@ -54,6 +80,7 @@ export default async function AuxiliaireDashboard() {
         firstName={userData.first_name}
         lastName={userData.last_name}
         currentPage="dashboard"
+        hasPlanning={hasPlanning}
       />
 
       <div className="max-w-5xl mx-auto px-4 py-8">
@@ -168,6 +195,22 @@ export default async function AuxiliaireDashboard() {
                     Voir les demandes
                   </Link>
                 </div>
+
+                {hasPlanning && (
+                  <div className="bg-white rounded-xl border p-6">
+                    <h3 className="font-semibold text-lg mb-2">Planning</h3>
+                    <p className="text-gray-600 mb-1">
+                      {planningShiftsCount} creneau{planningShiftsCount > 1 ? 'x' : ''} cette semaine
+                    </p>
+                    <p className="text-sm text-gray-400 mb-4">Consultez vos interventions planifiees.</p>
+                    <Link
+                      href="/auxiliaire/planning"
+                      className="inline-flex items-center px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition text-sm font-medium"
+                    >
+                      Voir mon planning
+                    </Link>
+                  </div>
+                )}
               </div>
             )}
           </div>
