@@ -46,8 +46,9 @@ export default async function RecherchePage({
   }
 
   // Requete les annonces auxiliaires publiees
-  // On utilise le client normal (RLS applique)
-  let query = supabase
+  // On utilise le service role pour permettre l'acces aux visiteurs non connectes
+  const supabaseAdmin = await createClient({ serviceRole: true })
+  let query = supabaseAdmin
     .from('annonces_auxiliaires')
     .select(`
       *,
@@ -88,8 +89,6 @@ export default async function RecherchePage({
   const { data: rawAnnonces } = await query
 
   // Filter to only show auxiliaires with active subscription
-  // Use service role to bypass RLS (beneficiaire can't read other users' subscriptions)
-  const supabaseAdmin = await createClient({ serviceRole: true })
   let annonces = rawAnnonces || []
   if (annonces.length > 0) {
     const userIds = annonces.map((a: any) => a.auxiliaires_profiles?.user_id).filter(Boolean)
@@ -212,17 +211,9 @@ export default async function RecherchePage({
             <Link href="/" className="text-xl font-bold text-black">
               roxanetnous
             </Link>
-            <div className="flex items-center gap-4">
-              <Link href="/login" className="text-sm text-gray-600 hover:text-black">
-                Connexion
-              </Link>
-              <Link
-                href="/register"
-                className="text-sm px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition"
-              >
-                Inscription
-              </Link>
-            </div>
+            <Link href="/login" className="text-sm px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition font-medium">
+              Connexion
+            </Link>
           </div>
         </header>
       )}
