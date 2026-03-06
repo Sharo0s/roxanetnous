@@ -3,6 +3,7 @@ import { Footer } from '@/components/footer'
 import { ContactForm } from '@/components/contact-form'
 import { AvisMarquee } from '@/components/landing/avis-marquee'
 import { HeroCarte } from '@/components/landing/hero-carte'
+import { AnimatedCounter } from '@/components/landing/animated-counter'
 import { createClient } from '@/lib/supabase/server'
 
 export default async function HomePage() {
@@ -132,9 +133,20 @@ export default async function HomePage() {
                     href="/login"
                     className="px-6 py-3 rounded-lg font-semibold text-sm text-black btn-hover bg-accent"
                   >
-                    Connectez-vous a votre espace
+                    Inscription / Connexion
                   </Link>
                 </div>
+
+                {((auxiliairesCount || 0) > 0 || villesUniques.size > 0) && (
+                  <div className="flex gap-8 justify-center md:justify-start pt-10">
+                    {(auxiliairesCount || 0) > 0 && (
+                      <AnimatedCounter end={auxiliairesCount || 0} label={`accompagnant(e)${(auxiliairesCount || 0) > 1 ? 's' : ''} verifie(e)${(auxiliairesCount || 0) > 1 ? 's' : ''}`} />
+                    )}
+                    {villesUniques.size > 0 && (
+                      <AnimatedCounter end={villesUniques.size} label={`ville${villesUniques.size > 1 ? 's' : ''}`} />
+                    )}
+                  </div>
+                )}
               </div>
 
               <div className="hidden md:block flex-1 w-full max-w-sm md:max-w-md">
@@ -150,25 +162,9 @@ export default async function HomePage() {
             <p className="text-base font-medium text-black tracking-wide">
               Premiere communaute de mise en relation entre accompagnants et accompagne(e)s
             </p>
-            <div className="flex flex-col md:flex-row gap-3 items-center text-sm shrink-0">
-              <Link href="/recherche" className="rounded-full px-4 py-1.5 font-medium bg-black text-white btn-hover whitespace-nowrap">
-                Consulter les annonces
-              </Link>
-              <div className="flex gap-3 flex-wrap justify-center">
-                {(auxiliairesCount || 0) > 0 && (
-                  <span className="rounded-full px-4 py-1.5 font-medium text-black whitespace-nowrap overflow-hidden relative bg-kraft">
-                    <span className="absolute inset-0 opacity-35 mix-blend-multiply pointer-events-none" style={{ backgroundImage: "url('/kraft-noise.png')", backgroundSize: '256px 256px', backgroundRepeat: 'repeat' }} />
-                    <span className="relative">Deja {auxiliairesCount} accompagnant(e){(auxiliairesCount || 0) > 1 ? 's' : ''} verifie(e){(auxiliairesCount || 0) > 1 ? 's' : ''}</span>
-                  </span>
-                )}
-                {villesUniques.size > 0 && (
-                  <span className="rounded-full px-4 py-1.5 font-medium text-black whitespace-nowrap overflow-hidden relative bg-kraft">
-                    <span className="absolute inset-0 opacity-35 mix-blend-multiply pointer-events-none" style={{ backgroundImage: "url('/kraft-noise.png')", backgroundSize: '256px 256px', backgroundRepeat: 'repeat' }} />
-                    <span className="relative">Deja {villesUniques.size} ville{villesUniques.size > 1 ? 's' : ''}</span>
-                  </span>
-                )}
-              </div>
-            </div>
+            <Link href="/recherche" className="rounded-full px-4 py-1.5 font-medium bg-black text-white btn-hover whitespace-nowrap text-sm shrink-0">
+              Consulter les annonces
+            </Link>
           </div>
         </section>
 
