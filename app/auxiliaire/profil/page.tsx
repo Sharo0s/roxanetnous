@@ -66,7 +66,7 @@ export default async function AuxiliaireProfilPage() {
           </div>
         )}
 
-        <DisponibleToggle initial={profile.disponible ?? true} />
+        <DisponibleToggle initial={profile.disponible ?? true} initialIndisponibleJusquAu={profile.indisponible_jusqu_au} />
 
         <AuxiliaireProfileForm
           userInfo={{

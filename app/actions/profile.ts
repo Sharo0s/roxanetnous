@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { notifyFavoriBeneficiaires } from '@/lib/notify-favori-disponible'
 import { revalidatePath } from 'next/cache'
 
 export type ProfileResult = {
@@ -130,7 +131,7 @@ export async function updateLastSeen(): Promise<void> {
     .eq('id', user.id)
 }
 
-export async function toggleDisponible(): Promise<ProfileResult> {
+export async function toggleDisponible(indisponibleJusquAu?: string | null): Promise<ProfileResult> {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'Non connecte.' }
@@ -147,7 +148,10 @@ export async function toggleDisponible(): Promise<ProfileResult> {
 
   const { error } = await supabase
     .from('auxiliaires_profiles')
-    .update({ disponible: newValue })
+    .update({
+      disponible: newValue,
+      indisponible_jusqu_au: newValue ? null : (indisponibleJusquAu || null),
+    })
     .eq('user_id', user.id)
 
   if (error) return { error: 'Erreur lors de la mise a jour.' }
@@ -157,6 +161,11 @@ export async function toggleDisponible(): Promise<ProfileResult> {
     .from('badges_cache')
     .update({ disponible: newValue, updated_at: new Date().toISOString() })
     .eq('user_id', user.id)
+
+  // Si repasse disponible, notifier les beneficiaires qui l'ont en favori (fire-and-forget)
+  if (newValue) {
+    notifyFavoriBeneficiaires(user.id).catch(() => {})
+  }
 
   revalidatePath('/auxiliaire/profil')
   revalidatePath('/auxiliaire/dashboard')

@@ -311,6 +311,94 @@ export async function sendTeamInviteEmail(params: {
   }
 }
 
+export async function sendDisponibleReactivatedEmail(params: {
+  email: string
+  firstName: string
+  userId?: string
+}) {
+  try {
+    await resend.emails.send({
+      from: FROM_EMAIL,
+      to: params.email,
+      subject: 'Votre profil est de nouveau disponible',
+      html: `
+        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+          <h1 style="color: #000;">Vous etes de nouveau disponible</h1>
+          <p>Bonjour ${params.firstName},</p>
+          <p>Votre date de retour est arrivee, votre profil est automatiquement repasse en disponible sur roxanetnous.</p>
+          <p>Si vous souhaitez prolonger votre indisponibilite, vous pouvez le faire depuis votre profil.</p>
+          <p style="margin-top: 24px;">
+            <a href="${BASE_URL}/auxiliaire/profil" style="background: #000; color: #fff; padding: 12px 24px; text-decoration: none; display: inline-block;">
+              Gerer ma disponibilite
+            </a>
+          </p>
+        </div>
+      `,
+    })
+
+    await logNotification({
+      userId: params.userId,
+      email: params.email,
+      type: 'disponible_reactivated',
+      subject: 'Votre profil est de nouveau disponible',
+      status: 'sent',
+    })
+  } catch (error) {
+    await logNotification({
+      userId: params.userId,
+      email: params.email,
+      type: 'disponible_reactivated',
+      subject: 'Votre profil est de nouveau disponible',
+      status: 'error',
+      error: error instanceof Error ? error.message : 'Erreur inconnue',
+    })
+  }
+}
+
+export async function sendFavoriDisponibleEmail(params: {
+  email: string
+  beneficiaireFirstName: string
+  auxiliaireFirstName: string
+  userId?: string
+}) {
+  try {
+    await resend.emails.send({
+      from: FROM_EMAIL,
+      to: params.email,
+      subject: `${params.auxiliaireFirstName} est de nouveau disponible`,
+      html: `
+        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+          <h1 style="color: #000;">Bonne nouvelle !</h1>
+          <p>Bonjour ${params.beneficiaireFirstName},</p>
+          <p>${params.auxiliaireFirstName}, que vous suivez dans vos favoris, est de nouveau disponible sur roxanetnous.</p>
+          <p style="margin-top: 24px;">
+            <a href="${BASE_URL}/recherche" style="background: #000; color: #fff; padding: 12px 24px; text-decoration: none; display: inline-block;">
+              Voir le profil
+            </a>
+          </p>
+        </div>
+      `,
+    })
+
+    await logNotification({
+      userId: params.userId,
+      email: params.email,
+      type: 'favori_disponible',
+      subject: `${params.auxiliaireFirstName} est de nouveau disponible`,
+      status: 'sent',
+    })
+  } catch (error) {
+    await logNotification({
+      userId: params.userId,
+      email: params.email,
+      type: 'favori_disponible',
+      subject: `${params.auxiliaireFirstName} est de nouveau disponible`,
+      status: 'error',
+      error: error instanceof Error ? error.message : 'Erreur inconnue',
+    })
+  }
+}
+
 export async function sendMatchingNotificationEmail(params: {
   email: string
   firstName: string

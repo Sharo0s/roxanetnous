@@ -3,6 +3,10 @@
     {
       "path": "/api/cron/update-badges",
       "schedule": "0 3 * * *"
+    },
+    {
+      "path": "/api/cron/reactivate-disponible",
+      "schedule": "0 6 * * *"
     }
   ]
 }
