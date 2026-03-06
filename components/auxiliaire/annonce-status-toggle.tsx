@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import { updateAnnonceAuxiliaireStatus, updateAnnonceBeneficiaireStatus } from '@/app/actions/annonces'
-import { Button } from '@/components/ui/button'
 
 type Props = {
   annonceId: string
@@ -25,11 +24,10 @@ export function AnnonceStatusToggle({ annonceId, currentStatus, type }: Props) {
   }
 
   return (
-    <Button
-      variant="ghost"
-      size="sm"
+    <button
       onClick={handleToggle}
       disabled={loading}
+      className="px-3 py-1.5 text-xs font-medium border border-gray-300 text-gray-700 rounded-lg hover:border-accent transition disabled:opacity-50"
     >
       {loading
         ? '...'
@@ -37,6 +35,6 @@ export function AnnonceStatusToggle({ annonceId, currentStatus, type }: Props) {
           ? 'Archiver'
           : 'Republier'
       }
-    </Button>
+    </button>
   )
 }
