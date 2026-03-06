@@ -22,8 +22,8 @@ export function ContactForm() {
   if (status === 'success') {
     return (
       <div className="bg-white border rounded-xl p-6 text-center">
-        <p className="font-semibold text-gray-900 mb-1">Message envoye</p>
-        <p className="text-sm text-gray-500">Nous vous repondrons dans les meilleurs delais.</p>
+        <p className="font-semibold text-black mb-1">Message envoye</p>
+        <p className="text-sm text-black/50">Nous vous repondrons dans les meilleurs delais.</p>
       </div>
     )
   }
@@ -40,7 +40,7 @@ export function ContactForm() {
           name="name"
           type="text"
           required
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-black"
+          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#FFB06E]"
           placeholder="Votre nom"
         />
       </div>
@@ -51,7 +51,7 @@ export function ContactForm() {
           name="email"
           type="email"
           required
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-black"
+          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#FFB06E]"
           placeholder="vous@exemple.com"
         />
       </div>
@@ -63,15 +63,14 @@ export function ContactForm() {
           required
           rows={4}
           maxLength={2000}
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-black resize-none"
+          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#FFB06E] resize-none"
           placeholder="Votre message..."
         />
       </div>
       <button
         type="submit"
         disabled={status === 'loading'}
-        className="w-full px-4 py-2 rounded-lg text-sm font-medium text-black btn-hover disabled:opacity-50"
-        style={{ backgroundColor: '#FFB06E' }}
+        className="w-full px-4 py-2 rounded-lg text-sm font-medium text-black btn-hover disabled:opacity-50 bg-accent"
       >
         {status === 'loading' ? 'Envoi en cours...' : 'Envoyer'}
       </button>

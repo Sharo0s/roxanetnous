@@ -57,7 +57,7 @@ export function PlanningViewSwitcher({
             key={v}
             onClick={() => onViewChange(v)}
             className={`px-3 py-1.5 text-sm font-medium rounded-lg transition ${
-              view === v ? 'bg-black text-white' : 'border hover:border-black'
+              view === v ? 'bg-accent text-black' : 'border hover:border-accent'
             }`}
           >
             {LABELS[v]}
@@ -68,7 +68,7 @@ export function PlanningViewSwitcher({
       <div className="flex items-center gap-3">
         <button
           onClick={() => navigate(-1)}
-          className="p-1.5 border rounded-lg hover:border-black transition"
+          className="p-1.5 border rounded-lg hover:border-accent transition"
           aria-label="Precedent"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -78,7 +78,7 @@ export function PlanningViewSwitcher({
 
         <button
           onClick={goToday}
-          className="px-3 py-1.5 text-xs font-medium border rounded-lg hover:border-black transition"
+          className="px-3 py-1.5 text-xs font-medium border rounded-lg hover:border-accent transition"
         >
           Aujourd'hui
         </button>
@@ -89,7 +89,7 @@ export function PlanningViewSwitcher({
 
         <button
           onClick={() => navigate(1)}
-          className="p-1.5 border rounded-lg hover:border-black transition"
+          className="p-1.5 border rounded-lg hover:border-accent transition"
           aria-label="Suivant"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

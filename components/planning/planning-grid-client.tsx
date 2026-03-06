@@ -125,13 +125,13 @@ export function PlanningGridClient({
         <div className="flex gap-2">
           <Link
             href="/beneficiaire/planning/equipe"
-            className="px-4 py-2 border rounded-lg hover:border-black transition text-sm font-medium"
+            className="px-4 py-2 border rounded-lg hover:border-accent transition text-sm font-medium"
           >
             Mon equipe
           </Link>
           <Link
             href="/beneficiaire/planning/documents"
-            className="px-4 py-2 border rounded-lg hover:border-black transition text-sm font-medium"
+            className="px-4 py-2 border rounded-lg hover:border-accent transition text-sm font-medium"
           >
             Documents
           </Link>

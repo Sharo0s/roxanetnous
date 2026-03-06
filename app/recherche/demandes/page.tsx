@@ -55,7 +55,7 @@ export default async function DemandesBeneficiairesPage({
   const unreadCount = user ? await getUnreadCount(user.id) : 0
 
   return (
-    <main className="min-h-screen bg-gray-50">
+    <main className="min-h-screen kraft bg-kraft">
       {userData?.role === 'auxiliaire' && user ? (
         <AuxiliaireHeader
           userId={user.id}
@@ -88,7 +88,7 @@ export default async function DemandesBeneficiairesPage({
         </header>
       )}
 
-      <div className="max-w-6xl mx-auto px-4 py-8">
+      <div className="max-w-6xl mx-auto px-4 py-8 relative z-10">
         <h2 className="text-2xl font-bold text-gray-900 mb-6">Demandes des beneficiaires</h2>
 
         {!annonces || annonces.length === 0 ? (
@@ -125,7 +125,7 @@ export default async function DemandesBeneficiairesPage({
                     {specLabels.length > 3 && (
                       <span className="px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full text-xs cursor-default relative group">
                         +{specLabels.length - 3}
-                        <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block bg-black text-white text-xs rounded-lg px-3 py-2 whitespace-nowrap z-50">
+                        <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block bg-accent text-black text-xs rounded-lg px-3 py-2 whitespace-nowrap z-50">
                           {specLabels.slice(3).join(', ')}
                         </span>
                       </span>

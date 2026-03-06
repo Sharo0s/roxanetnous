@@ -31,7 +31,7 @@ export function StepSpecialites({ data, onChange }: Props) {
             key={spec.value}
             className={`flex items-center p-3 rounded-lg border cursor-pointer transition ${
               data.specialites.includes(spec.value)
-                ? 'border-black bg-gray-50'
+                ? 'border-accent bg-gray-50'
                 : 'border-gray-200 hover:border-gray-400'
             }`}
           >

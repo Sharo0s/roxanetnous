@@ -156,7 +156,7 @@ export function PlanningMonthView({
                 return (
                   <td key={d} className="p-1 align-top">
                     <div
-                      className={`rounded-lg border p-2 min-h-[60px] md:min-h-[90px] transition cursor-pointer hover:border-black ${isToday ? 'border-black border-2' : ''}`}
+                      className={`rounded-lg border p-2 min-h-[60px] md:min-h-[90px] transition cursor-pointer hover:border-accent ${isToday ? 'border-accent border-2' : ''}`}
                       onClick={() => openPopup(d)}
                     >
                       <div className="flex items-center justify-between mb-1">
@@ -254,7 +254,7 @@ export function PlanningMonthView({
                 {popup.entries.map(entry => (
                   <button
                     key={entry.auxId}
-                    className="w-full text-left p-3 rounded-lg border hover:border-black transition"
+                    className="w-full text-left p-3 rounded-lg border hover:border-accent transition"
                     onClick={() => {
                       setPopup(null)
                       onCellClick(entry.auxId, popup.date)
@@ -285,7 +285,7 @@ export function PlanningMonthView({
                   {popup.available.map(aux => (
                     <button
                       key={aux.auxId}
-                      className="w-full text-left p-3 rounded-lg border border-dashed hover:border-black transition flex items-center gap-2"
+                      className="w-full text-left p-3 rounded-lg border border-dashed hover:border-accent transition flex items-center gap-2"
                       onClick={() => {
                         setPopup(null)
                         onCellClick(aux.auxId, popup.date)

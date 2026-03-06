@@ -13,7 +13,7 @@ import { calculateMatchScore } from '@/lib/matching'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Rechercher un auxiliaire de vie',
+  title: 'Rechercher un(e) accompagnant(e) de vie',
   description: 'Trouvez un auxiliaire de vie verifie pres de chez vous. Filtrez par specialite, localisation et experience.',
 }
 
@@ -188,7 +188,7 @@ export default async function RecherchePage({
   const unreadCount = user ? await getUnreadCount(user.id) : 0
 
   return (
-    <main className="min-h-screen bg-gray-50">
+    <main className="min-h-screen kraft bg-kraft">
       {userData?.role === 'auxiliaire' && user ? (
         <AuxiliaireHeader
           userId={user.id}
@@ -206,19 +206,19 @@ export default async function RecherchePage({
           currentPage="other"
         />
       ) : (
-        <header className="bg-white border-b">
+        <header className="bg-white border-b relative z-10">
           <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
             <Link href="/" className="text-xl font-bold text-black">
               roxanetnous
             </Link>
-            <Link href="/login" className="text-sm px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition font-medium">
+            <Link href="/login" className="text-sm px-4 py-2 bg-accent text-black rounded-lg btn-hover transition font-medium">
               Connexion
             </Link>
           </div>
         </header>
       )}
 
-      <div className="max-w-6xl mx-auto px-4 py-8">
+      <div className="max-w-6xl mx-auto px-4 py-8 relative z-10">
         <h2 className="text-2xl font-bold text-gray-900 mb-6">Trouver un auxiliaire de vie</h2>
 
         <SearchFilters
@@ -246,7 +246,7 @@ export default async function RecherchePage({
                     </select>
                     <button
                       type="submit"
-                      className="px-3 py-1 bg-black text-white rounded-lg text-xs hover:bg-gray-800 transition"
+                      className="px-3 py-1 bg-accent text-black rounded-lg text-xs btn-hover transition"
                     >
                       Actualiser
                     </button>
@@ -269,7 +269,7 @@ export default async function RecherchePage({
                 return (
                   <div
                     key={`match-${annonce.id}`}
-                    className="bg-white rounded-xl border-2 border-gray-200 hover:border-black transition relative"
+                    className="bg-white rounded-xl border-2 border-gray-200 hover:border-accent transition relative"
                   >
                     {user && (
                       <div className="absolute top-3 right-3 z-10">
@@ -300,14 +300,14 @@ export default async function RecherchePage({
 
                       <div className="flex flex-wrap gap-1 mb-2">
                         {specs.map((s: string) => (
-                          <span key={s} className="px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full text-xs">
+                          <span key={s} className="px-2.5 py-0.5 bg-accent text-black rounded-full text-xs">
                             {SPECIALITES.find((sp) => sp.value === s)?.label || s}
                           </span>
                         ))}
                         {(profile?.specialites?.length || 0) > 3 && (
-                          <span className="px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full text-xs cursor-default relative group">
+                          <span className="px-2.5 py-0.5 bg-accent text-black rounded-full text-xs cursor-default relative group">
                             +{profile.specialites.length - 3}
-                            <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block bg-black text-white text-xs rounded-lg px-3 py-2 whitespace-nowrap z-50">
+                            <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block bg-accent text-black text-xs rounded-lg px-3 py-2 whitespace-nowrap z-50">
                               {(profile.specialites as string[]).slice(3).map((s: string) => SPECIALITES.find((sp) => sp.value === s)?.label || s).join(', ')}
                             </span>
                           </span>
@@ -321,7 +321,7 @@ export default async function RecherchePage({
 
                       <Link
                         href={`/recherche/${annonce.id}`}
-                        className="mt-auto block w-full text-center px-4 py-2 border border-black text-black rounded-lg hover:bg-black hover:text-white transition text-sm font-medium"
+                        className="mt-auto block w-full text-center px-4 py-2 bg-accent text-black rounded-lg btn-hover transition text-sm font-medium"
                       >
                         Voir le profil
                       </Link>

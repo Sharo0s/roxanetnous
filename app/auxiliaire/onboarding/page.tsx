@@ -97,8 +97,8 @@ export default function OnboardingPage() {
   }
 
   return (
-    <main className="min-h-screen bg-gray-50">
-      <header className="bg-white border-b">
+    <main className="min-h-screen kraft bg-kraft">
+      <header className="bg-white border-b relative z-10">
         <div className="max-w-3xl mx-auto px-4 py-4 flex items-center justify-between">
           <Link href="/auxiliaire/dashboard" className="text-xl font-bold text-black">
             roxanetnous
@@ -110,13 +110,13 @@ export default function OnboardingPage() {
       </header>
 
       {/* Progress bar */}
-      <div className="max-w-3xl mx-auto px-4 pt-6">
+      <div className="max-w-3xl mx-auto px-4 pt-6 relative z-10">
         <div className="flex gap-1">
           {STEPS.map((_, i) => (
             <div
               key={i}
               className={`h-1 flex-1 rounded-full ${
-                i <= step ? 'bg-black' : 'bg-gray-200'
+                i <= step ? 'bg-accent' : 'bg-gray-200'
               }`}
             />
           ))}
@@ -124,7 +124,7 @@ export default function OnboardingPage() {
         <p className="mt-3 text-sm text-gray-500">{STEPS[step]}</p>
       </div>
 
-      <div className="max-w-3xl mx-auto px-4 py-6">
+      <div className="max-w-3xl mx-auto px-4 py-6 relative z-10">
         {error && (
           <div className="mb-4 p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
             {error}

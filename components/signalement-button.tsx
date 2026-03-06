@@ -60,24 +60,24 @@ export function SignalementButton({ cibleType, cibleId }: Props) {
     return (
       <button
         onClick={() => setOpen(true)}
-        className="text-xs text-gray-400 hover:text-gray-600 underline"
+        className="inline-flex items-center justify-center rounded-lg font-medium transition btn-hover bg-accent text-black h-10 px-4 py-2 w-full"
       >
-        Signaler
+        Signaler ce profil a l&#39;equipe
       </button>
     )
   }
 
   return (
-    <div className="mt-3 p-3 border rounded-lg">
+    <div className="bg-white border rounded-xl p-6 space-y-4 text-left mt-3">
       {error && (
-        <p className="text-xs text-red-600 mb-2">{error}</p>
+        <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg p-3">{error}</p>
       )}
-      <div className="mb-2">
-        <label className="block text-xs font-medium text-gray-700 mb-1">Motif</label>
+      <div>
+        <label className="block text-sm font-medium text-black mb-1">Motif</label>
         <select
           value={motif}
           onChange={(e) => setMotif(e.target.value)}
-          className="w-full rounded-lg border border-gray-300 bg-white px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-black"
+          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#FFB06E]"
         >
           <option value="">Selectionnez...</option>
           {MOTIFS.map((m) => (
@@ -85,22 +85,30 @@ export function SignalementButton({ cibleType, cibleId }: Props) {
           ))}
         </select>
       </div>
-      <div className="mb-2">
-        <label className="block text-xs font-medium text-gray-700 mb-1">Details (optionnel)</label>
+      <div>
+        <label className="block text-sm font-medium text-black mb-1">Details (optionnel)</label>
         <textarea
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          rows={2}
-          className="w-full rounded-lg border border-gray-300 bg-white px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-black resize-none"
+          rows={4}
+          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#FFB06E] resize-none"
+          placeholder="Decrivez le probleme..."
         />
       </div>
       <div className="flex gap-2">
-        <Button size="sm" onClick={handleSubmit} disabled={loading}>
-          {loading ? '...' : 'Envoyer'}
-        </Button>
-        <Button size="sm" variant="ghost" onClick={() => setOpen(false)}>
+        <button
+          onClick={handleSubmit}
+          disabled={loading}
+          className="flex-1 px-4 py-2 rounded-lg text-sm font-medium text-black btn-hover disabled:opacity-50 bg-accent"
+        >
+          {loading ? 'Envoi en cours...' : 'Envoyer'}
+        </button>
+        <button
+          onClick={() => setOpen(false)}
+          className="px-4 py-2 rounded-lg text-sm font-medium text-black hover:bg-gray-100 transition"
+        >
           Annuler
-        </Button>
+        </button>
       </div>
     </div>
   )

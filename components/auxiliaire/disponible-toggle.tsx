@@ -32,7 +32,7 @@ export function DisponibleToggle({ initial }: { initial: boolean }) {
         onClick={handleToggle}
         disabled={loading}
         className={`relative w-11 h-6 rounded-full transition ${
-          disponible ? 'bg-black' : 'bg-gray-300'
+          disponible ? 'bg-accent' : 'bg-gray-300'
         } ${loading ? 'opacity-50' : ''}`}
       >
         <span

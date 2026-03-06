@@ -23,7 +23,7 @@ export default async function AbonnementAuxiliairePage() {
   const unreadCount = await getUnreadCount(user.id)
 
   return (
-    <main className="min-h-screen bg-gray-50">
+    <main className="min-h-screen kraft bg-kraft">
       <AuxiliaireHeader
         userId={user.id}
         unreadCount={unreadCount}
@@ -32,7 +32,7 @@ export default async function AbonnementAuxiliairePage() {
         currentPage="abonnement"
       />
 
-      <div className="max-w-2xl mx-auto px-4 py-8">
+      <div className="relative z-10 max-w-2xl mx-auto px-4 py-8">
         <h2 className="text-2xl font-bold text-gray-900 mb-6">Mon abonnement</h2>
         <SubscriptionPageContent subscription={subscription} />
       </div>

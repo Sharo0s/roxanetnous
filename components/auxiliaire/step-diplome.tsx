@@ -101,7 +101,7 @@ export function StepDiplome({ data, onChange, onUpload, onUploadsChange }: Props
             disabled={uploading === 'cv'}
             className={`w-full p-4 rounded-lg border-2 border-dashed transition text-sm ${
               cvFileName
-                ? 'border-black bg-gray-50'
+                ? 'border-accent bg-gray-50'
                 : 'border-gray-300 hover:border-gray-500'
             }`}
           >
@@ -128,7 +128,7 @@ export function StepDiplome({ data, onChange, onUpload, onUploadsChange }: Props
                 <label
                   className={`flex items-center p-3 rounded-lg border cursor-pointer transition ${
                     isSelected
-                      ? 'border-black bg-gray-50'
+                      ? 'border-accent bg-gray-50'
                       : 'border-gray-200 hover:border-gray-400'
                   }`}
                 >
@@ -156,7 +156,7 @@ export function StepDiplome({ data, onChange, onUpload, onUploadsChange }: Props
                       disabled={uploading === `diplome:${d.value}`}
                       className={`w-full rounded-lg border-2 border-dashed px-4 py-3 text-sm transition ${
                         diplomeFileNames[d.value]
-                          ? 'border-black bg-gray-50 text-gray-700'
+                          ? 'border-accent bg-gray-50 text-gray-700'
                           : 'border-gray-300 text-gray-500 hover:border-gray-400'
                       }`}
                     >
@@ -185,7 +185,7 @@ export function StepDiplome({ data, onChange, onUpload, onUploadsChange }: Props
               key={exp.value}
               className={`flex items-center p-3 rounded-lg border cursor-pointer transition ${
                 data.experience === exp.value
-                  ? 'border-black bg-gray-50'
+                  ? 'border-accent bg-gray-50'
                   : 'border-gray-200 hover:border-gray-400'
               }`}
             >

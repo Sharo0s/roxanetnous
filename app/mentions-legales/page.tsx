@@ -3,9 +3,9 @@ import { Footer } from '@/components/footer'
 
 export default function MentionsLegalesPage() {
   return (
-    <div className="min-h-screen flex flex-col">
-      <main className="flex-1 max-w-3xl mx-auto px-4 py-12">
-        <Link href="/" className="text-sm text-gray-500 hover:text-black transition">
+    <div className="min-h-screen flex flex-col kraft bg-kraft">
+      <main className="flex-1 max-w-3xl mx-auto px-4 py-12 relative z-10">
+        <Link href="/" className="text-sm text-black/50 hover:text-black transition">
           Retour a l&apos;accueil
         </Link>
 

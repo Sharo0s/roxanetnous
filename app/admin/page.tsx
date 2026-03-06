@@ -81,7 +81,7 @@ export default async function AdminDashboard() {
                 <Link
                   key={profile.id}
                   href={`/admin/validation/${profile.id}`}
-                  className="block bg-white rounded-xl border p-5 hover:border-black hover:shadow-lg hover:-translate-y-1 transition-all duration-200"
+                  className="block bg-white rounded-xl border p-5 hover:border-accent hover:shadow-lg hover:-translate-y-1 transition-all duration-200"
                 >
                   <div className="flex items-center justify-between">
                     <div>
@@ -107,7 +107,7 @@ export default async function AdminDashboard() {
 
         {/* Signalements */}
         {(signalementsCount || 0) > 0 && (
-          <Link href="/admin/signalements" className="block bg-white rounded-xl border p-5 hover:border-black hover:shadow-lg hover:-translate-y-1 transition-all duration-200 mb-8">
+          <Link href="/admin/signalements" className="block bg-white rounded-xl border p-5 hover:border-accent hover:shadow-lg hover:-translate-y-1 transition-all duration-200 mb-8">
             <p className="text-sm text-gray-500">Signalements en attente</p>
             <p className="text-3xl font-bold mt-1">{signalementsCount}</p>
           </Link>
@@ -141,11 +141,11 @@ export default async function AdminDashboard() {
 
           {/* Inscriptions 12 derniers mois */}
           <div className="bg-white rounded-xl border overflow-hidden mb-8">
-            <div className="px-4 py-3 border-b bg-gray-50">
+            <div className="px-4 py-3 border-b bg-accent/20">
               <h4 className="font-medium text-gray-700 text-sm">Inscriptions (12 derniers mois)</h4>
             </div>
             <table className="w-full text-sm">
-              <thead className="bg-gray-50 border-b">
+              <thead className="bg-accent/20 border-b">
                 <tr>
                   <th className="text-left px-4 py-3 font-medium text-gray-500">Mois</th>
                   <th className="text-right px-4 py-3 font-medium text-gray-500">Auxiliaires</th>
@@ -155,7 +155,7 @@ export default async function AdminDashboard() {
               </thead>
               <tbody>
                 {inscriptions.map((row) => (
-                  <tr key={row.mois} className="border-b last:border-0 hover:bg-gray-50">
+                  <tr key={row.mois} className="border-b last:border-0 hover:bg-accent/10">
                     <td className="px-4 py-3 font-medium">{formatMois(row.mois)}</td>
                     <td className="px-4 py-3 text-right">{row.auxiliaires}</td>
                     <td className="px-4 py-3 text-right">{row.beneficiaires}</td>
@@ -173,7 +173,7 @@ export default async function AdminDashboard() {
               <span className="text-sm text-gray-600 w-28">Auxiliaires</span>
               <div className="flex-1 bg-gray-100 rounded-full h-6 overflow-hidden">
                 <div
-                  className="bg-black h-full rounded-full"
+                  className="bg-accent h-full rounded-full"
                   style={{ width: `${pctAux}%` }}
                 />
               </div>
@@ -193,11 +193,11 @@ export default async function AdminDashboard() {
 
           {/* Activite 6 derniers mois */}
           <div className="bg-white rounded-xl border overflow-hidden">
-            <div className="px-4 py-3 border-b bg-gray-50">
+            <div className="px-4 py-3 border-b bg-accent/20">
               <h4 className="font-medium text-gray-700 text-sm">Activite (6 derniers mois)</h4>
             </div>
             <table className="w-full text-sm">
-              <thead className="bg-gray-50 border-b">
+              <thead className="bg-accent/20 border-b">
                 <tr>
                   <th className="text-left px-4 py-3 font-medium text-gray-500">Mois</th>
                   <th className="text-right px-4 py-3 font-medium text-gray-500">Messages</th>
@@ -207,7 +207,7 @@ export default async function AdminDashboard() {
               </thead>
               <tbody>
                 {activite.map((row) => (
-                  <tr key={row.mois} className="border-b last:border-0 hover:bg-gray-50">
+                  <tr key={row.mois} className="border-b last:border-0 hover:bg-accent/10">
                     <td className="px-4 py-3 font-medium">{formatMois(row.mois)}</td>
                     <td className="px-4 py-3 text-right">{row.messages}</td>
                     <td className="px-4 py-3 text-right">{row.conversations}</td>
@@ -225,11 +225,11 @@ export default async function AdminDashboard() {
 
           {/* MRR par segment */}
           <div className="bg-white rounded-xl border overflow-hidden mb-8">
-            <div className="px-4 py-3 border-b bg-gray-50">
+            <div className="px-4 py-3 border-b bg-accent/20">
               <h4 className="font-medium text-gray-700 text-sm">Revenu mensuel recurrent par segment</h4>
             </div>
             <table className="w-full text-sm">
-              <thead className="bg-gray-50 border-b">
+              <thead className="bg-accent/20 border-b">
                 <tr>
                   <th className="text-left px-4 py-3 font-medium text-gray-500">Segment</th>
                   <th className="text-right px-4 py-3 font-medium text-gray-500">Abonnes</th>
@@ -237,22 +237,22 @@ export default async function AdminDashboard() {
                 </tr>
               </thead>
               <tbody>
-                <tr className="border-b hover:bg-gray-50">
+                <tr className="border-b hover:bg-accent/10">
                   <td className="px-4 py-3">Auxiliaire - Mensuel</td>
                   <td className="px-4 py-3 text-right">{mrrDetail.segments.auxiliaire_mensuel.count}</td>
                   <td className="px-4 py-3 text-right font-medium">{mrrDetail.segments.auxiliaire_mensuel.mrr.toFixed(2)} EUR</td>
                 </tr>
-                <tr className="border-b hover:bg-gray-50">
+                <tr className="border-b hover:bg-accent/10">
                   <td className="px-4 py-3">Auxiliaire - Annuel</td>
                   <td className="px-4 py-3 text-right">{mrrDetail.segments.auxiliaire_annuel.count}</td>
                   <td className="px-4 py-3 text-right font-medium">{mrrDetail.segments.auxiliaire_annuel.mrr.toFixed(2)} EUR</td>
                 </tr>
-                <tr className="border-b hover:bg-gray-50">
+                <tr className="border-b hover:bg-accent/10">
                   <td className="px-4 py-3">Beneficiaire - Mensuel</td>
                   <td className="px-4 py-3 text-right">{mrrDetail.segments.beneficiaire_mensuel.count}</td>
                   <td className="px-4 py-3 text-right font-medium">{mrrDetail.segments.beneficiaire_mensuel.mrr.toFixed(2)} EUR</td>
                 </tr>
-                <tr className="border-b last:border-0 hover:bg-gray-50">
+                <tr className="border-b last:border-0 hover:bg-accent/10">
                   <td className="px-4 py-3">Beneficiaire - Annuel</td>
                   <td className="px-4 py-3 text-right">{mrrDetail.segments.beneficiaire_annuel.count}</td>
                   <td className="px-4 py-3 text-right font-medium">{mrrDetail.segments.beneficiaire_annuel.mrr.toFixed(2)} EUR</td>
@@ -282,7 +282,7 @@ export default async function AdminDashboard() {
 
           {/* Dernieres annulations */}
           <div className="bg-white rounded-xl border overflow-hidden">
-            <div className="px-4 py-3 border-b bg-gray-50">
+            <div className="px-4 py-3 border-b bg-accent/20">
               <h4 className="font-medium text-gray-700 text-sm">Dernieres resiliations</h4>
             </div>
             {annulations.length === 0 ? (
@@ -291,7 +291,7 @@ export default async function AdminDashboard() {
               </div>
             ) : (
               <table className="w-full text-sm">
-                <thead className="bg-gray-50 border-b">
+                <thead className="bg-accent/20 border-b">
                   <tr>
                     <th className="text-left px-4 py-3 font-medium text-gray-500">Date</th>
                     <th className="text-left px-4 py-3 font-medium text-gray-500">Nom</th>
@@ -302,7 +302,7 @@ export default async function AdminDashboard() {
                 </thead>
                 <tbody>
                   {annulations.map((a, i) => (
-                    <tr key={i} className="border-b last:border-0 hover:bg-gray-50">
+                    <tr key={i} className="border-b last:border-0 hover:bg-accent/10">
                       <td className="px-4 py-3">
                         {a.date ? new Date(a.date).toLocaleDateString('fr-FR') : '-'}
                       </td>

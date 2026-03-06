@@ -72,7 +72,7 @@ export default async function BeneficiaireDashboard() {
   }
 
   return (
-    <main className="min-h-screen bg-gray-50">
+    <main className="min-h-screen kraft bg-kraft">
       <BeneficiaireHeader
         userId={user.id}
         unreadCount={unreadCount}
@@ -82,7 +82,7 @@ export default async function BeneficiaireDashboard() {
         hasPlanningSubscription={hasPlanning}
       />
 
-      <div className="max-w-5xl mx-auto px-4 py-8">
+      <div className="max-w-5xl mx-auto px-4 py-8 relative z-10">
         <h2 className="text-2xl font-bold text-gray-900 mb-6">
           Bonjour {userData.first_name}
         </h2>
@@ -95,13 +95,13 @@ export default async function BeneficiaireDashboard() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="bg-white rounded-xl border p-6">
-            <h3 className="font-semibold text-lg mb-2">Rechercher un auxiliaire</h3>
+            <h3 className="font-semibold text-lg mb-2">Rechercher un(e) accompagnant(e)</h3>
             <p className="text-gray-600 mb-4">
-              Trouvez l&#39;auxiliaire de vie ideal grace au matching intelligent.
+              Trouvez l&#39;accompagnant(e) que vous avez besoin
             </p>
             <Link
               href="/recherche"
-              className="inline-flex items-center px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition text-sm font-medium"
+              className="inline-flex items-center px-4 py-2 bg-accent text-black rounded-lg btn-hover transition text-sm font-medium"
             >
               Rechercher
             </Link>
@@ -114,7 +114,7 @@ export default async function BeneficiaireDashboard() {
             </p>
             <Link
               href="/beneficiaire/annonces/nouvelle"
-              className="inline-flex items-center px-4 py-2 border-2 border-black text-black rounded-lg hover:bg-gray-100 transition text-sm font-medium"
+              className="inline-flex items-center px-4 py-2 bg-accent text-black rounded-lg btn-hover transition text-sm font-medium"
             >
               Creer une annonce
             </Link>
@@ -128,7 +128,7 @@ export default async function BeneficiaireDashboard() {
             <p className="text-sm text-gray-400 mb-4">Gerez vos annonces de recherche.</p>
             <Link
               href="/beneficiaire/annonces"
-              className="inline-flex items-center px-4 py-2 border-2 border-black text-black rounded-lg hover:bg-gray-100 transition text-sm font-medium"
+              className="inline-flex items-center px-4 py-2 bg-accent text-black rounded-lg btn-hover transition text-sm font-medium"
             >
               Voir mes annonces
             </Link>
@@ -137,11 +137,11 @@ export default async function BeneficiaireDashboard() {
           <div className="bg-white rounded-xl border p-6">
             <h3 className="font-semibold text-lg mb-2">Mes favoris</h3>
             <p className="text-gray-600 mb-4">
-              Retrouvez les profils que vous avez mis en favori.
+              Retrouvez vos accompagnant(e)s que vous avez mis en favori.
             </p>
             <Link
               href="/favoris"
-              className="inline-flex items-center px-4 py-2 border-2 border-black text-black rounded-lg hover:bg-gray-100 transition text-sm font-medium"
+              className="inline-flex items-center px-4 py-2 bg-accent text-black rounded-lg btn-hover transition text-sm font-medium"
             >
               Voir mes favoris
             </Link>
@@ -152,12 +152,12 @@ export default async function BeneficiaireDashboard() {
             {hasPlanning ? (
               <>
                 <p className="text-gray-600 mb-1">
-                  {planningTeamCount} auxiliaire{planningTeamCount > 1 ? 's' : ''}, {planningShiftsCount} creneau{planningShiftsCount > 1 ? 'x' : ''} cette semaine
+                  {planningTeamCount} accompagnant(e){planningTeamCount > 1 ? 's' : ''}, {planningShiftsCount} intervention{planningShiftsCount > 1 ? 's' : ''} cette semaine
                 </p>
-                <p className="text-sm text-gray-400 mb-4">Gerez les interventions de vos auxiliaires.</p>
+                <p className="text-sm text-gray-400 mb-4">Gerez les interventions de vos accompagnant(e)s.</p>
                 <Link
                   href="/beneficiaire/planning"
-                  className="inline-flex items-center px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition text-sm font-medium"
+                  className="inline-flex items-center px-4 py-2 bg-accent text-black rounded-lg btn-hover transition text-sm font-medium"
                 >
                   Acceder au planning
                 </Link>
@@ -169,7 +169,7 @@ export default async function BeneficiaireDashboard() {
                 </p>
                 <Link
                   href="/beneficiaire/planning/abonnement"
-                  className="inline-flex items-center px-4 py-2 border-2 border-black text-black rounded-lg hover:bg-gray-100 transition text-sm font-medium"
+                  className="inline-flex items-center px-4 py-2 bg-accent text-black rounded-lg btn-hover transition text-sm font-medium"
                 >
                   Decouvrir le module
                 </Link>

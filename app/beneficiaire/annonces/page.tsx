@@ -38,7 +38,7 @@ export default async function MesAnnoncesBeneficiaire() {
   const unreadCount = await getUnreadCount(user.id)
 
   return (
-    <main className="min-h-screen bg-gray-50">
+    <main className="min-h-screen kraft bg-kraft">
       <BeneficiaireHeader
         userId={user.id}
         unreadCount={unreadCount}
@@ -47,12 +47,12 @@ export default async function MesAnnoncesBeneficiaire() {
         currentPage="annonces"
       />
 
-      <div className="max-w-5xl mx-auto px-4 py-8">
+      <div className="max-w-5xl mx-auto px-4 py-8 relative z-10">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-bold text-gray-900">Mes annonces</h2>
           <Link
             href="/beneficiaire/annonces/nouvelle"
-            className="inline-flex items-center px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition text-sm font-medium"
+            className="inline-flex items-center px-4 py-2 bg-accent text-black rounded-lg btn-hover transition text-sm font-medium"
           >
             Nouvelle annonce
           </Link>
@@ -63,7 +63,7 @@ export default async function MesAnnoncesBeneficiaire() {
             <p className="text-gray-500 mb-4">Vous n&#39;avez pas encore d&#39;annonce.</p>
             <Link
               href="/beneficiaire/annonces/nouvelle"
-              className="inline-flex items-center px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition text-sm font-medium"
+              className="inline-flex items-center px-4 py-2 bg-accent text-black rounded-lg btn-hover transition text-sm font-medium"
             >
               Creer ma premiere annonce
             </Link>
@@ -82,7 +82,7 @@ export default async function MesAnnoncesBeneficiaire() {
                         <h3 className="font-semibold text-gray-900 truncate">{annonce.titre}</h3>
                         <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
                           annonce.status === 'publiee'
-                            ? 'bg-black text-white'
+                            ? 'bg-accent text-black'
                             : 'bg-gray-200 text-gray-600'
                         }`}>
                           {annonce.status === 'publiee' ? 'Publiee' : 'Archivee'}
@@ -103,7 +103,7 @@ export default async function MesAnnoncesBeneficiaire() {
                             className="px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full text-xs cursor-default relative group"
                           >
                             +{specLabels.length - 3}
-                            <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block bg-black text-white text-xs rounded-lg px-3 py-2 whitespace-nowrap z-50">
+                            <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block bg-accent text-black text-xs rounded-lg px-3 py-2 whitespace-nowrap z-50">
                               {specLabels.slice(3).join(', ')}
                             </span>
                           </span>
@@ -113,7 +113,7 @@ export default async function MesAnnoncesBeneficiaire() {
                     <div className="flex items-center gap-2 flex-shrink-0 ml-4">
                       <Link
                         href={`/beneficiaire/annonces/${annonce.id}/modifier`}
-                        className="px-3 py-1.5 text-xs font-medium border border-gray-300 rounded-lg hover:border-black transition"
+                        className="px-3 py-1.5 text-xs font-medium border border-gray-300 rounded-lg hover:border-accent transition"
                       >
                         Modifier
                       </Link>

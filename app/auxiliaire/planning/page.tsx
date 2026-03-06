@@ -52,7 +52,7 @@ export default async function AuxiliairePlanningPage() {
   ])
 
   return (
-    <main className="min-h-screen bg-gray-50">
+    <main className="min-h-screen kraft bg-kraft">
       <AuxiliaireHeader
         userId={user.id}
         unreadCount={unreadCount}
@@ -62,7 +62,7 @@ export default async function AuxiliairePlanningPage() {
         hasPlanning
       />
 
-      <div className="max-w-6xl mx-auto px-4 py-8">
+      <div className="max-w-6xl mx-auto px-4 py-8 relative z-10">
         <AuxiliairePlanningClient initialShifts={shifts} initialDocuments={documents} />
       </div>
     </main>

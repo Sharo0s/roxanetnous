@@ -188,7 +188,7 @@ export default async function ValidationDetailPage({
                     href={cvUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-sm hover:border-black transition"
+                    className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-sm hover:border-accent transition"
                   >
                     Voir le document
                   </a>
@@ -203,7 +203,7 @@ export default async function ValidationDetailPage({
                     href={identiteUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-sm hover:border-black transition"
+                    className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-sm hover:border-accent transition"
                   >
                     Voir le document
                   </a>
@@ -218,7 +218,7 @@ export default async function ValidationDetailPage({
                     href={permisUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-sm hover:border-black transition"
+                    className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-sm hover:border-accent transition"
                   >
                     Voir le document
                   </a>
@@ -233,7 +233,7 @@ export default async function ValidationDetailPage({
                     href={d.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-sm hover:border-black transition"
+                    className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-sm hover:border-accent transition"
                   >
                     Voir le document
                   </a>
@@ -263,7 +263,7 @@ export default async function ValidationDetailPage({
 function StatusBadge({ status }: { status: string }) {
   const styles: Record<string, string> = {
     en_attente: 'bg-gray-200 text-gray-700',
-    valide: 'bg-black text-white',
+    valide: 'bg-accent text-black',
     refuse: 'bg-gray-100 text-gray-900 border border-gray-300',
     a_completer: 'bg-gray-100 text-gray-700 border border-gray-300',
   }

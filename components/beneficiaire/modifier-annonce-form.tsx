@@ -157,7 +157,7 @@ export function ModifierAnnonceBeneficiaireForm({ annonce }: { annonce: Annonce 
                 onClick={() => toggleSpecialite(spec.value)}
                 className={`px-3 py-1.5 rounded-full text-sm border transition ${
                   specialitesRecherchees.includes(spec.value)
-                    ? 'bg-black text-white border-black'
+                    ? 'bg-accent text-black border-accent'
                     : 'bg-white text-gray-700 border-gray-300 hover:border-gray-400'
                 }`}
               >
@@ -186,7 +186,7 @@ export function ModifierAnnonceBeneficiaireForm({ annonce }: { annonce: Annonce 
                     onClick={() => setNiveauDependance(opt.value)}
                     className={`px-4 py-2 rounded-lg text-sm border transition flex-1 ${
                       niveauDependance === opt.value
-                        ? 'bg-black text-white border-black'
+                        ? 'bg-accent text-black border-accent'
                         : 'bg-white text-gray-700 border-gray-300 hover:border-gray-400'
                     }`}
                   >
@@ -291,7 +291,7 @@ export function ModifierAnnonceBeneficiaireForm({ annonce }: { annonce: Annonce 
                             onClick={() => toggleDispo(jour.value, creneau.value)}
                             className={`w-8 h-8 rounded-md border transition flex items-center justify-center ${
                               isSelected
-                                ? 'border-black bg-white text-black'
+                                ? 'border-accent bg-white text-black'
                                 : 'bg-white border-gray-300 hover:border-gray-400'
                             }`}
                           >

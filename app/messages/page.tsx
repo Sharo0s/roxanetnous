@@ -80,7 +80,7 @@ export default async function MessagesPage() {
   const unreadCount = await getUnreadCount(user.id)
 
   return (
-    <main className="min-h-screen bg-gray-50">
+    <main className="min-h-screen kraft bg-kraft">
       {userData.role === 'auxiliaire' ? (
         <AuxiliaireHeader
           userId={user.id}
@@ -99,7 +99,7 @@ export default async function MessagesPage() {
         />
       )}
 
-      <div className="max-w-3xl mx-auto px-4 py-8">
+      <div className="max-w-3xl mx-auto px-4 py-8 relative z-10">
         <h2 className="text-2xl font-bold text-gray-900 mb-6">Messages</h2>
 
         {!conversations || conversations.length === 0 ? (
@@ -123,7 +123,7 @@ export default async function MessagesPage() {
                 <Link
                   key={conv.id}
                   href={`/messages/${conv.id}`}
-                  className="flex items-center justify-between bg-white rounded-xl border p-4 hover:border-black transition"
+                  className="flex items-center justify-between bg-white rounded-xl border p-4 hover:border-accent transition"
                 >
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-sm font-bold text-gray-600">
@@ -146,7 +146,7 @@ export default async function MessagesPage() {
                     </div>
                   </div>
                   {unread > 0 && (
-                    <span className="w-6 h-6 rounded-full bg-black text-white text-xs flex items-center justify-center font-medium">
+                    <span className="w-6 h-6 rounded-full bg-accent text-black text-xs flex items-center justify-center font-medium">
                       {unread}
                     </span>
                   )}

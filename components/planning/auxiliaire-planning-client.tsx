@@ -295,7 +295,7 @@ export function AuxiliairePlanningClient({
                   ) : (
                     <button
                       onClick={() => handleMarkRead(doc.id)}
-                      className="text-xs font-medium px-3 py-1.5 bg-black text-white rounded-lg hover:bg-gray-800 transition"
+                      className="text-xs font-medium px-3 py-1.5 bg-accent text-black rounded-lg btn-hover transition"
                     >
                       Marquer comme lu
                     </button>
@@ -447,8 +447,8 @@ function WeekGrid({
             </div>
             <div
               className={`rounded-lg border p-2 min-h-[100px] md:min-h-[140px] transition flex flex-col ${
-                isToday ? 'border-black border-2' : ''
-              } ${dayShifts.length > 0 ? 'cursor-pointer hover:border-black' : ''}`}
+                isToday ? 'border-accent border-2' : ''
+              } ${dayShifts.length > 0 ? 'cursor-pointer hover:border-accent' : ''}`}
               onClick={() => dayShifts.length > 0 && onCellClick(d)}
             >
               <div className="flex items-center justify-between mb-1">
@@ -546,8 +546,8 @@ function MonthGrid({
                   <td key={d} className="p-1 align-top">
                     <div
                       className={`rounded-lg border p-2 min-h-[60px] md:min-h-[90px] transition flex flex-col ${
-                        isToday ? 'border-black border-2' : ''
-                      } ${dayShifts.length > 0 ? 'cursor-pointer hover:border-black' : ''}`}
+                        isToday ? 'border-accent border-2' : ''
+                      } ${dayShifts.length > 0 ? 'cursor-pointer hover:border-accent' : ''}`}
                       onClick={() => dayShifts.length > 0 && onCellClick(d)}
                     >
                       <div className="flex items-center justify-between mb-1">

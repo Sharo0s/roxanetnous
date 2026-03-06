@@ -32,7 +32,7 @@ export default async function PlanningEquipePage() {
   ])
 
   return (
-    <main className="min-h-screen bg-gray-50">
+    <main className="min-h-screen kraft bg-kraft">
       <BeneficiaireHeader
         userId={user.id}
         unreadCount={unreadCount}
@@ -42,12 +42,12 @@ export default async function PlanningEquipePage() {
         hasPlanningSubscription
       />
 
-      <div className="max-w-3xl mx-auto px-4 py-8">
+      <div className="max-w-3xl mx-auto px-4 py-8 relative z-10">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-bold text-gray-900">Mon equipe</h2>
           <Link
             href="/beneficiaire/planning"
-            className="px-4 py-2 border rounded-lg hover:border-black transition text-sm font-medium"
+            className="px-4 py-2 border rounded-lg hover:border-accent transition text-sm font-medium"
           >
             Retour au planning
           </Link>

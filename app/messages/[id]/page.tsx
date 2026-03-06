@@ -3,6 +3,9 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { ChatWindow } from '@/components/messages/chat-window'
 import { markMessagesAsRead } from '@/app/actions/messages'
+import { AuxiliaireHeader } from '@/components/layout/auxiliaire-header'
+import { BeneficiaireHeader } from '@/components/layout/beneficiaire-header'
+import { getUnreadCount } from '@/lib/unread-count'
 
 export default async function ConversationPage({
   params,
@@ -56,6 +59,21 @@ export default async function ConversationPage({
     ? benProfile?.users
     : auxProfile?.users
 
+  // Recuperer le lien profil de l'interlocuteur (si auxiliaire)
+  let otherProfileUrl: string | null = null
+  if (userData.role === 'beneficiaire' && conversation.auxiliaire_id) {
+    const { data: auxAnnonce } = await supabase
+      .from('annonces_auxiliaires')
+      .select('id')
+      .eq('auxiliaire_id', conversation.auxiliaire_id)
+      .eq('status', 'publiee')
+      .limit(1)
+      .single()
+    if (auxAnnonce) {
+      otherProfileUrl = `/recherche/${auxAnnonce.id}`
+    }
+  }
+
   // Recuperer les messages existants
   const { data: messages } = await supabase
     .from('messages')
@@ -66,30 +84,53 @@ export default async function ConversationPage({
   // Marquer les messages comme lus
   await markMessagesAsRead(id)
 
-  const dashboardUrl = userData.role === 'auxiliaire' ? '/auxiliaire/dashboard' : '/beneficiaire/dashboard'
+  const unreadCount = await getUnreadCount(user.id)
 
   return (
-    <main className="min-h-screen bg-gray-50 flex flex-col">
-      <header className="bg-white border-b">
-        <div className="max-w-3xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Link href="/messages" className="text-sm text-gray-500 hover:text-black">
-              Retour
-            </Link>
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-xs font-bold text-gray-600">
-                {otherUser?.first_name?.[0]}{otherUser?.last_name?.[0]}
-              </div>
-              <span className="font-medium text-gray-900">
-                {otherUser?.first_name} {otherUser?.last_name}
-              </span>
-            </div>
-          </div>
-          <Link href={dashboardUrl} className="text-xl font-bold text-black">
-            roxanetnous
+    <main className="min-h-screen kraft bg-kraft flex flex-col">
+      {userData.role === 'auxiliaire' ? (
+        <AuxiliaireHeader
+          userId={user.id}
+          unreadCount={unreadCount}
+          firstName={userData.first_name}
+          lastName={userData.last_name}
+          currentPage="messages"
+        />
+      ) : (
+        <BeneficiaireHeader
+          userId={user.id}
+          unreadCount={unreadCount}
+          firstName={userData.first_name}
+          lastName={userData.last_name}
+          currentPage="messages"
+        />
+      )}
+
+      <div className="relative z-10">
+        <div className="max-w-3xl mx-auto px-4 py-3 flex items-center gap-2">
+          <Link href="/messages" className="inline-flex items-center gap-2 px-4 h-[52px] bg-accent text-black rounded-xl text-base font-medium btn-hover transition">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+            Messages
           </Link>
+          {otherProfileUrl ? (
+            <Link href={otherProfileUrl} className="inline-flex items-center gap-3 px-4 h-[52px] bg-black text-white rounded-xl text-base font-medium hover:bg-gray-800 transition">
+              <span className="w-9 h-9 rounded-full bg-gray-600 flex items-center justify-center text-sm font-bold text-white">
+                {otherUser?.first_name?.[0]}{otherUser?.last_name?.[0]}
+              </span>
+              {otherUser?.first_name} {otherUser?.last_name}
+            </Link>
+          ) : (
+            <span className="inline-flex items-center gap-3 px-4 h-[52px] bg-black text-white rounded-xl text-base font-medium">
+              <span className="w-9 h-9 rounded-full bg-gray-600 flex items-center justify-center text-sm font-bold text-white">
+                {otherUser?.first_name?.[0]}{otherUser?.last_name?.[0]}
+              </span>
+              {otherUser?.first_name} {otherUser?.last_name}
+            </span>
+          )}
         </div>
-      </header>
+      </div>
 
       <ChatWindow
         conversationId={id}

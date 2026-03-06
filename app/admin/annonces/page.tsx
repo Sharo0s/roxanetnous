@@ -45,16 +45,16 @@ export default async function AdminAnnoncesPage({
         <div className="flex gap-2 mb-6">
           <Link
             href="/admin/annonces?type=auxiliaire"
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
-              type === 'auxiliaire' ? 'bg-black text-white' : 'bg-white border border-gray-300 text-gray-700 hover:border-black'
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition btn-hover ${
+              type === 'auxiliaire' ? 'bg-accent text-black' : 'bg-white border border-gray-300 text-gray-700 hover:border-accent'
             }`}
           >
             Auxiliaires ({type === 'auxiliaire' ? annonces.length : '...'})
           </Link>
           <Link
             href="/admin/annonces?type=beneficiaire"
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
-              type === 'beneficiaire' ? 'bg-black text-white' : 'bg-white border border-gray-300 text-gray-700 hover:border-black'
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition btn-hover ${
+              type === 'beneficiaire' ? 'bg-accent text-black' : 'bg-white border border-gray-300 text-gray-700 hover:border-accent'
             }`}
           >
             Beneficiaires ({type === 'beneficiaire' ? annonces.length : '...'})
@@ -68,7 +68,7 @@ export default async function AdminAnnoncesPage({
         ) : (
           <div className="bg-white rounded-xl border overflow-hidden">
             <table className="w-full text-sm">
-              <thead className="bg-gray-50 border-b">
+              <thead className="bg-accent/20 border-b">
                 <tr>
                   <th className="text-left px-4 py-3 font-medium text-gray-500">Titre</th>
                   <th className="text-left px-4 py-3 font-medium text-gray-500">Auteur</th>
@@ -86,7 +86,7 @@ export default async function AdminAnnoncesPage({
                   const u = (profileData as any)?.users
 
                   return (
-                    <tr key={annonce.id} className="border-b last:border-0 hover:bg-gray-50">
+                    <tr key={annonce.id} className="border-b last:border-0 hover:bg-accent/10">
                       <td className="px-4 py-3">
                         <p className="font-medium text-gray-900 line-clamp-1">{annonce.titre}</p>
                       </td>
@@ -98,7 +98,7 @@ export default async function AdminAnnoncesPage({
                       </td>
                       <td className="px-4 py-3">
                         <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                          annonce.status === 'publiee' ? 'bg-black text-white' :
+                          annonce.status === 'publiee' ? 'bg-accent text-black' :
                           annonce.status === 'suspendue' ? 'bg-red-100 text-red-700' :
                           'bg-gray-200 text-gray-600'
                         }`}>

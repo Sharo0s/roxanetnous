@@ -132,7 +132,7 @@ export function PlanningDayView({
             <button
               key={`${item.auxId}-${item.debut}-${i}`}
               onClick={() => onCellClick(item.auxId, dateStr)}
-              className="w-full bg-white rounded-xl border p-4 text-left hover:border-black transition flex items-center gap-4"
+              className="w-full bg-white rounded-xl border p-4 text-left hover:border-accent transition flex items-center gap-4"
               style={{ borderLeftWidth: 4, borderLeftColor: item.couleur }}
             >
               <div className="text-right min-w-[90px]">
@@ -159,7 +159,7 @@ export function PlanningDayView({
       {/* Bouton ajouter */}
       <button
         onClick={openAddPopup}
-        className="w-full py-3 border border-dashed rounded-xl text-sm font-medium text-black hover:border-black transition"
+        className="w-full py-3 border border-dashed rounded-xl text-sm font-medium text-black hover:border-accent transition"
       >
         + Ajouter un creneau
       </button>
@@ -182,7 +182,7 @@ export function PlanningDayView({
                 {popup.entries.map(entry => (
                   <button
                     key={entry.auxId}
-                    className="w-full text-left p-3 rounded-lg border hover:border-black transition"
+                    className="w-full text-left p-3 rounded-lg border hover:border-accent transition"
                     onClick={() => {
                       setPopup(null)
                       onCellClick(entry.auxId, popup.date)
@@ -212,7 +212,7 @@ export function PlanningDayView({
                   {popup.available.map(aux => (
                     <button
                       key={aux.auxId}
-                      className="w-full text-left p-3 rounded-lg border border-dashed hover:border-black transition flex items-center gap-2"
+                      className="w-full text-left p-3 rounded-lg border border-dashed hover:border-accent transition flex items-center gap-2"
                       onClick={() => {
                         setPopup(null)
                         onCellClick(aux.auxId, popup.date)

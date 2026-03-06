@@ -112,7 +112,7 @@ export function PlanningDocumentsClient({
             <input
               ref={fileRef}
               type="file"
-              className="block w-full text-sm border rounded-lg px-3 py-2 file:mr-4 file:py-1 file:px-3 file:rounded-lg file:border file:text-sm file:font-medium file:bg-black file:text-white hover:file:bg-gray-800"
+              className="block w-full text-sm border rounded-lg px-3 py-2 file:mr-4 file:py-1 file:px-3 file:rounded-lg file:border file:text-sm file:font-medium file:bg-accent file:text-black"
             />
           </div>
 
@@ -131,7 +131,7 @@ export function PlanningDocumentsClient({
                     className={`px-3 py-1.5 text-sm rounded-lg border transition ${
                       selectedAuxIds.has(member.auxiliaire_user_id)
                         ? 'text-white border-transparent'
-                        : 'hover:border-black'
+                        : 'hover:border-accent'
                     }`}
                     style={selectedAuxIds.has(member.auxiliaire_user_id)
                       ? { backgroundColor: member.couleur, borderColor: member.couleur }
@@ -148,7 +148,7 @@ export function PlanningDocumentsClient({
           <button
             onClick={handleUpload}
             disabled={uploading}
-            className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition text-sm font-medium disabled:opacity-50"
+            className="px-4 py-2 bg-accent text-black rounded-lg btn-hover transition text-sm font-medium disabled:opacity-50"
           >
             {uploading ? 'Envoi en cours...' : 'Envoyer'}
           </button>

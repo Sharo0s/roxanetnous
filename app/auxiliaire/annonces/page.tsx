@@ -38,7 +38,7 @@ export default async function MesAnnoncesAuxiliaire() {
     .order('created_at', { ascending: false })
 
   return (
-    <main className="min-h-screen bg-gray-50">
+    <main className="min-h-screen kraft bg-kraft">
       <AuxiliaireHeader
         userId={user.id}
         unreadCount={unreadCount}
@@ -47,13 +47,13 @@ export default async function MesAnnoncesAuxiliaire() {
         currentPage="annonces"
       />
 
-      <div className="max-w-5xl mx-auto px-4 py-8">
+      <div className="max-w-5xl mx-auto px-4 py-8 relative z-10">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-bold text-gray-900">Mes annonces</h2>
           {subscribed && (
             <Link
               href="/auxiliaire/annonces/nouvelle"
-              className="inline-flex items-center px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition text-sm font-medium"
+              className="inline-flex items-center px-4 py-2 bg-accent text-black rounded-lg btn-hover transition text-sm font-medium"
             >
               Nouvelle annonce
             </Link>
@@ -61,14 +61,14 @@ export default async function MesAnnoncesAuxiliaire() {
         </div>
 
         {!subscribed && (
-          <div className="bg-white rounded-xl border-2 border-black p-6 mb-6">
+          <div className="bg-white rounded-xl border-2 border-accent p-6 mb-6">
             <h3 className="font-semibold text-lg mb-2">Abonnement requis</h3>
             <p className="text-gray-600 mb-4">
               Souscrivez un abonnement pour publier vos annonces.
             </p>
             <Link
               href="/auxiliaire/abonnement"
-              className="inline-flex items-center px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition text-sm font-medium"
+              className="inline-flex items-center px-4 py-2 bg-accent text-black rounded-lg btn-hover transition text-sm font-medium"
             >
               Voir les offres
             </Link>
@@ -81,7 +81,7 @@ export default async function MesAnnoncesAuxiliaire() {
             {subscribed && (
               <Link
                 href="/auxiliaire/annonces/nouvelle"
-                className="inline-flex items-center px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition text-sm font-medium"
+                className="inline-flex items-center px-4 py-2 bg-accent text-black rounded-lg btn-hover transition text-sm font-medium"
               >
                 Creer ma premiere annonce
               </Link>
@@ -96,7 +96,7 @@ export default async function MesAnnoncesAuxiliaire() {
                     <div className="flex items-center gap-3 mb-1">
                       <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
                         annonce.status === 'publiee'
-                          ? 'bg-black text-white'
+                          ? 'bg-accent text-black'
                           : 'bg-gray-200 text-gray-600'
                       }`}>
                         {annonce.status === 'publiee' ? 'Publiee' : 'Archivee'}
@@ -115,7 +115,7 @@ export default async function MesAnnoncesAuxiliaire() {
                   <div className="flex items-center gap-2">
                     <Link
                       href={`/auxiliaire/annonces/${annonce.id}/modifier`}
-                      className="px-3 py-1.5 border border-gray-300 text-gray-700 rounded-lg hover:border-black transition text-sm"
+                      className="px-3 py-1.5 border border-gray-300 text-gray-700 rounded-lg hover:border-accent transition text-sm"
                     >
                       Modifier
                     </Link>

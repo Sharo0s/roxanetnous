@@ -115,7 +115,7 @@ export default async function AnnonceDetailPage({
   const dispos = (annonce.disponibilites || profile?.disponibilites || {}) as Record<string, string[]>
 
   return (
-    <main className="min-h-screen bg-gray-50">
+    <main className="min-h-screen kraft bg-kraft">
       {userData?.role === 'auxiliaire' && user ? (
         <AuxiliaireHeader
           userId={user.id}
@@ -145,7 +145,7 @@ export default async function AnnonceDetailPage({
         </header>
       )}
 
-      <div className="max-w-4xl mx-auto px-4 py-8">
+      <div className="max-w-4xl mx-auto px-4 py-8 relative z-10">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-4">
             <div className="w-14 h-14 rounded-full bg-gray-200 flex items-center justify-center text-lg font-bold text-gray-600">
@@ -158,7 +158,7 @@ export default async function AnnonceDetailPage({
                 </h2>
                 <BadgesDisplay badges={badgesMap[auxUserId]} />
               </div>
-              <p className="text-gray-500">
+              <p className="text-black">
                 {diplomeLabel} — Experience : {expLabel}
                 {moyenneNote !== null && ` — ${moyenneNote.toFixed(1)}/5 (${avisFormatted.length} avis)`}
               </p>
@@ -187,7 +187,7 @@ export default async function AnnonceDetailPage({
               <h3 className="font-semibold mb-3">Specialites ({specLabels.length})</h3>
               <div className="flex flex-wrap gap-2">
                 {specLabels.map((label: string, i: number) => (
-                  <span key={i} className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-xs font-medium">
+                  <span key={i} className="px-3 py-1 bg-accent text-black rounded-full text-xs font-medium">
                     {label}
                   </span>
                 ))}
@@ -218,7 +218,7 @@ export default async function AnnonceDetailPage({
                             return (
                               <td key={creneau.value} className="py-2 px-2 text-center">
                                 <div className={`w-8 h-8 mx-auto rounded-md border flex items-center justify-center ${
-                                  available ? 'border-black bg-white text-black' : 'border-gray-200 bg-gray-50'
+                                  available ? 'border-accent bg-white text-black' : 'border-gray-200 bg-gray-50'
                                 }`}>
                                   {available && (
                                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -291,7 +291,7 @@ export default async function AnnonceDetailPage({
                 </p>
                 <Link
                   href="/register"
-                  className="inline-flex items-center px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition text-sm font-medium w-full justify-center"
+                  className="inline-flex items-center px-4 py-2 bg-accent text-black rounded-lg btn-hover transition text-sm font-medium w-full justify-center"
                 >
                   Creer un compte
                 </Link>

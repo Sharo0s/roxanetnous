@@ -106,7 +106,7 @@ export function PlanningEquipeClient({
                 value={member.couleur}
                 onChange={e => handleColorInput(member.auxiliaire_user_id, e.target.value)}
                 onBlur={e => handleColorCommit(member.auxiliaire_user_id, e.target.value)}
-                className="w-8 h-8 rounded-full cursor-pointer border-2 border-gray-200 hover:border-black transition p-0"
+                className="w-8 h-8 rounded-full cursor-pointer border-2 border-gray-200 hover:border-accent transition p-0"
               />
 
               {/* Nom */}
@@ -122,13 +122,13 @@ export function PlanningEquipeClient({
               {/* Actions */}
               <button
                 onClick={() => handleToggle(member.auxiliaire_user_id)}
-                className="px-3 py-1.5 text-xs font-medium border rounded-lg hover:border-black transition"
+                className="px-3 py-1.5 text-xs font-medium border rounded-lg hover:border-accent transition"
               >
                 {member.actif ? 'Desactiver' : 'Activer'}
               </button>
               <button
                 onClick={() => handleRemove(member.auxiliaire_user_id)}
-                className="px-3 py-1.5 text-xs font-medium text-gray-500 border rounded-lg hover:border-black hover:text-black transition"
+                className="px-3 py-1.5 text-xs font-medium text-gray-500 border rounded-lg hover:border-accent hover:text-black transition"
               >
                 Retirer
               </button>
@@ -167,7 +167,7 @@ export function PlanningEquipeClient({
             <button
               onClick={handleAdd}
               disabled={!selectedAux || loading}
-              className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition text-sm font-medium disabled:opacity-50"
+              className="px-4 py-2 bg-accent text-black rounded-lg btn-hover transition text-sm font-medium disabled:opacity-50"
             >
               {loading ? '...' : 'Ajouter'}
             </button>

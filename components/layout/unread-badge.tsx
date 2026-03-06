@@ -42,7 +42,7 @@ export function UnreadBadge({ userId, initialCount }: Props) {
     <Link href="/messages" className="relative text-sm text-gray-600 hover:text-black">
       Messages
       {count > 0 && (
-        <span className="absolute -top-1.5 -right-3 w-4 h-4 rounded-full bg-black text-white text-[10px] flex items-center justify-center font-medium">
+        <span className="absolute -top-1.5 -right-3 w-4 h-4 rounded-full bg-accent text-black text-[10px] flex items-center justify-center font-medium">
           {count > 9 ? '9+' : count}
         </span>
       )}

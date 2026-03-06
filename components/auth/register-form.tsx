@@ -88,25 +88,25 @@ export function RegisterForm() {
 
   if (emailSent) {
     return (
-      <main className="min-h-screen flex items-center justify-center p-4 bg-gray-50">
-        <div className="w-full max-w-md text-center">
+      <main className="min-h-screen flex items-center justify-center p-4 kraft bg-kraft">
+        <div className="w-full max-w-md text-center relative z-10">
           <Link href="/" className="text-3xl font-bold text-black">
             roxanetnous
           </Link>
-          <div className="mt-8 bg-white p-8 rounded-xl shadow-sm border">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">
+          <div className="mt-8 bg-white p-8 rounded-xl shadow-sm border border-accent">
+            <h2 className="text-xl font-semibold text-black mb-4">
               Verifiez votre email
             </h2>
             <p className="text-gray-600 mb-2">
               Un email de confirmation a ete envoye a :
             </p>
             <p className="font-medium text-black mb-6">{email}</p>
-            <p className="text-sm text-gray-500 mb-6">
+            <p className="text-sm text-black/50 mb-6">
               Cliquez sur le lien dans le mail pour activer votre compte, puis connectez-vous.
             </p>
             <Link
               href="/login"
-              className="inline-block px-6 py-2.5 bg-black text-white rounded-lg text-sm font-medium hover:bg-gray-800 transition"
+              className="inline-block px-6 py-2.5 bg-accent text-black rounded-lg text-sm font-medium btn-hover transition"
             >
               Aller a la page de connexion
             </Link>
@@ -117,8 +117,8 @@ export function RegisterForm() {
   }
 
   return (
-    <main className="min-h-screen flex items-center justify-center p-4 bg-gray-50">
-      <div className="w-full max-w-md">
+    <main className="min-h-screen flex items-center justify-center p-4 kraft bg-kraft">
+      <div className="w-full max-w-md relative z-10">
         <div className="text-center mb-8">
           <Link href="/" className="text-3xl font-bold text-black">
             roxanetnous
@@ -144,12 +144,12 @@ export function RegisterForm() {
                 onClick={() => selectRole('auxiliaire')}
                 className={`p-4 rounded-lg border-2 text-left transition ${
                   role === 'auxiliaire'
-                    ? 'border-black bg-black text-white'
-                    : 'border-gray-200 hover:border-gray-400'
+                    ? 'border-accent bg-accent text-black'
+                    : 'border-gray-200 hover:border-accent'
                 }`}
               >
                 <p className="font-semibold text-sm">Vos competences meritent que vous soyez trouve(e)</p>
-                <p className={`text-xs mt-1 ${role === 'auxiliaire' ? 'text-gray-300' : 'text-gray-500'}`}>
+                <p className={`text-xs mt-1 ${role === 'auxiliaire' ? 'text-black/50' : 'text-gray-500'}`}>
                   Au bon moment, au bon endroit
                 </p>
               </button>
@@ -158,12 +158,12 @@ export function RegisterForm() {
                 onClick={() => selectRole('beneficiaire')}
                 className={`p-4 rounded-lg border-2 text-left transition ${
                   role === 'beneficiaire'
-                    ? 'border-black bg-black text-white'
-                    : 'border-gray-200 hover:border-gray-400'
+                    ? 'border-accent bg-accent text-black'
+                    : 'border-gray-200 hover:border-accent'
                 }`}
               >
                 <p className="font-semibold text-sm">Choisissez votre accompagnant(e)</p>
-                <p className={`text-xs mt-1 ${role === 'beneficiaire' ? 'text-gray-300' : 'text-gray-500'}`}>
+                <p className={`text-xs mt-1 ${role === 'beneficiaire' ? 'text-black/50' : 'text-gray-500'}`}>
                   On s'occupe de tout
                 </p>
               </button>

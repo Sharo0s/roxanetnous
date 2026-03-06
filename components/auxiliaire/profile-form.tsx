@@ -246,7 +246,7 @@ export function AuxiliaireProfileForm({ userInfo, profile }: Props) {
             disabled={uploadingCv}
             className={`w-full p-4 rounded-lg border-2 border-dashed transition text-sm ${
               cvFileName
-                ? 'border-black bg-gray-50'
+                ? 'border-accent bg-gray-50'
                 : 'border-gray-300 hover:border-gray-500'
             }`}
           >
@@ -269,7 +269,7 @@ export function AuxiliaireProfileForm({ userInfo, profile }: Props) {
                   <label
                     className={`flex items-center p-3 rounded-lg border cursor-pointer transition ${
                       isSelected
-                        ? 'border-black bg-gray-50'
+                        ? 'border-accent bg-gray-50'
                         : 'border-gray-200 hover:border-gray-400'
                     }`}
                   >
@@ -308,7 +308,7 @@ export function AuxiliaireProfileForm({ userInfo, profile }: Props) {
                         disabled={uploadingDiplome === d.value}
                         className={`w-full rounded-lg border-2 border-dashed px-4 py-3 text-sm transition ${
                           diplomeFileNames[d.value]
-                            ? 'border-black bg-gray-50 text-gray-700'
+                            ? 'border-accent bg-gray-50 text-gray-700'
                             : 'border-gray-300 text-gray-500 hover:border-gray-400'
                         }`}
                       >
@@ -351,7 +351,7 @@ export function AuxiliaireProfileForm({ userInfo, profile }: Props) {
               onClick={() => toggleSpecialite(spec.value)}
               className={`px-3 py-1.5 rounded-full text-sm border transition ${
                 specialites.includes(spec.value)
-                  ? 'bg-black text-white border-black'
+                  ? 'bg-accent text-black border-accent'
                   : 'bg-white text-gray-700 border-gray-300 hover:border-gray-400'
               }`}
             >
@@ -461,7 +461,7 @@ export function AuxiliaireProfileForm({ userInfo, profile }: Props) {
                           onClick={() => toggleDispo(jour.value, creneau.value)}
                           className={`w-8 h-8 rounded-md border transition ${
                             isSelected
-                              ? 'bg-black border-black text-white'
+                              ? 'bg-accent border-accent text-black'
                               : 'bg-white border-gray-300 hover:border-gray-400'
                           }`}
                         >
@@ -489,7 +489,7 @@ export function AuxiliaireProfileForm({ userInfo, profile }: Props) {
       </div>
 
       {success && (
-        <div className="p-4 rounded-lg bg-black text-white text-sm font-medium">
+        <div className="p-4 rounded-lg bg-accent text-black text-sm font-medium">
           Profil mis a jour avec succes.
         </div>
       )}

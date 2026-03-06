@@ -17,8 +17,8 @@ export default async function PlanningAbonnementSuccessPage() {
   if (!userData || userData.role !== 'beneficiaire') redirect('/')
 
   return (
-    <main className="min-h-screen bg-gray-50 flex items-center justify-center">
-      <div className="max-w-md mx-auto px-4 text-center">
+    <main className="min-h-screen kraft bg-kraft flex items-center justify-center">
+      <div className="max-w-md mx-auto px-4 text-center relative z-10">
         <div className="bg-white rounded-xl border p-8">
           <h1 className="text-2xl font-bold text-gray-900 mb-4">Module Planning active</h1>
           <p className="text-gray-600 mb-6">
@@ -27,13 +27,13 @@ export default async function PlanningAbonnementSuccessPage() {
           <div className="flex flex-col gap-3">
             <Link
               href="/beneficiaire/planning"
-              className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition text-sm font-medium"
+              className="px-4 py-2 bg-accent text-black rounded-lg btn-hover transition text-sm font-medium"
             >
               Acceder au planning
             </Link>
             <Link
               href="/beneficiaire/dashboard"
-              className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:border-black transition text-sm font-medium"
+              className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:border-accent transition text-sm font-medium"
             >
               Retour au tableau de bord
             </Link>

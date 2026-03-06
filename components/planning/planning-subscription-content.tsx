@@ -21,7 +21,7 @@ export function PlanningSubscriptionContent({
         <div className="bg-white rounded-xl border p-6">
           <div className="flex items-center gap-3 mb-4">
             <h3 className="font-semibold text-lg">Module Planning actif</h3>
-            <span className="px-2 py-1 rounded-full text-xs font-medium bg-black text-white">
+            <span className="px-2 py-1 rounded-full text-xs font-medium bg-accent text-black">
               {subscription.status === 'trialing' ? 'Essai gratuit' : 'Actif'}
             </span>
           </div>
@@ -52,7 +52,7 @@ export function PlanningSubscriptionContent({
           <form action={createPlanningPortalSession}>
             <button
               type="submit"
-              className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition text-sm font-medium"
+              className="px-4 py-2 bg-accent text-black rounded-lg btn-hover transition text-sm font-medium"
             >
               Gerer mon abonnement
             </button>
@@ -62,7 +62,7 @@ export function PlanningSubscriptionContent({
             <form action={cancelPlanningSubscription}>
               <button
                 type="submit"
-                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:border-black transition text-sm font-medium"
+                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:border-accent transition text-sm font-medium"
               >
                 Annuler
               </button>
@@ -99,7 +99,7 @@ export function PlanningSubscriptionContent({
               <input type="hidden" name="plan" value="mensuel" />
               <button
                 type="submit"
-                className="w-full px-4 py-3 border-2 border-black text-black rounded-lg hover:bg-gray-100 transition text-sm font-medium"
+                className="w-full px-4 py-3 border-2 border-accent text-black rounded-lg btn-hover transition text-sm font-medium"
               >
                 S&apos;abonner
               </button>
@@ -107,8 +107,8 @@ export function PlanningSubscriptionContent({
           </div>
 
           {/* Annuel */}
-          <div className="rounded-xl border-2 border-black p-6 flex flex-col relative">
-            <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-black text-white text-xs px-3 py-1 rounded-full font-medium">
+          <div className="rounded-xl border-2 border-accent p-6 flex flex-col relative">
+            <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-accent text-black text-xs px-3 py-1 rounded-full font-medium">
               2 mois offerts
             </div>
             <h3 className="font-semibold text-lg mb-1">Annuel</h3>
@@ -128,7 +128,7 @@ export function PlanningSubscriptionContent({
               <input type="hidden" name="plan" value="annuel" />
               <button
                 type="submit"
-                className="w-full px-4 py-3 bg-black text-white rounded-lg hover:bg-gray-800 transition text-sm font-medium"
+                className="w-full px-4 py-3 bg-accent text-black rounded-lg btn-hover transition text-sm font-medium"
               >
                 S&apos;abonner
               </button>

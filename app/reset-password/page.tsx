@@ -25,8 +25,8 @@ export default function ResetPasswordPage() {
   }
 
   return (
-    <main className="min-h-screen flex items-center justify-center p-4 bg-gray-50">
-      <div className="w-full max-w-md">
+    <main className="min-h-screen flex items-center justify-center p-4 kraft bg-kraft">
+      <div className="w-full max-w-md relative z-10">
         <div className="text-center mb-8">
           <Link href="/" className="text-3xl font-bold text-black">
             roxanetnous
@@ -42,7 +42,7 @@ export default function ResetPasswordPage() {
             </p>
             <Link
               href="/login"
-              className="inline-flex items-center px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition text-sm font-medium"
+              className="inline-flex items-center px-4 py-2 bg-accent text-black rounded-lg btn-hover transition text-sm font-medium"
             >
               Se connecter
             </Link>

@@ -35,7 +35,7 @@ export default async function AdminUtilisateursPage() {
         ) : (
           <div className="bg-white rounded-xl border overflow-hidden">
             <table className="w-full text-sm">
-              <thead className="bg-gray-50 border-b">
+              <thead className="bg-accent/20 border-b">
                 <tr>
                   <th className="text-left px-4 py-3 font-medium text-gray-500">Nom</th>
                   <th className="text-left px-4 py-3 font-medium text-gray-500">Email</th>
@@ -45,7 +45,7 @@ export default async function AdminUtilisateursPage() {
               </thead>
               <tbody>
                 {users.map((u) => (
-                  <tr key={u.id} className="border-b last:border-0 hover:bg-gray-50">
+                  <tr key={u.id} className="border-b last:border-0 hover:bg-accent/10">
                     <td className="px-4 py-3 font-medium text-gray-900">
                       {u.first_name} {u.last_name}
                     </td>
@@ -53,7 +53,7 @@ export default async function AdminUtilisateursPage() {
                     <td className="px-4 py-3">
                       <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
                         u.role === 'admin'
-                          ? 'bg-gray-800 text-white'
+                          ? 'bg-accent text-black'
                           : u.role === 'auxiliaire'
                             ? 'bg-gray-200 text-gray-700'
                             : 'bg-gray-100 text-gray-600'

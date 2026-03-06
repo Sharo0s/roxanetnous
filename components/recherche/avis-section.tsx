@@ -96,7 +96,7 @@ export function AvisSection({ cibleUserId, avisList, moyenneNote, canLeaveAvis }
                   onClick={() => setNote(n)}
                   className={`w-10 h-10 rounded-lg border text-sm font-medium transition ${
                     n <= note
-                      ? 'bg-black text-white border-black'
+                      ? 'bg-accent text-black border-accent'
                       : 'bg-white text-gray-400 border-gray-300 hover:border-gray-400'
                   }`}
                 >
@@ -120,7 +120,7 @@ export function AvisSection({ cibleUserId, avisList, moyenneNote, canLeaveAvis }
           <button
             onClick={handleSubmit}
             disabled={loading}
-            className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition text-sm font-medium disabled:opacity-50"
+            className="px-4 py-2 bg-accent text-black rounded-lg transition text-sm font-medium disabled:opacity-50 btn-hover"
           >
             {loading ? 'Envoi...' : 'Publier l\'avis'}
           </button>
@@ -143,7 +143,7 @@ export function AvisSection({ cibleUserId, avisList, moyenneNote, canLeaveAvis }
                       <div
                         key={n}
                         className={`w-3 h-3 rounded-sm ${
-                          n <= avis.note ? 'bg-black' : 'bg-gray-200'
+                          n <= avis.note ? 'bg-accent' : 'bg-gray-200'
                         }`}
                       />
                     ))}

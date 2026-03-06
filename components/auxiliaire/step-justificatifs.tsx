@@ -51,7 +51,7 @@ export function StepJustificatifs({ onUpload }: Props) {
           disabled={uploading}
           className={`w-full p-4 rounded-lg border-2 border-dashed transition text-sm ${
             identiteFile
-              ? 'border-black bg-gray-50'
+              ? 'border-accent bg-gray-50'
               : 'border-gray-300 hover:border-gray-500'
           }`}
         >

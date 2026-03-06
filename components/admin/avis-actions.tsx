@@ -25,7 +25,7 @@ export function AdminAvisActions({ avisId, isMasque }: Props) {
     <button
       onClick={handleAction}
       disabled={loading}
-      className="px-2 py-1 text-xs border border-gray-300 rounded hover:border-black transition whitespace-nowrap"
+      className="px-2 py-1 text-xs border border-gray-300 rounded hover:border-accent transition btn-hover whitespace-nowrap"
     >
       {loading ? '...' : isMasque ? 'Demasquer' : 'Masquer'}
     </button>

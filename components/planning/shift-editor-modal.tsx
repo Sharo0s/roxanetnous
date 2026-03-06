@@ -157,7 +157,7 @@ export function ShiftEditorModal({
           <button
             onClick={handleSave}
             disabled={saving}
-            className="flex-1 px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition text-sm font-medium disabled:opacity-50"
+            className="flex-1 px-4 py-2 bg-accent text-black rounded-lg btn-hover transition text-sm font-medium disabled:opacity-50"
           >
             {saving ? '...' : 'Enregistrer'}
           </button>
@@ -165,7 +165,7 @@ export function ShiftEditorModal({
             <button
               onClick={handleDelete}
               disabled={saving}
-              className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:border-black transition text-sm font-medium disabled:opacity-50"
+              className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:border-accent transition text-sm font-medium disabled:opacity-50"
             >
               Supprimer
             </button>

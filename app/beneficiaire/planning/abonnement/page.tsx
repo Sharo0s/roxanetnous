@@ -27,7 +27,7 @@ export default async function PlanningAbonnementPage() {
   const unreadCount = await getUnreadCount(user.id)
 
   return (
-    <main className="min-h-screen bg-gray-50">
+    <main className="min-h-screen kraft bg-kraft">
       <BeneficiaireHeader
         userId={user.id}
         unreadCount={unreadCount}
@@ -36,7 +36,7 @@ export default async function PlanningAbonnementPage() {
         currentPage="other"
       />
 
-      <div className="max-w-2xl mx-auto px-4 py-8">
+      <div className="max-w-2xl mx-auto px-4 py-8 relative z-10">
         <h2 className="text-2xl font-bold text-gray-900 mb-6">Module Planning</h2>
         <PlanningSubscriptionContent subscription={planningSubscription} />
       </div>

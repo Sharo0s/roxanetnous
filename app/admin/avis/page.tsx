@@ -71,7 +71,7 @@ function AvisCard({ avis, showActions, adminId }: { avis: any; showActions: bool
           <div className="flex items-center gap-2 mb-1">
             <div className="flex gap-0.5">
               {[1, 2, 3, 4, 5].map((n) => (
-                <div key={n} className={`w-3 h-3 rounded-sm ${n <= avis.note ? 'bg-black' : 'bg-gray-200'}`} />
+                <div key={n} className={`w-3 h-3 rounded-sm ${n <= avis.note ? 'bg-accent' : 'bg-gray-200'}`} />
               ))}
             </div>
             {avis.signale && (

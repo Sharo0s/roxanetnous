@@ -25,7 +25,7 @@ export function BeneficiaireHeader({
   const [menuOpen, setMenuOpen] = useState(false)
 
   return (
-    <header className="bg-white border-b">
+    <header className="bg-white border-b border-accent relative z-10">
       <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
         <Link href="/beneficiaire/dashboard" className="text-xl font-bold text-black">
           roxanetnous
@@ -75,7 +75,7 @@ export function BeneficiaireHeader({
 
       {/* Menu mobile */}
       {menuOpen && (
-        <div className="md:hidden border-t px-4 py-3 flex flex-col gap-3">
+        <div className="md:hidden border-t border-accent px-4 py-3 flex flex-col gap-3">
           <span className="text-sm font-medium text-black">
             {firstName} {lastName}
           </span>

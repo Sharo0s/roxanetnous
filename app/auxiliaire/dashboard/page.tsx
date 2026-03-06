@@ -73,7 +73,7 @@ export default async function AuxiliaireDashboard() {
   }
 
   return (
-    <main className="min-h-screen bg-gray-50">
+    <main className="min-h-screen kraft bg-kraft">
       <AuxiliaireHeader
         userId={user.id}
         unreadCount={unreadCount}
@@ -83,7 +83,7 @@ export default async function AuxiliaireDashboard() {
         hasPlanning={hasPlanning}
       />
 
-      <div className="max-w-5xl mx-auto px-4 py-8">
+      <div className="max-w-5xl mx-auto px-4 py-8 relative z-10">
         <h2 className="text-2xl font-bold text-gray-900 mb-6">
           Bonjour {userData.first_name}
         </h2>
@@ -96,7 +96,7 @@ export default async function AuxiliaireDashboard() {
             </p>
             <a
               href="/auxiliaire/onboarding"
-              className="inline-flex items-center px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition"
+              className="inline-flex items-center px-4 py-2 bg-accent text-black rounded-lg btn-hover transition"
             >
               Completer mon profil
             </a>
@@ -130,7 +130,7 @@ export default async function AuxiliaireDashboard() {
                   )}
                   <Link
                     href="/auxiliaire/profil"
-                    className="inline-flex items-center px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition text-sm font-medium mt-3"
+                    className="inline-flex items-center px-4 py-2 bg-accent text-black rounded-lg btn-hover transition text-sm font-medium mt-3"
                   >
                     Modifier mon profil
                   </Link>
@@ -148,7 +148,7 @@ export default async function AuxiliaireDashboard() {
                   )}
                   <Link
                     href="/auxiliaire/profil"
-                    className="inline-flex items-center px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition text-sm font-medium mt-3"
+                    className="inline-flex items-center px-4 py-2 bg-accent text-black rounded-lg btn-hover transition text-sm font-medium mt-3"
                   >
                     Modifier mon profil
                   </Link>
@@ -172,7 +172,7 @@ export default async function AuxiliaireDashboard() {
                       <p className="text-sm text-gray-400 mb-4">{annoncesCount} au total</p>
                       <Link
                         href="/auxiliaire/annonces"
-                        className="inline-flex items-center px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition text-sm font-medium"
+                        className="inline-flex items-center px-4 py-2 bg-accent text-black rounded-lg btn-hover transition text-sm font-medium"
                       >
                         Gerer mes annonces
                       </Link>
@@ -190,7 +190,7 @@ export default async function AuxiliaireDashboard() {
                   </p>
                   <Link
                     href="/recherche/demandes"
-                    className="inline-flex items-center px-4 py-2 border-2 border-black text-black rounded-lg hover:bg-gray-100 transition text-sm font-medium"
+                    className="inline-flex items-center px-4 py-2 bg-accent text-black rounded-lg btn-hover transition text-sm font-medium"
                   >
                     Voir les demandes
                   </Link>
@@ -205,7 +205,7 @@ export default async function AuxiliaireDashboard() {
                     <p className="text-sm text-gray-400 mb-4">Consultez vos interventions planifiees.</p>
                     <Link
                       href="/auxiliaire/planning"
-                      className="inline-flex items-center px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition text-sm font-medium"
+                      className="inline-flex items-center px-4 py-2 bg-accent text-black rounded-lg btn-hover transition text-sm font-medium"
                     >
                       Voir mon planning
                     </Link>
@@ -223,7 +223,7 @@ export default async function AuxiliaireDashboard() {
 function StatusBadge({ status }: { status: string }) {
   const styles: Record<string, string> = {
     en_attente: 'bg-gray-200 text-gray-700',
-    valide: 'bg-black text-white',
+    valide: 'bg-accent text-black',
     refuse: 'bg-red-50 text-red-800 border border-red-200',
     a_completer: 'bg-red-50 text-red-800 border border-red-200',
   }

@@ -38,7 +38,7 @@ export default async function AdminSignalementsPage() {
                           sig.status === 'en_attente'
                             ? 'bg-gray-200 text-gray-700'
                             : sig.status === 'traite'
-                              ? 'bg-black text-white'
+                              ? 'bg-accent text-black'
                               : 'bg-gray-100 text-gray-500'
                         }`}>
                           {sig.status === 'en_attente' ? 'En attente' : sig.status === 'traite' ? 'Traite' : 'Ignore'}

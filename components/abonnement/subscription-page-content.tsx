@@ -24,7 +24,7 @@ export function SubscriptionPageContent({
         <div className="bg-white rounded-xl border p-6">
           <div className="flex items-center gap-3 mb-4">
             <h3 className="font-semibold text-lg">Abonnement actif</h3>
-            <span className="px-2 py-1 rounded-full text-xs font-medium bg-black text-white">
+            <span className="px-2 py-1 rounded-full text-xs font-medium bg-accent text-black">
               {subscription.status === 'trialing' ? 'Essai gratuit' : 'Actif'}
             </span>
           </div>
@@ -55,7 +55,7 @@ export function SubscriptionPageContent({
           <form action={createPortalSession}>
             <button
               type="submit"
-              className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition text-sm font-medium"
+              className="px-4 py-2 bg-accent text-black rounded-lg btn-hover transition text-sm font-medium"
             >
               Gerer mon abonnement
             </button>
@@ -65,7 +65,7 @@ export function SubscriptionPageContent({
             <form action={cancelSubscription}>
               <button
                 type="submit"
-                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:border-black transition text-sm font-medium"
+                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:border-accent transition text-sm font-medium"
               >
                 Annuler
               </button>
@@ -79,9 +79,9 @@ export function SubscriptionPageContent({
   return (
     <div className="space-y-4">
       {launch && (
-        <div className="bg-gray-900 text-white rounded-xl p-4 text-center">
+        <div className="bg-accent text-black rounded-xl p-4 text-center">
           <p className="font-semibold">Offre de lancement</p>
-          <p className="text-sm text-gray-300 mt-1">
+          <p className="text-sm text-black/70 mt-1">
             2 mois offerts sur le mensuel, 3 mois offerts sur l'annuel
           </p>
         </div>
@@ -93,7 +93,7 @@ export function SubscriptionPageContent({
           <h3 className="font-semibold text-lg mb-1">Mensuel</h3>
           <p className="mb-1">
             <span className="text-lg text-gray-400 line-through">4,99€</span>
-            <span className="text-2xl font-bold text-green-600 ml-2">2,99€/mois</span>
+            <span className="text-2xl font-bold text-accent ml-2">2,99€/mois</span>
           </p>
           <p className="text-sm text-gray-500 mb-4">Pendant 1 mois, puis 4,99 €/mois</p>
           <ul className="space-y-2 text-sm text-gray-600 mb-6 flex-1">
@@ -110,7 +110,7 @@ export function SubscriptionPageContent({
             <input type="hidden" name="plan" value="mensuel" />
             <button
               type="submit"
-              className="w-full px-4 py-3 border-2 border-black text-black rounded-lg hover:bg-gray-100 transition text-sm font-medium"
+              className="w-full px-4 py-3 border-2 border-accent text-black rounded-lg btn-hover transition text-sm font-medium"
             >
               {launch ? 'Essayer gratuitement' : 'S\'abonner'}
             </button>
@@ -118,14 +118,14 @@ export function SubscriptionPageContent({
         </div>
 
         {/* Annuel */}
-        <div className="bg-white rounded-xl border-2 border-black p-6 flex flex-col relative">
-          <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-black text-white text-xs px-3 py-1 rounded-full font-medium">
+        <div className="bg-white rounded-xl border-2 border-accent p-6 flex flex-col relative">
+          <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-accent text-black text-xs px-3 py-1 rounded-full font-medium">
             2 mois offerts
           </div>
           <h3 className="font-semibold text-lg mb-1">Annuel</h3>
           <p className="mb-1">
             <span className="text-lg text-gray-400 line-through">59,88€</span>
-            <span className="text-2xl font-bold text-green-600 ml-2">49,99€/an</span>
+            <span className="text-2xl font-bold text-accent ml-2">49,99€/an</span>
           </p>
           <p className="text-sm text-gray-500 mb-4">soit 4,17 €/mois</p>
           <ul className="space-y-2 text-sm text-gray-600 mb-6 flex-1">
@@ -142,7 +142,7 @@ export function SubscriptionPageContent({
             <input type="hidden" name="plan" value="annuel" />
             <button
               type="submit"
-              className="w-full px-4 py-3 bg-black text-white rounded-lg hover:bg-gray-800 transition text-sm font-medium"
+              className="w-full px-4 py-3 bg-accent text-black rounded-lg btn-hover transition text-sm font-medium"
             >
               {launch ? 'Essayer gratuitement' : 'S\'abonner'}
             </button>

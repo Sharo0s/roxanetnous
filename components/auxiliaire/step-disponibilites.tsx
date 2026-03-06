@@ -57,7 +57,7 @@ export function StepDisponibilites({ data, onChange }: Props) {
                       onClick={() => toggleCreneau(jour.value, creneau.value)}
                       className={`w-8 h-8 rounded-md border transition ${
                         isSelected(jour.value, creneau.value)
-                          ? 'bg-black border-black text-white'
+                          ? 'bg-accent border-accent text-black'
                           : 'bg-white border-gray-300 hover:border-gray-500'
                       }`}
                     >

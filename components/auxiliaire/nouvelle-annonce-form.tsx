@@ -136,7 +136,7 @@ export function NouvelleAnnonceForm() {
                             onClick={() => toggleDispo(jour.value, creneau.value)}
                             className={`w-8 h-8 rounded-md border transition flex items-center justify-center ${
                               isSelected
-                                ? 'border-black bg-white text-black'
+                                ? 'border-accent bg-white text-black'
                                 : 'bg-white border-gray-300 hover:border-gray-400'
                             }`}
                           >

@@ -133,7 +133,7 @@ export function PlanningWeekView({
                 </span>
               </div>
               <div
-                className={`rounded-lg border p-2 min-h-[100px] md:min-h-[140px] transition cursor-pointer hover:border-black flex flex-col ${isToday ? 'border-black border-2' : ''}`}
+                className={`rounded-lg border p-2 min-h-[100px] md:min-h-[140px] transition cursor-pointer hover:border-accent flex flex-col ${isToday ? 'border-accent border-2' : ''}`}
                 onClick={() => openPopup(d)}
               >
                 <div className="flex items-center justify-between mb-1">
@@ -225,7 +225,7 @@ export function PlanningWeekView({
                 {popup.entries.map(entry => (
                   <button
                     key={entry.auxId}
-                    className="w-full text-left p-3 rounded-lg border hover:border-black transition"
+                    className="w-full text-left p-3 rounded-lg border hover:border-accent transition"
                     onClick={() => {
                       setPopup(null)
                       onCellClick(entry.auxId, popup.date)
@@ -255,7 +255,7 @@ export function PlanningWeekView({
                   {popup.available.map(aux => (
                     <button
                       key={aux.auxId}
-                      className="w-full text-left p-3 rounded-lg border border-dashed hover:border-black transition flex items-center gap-2"
+                      className="w-full text-left p-3 rounded-lg border border-dashed hover:border-accent transition flex items-center gap-2"
                       onClick={() => {
                         setPopup(null)
                         onCellClick(aux.auxId, popup.date)

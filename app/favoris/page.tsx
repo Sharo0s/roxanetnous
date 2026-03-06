@@ -45,7 +45,7 @@ export default async function FavorisPage() {
   const unreadCount = await getUnreadCount(user.id)
 
   return (
-    <main className="min-h-screen bg-gray-50">
+    <main className="min-h-screen kraft bg-kraft">
       {userData.role === 'auxiliaire' ? (
         <AuxiliaireHeader
           userId={user.id}
@@ -64,7 +64,7 @@ export default async function FavorisPage() {
         />
       )}
 
-      <div className="max-w-5xl mx-auto px-4 py-8">
+      <div className="max-w-5xl mx-auto px-4 py-8 relative z-10">
         <h2 className="text-2xl font-bold text-gray-900 mb-6">Mes favoris</h2>
 
         {!favoris || favoris.length === 0 ? (
@@ -87,7 +87,7 @@ export default async function FavorisPage() {
                   <Link
                     key={fav.id}
                     href={`/recherche/${annonce.id}`}
-                    className="bg-white rounded-xl border p-5 hover:border-black transition block"
+                    className="bg-white rounded-xl border p-5 hover:border-accent transition block"
                   >
                     <div className="flex items-center gap-3 mb-3">
                       <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-sm font-bold text-gray-600">

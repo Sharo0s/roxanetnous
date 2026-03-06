@@ -69,7 +69,7 @@ export function InfiniteAnnoncesGrid({ annonces, badgesMap, userId, favorisIds =
           return (
             <div
               key={annonce.id}
-              className="bg-white rounded-xl border p-5 hover:border-black transition relative flex flex-col"
+              className="bg-white rounded-xl border p-5 hover:border-accent transition relative flex flex-col"
             >
               {userId && (
                 <div className="absolute top-3 right-3">
@@ -82,39 +82,39 @@ export function InfiniteAnnoncesGrid({ annonces, badgesMap, userId, favorisIds =
               )}
 
               <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-sm font-bold text-gray-600">
+                <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-sm font-bold text-black/70">
                   {u?.first_name?.[0]}{u?.last_name?.[0]}
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <p className="font-semibold text-gray-900">
+                    <p className="font-semibold text-black">
                       {u?.first_name} {u?.last_name?.[0]}.
                     </p>
                     <BadgesDisplay badges={badgesMap[profile?.user_id]} />
                   </div>
-                  <p className="text-xs text-gray-500">{diplomeLabel}</p>
+                  <p className="text-xs text-black/70">{diplomeLabel}</p>
                 </div>
               </div>
 
-              <p className="text-sm text-gray-600 line-clamp-3 mb-3">{annonce.description}</p>
+              <p className="text-sm text-black/90 line-clamp-3 mb-3">{annonce.description}</p>
 
               <div className="flex flex-wrap gap-1 mb-3">
                 {specs.map((s: string) => (
-                  <span key={s} className="px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full text-xs">
+                  <span key={s} className="px-2.5 py-0.5 bg-accent text-black rounded-full text-xs">
                     {SPECIALITES.find((sp) => sp.value === s)?.label || s}
                   </span>
                 ))}
                 {(profile?.specialites?.length || 0) > 3 && (
-                  <span className="px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full text-xs cursor-default relative group">
+                  <span className="px-2.5 py-0.5 bg-accent text-black rounded-full text-xs cursor-default relative group">
                     +{profile.specialites.length - 3}
-                    <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block bg-black text-white text-xs rounded-lg px-3 py-2 whitespace-nowrap z-50">
+                    <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block bg-accent text-black text-xs rounded-lg px-3 py-2 whitespace-nowrap z-50">
                       {(profile.specialites as string[]).slice(3).map((s: string) => SPECIALITES.find((sp) => sp.value === s)?.label || s).join(', ')}
                     </span>
                   </span>
                 )}
               </div>
 
-              <div className="flex items-center justify-between text-xs text-gray-500 mb-3">
+              <div className="flex items-center justify-between text-xs text-black/70 mb-3">
                 <span>{annonce.ville} ({annonce.code_postal})</span>
                 <span>{expLabel}</span>
               </div>
@@ -122,17 +122,17 @@ export function InfiniteAnnoncesGrid({ annonces, badgesMap, userId, favorisIds =
               {(profile?.permis_conduire || profile?.vehicule) && (
                 <div className="flex gap-2 mb-3">
                   {profile.permis_conduire && (
-                    <span className="text-xs text-gray-500">Permis B</span>
+                    <span className="text-xs text-black/70">Permis B</span>
                   )}
                   {profile.vehicule && (
-                    <span className="text-xs text-gray-500">Vehicule</span>
+                    <span className="text-xs text-black/70">Vehicule</span>
                   )}
                 </div>
               )}
 
               <Link
                 href={`/recherche/${annonce.id}`}
-                className="mt-auto block w-full text-center px-4 py-2 border border-black text-black rounded-lg hover:bg-black hover:text-white transition text-sm font-medium"
+                className="mt-auto block w-full text-center px-4 py-2 bg-accent text-black rounded-lg btn-hover transition text-sm font-medium"
               >
                 Voir le profil
               </Link>
@@ -143,7 +143,7 @@ export function InfiniteAnnoncesGrid({ annonces, badgesMap, userId, favorisIds =
 
       {hasMore && (
         <div ref={loaderRef} className="flex justify-center py-8">
-          <div className="w-6 h-6 border-2 border-gray-300 border-t-black rounded-full animate-spin" />
+          <div className="w-6 h-6 border-2 border-gray-300 border-t-[#FFB06E] rounded-full animate-spin" />
         </div>
       )}
 

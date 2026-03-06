@@ -28,7 +28,7 @@ export function CookieBanner() {
         </p>
         <button
           onClick={handleAccept}
-          className="px-4 py-2 bg-black text-white rounded-lg text-sm hover:bg-gray-800 transition whitespace-nowrap"
+          className="px-4 py-2 bg-accent text-black rounded-lg text-sm btn-hover transition whitespace-nowrap"
         >
           Compris
         </button>
