@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { AnnonceStatusToggle } from '@/components/auxiliaire/annonce-status-toggle'
+import { AnnonceDeleteButton } from '@/components/annonce-delete-button'
 import { hasActiveSubscription } from '@/lib/subscription-helpers'
 import { AuxiliaireHeader } from '@/components/layout/auxiliaire-header'
 import { getUnreadCount } from '@/lib/unread-count'
@@ -122,6 +123,10 @@ export default async function MesAnnoncesAuxiliaire() {
                     <AnnonceStatusToggle
                       annonceId={annonce.id}
                       currentStatus={annonce.status}
+                      type="auxiliaire"
+                    />
+                    <AnnonceDeleteButton
+                      annonceId={annonce.id}
                       type="auxiliaire"
                     />
                   </div>

@@ -358,6 +358,64 @@ export async function updateAnnonceBeneficiaire(
   redirect('/beneficiaire/annonces')
 }
 
+export async function deleteAnnonceAuxiliaire(
+  annonceId: string
+): Promise<AnnonceResult> {
+  const supabase = await createClient()
+
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Non connecte.' }
+
+  const { data: profile } = await supabase
+    .from('auxiliaires_profiles')
+    .select('id')
+    .eq('user_id', user.id)
+    .single()
+
+  if (!profile) return { error: 'Profil non trouve.' }
+
+  const { error } = await supabase
+    .from('annonces_auxiliaires')
+    .delete()
+    .eq('id', annonceId)
+    .eq('auxiliaire_id', profile.id)
+
+  if (error) {
+    return { error: 'Erreur lors de la suppression.' }
+  }
+
+  return { success: true }
+}
+
+export async function deleteAnnonceBeneficiaire(
+  annonceId: string
+): Promise<AnnonceResult> {
+  const supabase = await createClient()
+
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Non connecte.' }
+
+  const { data: profile } = await supabase
+    .from('beneficiaires_profiles')
+    .select('id')
+    .eq('user_id', user.id)
+    .single()
+
+  if (!profile) return { error: 'Profil non trouve.' }
+
+  const { error } = await supabase
+    .from('annonces_beneficiaires')
+    .delete()
+    .eq('id', annonceId)
+    .eq('beneficiaire_id', profile.id)
+
+  if (error) {
+    return { error: 'Erreur lors de la suppression.' }
+  }
+
+  return { success: true }
+}
+
 export async function updateAnnonceBeneficiaireStatus(
   annonceId: string,
   status: 'publiee' | 'archivee'
