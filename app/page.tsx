@@ -168,6 +168,12 @@ export default async function HomePage() {
           </div>
         </section>
 
+        <svg viewBox="0 0 1440 60" preserveAspectRatio="none" className="w-full h-8 md:h-12 block -mb-px bg-accent">
+          <defs><pattern id="kraft-wave-1" patternUnits="userSpaceOnUse" width="256" height="256"><image href="/kraft-noise.png" width="256" height="256" /></pattern></defs>
+          <path d="M0,30 Q240,0 480,30 T960,30 T1440,30 L1440,60 L0,60 Z" fill="#F5E1C8" />
+          <path d="M0,30 Q240,0 480,30 T960,30 T1440,30 L1440,60 L0,60 Z" fill="url(#kraft-wave-1)" opacity="0.35" style={{ mixBlendMode: 'multiply' }} />
+        </svg>
+
         {/* ===== COMMENT CA MARCHE ===== */}
         <section className="px-4 py-16 kraft bg-kraft">
           <div className="max-w-3xl mx-auto relative z-10">
@@ -197,6 +203,13 @@ export default async function HomePage() {
             </div>
           </div>
         </section>
+
+        <svg viewBox="0 0 1440 60" preserveAspectRatio="none" className="w-full h-8 md:h-12 block -mb-px bg-kraft">
+          <defs><pattern id="kraft-wave-2" patternUnits="userSpaceOnUse" width="256" height="256"><image href="/kraft-noise.png" width="256" height="256" /></pattern></defs>
+          <path d="M0,0 L1440,0 L1440,30 Q1080,60 720,30 T0,30 Z" fill="#F5E1C8" />
+          <path d="M0,0 L1440,0 L1440,30 Q1080,60 720,30 T0,30 Z" fill="url(#kraft-wave-2)" opacity="0.35" style={{ mixBlendMode: 'multiply' }} />
+          <path d="M0,30 Q360,60 720,30 T1440,30 L1440,60 L0,60 Z" fill="white" />
+        </svg>
 
         {/* ===== AVIS ===== */}
         {avisWithNames.length > 0 && (
@@ -262,6 +275,12 @@ export default async function HomePage() {
           </div>
         </section>
 
+        <svg viewBox="0 0 1440 60" preserveAspectRatio="none" className="w-full h-8 md:h-12 block -mb-px bg-white">
+          <defs><pattern id="kraft-wave-3" patternUnits="userSpaceOnUse" width="256" height="256"><image href="/kraft-noise.png" width="256" height="256" /></pattern></defs>
+          <path d="M0,30 Q240,0 480,30 T960,30 T1440,30 L1440,60 L0,60 Z" fill="#F5E1C8" />
+          <path d="M0,30 Q240,0 480,30 T960,30 T1440,30 L1440,60 L0,60 Z" fill="url(#kraft-wave-3)" opacity="0.35" style={{ mixBlendMode: 'multiply' }} />
+        </svg>
+
         {/* ===== OFFRES ===== */}
         <section className="px-4 py-16 kraft bg-kraft">
           <div className="max-w-4xl mx-auto relative z-10">
@@ -308,6 +327,13 @@ export default async function HomePage() {
           </div>
         </section>
 
+        <svg viewBox="0 0 1440 60" preserveAspectRatio="none" className="w-full h-8 md:h-12 block -mb-px bg-kraft">
+          <defs><pattern id="kraft-wave-4" patternUnits="userSpaceOnUse" width="256" height="256"><image href="/kraft-noise.png" width="256" height="256" /></pattern></defs>
+          <path d="M0,0 L1440,0 L1440,30 Q1080,60 720,30 T0,30 Z" fill="#F5E1C8" />
+          <path d="M0,0 L1440,0 L1440,30 Q1080,60 720,30 T0,30 Z" fill="url(#kraft-wave-4)" opacity="0.35" style={{ mixBlendMode: 'multiply' }} />
+          <path d="M0,30 Q360,60 720,30 T1440,30 L1440,60 L0,60 Z" fill="white" />
+        </svg>
+
         {/* ===== FAQ ===== */}
         <section className="px-4 py-16 bg-white">
           <div className="max-w-5xl mx-auto">
@@ -337,6 +363,12 @@ export default async function HomePage() {
             </div>
           </div>
         </section>
+
+        <svg viewBox="0 0 1440 60" preserveAspectRatio="none" className="w-full h-8 md:h-12 block -mb-px bg-white">
+          <defs><pattern id="kraft-wave-5" patternUnits="userSpaceOnUse" width="256" height="256"><image href="/kraft-noise.png" width="256" height="256" /></pattern></defs>
+          <path d="M0,30 Q240,0 480,30 T960,30 T1440,30 L1440,60 L0,60 Z" fill="#F5E1C8" />
+          <path d="M0,30 Q240,0 480,30 T960,30 T1440,30 L1440,60 L0,60 Z" fill="url(#kraft-wave-5)" opacity="0.35" style={{ mixBlendMode: 'multiply' }} />
+        </svg>
 
         {/* ===== CONTACT ===== */}
         <section className="px-4 py-16 kraft bg-kraft">
