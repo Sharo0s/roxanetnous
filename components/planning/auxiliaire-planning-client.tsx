@@ -2,7 +2,6 @@
 
 import { useState, useCallback, useRef, useEffect } from 'react'
 import { getAuxiliaireShifts } from '@/app/actions/planning-auxiliaire'
-import { markDocumentAsRead } from '@/app/actions/planning-documents'
 import { PlanningViewSwitcher } from '@/components/planning/planning-view-switcher'
 
 type ViewType = 'day' | 'week' | 'month'
@@ -16,15 +15,6 @@ type AuxShift = {
   note: string | null
   beneficiaire_name: string
   couleur: string
-}
-
-type AuxDocument = {
-  id: string
-  nom_fichier: string
-  file_size: number
-  created_at: string
-  beneficiaire_name: string
-  is_read: boolean
 }
 
 const JOURS = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim']
@@ -104,12 +94,6 @@ function getDateRange(view: ViewType, date: Date) {
   }
 }
 
-function formatFileSize(bytes: number) {
-  if (bytes < 1024) return `${bytes} o`
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} Ko`
-  return `${(bytes / (1024 * 1024)).toFixed(1)} Mo`
-}
-
 type PopupInfo = {
   date: string
   entries: {
@@ -124,15 +108,12 @@ type PopupInfo = {
 
 export function AuxiliairePlanningClient({
   initialShifts,
-  initialDocuments,
 }: {
   initialShifts: AuxShift[]
-  initialDocuments: AuxDocument[]
 }) {
   const [view, setView] = useState<ViewType>('week')
   const [currentDate, setCurrentDate] = useState(new Date())
   const [shifts, setShifts] = useState<AuxShift[]>(initialShifts)
-  const [documents, setDocuments] = useState(initialDocuments)
   const [loading, setLoading] = useState(false)
   const [popup, setPopup] = useState<PopupInfo | null>(null)
   const popupRef = useRef<HTMLDivElement>(null)
@@ -167,13 +148,6 @@ export function AuxiliairePlanningClient({
   function handleDateChange(d: Date) {
     setCurrentDate(d)
     fetchShifts(view, d)
-  }
-
-  async function handleMarkRead(docId: string) {
-    await markDocumentAsRead(docId)
-    setDocuments(prev => prev.map(d =>
-      d.id === docId ? { ...d, is_read: true } : d
-    ))
   }
 
   const shiftsByDate = new Map<string, AuxShift[]>()
@@ -270,37 +244,6 @@ export function AuxiliairePlanningClient({
               <div key={id} className="flex items-center justify-between text-sm">
                 <span className="text-gray-700">{name}</span>
                 <span className="font-medium">{total.toFixed(1)}h</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Documents */}
-      {documents.length > 0 && (
-        <div className="mt-8">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Documents</h3>
-          <div className="space-y-2">
-            {documents.map(doc => (
-              <div key={doc.id} className="bg-white rounded-xl border p-4 flex items-center justify-between">
-                <div>
-                  <p className="font-medium text-sm">{doc.nom_fichier}</p>
-                  <p className="text-xs text-gray-500 mt-0.5">
-                    {doc.beneficiaire_name} - {formatFileSize(doc.file_size)} - {new Date(doc.created_at).toLocaleDateString('fr-FR')}
-                  </p>
-                </div>
-                <div className="flex items-center gap-2">
-                  {doc.is_read ? (
-                    <span className="text-xs text-gray-400 px-2 py-1 border rounded-full">Lu</span>
-                  ) : (
-                    <button
-                      onClick={() => handleMarkRead(doc.id)}
-                      className="text-xs font-medium px-3 py-1.5 bg-accent text-black rounded-lg btn-hover transition"
-                    >
-                      Marquer comme lu
-                    </button>
-                  )}
-                </div>
               </div>
             ))}
           </div>

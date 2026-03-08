@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { isAuxiliaireInAnyTeam, getAuxiliaireShifts, getAuxiliaireDocuments } from '@/app/actions/planning-auxiliaire'
+import { isAuxiliaireInAnyTeam, getAuxiliaireShifts } from '@/app/actions/planning-auxiliaire'
 import { AuxiliairePlanningClient } from '@/components/planning/auxiliaire-planning-client'
 import { AuxiliaireHeader } from '@/components/layout/auxiliaire-header'
 import { getUnreadCount } from '@/lib/unread-count'
@@ -45,9 +45,8 @@ export default async function AuxiliairePlanningPage() {
 
   const week = getWeekRange(new Date())
 
-  const [shifts, documents, unreadCount] = await Promise.all([
+  const [shifts, unreadCount] = await Promise.all([
     getAuxiliaireShifts(week.start, week.end),
-    getAuxiliaireDocuments(),
     getUnreadCount(user.id),
   ])
 
@@ -63,7 +62,7 @@ export default async function AuxiliairePlanningPage() {
       />
 
       <div className="max-w-6xl mx-auto px-4 py-8 relative z-10">
-        <AuxiliairePlanningClient initialShifts={shifts} initialDocuments={documents} />
+        <AuxiliairePlanningClient initialShifts={shifts} />
       </div>
     </main>
   )

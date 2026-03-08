@@ -3,7 +3,6 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { getUnreadCount } from '@/lib/unread-count'
 import { hasActiveSubscription } from '@/lib/subscription-helpers'
-import { canAccessPlanning } from '@/lib/planning-subscription-helpers'
 import { BeneficiaireSubscriptionBanner } from '@/components/beneficiaire/subscription-banner'
 import { BeneficiaireHeader } from '@/components/layout/beneficiaire-header'
 
@@ -21,10 +20,9 @@ export default async function BeneficiaireDashboard() {
 
   if (!userData || userData.role !== 'beneficiaire') redirect('/')
 
-  const [unreadCount, subscribed, hasPlanning] = await Promise.all([
+  const [unreadCount, subscribed] = await Promise.all([
     getUnreadCount(user.id),
     hasActiveSubscription(user.id),
-    canAccessPlanning(user.id),
   ])
 
   // Recuperer les annonces du beneficiaire
@@ -35,8 +33,6 @@ export default async function BeneficiaireDashboard() {
     .single()
 
   let annoncesCount = 0
-  let planningTeamCount = 0
-  let planningShiftsCount = 0
 
   if (profile) {
     const { count } = await supabase
@@ -44,31 +40,6 @@ export default async function BeneficiaireDashboard() {
       .select('id', { count: 'exact', head: true })
       .eq('beneficiaire_id', profile.id)
     annoncesCount = count || 0
-
-    if (hasPlanning) {
-      const { count: teamCount } = await supabase
-        .from('beneficiaire_auxiliaires')
-        .select('id', { count: 'exact', head: true })
-        .eq('beneficiaire_id', profile.id)
-        .eq('actif', true)
-      planningTeamCount = teamCount || 0
-
-      // Shifts cette semaine
-      const now = new Date()
-      const day = now.getDay()
-      const monday = new Date(now)
-      monday.setDate(now.getDate() - day + (day === 0 ? -6 : 1))
-      const sunday = new Date(monday)
-      sunday.setDate(monday.getDate() + 6)
-
-      const { count: shiftsCount } = await supabase
-        .from('planning_shifts')
-        .select('id', { count: 'exact', head: true })
-        .eq('beneficiaire_id', profile.id)
-        .gte('date', monday.toISOString().split('T')[0])
-        .lte('date', sunday.toISOString().split('T')[0])
-      planningShiftsCount = shiftsCount || 0
-    }
   }
 
   return (
@@ -79,7 +50,7 @@ export default async function BeneficiaireDashboard() {
         firstName={userData.first_name}
         lastName={userData.last_name}
         currentPage="dashboard"
-        hasPlanningSubscription={hasPlanning}
+        hasPlanningSubscription={false}
       />
 
       <div className="max-w-5xl mx-auto px-4 py-8 relative z-10">
@@ -147,35 +118,6 @@ export default async function BeneficiaireDashboard() {
             </Link>
           </div>
 
-          <div className="bg-white rounded-xl border p-6">
-            <h3 className="font-semibold text-lg mb-2">Planning</h3>
-            {hasPlanning ? (
-              <>
-                <p className="text-gray-600 mb-1">
-                  {planningTeamCount} accompagnant(e){planningTeamCount > 1 ? 's' : ''}, {planningShiftsCount} intervention{planningShiftsCount > 1 ? 's' : ''} cette semaine
-                </p>
-                <p className="text-sm text-gray-400 mb-4">Gerez les interventions de vos accompagnant(e)s.</p>
-                <Link
-                  href="/beneficiaire/planning"
-                  className="inline-flex items-center px-4 py-2 bg-accent text-black rounded-lg btn-hover transition text-sm font-medium"
-                >
-                  Acceder au planning
-                </Link>
-              </>
-            ) : (
-              <>
-                <p className="text-gray-600 mb-4">
-                  Organisez les interventions de vos auxiliaires de vie.
-                </p>
-                <Link
-                  href="/beneficiaire/planning/abonnement"
-                  className="inline-flex items-center px-4 py-2 bg-accent text-black rounded-lg btn-hover transition text-sm font-medium"
-                >
-                  Decouvrir le module
-                </Link>
-              </>
-            )}
-          </div>
         </div>
       </div>
     </main>
