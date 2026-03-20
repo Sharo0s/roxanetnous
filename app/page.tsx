@@ -160,7 +160,7 @@ export default async function HomePage() {
         <section className="bg-accent">
           <div className="max-w-5xl mx-auto px-4 py-8 flex flex-col items-center gap-4 text-center md:flex-row md:justify-between md:text-left">
             <p className="text-base font-medium text-black tracking-wide">
-              Premiere communaute de mise en relation entre accompagnants et accompagne(e)s
+              Notre communaute de mise en relation entre accompagnants et accompagne(e)s
             </p>
             <Link href="/recherche" className="rounded-full px-4 py-1.5 font-medium bg-black text-white btn-hover whitespace-nowrap text-sm shrink-0">
               Consulter les annonces
