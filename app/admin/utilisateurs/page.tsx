@@ -32,14 +32,16 @@ export default async function AdminUtilisateursPage() {
   const supabaseAdmin = await createClient({ serviceRole: true })
 
   // Charger les auxiliaires avec leur profil
+  // Hint FK necessaire car auxiliaires_profiles a 2 FK vers users (user_id + validated_by)
   const { data: auxUsers } = await supabaseAdmin
     .from('users')
     .select(`
       id, email, first_name, last_name, role, created_at,
-      auxiliaires_profiles (id, ville, code_postal, validation_status, diplomes, experience)
+      auxiliaires_profiles!auxiliaires_profiles_user_id_fkey (id, ville, code_postal, validation_status, diplomes, experience)
     `)
     .eq('role', 'auxiliaire')
     .order('created_at', { ascending: false })
+    .limit(5000)
 
   // Charger les beneficiaires avec leur profil
   const { data: benUsers } = await supabaseAdmin
@@ -50,6 +52,7 @@ export default async function AdminUtilisateursPage() {
     `)
     .eq('role', 'beneficiaire')
     .order('created_at', { ascending: false })
+    .limit(5000)
 
   const auxiliaires: AuxiliaireRow[] = (auxUsers || []).map((u: any) => {
     const p = Array.isArray(u.auxiliaires_profiles)
