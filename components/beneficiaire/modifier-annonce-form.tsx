@@ -17,7 +17,7 @@ type Annonce = {
   code_postal: string | null
   diplome_requis: string | null
   experience_min: string | null
-  niveau_dependance: 'forte' | 'moderee' | 'peu'
+  niveau_dependance: 'besoins_plus_plus_plus' | 'besoins_plus_plus' | 'besoins_plus'
   equipe_en_place: string | null
   disponibilites: Record<string, string[]> | null
   date_debut: string
@@ -34,7 +34,7 @@ export function ModifierAnnonceBeneficiaireForm({ annonce }: { annonce: Annonce 
   const [codePostal, setCodePostal] = useState(annonce.code_postal || '')
   const [diplomeRequis, setDiplomeRequis] = useState(annonce.diplome_requis || '')
   const [experienceMin, setExperienceMin] = useState(annonce.experience_min || '')
-  const [niveauDependance, setNiveauDependance] = useState<'forte' | 'moderee' | 'peu'>(annonce.niveau_dependance)
+  const [niveauDependance, setNiveauDependance] = useState<'besoins_plus_plus_plus' | 'besoins_plus_plus' | 'besoins_plus'>(annonce.niveau_dependance)
   const [equipeEnPlace, setEquipeEnPlace] = useState(annonce.equipe_en_place || '')
   const [disponibilites, setDisponibilites] = useState<Record<string, string[]>>(annonce.disponibilites || {})
   const [dateDebut, setDateDebut] = useState(annonce.date_debut)
@@ -172,13 +172,13 @@ export function ModifierAnnonceBeneficiaireForm({ annonce }: { annonce: Annonce 
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Niveau de dependance <span className="text-red-500">*</span>
+                Besoin de l'accompagnement <span className="text-red-500">*</span>
               </label>
               <div className="flex gap-3">
                 {[
-                  { value: 'peu' as const, label: 'Peu dependant' },
-                  { value: 'moderee' as const, label: 'Dependance moderee' },
-                  { value: 'forte' as const, label: 'Forte dependance' },
+                  { value: 'besoins_plus' as const, label: 'Besoins +' },
+                  { value: 'besoins_plus_plus' as const, label: 'Besoins ++' },
+                  { value: 'besoins_plus_plus_plus' as const, label: 'Besoins +++' },
                 ].map((opt) => (
                   <button
                     key={opt.value}

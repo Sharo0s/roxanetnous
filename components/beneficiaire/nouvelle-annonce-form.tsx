@@ -18,7 +18,7 @@ export function NouvelleAnnonceBeneficiaireForm() {
   const [codePostal, setCodePostal] = useState('')
   const [diplomeRequis, setDiplomeRequis] = useState('')
   const [experienceMin, setExperienceMin] = useState('')
-  const [niveauDependance, setNiveauDependance] = useState<'forte' | 'moderee' | 'peu'>('moderee')
+  const [niveauDependance, setNiveauDependance] = useState<'besoins_plus_plus_plus' | 'besoins_plus_plus' | 'besoins_plus'>('besoins_plus_plus')
   const [equipeEnPlace, setEquipeEnPlace] = useState('')
   const [disponibilites, setDisponibilites] = useState<Record<string, string[]>>({})
   const [dateDebut, setDateDebut] = useState('')
@@ -181,13 +181,13 @@ export function NouvelleAnnonceBeneficiaireForm() {
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Niveau de dependance <span className="text-red-500">*</span>
+                  Besoin de l'accompagnement <span className="text-red-500">*</span>
                 </label>
                 <div className="flex gap-3">
                   {[
-                    { value: 'peu' as const, label: 'Peu dependant' },
-                    { value: 'moderee' as const, label: 'Dependance moderee' },
-                    { value: 'forte' as const, label: 'Forte dependance' },
+                    { value: 'besoins_plus' as const, label: 'Besoins +' },
+                    { value: 'besoins_plus_plus' as const, label: 'Besoins ++' },
+                    { value: 'besoins_plus_plus_plus' as const, label: 'Besoins +++' },
                   ].map((opt) => (
                     <button
                       key={opt.value}
@@ -387,9 +387,9 @@ export function NouvelleAnnonceBeneficiaireForm() {
                 <dd className="font-medium">{ville || '-'} {codePostal && `(${codePostal})`}</dd>
               </div>
               <div className="flex justify-between">
-                <dt className="text-gray-500">Dependance</dt>
+                <dt className="text-gray-500">Accompagnement</dt>
                 <dd className="font-medium">
-                  {niveauDependance === 'peu' ? 'Peu' : niveauDependance === 'moderee' ? 'Moderee' : 'Forte'}
+                  {niveauDependance === 'besoins_plus' ? 'Besoins +' : niveauDependance === 'besoins_plus_plus' ? 'Besoins ++' : 'Besoins +++'}
                 </dd>
               </div>
               <div className="flex justify-between">

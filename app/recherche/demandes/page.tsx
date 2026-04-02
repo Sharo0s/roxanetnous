@@ -135,7 +135,7 @@ export default async function DemandesBeneficiairesPage({
                   <div className="flex items-center gap-3 text-xs text-gray-400 mb-4">
                     {diplomeLabel && <span>{diplomeLabel}</span>}
                     {expLabel && <span>{expLabel}</span>}
-                    <span className="capitalize">Dependance {annonce.niveau_dependance}</span>
+                    <span>{annonce.niveau_dependance === 'besoins_plus' ? 'Besoins +' : annonce.niveau_dependance === 'besoins_plus_plus' ? 'Besoins ++' : 'Besoins +++'}</span>
                   </div>
 
                   {userData?.role === 'auxiliaire' && (

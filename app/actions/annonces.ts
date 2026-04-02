@@ -180,7 +180,7 @@ export async function createAnnonceBeneficiaire(data: {
   code_postal: string
   diplome_requis: string
   experience_min: string
-  niveau_dependance: 'forte' | 'moderee' | 'peu'
+  niveau_dependance: 'besoins_plus_plus_plus' | 'besoins_plus_plus' | 'besoins_plus'
   ouverture_aide: string
   equipe_en_place: string
   disponibilites: Record<string, string[]>
@@ -296,7 +296,7 @@ export async function updateAnnonceBeneficiaire(
     code_postal: string
     diplome_requis: string
     experience_min: string
-    niveau_dependance: 'forte' | 'moderee' | 'peu'
+    niveau_dependance: 'besoins_plus_plus_plus' | 'besoins_plus_plus' | 'besoins_plus'
     equipe_en_place: string
     disponibilites: Record<string, string[]>
     date_debut: string
