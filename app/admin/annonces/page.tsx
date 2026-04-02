@@ -12,31 +12,39 @@ export default async function AdminAnnoncesPage({
   const supabaseAdmin = await createClient({ serviceRole: true })
   const type = params.type || 'auxiliaire'
 
-  let annonces: any[] = []
+  // Charger les counts des deux types en parallele
+  const [auxResult, benResult] = await Promise.all([
+    type === 'auxiliaire'
+      ? supabaseAdmin
+          .from('annonces_auxiliaires')
+          .select(`
+            id, titre, ville, code_postal, status, created_at, published_at, vues, contacts_count,
+            auxiliaires_profiles:auxiliaire_id (
+              users:user_id (first_name, last_name, email)
+            )
+          `)
+          .order('created_at', { ascending: false })
+      : supabaseAdmin
+          .from('annonces_auxiliaires')
+          .select('id', { count: 'exact', head: true }),
+    type === 'beneficiaire'
+      ? supabaseAdmin
+          .from('annonces_beneficiaires')
+          .select(`
+            id, titre, ville, code_postal, status, created_at, published_at,
+            beneficiaires_profiles:beneficiaire_id (
+              users:user_id (first_name, last_name, email)
+            )
+          `)
+          .order('created_at', { ascending: false })
+      : supabaseAdmin
+          .from('annonces_beneficiaires')
+          .select('id', { count: 'exact', head: true }),
+  ])
 
-  if (type === 'auxiliaire') {
-    const { data } = await supabaseAdmin
-      .from('annonces_auxiliaires')
-      .select(`
-        id, titre, ville, code_postal, status, created_at, published_at, vues, contacts_count,
-        auxiliaires_profiles:auxiliaire_id (
-          users:user_id (first_name, last_name, email)
-        )
-      `)
-      .order('created_at', { ascending: false })
-    annonces = data || []
-  } else {
-    const { data } = await supabaseAdmin
-      .from('annonces_beneficiaires')
-      .select(`
-        id, titre, ville, code_postal, status, created_at, published_at,
-        beneficiaires_profiles:beneficiaire_id (
-          users:user_id (first_name, last_name, email)
-        )
-      `)
-      .order('created_at', { ascending: false })
-    annonces = data || []
-  }
+  const annonces = (type === 'auxiliaire' ? auxResult.data : benResult.data) || []
+  const auxCount = type === 'auxiliaire' ? annonces.length : (auxResult.count ?? 0)
+  const benCount = type === 'beneficiaire' ? annonces.length : (benResult.count ?? 0)
 
   return (
       <div className="max-w-6xl mx-auto px-4 py-8">
@@ -49,7 +57,7 @@ export default async function AdminAnnoncesPage({
               type === 'auxiliaire' ? 'bg-accent text-black' : 'bg-white border border-gray-300 text-gray-700 hover:border-accent'
             }`}
           >
-            Auxiliaires ({type === 'auxiliaire' ? annonces.length : '...'})
+            Auxiliaires ({auxCount})
           </Link>
           <Link
             href="/admin/annonces?type=beneficiaire"
@@ -57,7 +65,7 @@ export default async function AdminAnnoncesPage({
               type === 'beneficiaire' ? 'bg-accent text-black' : 'bg-white border border-gray-300 text-gray-700 hover:border-accent'
             }`}
           >
-            Beneficiaires ({type === 'beneficiaire' ? annonces.length : '...'})
+            Beneficiaires ({benCount})
           </Link>
         </div>
 
