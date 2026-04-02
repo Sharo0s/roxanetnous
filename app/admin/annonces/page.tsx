@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
-import { AdminAnnonceActions } from '@/components/admin/annonce-actions'
+import { AnnoncesSearchTable } from '@/components/admin/annonces-client'
 
 export default async function AdminAnnoncesPage({
   searchParams,
@@ -42,9 +42,27 @@ export default async function AdminAnnoncesPage({
           .select('id', { count: 'exact', head: true }),
   ])
 
-  const annonces = (type === 'auxiliaire' ? auxResult.data : benResult.data) || []
-  const auxCount = type === 'auxiliaire' ? annonces.length : (auxResult.count ?? 0)
-  const benCount = type === 'beneficiaire' ? annonces.length : (benResult.count ?? 0)
+  const rawAnnonces = (type === 'auxiliaire' ? auxResult.data : benResult.data) || []
+  const auxCount = type === 'auxiliaire' ? rawAnnonces.length : (auxResult.count ?? 0)
+  const benCount = type === 'beneficiaire' ? rawAnnonces.length : (benResult.count ?? 0)
+
+  // Transformer les donnees pour le composant client
+  const annonces = rawAnnonces.map((annonce: any) => {
+    const profileData = type === 'auxiliaire'
+      ? annonce.auxiliaires_profiles
+      : annonce.beneficiaires_profiles
+    const u = (profileData as any)?.users
+    return {
+      id: annonce.id,
+      titre: annonce.titre,
+      ville: annonce.ville,
+      code_postal: annonce.code_postal,
+      status: annonce.status,
+      created_at: annonce.created_at,
+      auteur_nom: u ? `${u.first_name} ${u.last_name}` : '',
+      type: type as 'auxiliaire' | 'beneficiaire',
+    }
+  })
 
   return (
       <div className="max-w-6xl mx-auto px-4 py-8">
@@ -69,67 +87,7 @@ export default async function AdminAnnoncesPage({
           </Link>
         </div>
 
-        {annonces.length === 0 ? (
-          <div className="bg-white rounded-xl border p-8 text-center text-gray-500">
-            Aucune annonce.
-          </div>
-        ) : (
-          <div className="bg-white rounded-xl border overflow-hidden">
-            <table className="w-full text-sm">
-              <thead className="bg-accent/20 border-b">
-                <tr>
-                  <th className="text-left px-4 py-3 font-medium text-gray-500">Titre</th>
-                  <th className="text-left px-4 py-3 font-medium text-gray-500">Auteur</th>
-                  <th className="text-left px-4 py-3 font-medium text-gray-500">Ville</th>
-                  <th className="text-left px-4 py-3 font-medium text-gray-500">Statut</th>
-                  <th className="text-left px-4 py-3 font-medium text-gray-500">Date</th>
-                  <th className="text-right px-4 py-3 font-medium text-gray-500">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {annonces.map((annonce: any) => {
-                  const profileData = type === 'auxiliaire'
-                    ? annonce.auxiliaires_profiles
-                    : annonce.beneficiaires_profiles
-                  const u = (profileData as any)?.users
-
-                  return (
-                    <tr key={annonce.id} className="border-b last:border-0 hover:bg-accent/10">
-                      <td className="px-4 py-3">
-                        <p className="font-medium text-gray-900 line-clamp-1">{annonce.titre}</p>
-                      </td>
-                      <td className="px-4 py-3 text-gray-600">
-                        {u?.first_name} {u?.last_name}
-                      </td>
-                      <td className="px-4 py-3 text-gray-600">
-                        {annonce.ville} {annonce.code_postal && `(${annonce.code_postal})`}
-                      </td>
-                      <td className="px-4 py-3">
-                        <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                          annonce.status === 'publiee' ? 'bg-accent text-black' :
-                          annonce.status === 'suspendue' ? 'bg-gray-200 text-gray-700 border border-gray-400' :
-                          'bg-gray-200 text-gray-600'
-                        }`}>
-                          {annonce.status}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 text-gray-400">
-                        {new Date(annonce.created_at).toLocaleDateString('fr-FR')}
-                      </td>
-                      <td className="px-4 py-3 text-right">
-                        <AdminAnnonceActions
-                          annonceId={annonce.id}
-                          currentStatus={annonce.status}
-                          type={type as 'auxiliaire' | 'beneficiaire'}
-                        />
-                      </td>
-                    </tr>
-                  )
-                })}
-              </tbody>
-            </table>
-          </div>
-        )}
+        <AnnoncesSearchTable annonces={annonces} type={type as 'auxiliaire' | 'beneficiaire'} />
       </div>
   )
 }
