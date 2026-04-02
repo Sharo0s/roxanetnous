@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
+import Link from 'next/link'
 import { AdminAnnonceActions } from '@/components/admin/annonce-actions'
 
 type AnnonceRow = {
@@ -86,7 +87,14 @@ export function AnnoncesSearchTable({
                     <td className="px-4 py-3 text-gray-400">
                       {new Date(annonce.created_at).toLocaleDateString('fr-FR')}
                     </td>
-                    <td className="px-4 py-3 text-right">
+                    <td className="px-4 py-3 text-right flex items-center justify-end gap-2">
+                      <Link
+                        href={`/recherche/${annonce.id}`}
+                        target="_blank"
+                        className="px-3 py-1.5 text-xs font-medium border border-gray-300 rounded-lg hover:border-accent transition-colors"
+                      >
+                        Voir
+                      </Link>
                       <AdminAnnonceActions
                         annonceId={annonce.id}
                         currentStatus={annonce.status}
