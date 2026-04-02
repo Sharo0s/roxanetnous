@@ -341,7 +341,7 @@ export default async function RecherchePage({
 
         {!annonces || annonces.length === 0 ? (
           <div className="bg-white rounded-xl border p-8 text-center mt-6">
-            <p className="text-gray-500">Aucun resultat pour votre recherche.</p>
+            <p className="text-gray-500">{(params.ville || params.specialite || params.experience) ? 'Aucun resultat pour votre recherche.' : 'Lancez votre recherche.'}</p>
             {(params.ville || params.specialite || params.experience) && (
               <Link href="/recherche" className="text-sm text-black underline mt-2 inline-block">
                 Voir tous les auxiliaires
