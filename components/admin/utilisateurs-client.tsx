@@ -154,7 +154,7 @@ export function UtilisateursClient({
           placeholder="Rechercher par nom, email ou ville..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-black transition-colors"
+          className="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-xl text-sm focus:outline-none focus:border-black transition-colors"
         />
       </div>
 
