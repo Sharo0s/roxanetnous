@@ -74,23 +74,23 @@ export function UtilisateursClient({
       <h2 className="text-2xl font-bold text-gray-900 mb-6">Utilisateurs</h2>
 
       {/* Onglets */}
-      <div className="flex gap-1 mb-6 border-b">
+      <div className="flex gap-2 mb-6">
         <button
           onClick={() => { setTab('auxiliaires'); setStatusFilter('tous') }}
-          className={`px-4 py-2.5 text-sm font-medium border-b-2 transition-colors ${
+          className={`px-4 py-2 rounded-lg text-sm font-medium transition btn-hover ${
             tab === 'auxiliaires'
-              ? 'border-accent text-black'
-              : 'border-transparent text-gray-500 hover:text-black'
+              ? 'bg-accent text-black'
+              : 'bg-white border border-gray-300 text-gray-700 hover:border-accent'
           }`}
         >
           Auxiliaires ({auxiliaires.length})
         </button>
         <button
           onClick={() => { setTab('beneficiaires'); setStatusFilter('tous') }}
-          className={`px-4 py-2.5 text-sm font-medium border-b-2 transition-colors ${
+          className={`px-4 py-2 rounded-lg text-sm font-medium transition btn-hover ${
             tab === 'beneficiaires'
-              ? 'border-accent text-black'
-              : 'border-transparent text-gray-500 hover:text-black'
+              ? 'bg-accent text-black'
+              : 'bg-white border border-gray-300 text-gray-700 hover:border-accent'
           }`}
         >
           Beneficiaires ({beneficiaires.length})
