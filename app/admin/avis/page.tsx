@@ -65,7 +65,7 @@ function AvisCard({ avis, showActions, adminId }: { avis: any; showActions: bool
   const cible = avis.cible as any
 
   return (
-    <div className={`bg-white rounded-xl border p-5 ${avis.masque ? 'opacity-50' : ''}`}>
+    <div className={`bg-white rounded-xl border p-5 hover:border-accent transition-colors ${avis.masque ? 'opacity-50' : ''}`}>
       <div className="flex items-start justify-between">
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-1">
@@ -75,7 +75,7 @@ function AvisCard({ avis, showActions, adminId }: { avis: any; showActions: bool
               ))}
             </div>
             {avis.signale && (
-              <span className="px-2 py-0.5 bg-red-100 text-red-700 rounded-full text-xs font-medium">Signale</span>
+              <span className="px-2 py-0.5 bg-gray-200 text-gray-700 rounded-full text-xs font-medium border border-gray-400">Signale</span>
             )}
             {avis.masque && (
               <span className="px-2 py-0.5 bg-gray-200 text-gray-500 rounded-full text-xs font-medium">Masque</span>

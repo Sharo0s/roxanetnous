@@ -111,7 +111,7 @@ export default async function AdminUtilisateurDetailPage({
       {/* Navigation retour */}
       <Link
         href="/admin/utilisateurs"
-        className="inline-flex items-center text-sm text-gray-500 hover:text-black mb-6 transition-colors"
+        className="inline-flex items-center text-sm text-gray-500 hover:text-accent mb-6 transition-colors"
       >
         &larr; Retour aux utilisateurs
       </Link>
@@ -333,14 +333,14 @@ export default async function AdminUtilisateurDetailPage({
       <div className="mt-8 flex gap-3">
         <a
           href={`mailto:${userData.email}`}
-          className="px-4 py-2 text-sm font-medium border border-gray-300 rounded-lg hover:border-black transition-colors"
+          className="px-4 py-2 text-sm font-medium border border-gray-300 rounded-lg hover:border-accent transition-colors"
         >
           Envoyer un email
         </a>
         {auxProfile?.validation_status === 'valide' && (
           <Link
             href={`/recherche?auxiliaire=${id}`}
-            className="px-4 py-2 text-sm font-medium border border-gray-300 rounded-lg hover:border-black transition-colors"
+            className="px-4 py-2 text-sm font-medium border border-gray-300 rounded-lg hover:border-accent transition-colors"
             target="_blank"
           >
             Voir le profil public
@@ -354,7 +354,7 @@ export default async function AdminUtilisateurDetailPage({
 function StatusBadge({ status }: { status: string }) {
   const styles: Record<string, string> = {
     en_attente: 'bg-gray-200 text-gray-700',
-    valide: 'bg-black text-white',
+    valide: 'bg-accent text-black',
     refuse: 'bg-white text-gray-900 border border-gray-400',
     a_completer: 'bg-gray-100 text-gray-700 border border-gray-300',
   }
@@ -382,7 +382,7 @@ function DocLink({ label, url }: { label: string; url: string | null }) {
           href={url}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-sm hover:border-black transition"
+          className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-sm hover:border-accent transition"
         >
           Voir le document
         </a>

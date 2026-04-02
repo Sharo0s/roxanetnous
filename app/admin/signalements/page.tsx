@@ -30,7 +30,7 @@ export default async function AdminSignalementsPage() {
             {signalements.map((sig: any) => {
               const auteur = sig.auteur as any
               return (
-                <div key={sig.id} className="bg-white rounded-xl border p-5">
+                <div key={sig.id} className="bg-white rounded-xl border p-5 hover:border-accent transition-colors">
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-1">

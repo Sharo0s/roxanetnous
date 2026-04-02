@@ -99,7 +99,7 @@ export default async function AdminAnnoncesPage({
                       <td className="px-4 py-3">
                         <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
                           annonce.status === 'publiee' ? 'bg-accent text-black' :
-                          annonce.status === 'suspendue' ? 'bg-red-100 text-red-700' :
+                          annonce.status === 'suspendue' ? 'bg-gray-200 text-gray-700 border border-gray-400' :
                           'bg-gray-200 text-gray-600'
                         }`}>
                           {annonce.status}
