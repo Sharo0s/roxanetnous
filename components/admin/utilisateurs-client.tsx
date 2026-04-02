@@ -15,7 +15,7 @@ const VALIDATION_LABELS: Record<string, string> = {
 
 const VALIDATION_STYLES: Record<string, string> = {
   en_attente: 'bg-gray-200 text-gray-700',
-  valide: 'bg-black text-white',
+  valide: 'bg-accent text-black',
   refuse: 'bg-white text-gray-900 border border-gray-400',
   a_completer: 'bg-gray-100 text-gray-700 border border-gray-300',
 }
@@ -79,7 +79,7 @@ export function UtilisateursClient({
           onClick={() => { setTab('auxiliaires'); setStatusFilter('tous') }}
           className={`px-4 py-2.5 text-sm font-medium border-b-2 transition-colors ${
             tab === 'auxiliaires'
-              ? 'border-black text-black'
+              ? 'border-accent text-black'
               : 'border-transparent text-gray-500 hover:text-black'
           }`}
         >
@@ -89,7 +89,7 @@ export function UtilisateursClient({
           onClick={() => { setTab('beneficiaires'); setStatusFilter('tous') }}
           className={`px-4 py-2.5 text-sm font-medium border-b-2 transition-colors ${
             tab === 'beneficiaires'
-              ? 'border-black text-black'
+              ? 'border-accent text-black'
               : 'border-transparent text-gray-500 hover:text-black'
           }`}
         >
@@ -103,7 +103,7 @@ export function UtilisateursClient({
           <button
             onClick={() => setStatusFilter('tous')}
             className={`bg-white rounded-xl border p-5 text-left transition-colors ${
-              statusFilter === 'tous' ? 'border-black' : 'hover:border-gray-400'
+              statusFilter === 'tous' ? 'border-accent' : 'hover:border-gray-400'
             }`}
           >
             <p className="text-sm text-gray-500">Total</p>
@@ -112,7 +112,7 @@ export function UtilisateursClient({
           <button
             onClick={() => setStatusFilter('en_attente')}
             className={`bg-white rounded-xl border p-5 text-left transition-colors ${
-              statusFilter === 'en_attente' ? 'border-black' : 'hover:border-gray-400'
+              statusFilter === 'en_attente' ? 'border-accent' : 'hover:border-gray-400'
             }`}
           >
             <p className="text-sm text-gray-500">En attente</p>
@@ -121,7 +121,7 @@ export function UtilisateursClient({
           <button
             onClick={() => setStatusFilter('valide')}
             className={`bg-white rounded-xl border p-5 text-left transition-colors ${
-              statusFilter === 'valide' ? 'border-black' : 'hover:border-gray-400'
+              statusFilter === 'valide' ? 'border-accent' : 'hover:border-gray-400'
             }`}
           >
             <p className="text-sm text-gray-500">Valides</p>
@@ -154,7 +154,7 @@ export function UtilisateursClient({
           placeholder="Rechercher par nom, email ou ville..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-xl text-sm focus:outline-none focus:border-black transition-colors"
+          className="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-xl text-sm focus:outline-none focus:border-accent transition-colors"
         />
       </div>
 
@@ -167,7 +167,7 @@ export function UtilisateursClient({
               onClick={() => setStatusFilter(s)}
               className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
                 statusFilter === s
-                  ? 'bg-black text-white'
+                  ? 'bg-accent text-black'
                   : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
               }`}
             >
@@ -212,7 +212,7 @@ function AuxiliairesTable({
     <div className="bg-white rounded-xl border overflow-hidden">
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
-          <thead className="bg-gray-50 border-b">
+          <thead className="bg-accent/20 border-b">
             <tr>
               <th className="text-left px-4 py-3 font-medium text-gray-500">Nom</th>
               <th className="text-left px-4 py-3 font-medium text-gray-500">Ville</th>
@@ -230,7 +230,7 @@ function AuxiliairesTable({
               const moreCount = (u.diplomes?.length || 0) - 1
 
               return (
-                <tr key={u.id} className="border-b last:border-0 hover:bg-gray-50">
+                <tr key={u.id} className="border-b last:border-0 hover:bg-accent/10">
                   <td className="px-4 py-3">
                     <div className="font-medium text-gray-900">
                       {u.first_name} {u.last_name}
@@ -268,7 +268,7 @@ function AuxiliairesTable({
                   <td className="px-4 py-3 text-right">
                     <Link
                       href={`/admin/utilisateurs/${u.id}`}
-                      className="px-3 py-1.5 text-xs font-medium border border-gray-300 rounded-lg hover:border-black transition-colors"
+                      className="px-3 py-1.5 text-xs font-medium border border-gray-300 rounded-lg hover:border-accent transition-colors"
                     >
                       Voir
                     </Link>
@@ -300,7 +300,7 @@ function BeneficiairesTable({
     <div className="bg-white rounded-xl border overflow-hidden">
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
-          <thead className="bg-gray-50 border-b">
+          <thead className="bg-accent/20 border-b">
             <tr>
               <th className="text-left px-4 py-3 font-medium text-gray-500">Nom</th>
               <th className="text-left px-4 py-3 font-medium text-gray-500">Ville</th>
@@ -310,7 +310,7 @@ function BeneficiairesTable({
           </thead>
           <tbody>
             {beneficiaires.map((u) => (
-              <tr key={u.id} className="border-b last:border-0 hover:bg-gray-50">
+              <tr key={u.id} className="border-b last:border-0 hover:bg-accent/10">
                 <td className="px-4 py-3">
                   <div className="font-medium text-gray-900">
                     {u.first_name} {u.last_name}
@@ -326,7 +326,7 @@ function BeneficiairesTable({
                 <td className="px-4 py-3 text-right">
                   <Link
                     href={`/admin/utilisateurs/${u.id}`}
-                    className="px-3 py-1.5 text-xs font-medium border border-gray-300 rounded-lg hover:border-black transition-colors"
+                    className="px-3 py-1.5 text-xs font-medium border border-gray-300 rounded-lg hover:border-accent transition-colors"
                   >
                     Voir
                   </Link>
