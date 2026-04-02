@@ -1,75 +1,108 @@
 import { createClient } from '@/lib/supabase/server'
+import { DIPLOMES, EXPERIENCE_LEVELS } from '@/lib/constants'
+import { UtilisateursClient } from '@/components/admin/utilisateurs-client'
+
+export type AuxiliaireRow = {
+  id: string
+  email: string
+  first_name: string
+  last_name: string
+  role: 'auxiliaire'
+  created_at: string
+  ville: string | null
+  code_postal: string | null
+  validation_status: string | null
+  diplomes: string[]
+  experience: string | null
+  profile_id: string | null
+}
+
+export type BeneficiaireRow = {
+  id: string
+  email: string
+  first_name: string
+  last_name: string
+  role: 'beneficiaire'
+  created_at: string
+  ville: string | null
+  code_postal: string | null
+}
 
 export default async function AdminUtilisateursPage() {
   const supabaseAdmin = await createClient({ serviceRole: true })
 
-  const { data: users } = await supabaseAdmin
+  // Charger les auxiliaires avec leur profil
+  const { data: auxUsers } = await supabaseAdmin
     .from('users')
-    .select('id, email, first_name, last_name, role, created_at')
-    .neq('role', 'admin')
+    .select(`
+      id, email, first_name, last_name, role, created_at,
+      auxiliaires_profiles (id, ville, code_postal, validation_status, diplomes, experience)
+    `)
+    .eq('role', 'auxiliaire')
     .order('created_at', { ascending: false })
 
-  // Compter par role
-  const auxCount = users?.filter((u) => u.role === 'auxiliaire').length || 0
-  const benCount = users?.filter((u) => u.role === 'beneficiaire').length || 0
+  // Charger les beneficiaires avec leur profil
+  const { data: benUsers } = await supabaseAdmin
+    .from('users')
+    .select(`
+      id, email, first_name, last_name, role, created_at,
+      beneficiaires_profiles (ville, code_postal)
+    `)
+    .eq('role', 'beneficiaire')
+    .order('created_at', { ascending: false })
+
+  const auxiliaires: AuxiliaireRow[] = (auxUsers || []).map((u: any) => {
+    const p = Array.isArray(u.auxiliaires_profiles)
+      ? u.auxiliaires_profiles[0]
+      : u.auxiliaires_profiles
+    return {
+      id: u.id,
+      email: u.email,
+      first_name: u.first_name,
+      last_name: u.last_name,
+      role: 'auxiliaire' as const,
+      created_at: u.created_at,
+      ville: p?.ville || null,
+      code_postal: p?.code_postal || null,
+      validation_status: p?.validation_status || null,
+      diplomes: p?.diplomes || [],
+      experience: p?.experience || null,
+      profile_id: p?.id || null,
+    }
+  })
+
+  const beneficiaires: BeneficiaireRow[] = (benUsers || []).map((u: any) => {
+    const p = Array.isArray(u.beneficiaires_profiles)
+      ? u.beneficiaires_profiles[0]
+      : u.beneficiaires_profiles
+    return {
+      id: u.id,
+      email: u.email,
+      first_name: u.first_name,
+      last_name: u.last_name,
+      role: 'beneficiaire' as const,
+      created_at: u.created_at,
+      ville: p?.ville || null,
+      code_postal: p?.code_postal || null,
+    }
+  })
+
+  // Compter par statut de validation
+  const enAttenteCount = auxiliaires.filter(
+    (a) => a.validation_status === 'en_attente'
+  ).length
+  const validesCount = auxiliaires.filter(
+    (a) => a.validation_status === 'valide'
+  ).length
 
   return (
-      <div className="max-w-6xl mx-auto px-4 py-8">
-        <h2 className="text-2xl font-bold text-gray-900 mb-6">Utilisateurs</h2>
-
-        <div className="grid grid-cols-2 gap-4 mb-8">
-          <div className="bg-white rounded-xl border p-5">
-            <p className="text-sm text-gray-500">Auxiliaires</p>
-            <p className="text-3xl font-bold mt-1">{auxCount}</p>
-          </div>
-          <div className="bg-white rounded-xl border p-5">
-            <p className="text-sm text-gray-500">Beneficiaires</p>
-            <p className="text-3xl font-bold mt-1">{benCount}</p>
-          </div>
-        </div>
-
-        {!users || users.length === 0 ? (
-          <div className="bg-white rounded-xl border p-8 text-center text-gray-500">
-            Aucun utilisateur.
-          </div>
-        ) : (
-          <div className="bg-white rounded-xl border overflow-hidden">
-            <table className="w-full text-sm">
-              <thead className="bg-accent/20 border-b">
-                <tr>
-                  <th className="text-left px-4 py-3 font-medium text-gray-500">Nom</th>
-                  <th className="text-left px-4 py-3 font-medium text-gray-500">Email</th>
-                  <th className="text-left px-4 py-3 font-medium text-gray-500">Role</th>
-                  <th className="text-left px-4 py-3 font-medium text-gray-500">Inscription</th>
-                </tr>
-              </thead>
-              <tbody>
-                {users.map((u) => (
-                  <tr key={u.id} className="border-b last:border-0 hover:bg-accent/10">
-                    <td className="px-4 py-3 font-medium text-gray-900">
-                      {u.first_name} {u.last_name}
-                    </td>
-                    <td className="px-4 py-3 text-gray-600">{u.email}</td>
-                    <td className="px-4 py-3">
-                      <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                        u.role === 'admin'
-                          ? 'bg-accent text-black'
-                          : u.role === 'auxiliaire'
-                            ? 'bg-gray-200 text-gray-700'
-                            : 'bg-gray-100 text-gray-600'
-                      }`}>
-                        {u.role}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-gray-400">
-                      {new Date(u.created_at).toLocaleDateString('fr-FR')}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
+    <UtilisateursClient
+      auxiliaires={auxiliaires}
+      beneficiaires={beneficiaires}
+      enAttenteCount={enAttenteCount}
+      validesCount={validesCount}
+      diplomeLabels={Object.fromEntries(DIPLOMES.map((d) => [d.value, d.label]))}
+      experienceLabels={Object.fromEntries(EXPERIENCE_LEVELS.map((e) => [e.value, e.label]))}
+    />
   )
 }
