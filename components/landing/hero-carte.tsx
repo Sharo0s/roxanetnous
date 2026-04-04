@@ -52,10 +52,46 @@ const BRETAGNE_COORDS: [number, number][] = [
   [-1.8501, 48.6994], [-1.9860, 48.6812], [-2.0249, 48.6374],
 ]
 
-const BRETAGNE_PATH = (() => {
-  const points = BRETAGNE_COORDS.map(([lon, lat]) => geoToSvg(lon, lat))
+// Belle-Ile-en-Mer
+const BELLE_ILE_COORDS: [number, number][] = [
+  [-3.2355, 47.3238], [-3.2539, 47.3375], [-3.2635, 47.3523],
+  [-3.2561, 47.3733], [-3.2472, 47.3875], [-3.2186, 47.3759],
+  [-3.1997, 47.3702], [-3.1661, 47.3623], [-3.1513, 47.3455],
+  [-3.1316, 47.3280], [-3.0905, 47.3162], [-3.0582, 47.3117],
+  [-3.0722, 47.2950], [-3.0918, 47.2784], [-3.1123, 47.2877],
+  [-3.1397, 47.2860], [-3.1643, 47.2978], [-3.1823, 47.2959],
+  [-3.2064, 47.2963], [-3.2250, 47.3002], [-3.2449, 47.3107],
+]
+
+// Ouessant
+const OUESSANT_COORDS: [number, number][] = [
+  [-5.1026, 48.4361], [-5.1125, 48.4385], [-5.0979, 48.4451],
+  [-5.1054, 48.4552], [-5.1269, 48.4494], [-5.1333, 48.4556],
+  [-5.1179, 48.4633], [-5.1049, 48.4723], [-5.0829, 48.4724],
+  [-5.0762, 48.4806], [-5.0525, 48.4777], [-5.0538, 48.4650],
+  [-5.0378, 48.4641], [-5.0509, 48.4576], [-5.0654, 48.4503],
+  [-5.0831, 48.4481], [-5.1010, 48.4386],
+]
+
+// Groix
+const GROIX_COORDS: [number, number][] = [
+  [-3.4218, 47.6200], [-3.4327, 47.6235], [-3.4405, 47.6280],
+  [-3.4505, 47.6234], [-3.4626, 47.6202], [-3.4764, 47.6273],
+  [-3.4857, 47.6295], [-3.4925, 47.6324], [-3.5063, 47.6397],
+  [-3.5151, 47.6471], [-3.5025, 47.6532], [-3.4822, 47.6504],
+  [-3.4703, 47.6491], [-3.4547, 47.6452], [-3.4375, 47.6441],
+  [-3.4234, 47.6381], [-3.4154, 47.6314], [-3.4214, 47.6223],
+]
+
+function coordsToPath(coords: [number, number][]): string {
+  const points = coords.map(([lon, lat]) => geoToSvg(lon, lat))
   return 'M' + points.map(([x, y]) => `${x} ${y}`).join(' L') + ' Z'
-})()
+}
+
+const BRETAGNE_PATH = coordsToPath(BRETAGNE_COORDS)
+const BELLE_ILE_PATH = coordsToPath(BELLE_ILE_COORDS)
+const OUESSANT_PATH = coordsToPath(OUESSANT_COORDS)
+const GROIX_PATH = coordsToPath(GROIX_COORDS)
 
 type VilleCoord = { ville: string; lat: number; lon: number }
 
@@ -129,7 +165,7 @@ export function HeroCarte({ villes }: { villes: VilleCoord[] }) {
 
   return (
     <div ref={containerRef} className="w-full">
-      <svg viewBox="-20 -20 830 540" className="w-full h-auto" aria-hidden="true">
+      <svg viewBox="-30 -20 850 560" className="w-full h-auto" aria-hidden="true">
         {/* Contour Bretagne */}
         <path
           ref={pathRef}
@@ -139,6 +175,11 @@ export function HeroCarte({ villes }: { villes: VilleCoord[] }) {
           strokeWidth={1.5}
           strokeLinejoin="round"
         />
+
+        {/* Iles */}
+        <path d={BELLE_ILE_PATH} fill="none" stroke="black" strokeWidth={1.2} strokeLinejoin="round" />
+        <path d={OUESSANT_PATH} fill="none" stroke="black" strokeWidth={1.2} strokeLinejoin="round" />
+        <path d={GROIX_PATH} fill="none" stroke="black" strokeWidth={1.2} strokeLinejoin="round" />
 
         {/* Villes */}
         {cities.map((city, i) => {
