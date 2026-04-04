@@ -93,6 +93,19 @@ const BELLE_ILE_PATH = coordsToPath(BELLE_ILE_COORDS)
 const OUESSANT_PATH = coordsToPath(OUESSANT_COORDS)
 const GROIX_PATH = coordsToPath(GROIX_COORDS)
 
+// Test point-in-polygon (ray casting)
+function isInPolygon(lon: number, lat: number, poly: [number, number][]): boolean {
+  let inside = false
+  for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+    const [xi, yi] = poly[i]
+    const [xj, yj] = poly[j]
+    if ((yi > lat) !== (yj > lat) && lon < ((xj - xi) * (lat - yi)) / (yj - yi) + xi) {
+      inside = !inside
+    }
+  }
+  return inside
+}
+
 type VilleCoord = { ville: string; lat: number; lon: number }
 
 export function HeroCarte({ villes }: { villes: VilleCoord[] }) {
@@ -106,9 +119,9 @@ export function HeroCarte({ villes }: { villes: VilleCoord[] }) {
   const [cities, setCities] = useState<{ name: string; x: number; y: number }[]>([])
 
   useEffect(() => {
-    // Filtrer les villes en Bretagne (bounding box)
+    // Filtrer les villes reellement dans le contour de la Bretagne
     const bretagneVilles = villes.filter(
-      (v) => v.lon >= -5.2 && v.lon <= -0.9 && v.lat >= 47.2 && v.lat <= 49.0
+      (v) => isInPolygon(v.lon, v.lat, BRETAGNE_COORDS)
     )
 
     const mapped = bretagneVilles.map((v) => {
