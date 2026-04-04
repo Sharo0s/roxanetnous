@@ -48,59 +48,65 @@ export default async function RecherchePage({
   // Requete les annonces accompagnantes publiees
   // On utilise le service role pour permettre l'acces aux visiteurs non connectes
   const supabaseAdmin = await createClient({ serviceRole: true })
-  let query = supabaseAdmin
-    .from('annonces_accompagnantes')
-    .select(`
-      *,
-      accompagnantes_profiles!inner (
-        diplomes,
-        experience,
-        specialites,
-        description,
-        permis_conduire,
-        vehicule,
-        validation_status,
-        user_id,
-        users:user_id (first_name, last_name)
-      )
-    `)
-    .eq('status', 'publiee')
-    .eq('accompagnantes_profiles.validation_status', 'valide')
-    .order('published_at', { ascending: false })
+  const hasFilters = !!(params.ville || params.specialite || params.experience)
 
-  // Filtre par ville
-  if (params.ville) {
-    query = query.ilike('ville', `%${params.ville}%`)
-  }
+  let annonces: any[] = []
 
-  // Filtre par specialite(s)
-  if (params.specialite) {
-    const specs = params.specialite.split(',').filter(Boolean)
-    if (specs.length > 0) {
-      query = query.overlaps('accompagnantes_profiles.specialites', specs)
+  if (hasFilters) {
+    let query = supabaseAdmin
+      .from('annonces_accompagnantes')
+      .select(`
+        *,
+        accompagnantes_profiles!inner (
+          diplomes,
+          experience,
+          specialites,
+          description,
+          permis_conduire,
+          vehicule,
+          validation_status,
+          user_id,
+          users:user_id (first_name, last_name)
+        )
+      `)
+      .eq('status', 'publiee')
+      .eq('accompagnantes_profiles.validation_status', 'valide')
+      .order('published_at', { ascending: false })
+
+    // Filtre par ville
+    if (params.ville) {
+      query = query.ilike('ville', `%${params.ville}%`)
     }
-  }
 
-  // Filtre par experience
-  if (params.experience) {
-    query = query.eq('accompagnantes_profiles.experience', params.experience)
-  }
+    // Filtre par specialite(s)
+    if (params.specialite) {
+      const specs = params.specialite.split(',').filter(Boolean)
+      if (specs.length > 0) {
+        query = query.overlaps('accompagnantes_profiles.specialites', specs)
+      }
+    }
 
-  const { data: rawAnnonces } = await query
+    // Filtre par experience
+    if (params.experience) {
+      query = query.eq('accompagnantes_profiles.experience', params.experience)
+    }
 
-  // Filter to only show accompagnantes with active subscription
-  let annonces = rawAnnonces || []
-  if (annonces.length > 0) {
-    const userIds = annonces.map((a: any) => a.accompagnantes_profiles?.user_id).filter(Boolean)
-    const { data: activeSubs } = await supabaseAdmin
-      .from('subscriptions')
-      .select('user_id')
-      .in('user_id', userIds)
-      .in('status', ['active', 'trialing'])
-      .gte('current_period_end', new Date().toISOString())
+    const { data: rawAnnonces } = await query
 
-    const activeUserIds = new Set((activeSubs || []).map((s) => s.user_id))
-    annonces = annonces.filter((a: any) => activeUserIds.has(a.accompagnantes_profiles?.user_id))
+    // Filter to only show accompagnantes with active subscription
+    annonces = rawAnnonces || []
+    if (annonces.length > 0) {
+      const userIds = annonces.map((a: any) => a.accompagnantes_profiles?.user_id).filter(Boolean)
+      const { data: activeSubs } = await supabaseAdmin
+        .from('subscriptions')
+        .select('user_id')
+        .in('user_id', userIds)
+        .in('status', ['active', 'trialing'])
+        .gte('current_period_end', new Date().toISOString())
+
+      const activeUserIds = new Set((activeSubs || []).map((s) => s.user_id))
+      annonces = annonces.filter((a: any) => activeUserIds.has(a.accompagnantes_profiles?.user_id))
+    }
   }
 
   // Fetch des badges
@@ -149,7 +155,44 @@ export default async function RecherchePage({
           longitude: matchAnnonce.longitude ? Number(matchAnnonce.longitude) : undefined,
         }
 
-        matchResults = annonces.map((a: any) => {
+        // Charger toutes les annonces pour le matching si pas deja chargees
+        let matchSourceAnnonces = annonces
+        if (matchSourceAnnonces.length === 0) {
+          const { data: allAnnonces } = await supabaseAdmin
+            .from('annonces_accompagnantes')
+            .select(`
+              *,
+              accompagnantes_profiles!inner (
+                diplomes,
+                experience,
+                specialites,
+                description,
+                permis_conduire,
+                vehicule,
+                validation_status,
+                user_id,
+                users:user_id (first_name, last_name)
+              )
+            `)
+            .eq('status', 'publiee')
+            .eq('accompagnantes_profiles.validation_status', 'valide')
+            .order('published_at', { ascending: false })
+
+          matchSourceAnnonces = allAnnonces || []
+          if (matchSourceAnnonces.length > 0) {
+            const userIds = matchSourceAnnonces.map((a: any) => a.accompagnantes_profiles?.user_id).filter(Boolean)
+            const { data: activeSubs } = await supabaseAdmin
+              .from('subscriptions')
+              .select('user_id')
+              .in('user_id', userIds)
+              .in('status', ['active', 'trialing'])
+              .gte('current_period_end', new Date().toISOString())
+            const activeUserIds = new Set((activeSubs || []).map((s) => s.user_id))
+            matchSourceAnnonces = matchSourceAnnonces.filter((a: any) => activeUserIds.has(a.accompagnantes_profiles?.user_id))
+          }
+        }
+
+        matchResults = matchSourceAnnonces.map((a: any) => {
           const auxProfile = a.accompagnantes_profiles
           const { score, details } = calculateMatchScore(
             {
