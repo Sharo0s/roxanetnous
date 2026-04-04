@@ -109,7 +109,7 @@ export default async function HomePage() {
           <div className="animate-marquee whitespace-nowrap py-3 text-base font-bold text-accent">
             {Array.from({ length: 6 }).map((_, i) => (
               <span key={i} className="mx-12">
-                OFFRE DE LANCEMENT — 5 MOIS OFFERTS POUR LES PREMIERS INSCRITS
+                OFFRE DE LANCEMENT — 2 MOIS OFFERTS POUR LES PREMIERS INSCRITS
               </span>
             ))}
           </div>
@@ -321,7 +321,7 @@ export default async function HomePage() {
             </div>
             {launchOfferActive && (
               <p className="text-center text-sm text-black mt-6">
-                Offre de lancement : 5 mois offerts pour les premiers inscrits.
+                Offre de lancement : 2 mois offerts pour les premiers inscrits.
               </p>
             )}
           </div>

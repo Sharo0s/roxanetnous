@@ -82,7 +82,7 @@ export function SubscriptionPageContent({
         <div className="bg-accent text-black rounded-xl p-4 text-center">
           <p className="font-semibold">Offre de lancement</p>
           <p className="text-sm text-black/70 mt-1">
-            2 mois offerts sur le mensuel, 3 mois offerts sur l'annuel
+            2 mois offerts pour les premiers inscrits
           </p>
         </div>
       )}

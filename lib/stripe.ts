@@ -17,9 +17,7 @@ export function getStripePriceId(role: 'auxiliaire' | 'beneficiaire', plan: Plan
   return prices[`${role}_${plan}`]
 }
 
-// Offre de lancement : essai gratuit
-// Mensuel : 2 mois offerts
-// Annuel : 3 mois offerts
+// Offre de lancement : essai gratuit 2 mois
 export function getTrialDays(plan: PlanType): number | undefined {
   const launchEnd = process.env.LAUNCH_OFFER_END
   if (!launchEnd) return undefined
@@ -29,8 +27,7 @@ export function getTrialDays(plan: PlanType): number | undefined {
 
   if (now >= end) return undefined
 
-  if (plan === 'mensuel') return 60  // ~2 mois
-  if (plan === 'annuel') return 90   // ~3 mois
+  if (plan === 'mensuel' || plan === 'annuel') return 60  // ~2 mois
   return undefined
 }
 
