@@ -5,6 +5,7 @@ import {
   getInscriptionsParMois,
   getRepartitionRoles,
   getActiviteParMois,
+  getRevenusParMois,
   getMrrDetail,
   getChurn,
   getDernieresAnnulations,
@@ -51,12 +52,13 @@ export default async function AdminDashboard() {
     .select('id', { count: 'exact', head: true })
     .eq('status', 'en_attente')
 
-  const [kpis, inscriptions, repartition, activite, mrrDetail, churn, annulations] =
+  const [kpis, inscriptions, repartition, activite, revenus, mrrDetail, churn, annulations] =
     await Promise.all([
       getKpis(),
       getInscriptionsParMois(),
       getRepartitionRoles(),
       getActiviteParMois(),
+      getRevenusParMois(),
       getMrrDetail(),
       getChurn(),
       getDernieresAnnulations(),
@@ -66,8 +68,8 @@ export default async function AdminDashboard() {
     ? (repartition.accompagnantes / repartition.total) * 100
     : 0
 
-  const inscriptionsRecentes = [...inscriptions].reverse()
-  const activiteRecente = [...activite].reverse()
+  const inscriptionsRecentes = inscriptions
+  const activiteRecente = activite
 
   const moisEnCours = activite.length > 0 ? activite[activite.length - 1] : null
 
@@ -232,6 +234,34 @@ export default async function AdminDashboard() {
 
           revenus: (
             <>
+              {/* Historique revenus 12 mois */}
+              <div className="bg-white rounded-xl border overflow-hidden mb-8">
+                <div className="px-4 py-3 border-b bg-accent/20">
+                  <h4 className="font-medium text-gray-700 text-sm">Revenus (12 derniers mois)</h4>
+                </div>
+                <table className="w-full text-sm">
+                  <thead className="bg-accent/20 border-b">
+                    <tr>
+                      <th className="text-left px-4 py-3 font-medium text-gray-500">Mois</th>
+                      <th className="text-right px-4 py-3 font-medium text-gray-500">Abonnes</th>
+                      <th className="text-right px-4 py-3 font-medium text-gray-500">MRR</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {revenus.map((row) => {
+                      const isZero = row.abonnes === 0
+                      return (
+                        <tr key={row.mois} className={`border-b last:border-0 hover:bg-accent/10 ${isZero ? 'text-gray-300' : ''}`}>
+                          <td className={`px-4 py-3 ${isZero ? '' : 'font-medium'}`}>{formatMois(row.mois)}</td>
+                          <td className="px-4 py-3 text-right">{row.abonnes}</td>
+                          <td className={`px-4 py-3 text-right ${isZero ? '' : 'font-medium'}`}>{formatEur(row.mrr)}</td>
+                        </tr>
+                      )
+                    })}
+                  </tbody>
+                </table>
+              </div>
+
               {/* MRR par segment */}
               <div className="bg-white rounded-xl border overflow-hidden mb-8">
                 <div className="px-4 py-3 border-b bg-accent/20">
@@ -337,7 +367,7 @@ export default async function AdminDashboard() {
           activite: (
             <div className="bg-white rounded-xl border overflow-hidden">
               <div className="px-4 py-3 border-b bg-accent/20">
-                <h4 className="font-medium text-gray-700 text-sm">Activite (6 derniers mois)</h4>
+                <h4 className="font-medium text-gray-700 text-sm">Activite (12 derniers mois)</h4>
               </div>
               <table className="w-full text-sm">
                 <thead className="bg-accent/20 border-b">
