@@ -1,4 +1,6 @@
 # roxanetnous
+  Si vous voulez retrouver l'etat actuel carte france, il suffira de faire :             
+  git show 1d7f077:components/landing/hero-carte.tsx
 
 Plateforme de mise en relation entre auxiliaires de vie vérifiés et bénéficiaires.
 

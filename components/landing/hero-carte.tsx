@@ -2,56 +2,91 @@
 
 import { useEffect, useState, useRef } from 'react'
 
-// Projection GPS -> SVG
+// Projection GPS -> SVG pour la Bretagne
+// Bounding box: lon [-5.2, -0.9], lat [47.2, 48.95]
 function geoToSvg(lon: number, lat: number): [number, number] {
-  const x = (lon + 5.0) * (460 / 13.5) + 20
-  const y = 480 - (lat - 42.1) * (460 / 9.2)
+  const x = (lon + 5.2) * (460 / 4.3) + 20
+  const y = 480 - (lat - 47.2) * (460 / 1.75) - 20
   return [Math.round(x * 10) / 10, Math.round(y * 10) / 10]
 }
 
-// Contour France metropolitaine
-const OUTLINE_COORDS: [number, number][] = [
-  [2.55, 51.15], [2.20, 51.05], [1.85, 50.95], [1.58, 50.73], [1.57, 50.13],
-  [1.25, 49.92], [0.11, 49.48], [-0.37, 49.19], [-1.09, 48.88],
-  [-1.84, 48.65], [-2.76, 48.56], [-3.47, 48.73], [-4.10, 48.65],
-  [-4.70, 48.50], [-4.90, 48.30], [-4.77, 48.02], [-4.33, 47.83],
-  [-3.36, 47.73], [-2.76, 47.50], [-2.51, 47.28], [-2.17, 47.08],
-  [-1.57, 46.67], [-1.14, 46.16], [-1.18, 45.70], [-1.07, 45.23],
-  [-1.16, 44.73], [-1.31, 44.20], [-1.52, 43.50], [-1.77, 43.37],
-  [-0.73, 42.93], [0.32, 42.58], [1.42, 42.33], [1.86, 42.35],
-  [2.53, 42.33], [3.03, 42.34], [3.17, 42.60], [3.08, 43.25],
-  [3.54, 43.40], [3.88, 43.58], [4.36, 43.40], [4.80, 43.34],
-  [5.06, 43.34], [5.50, 43.20], [5.78, 43.10], [6.14, 43.00],
-  [6.63, 43.35], [7.01, 43.50], [7.40, 43.60], [7.55, 43.80],
-  [7.13, 44.15], [6.75, 44.58], [6.87, 45.17], [6.85, 45.59],
-  [6.87, 45.84], [6.20, 46.21], [6.10, 46.47], [6.83, 47.17],
-  [7.02, 47.50], [7.55, 47.59], [7.90, 48.10], [8.10, 48.70],
-  [8.20, 49.00], [7.42, 49.18], [6.36, 49.47], [5.82, 49.54],
-  [5.39, 49.62], [4.85, 49.80], [4.23, 49.96], [3.61, 50.10],
-  [3.20, 50.40], [3.15, 50.80], [3.10, 51.00], [2.89, 51.10],
+// Contour simplifie de la Bretagne (4 departements administratifs)
+// Trace dans le sens horaire depuis la frontiere nord-est
+const BRETAGNE_COORDS: [number, number][] = [
+  // Frontiere est (du nord au sud)
+  [-1.01, 48.65],  // nord-est, pres de Pontorson
+  [-1.08, 48.50],  // est de Fougeres
+  [-1.17, 48.35],  // Fougeres
+  [-1.07, 48.17],  // est de Vitre
+  [-1.05, 48.00],  // Vitre
+  [-1.18, 47.82],  // est de Chateaubriant
+  [-1.37, 47.64],  // Chateaubriant
+  [-1.52, 47.50],  // sud-est, vers Nozay
+  [-1.62, 47.45],  // Blain
+  [-1.78, 47.38],  // vers Saint-Nazaire interieur
+  // Cote sud (de l'est vers l'ouest)
+  [-2.10, 47.28],  // embouchure Loire / Saint-Nazaire
+  [-2.35, 47.26],  // Le Croisic
+  [-2.52, 47.28],  // Guerande
+  [-2.75, 47.50],  // Vannes sud
+  [-2.82, 47.48],  // Golfe du Morbihan
+  [-2.95, 47.47],  // Locmariaquer
+  [-3.08, 47.50],  // Quiberon
+  [-3.13, 47.48],  // Belle-Ile (approximation cote)
+  [-3.35, 47.58],  // Lorient
+  [-3.43, 47.65],  // Guidel
+  [-3.55, 47.70],  // Quimperle
+  [-3.82, 47.78],  // Concarneau
+  [-3.92, 47.80],  // vers Fouesnant
+  [-4.05, 47.83],  // Benodet
+  [-4.10, 47.88],  // Quimper sud
+  // Pointe du Finistere sud
+  [-4.22, 47.85],  // Audierne approche
+  [-4.33, 48.00],  // Pointe du Raz
+  [-4.52, 48.03],  // Cap Sizun
+  [-4.57, 48.08],  // Douarnenez
+  [-4.60, 48.15],  // Crozon approche
+  // Presqu'ile de Crozon et rade de Brest
+  [-4.70, 48.17],  // Crozon
+  [-4.78, 48.25],  // Pointe de Pen-Hir
+  [-4.73, 48.30],  // Camaret
+  [-4.58, 48.33],  // Rade de Brest sud
+  [-4.50, 48.38],  // Brest
+  [-4.55, 48.42],  // cote nord Brest
+  // Cote nord Finistere
+  [-4.70, 48.45],  // Le Conquet
+  [-4.78, 48.48],  // pointe Saint-Mathieu
+  [-4.72, 48.52],  // cote nord
+  [-4.57, 48.55],  // Portsall
+  [-4.40, 48.58],  // Brignogan
+  [-4.22, 48.62],  // cote des Abers
+  [-4.05, 48.65],  // Roscoff approche
+  [-3.88, 48.68],  // Roscoff
+  [-3.72, 48.70],  // Morlaix
+  [-3.58, 48.73],  // Plestin-les-Greves
+  // Cote nord (Cotes-d'Armor)
+  [-3.42, 48.78],  // Lannion
+  [-3.22, 48.83],  // Perros-Guirec
+  [-3.02, 48.85],  // Paimpol
+  [-2.85, 48.83],  // Pointe de l'Arcouest
+  [-2.75, 48.78],  // Brehat approche
+  [-2.65, 48.73],  // Binic
+  [-2.55, 48.68],  // Saint-Brieuc
+  [-2.40, 48.63],  // Erquy
+  [-2.28, 48.60],  // Cap Frehel
+  [-2.10, 48.62],  // Saint-Cast
+  [-2.00, 48.63],  // Dinard approche
+  [-1.85, 48.65],  // Saint-Malo ouest
+  [-1.68, 48.65],  // Saint-Malo
+  // Retour vers la frontiere est
+  [-1.50, 48.68],  // Cancale approche
+  [-1.35, 48.68],  // Cancale
+  [-1.20, 48.65],  // vers Mont-Saint-Michel
+  [-1.01, 48.65],  // fermeture du contour
 ]
 
-// Contour Corse — decalee vers l'ouest pour tenir dans le viewBox
-function corseSvg(lon: number, lat: number): [number, number] {
-  return geoToSvg(lon - 1.5, lat)
-}
-
-const CORSE_COORDS: [number, number][] = [
-  [9.56, 43.01], [9.49, 42.88], [9.41, 42.58], [9.36, 42.30],
-  [9.21, 42.10], [9.19, 41.92], [9.12, 41.70], [9.02, 41.55],
-  [8.80, 41.40], [8.58, 41.38], [8.57, 41.52], [8.62, 41.70],
-  [8.58, 41.93], [8.67, 42.05], [8.57, 42.18], [8.60, 42.38],
-  [8.77, 42.55], [9.10, 42.75], [9.30, 42.90], [9.41, 43.00],
-  [9.56, 43.01],
-]
-
-const FRANCE_PATH = (() => {
-  const points = OUTLINE_COORDS.map(([lon, lat]) => geoToSvg(lon, lat))
-  return 'M' + points.map(([x, y]) => `${x} ${y}`).join(' L') + ' Z'
-})()
-
-const CORSE_PATH = (() => {
-  const points = CORSE_COORDS.map(([lon, lat]) => corseSvg(lon, lat))
+const BRETAGNE_PATH = (() => {
+  const points = BRETAGNE_COORDS.map(([lon, lat]) => geoToSvg(lon, lat))
   return 'M' + points.map(([x, y]) => `${x} ${y}`).join(' L') + ' Z'
 })()
 
@@ -62,17 +97,19 @@ export function HeroCarte({ villes }: { villes: VilleCoord[] }) {
   const [hoveredCity, setHoveredCity] = useState<number | null>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const pathRef = useRef<SVGPathElement>(null)
-  const corseRef = useRef<SVGPathElement>(null)
   const startedRef = useRef(false)
 
-  // Convertir et mélanger côté client uniquement
+  // Convertir et melanger cote client uniquement
   const [cities, setCities] = useState<{ name: string; x: number; y: number }[]>([])
 
   useEffect(() => {
-    const mapped = villes.map((v) => {
-      // Villes corses : appliquer le même décalage que le contour
-      const isCorse = v.lon > 8.2 && v.lat < 43.1
-      const [x, y] = isCorse ? corseSvg(v.lon, v.lat) : geoToSvg(v.lon, v.lat)
+    // Filtrer les villes en Bretagne (bounding box)
+    const bretagneVilles = villes.filter(
+      (v) => v.lon >= -5.2 && v.lon <= -0.9 && v.lat >= 47.2 && v.lat <= 49.0
+    )
+
+    const mapped = bretagneVilles.map((v) => {
+      const [x, y] = geoToSvg(v.lon, v.lat)
       return { name: v.ville, x, y }
     })
     for (let i = mapped.length - 1; i > 0; i--) {
@@ -82,30 +119,28 @@ export function HeroCarte({ villes }: { villes: VilleCoord[] }) {
     const filtered: typeof mapped = []
     for (const city of mapped) {
       const tooClose = filtered.some(
-        (c) => Math.hypot(c.x - city.x, c.y - city.y) < 15
+        (c) => Math.hypot(c.x - city.x, c.y - city.y) < 20
       )
       if (!tooClose) filtered.push(city)
-      if (filtered.length >= 40) break
+      if (filtered.length >= 30) break
     }
     setCities(filtered)
 
-    // Animer contours + villes
+    // Animer contour + villes
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting && !startedRef.current) {
           startedRef.current = true
 
-          for (const ref of [pathRef, corseRef]) {
-            const path = ref.current
-            if (path) {
-              const length = path.getTotalLength()
-              path.style.strokeDasharray = `${length}`
-              path.style.strokeDashoffset = `${length}`
-              path.animate(
-                [{ strokeDashoffset: length }, { strokeDashoffset: 0 }],
-                { duration: 2000, easing: 'ease-in-out', fill: 'forwards' }
-              )
-            }
+          const path = pathRef.current
+          if (path) {
+            const length = path.getTotalLength()
+            path.style.strokeDasharray = `${length}`
+            path.style.strokeDashoffset = `${length}`
+            path.animate(
+              [{ strokeDashoffset: length }, { strokeDashoffset: 0 }],
+              { duration: 2000, easing: 'ease-in-out', fill: 'forwards' }
+            )
           }
 
           setTimeout(() => {
@@ -128,20 +163,10 @@ export function HeroCarte({ villes }: { villes: VilleCoord[] }) {
   return (
     <div ref={containerRef} className="w-full">
       <svg viewBox="0 -20 500 540" className="w-full h-auto" aria-hidden="true">
-        {/* Contour France */}
+        {/* Contour Bretagne */}
         <path
           ref={pathRef}
-          d={FRANCE_PATH}
-          fill="none"
-          stroke="black"
-          strokeWidth={1.5}
-          strokeLinejoin="round"
-        />
-
-        {/* Contour Corse */}
-        <path
-          ref={corseRef}
-          d={CORSE_PATH}
+          d={BRETAGNE_PATH}
           fill="none"
           stroke="black"
           strokeWidth={1.5}
@@ -161,7 +186,7 @@ export function HeroCarte({ villes }: { villes: VilleCoord[] }) {
             >
               {/* Ripple */}
               {isVisible && (
-                <circle cx={city.x} cy={city.y} r={5} fill="none" stroke="#FFB06E" strokeWidth={1.5}>
+                <circle cx={city.x} cy={city.y} r={5} fill="none" stroke="black" strokeWidth={1.5}>
                   <animate attributeName="r" from="5" to="25" dur="0.8s" fill="freeze" />
                   <animate attributeName="opacity" from="0.5" to="0" dur="0.8s" fill="freeze" />
                 </circle>
@@ -169,18 +194,18 @@ export function HeroCarte({ villes }: { villes: VilleCoord[] }) {
 
               {/* Pulse */}
               {isVisible && (
-                <circle cx={city.x} cy={city.y} r={5} fill="none" stroke="#FFB06E" strokeWidth={0.8}>
+                <circle cx={city.x} cy={city.y} r={5} fill="none" stroke="black" strokeWidth={0.8}>
                   <animate attributeName="r" values="5;16;5" dur="3s" repeatCount="indefinite" />
                   <animate attributeName="opacity" values="0.25;0;0.25" dur="3s" repeatCount="indefinite" />
                 </circle>
               )}
 
-              {/* Point — seul element interactif */}
+              {/* Point */}
               <circle
                 cx={city.x}
                 cy={city.y}
                 r={isHovered ? 8 : 5.5}
-                fill="#FFB06E"
+                fill="black"
                 opacity={isVisible ? 0.85 : 0}
                 className="transition-all duration-300"
                 style={{ pointerEvents: 'auto', cursor: 'default' }}
