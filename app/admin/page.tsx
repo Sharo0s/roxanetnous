@@ -11,13 +11,7 @@ import {
   getDernieresAnnulations,
 } from '@/lib/admin-stats'
 import { DashboardTabs } from '@/components/admin/dashboard-tabs'
-import { PeriodSelector } from '@/components/admin/period-selector'
-
-function formatMois(mois: string) {
-  const [year, month] = mois.split('-')
-  const date = new Date(parseInt(year), parseInt(month) - 1)
-  return date.toLocaleDateString('fr-FR', { month: 'short', year: '2-digit' })
-}
+import { InscriptionsTable, RevenusTable, ActiviteTable } from '@/components/admin/stats-tables'
 
 function formatEur(n: number) {
   return n.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' EUR'
@@ -200,67 +194,12 @@ export default async function AdminDashboard() {
           ),
 
           inscriptions: (
-            <PeriodSelector data={inscriptions}>
-              {(filtered) => (
-                <div className="bg-white rounded-xl border overflow-hidden">
-                  <table className="w-full text-sm">
-                    <thead className="bg-accent/20 border-b">
-                      <tr>
-                        <th className="text-left px-4 py-3 font-medium text-gray-500">Mois</th>
-                        <th className="text-right px-4 py-3 font-medium text-gray-500">Accompagnantes</th>
-                        <th className="text-right px-4 py-3 font-medium text-gray-500">Accompagnes</th>
-                        <th className="text-right px-4 py-3 font-medium text-gray-500">Total</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {filtered.map((row) => {
-                        const isZero = row.total === 0
-                        return (
-                          <tr key={row.mois} className={`border-b last:border-0 hover:bg-accent/10 ${isZero ? 'text-gray-300' : ''}`}>
-                            <td className={`px-4 py-3 ${isZero ? '' : 'font-medium'}`}>{formatMois(row.mois)}</td>
-                            <td className="px-4 py-3 text-right">{row.accompagnantes}</td>
-                            <td className="px-4 py-3 text-right">{row.accompagnes}</td>
-                            <td className={`px-4 py-3 text-right ${isZero ? '' : 'font-medium'}`}>{row.total}</td>
-                          </tr>
-                        )
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </PeriodSelector>
+            <InscriptionsTable data={inscriptions} />
           ),
 
           revenus: (
             <>
-              {/* Historique revenus */}
-              <PeriodSelector data={revenus}>
-                {(filtered) => (
-                  <div className="bg-white rounded-xl border overflow-hidden mb-8">
-                    <table className="w-full text-sm">
-                      <thead className="bg-accent/20 border-b">
-                        <tr>
-                          <th className="text-left px-4 py-3 font-medium text-gray-500">Mois</th>
-                          <th className="text-right px-4 py-3 font-medium text-gray-500">Abonnes</th>
-                          <th className="text-right px-4 py-3 font-medium text-gray-500">MRR</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {filtered.map((row) => {
-                          const isZero = row.abonnes === 0
-                          return (
-                            <tr key={row.mois} className={`border-b last:border-0 hover:bg-accent/10 ${isZero ? 'text-gray-300' : ''}`}>
-                              <td className={`px-4 py-3 ${isZero ? '' : 'font-medium'}`}>{formatMois(row.mois)}</td>
-                              <td className="px-4 py-3 text-right">{row.abonnes}</td>
-                              <td className={`px-4 py-3 text-right ${isZero ? '' : 'font-medium'}`}>{formatEur(row.mrr)}</td>
-                            </tr>
-                          )
-                        })}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
-              </PeriodSelector>
+              <RevenusTable data={revenus} />
 
               {/* MRR par segment */}
               <div className="bg-white rounded-xl border overflow-hidden mb-8">
@@ -365,35 +304,7 @@ export default async function AdminDashboard() {
           ),
 
           activite: (
-            <PeriodSelector data={activite}>
-              {(filtered) => (
-                <div className="bg-white rounded-xl border overflow-hidden">
-                  <table className="w-full text-sm">
-                    <thead className="bg-accent/20 border-b">
-                      <tr>
-                        <th className="text-left px-4 py-3 font-medium text-gray-500">Mois</th>
-                        <th className="text-right px-4 py-3 font-medium text-gray-500">Messages</th>
-                        <th className="text-right px-4 py-3 font-medium text-gray-500">Conversations</th>
-                        <th className="text-right px-4 py-3 font-medium text-gray-500">Avis</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {filtered.map((row) => {
-                        const isZero = row.messages === 0 && row.conversations === 0 && row.avis === 0
-                        return (
-                          <tr key={row.mois} className={`border-b last:border-0 hover:bg-accent/10 ${isZero ? 'text-gray-300' : ''}`}>
-                            <td className={`px-4 py-3 ${isZero ? '' : 'font-medium'}`}>{formatMois(row.mois)}</td>
-                            <td className="px-4 py-3 text-right">{row.messages}</td>
-                            <td className="px-4 py-3 text-right">{row.conversations}</td>
-                            <td className="px-4 py-3 text-right">{row.avis}</td>
-                          </tr>
-                        )
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </PeriodSelector>
+            <ActiviteTable data={activite} />
           ),
         }}
       </DashboardTabs>
