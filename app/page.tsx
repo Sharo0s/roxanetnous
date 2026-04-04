@@ -14,6 +14,10 @@ export default async function HomePage() {
     .select('id', { count: 'exact', head: true })
     .eq('validation_status', 'valide')
 
+  const { count: beneficiairesCount } = await supabase
+    .from('beneficiaires_profiles')
+    .select('id', { count: 'exact', head: true })
+
   const { data: villesData } = await supabase
     .from('auxiliaires_profiles')
     .select('ville, latitude, longitude')
@@ -137,10 +141,13 @@ export default async function HomePage() {
                   </Link>
                 </div>
 
-                {((auxiliairesCount || 0) > 0 || villesUniques.size > 0) && (
+                {((auxiliairesCount || 0) > 0 || (beneficiairesCount || 0) > 0 || villesUniques.size > 0) && (
                   <div className="flex gap-8 justify-center md:justify-start pt-10">
                     {(auxiliairesCount || 0) > 0 && (
                       <AnimatedCounter end={auxiliairesCount || 0} label={`accompagnant(e)${(auxiliairesCount || 0) > 1 ? 's' : ''} verifie(e)${(auxiliairesCount || 0) > 1 ? 's' : ''}`} />
+                    )}
+                    {(beneficiairesCount || 0) > 0 && (
+                      <AnimatedCounter end={beneficiairesCount || 0} label={`accompagne(e)${(beneficiairesCount || 0) > 1 ? 's' : ''}`} />
                     )}
                     {villesUniques.size > 0 && (
                       <AnimatedCounter end={villesUniques.size} label={`ville${villesUniques.size > 1 ? 's' : ''}`} />
