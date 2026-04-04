@@ -10,8 +10,7 @@ type Props = {
   unreadCount: number
   firstName: string
   lastName: string
-  currentPage?: 'dashboard' | 'profil' | 'messages' | 'annonces' | 'abonnement' | 'planning' | 'other'
-  hasPlanning?: boolean
+  currentPage?: 'dashboard' | 'profil' | 'messages' | 'annonces' | 'abonnement' | 'other'
 }
 
 export function AuxiliaireHeader({
@@ -20,7 +19,6 @@ export function AuxiliaireHeader({
   firstName,
   lastName,
   currentPage,
-  hasPlanning,
 }: Props) {
   const [menuOpen, setMenuOpen] = useState(false)
 
@@ -44,11 +42,6 @@ export function AuxiliaireHeader({
           {currentPage !== 'profil' && (
             <Link href="/auxiliaire/profil" className="text-sm text-gray-600 hover:text-black">
               Mon profil
-            </Link>
-          )}
-          {hasPlanning && currentPage !== 'planning' && (
-            <Link href="/auxiliaire/planning" className="text-sm text-gray-600 hover:text-black">
-              Planning
             </Link>
           )}
           <span className="text-sm text-gray-600">
@@ -90,11 +83,6 @@ export function AuxiliaireHeader({
           {currentPage !== 'profil' && (
             <Link href="/auxiliaire/profil" className="text-sm text-gray-600 hover:text-black" onClick={() => setMenuOpen(false)}>
               Mon profil
-            </Link>
-          )}
-          {hasPlanning && currentPage !== 'planning' && (
-            <Link href="/auxiliaire/planning" className="text-sm text-gray-600 hover:text-black" onClick={() => setMenuOpen(false)}>
-              Planning
             </Link>
           )}
           <LogoutButton />

@@ -61,10 +61,7 @@ export async function POST(request: NextRequest) {
 
       const subscriptionResponse = await stripe.subscriptions.retrieve(session.subscription as string)
       const period = getSubscriptionPeriod(subscriptionResponse)
-      const isPlanning = session.metadata?.type === 'planning'
-      const table = isPlanning ? 'planning_subscriptions' : 'subscriptions'
-
-      await supabase.from(table).upsert(
+      await supabase.from('subscriptions').upsert(
         {
           user_id: userId,
           stripe_customer_id: session.customer as string,
@@ -99,24 +96,13 @@ export async function POST(request: NextRequest) {
     case 'customer.subscription.updated': {
       const subscription = event.data.object as Stripe.Subscription
 
-      // Chercher dans subscriptions d'abord, puis planning_subscriptions
       const { data: existing } = await supabase
         .from('subscriptions')
         .select('user_id')
         .eq('stripe_subscription_id', subscription.id)
         .single()
 
-      let targetTable = 'subscriptions'
-      if (!existing) {
-        const { data: planningExisting } = await supabase
-          .from('planning_subscriptions')
-          .select('user_id')
-          .eq('stripe_subscription_id', subscription.id)
-          .single()
-
-        if (!planningExisting) break
-        targetTable = 'planning_subscriptions'
-      }
+      if (!existing) break
 
       const period = getSubscriptionPeriod(subscription)
       const updateData: Record<string, unknown> = {
@@ -134,7 +120,7 @@ export async function POST(request: NextRequest) {
       }
 
       await supabase
-        .from(targetTable)
+        .from('subscriptions')
         .update(updateData)
         .eq('stripe_subscription_id', subscription.id)
 
@@ -144,29 +130,17 @@ export async function POST(request: NextRequest) {
     case 'customer.subscription.deleted': {
       const subscription = event.data.object as Stripe.Subscription
 
-      // Chercher dans subscriptions d'abord, puis planning_subscriptions
       const { data: existing } = await supabase
         .from('subscriptions')
         .select('user_id')
         .eq('stripe_subscription_id', subscription.id)
         .single()
 
-      let targetTable = 'subscriptions'
-      let deletedUserId: string | null = existing?.user_id || null
-      if (!existing) {
-        const { data: planningExisting } = await supabase
-          .from('planning_subscriptions')
-          .select('user_id')
-          .eq('stripe_subscription_id', subscription.id)
-          .single()
-
-        if (!planningExisting) break
-        targetTable = 'planning_subscriptions'
-        deletedUserId = planningExisting.user_id
-      }
+      if (!existing) break
+      const deletedUserId = existing.user_id
 
       await supabase
-        .from(targetTable)
+        .from('subscriptions')
         .update({
           status: 'cancelled',
           cancelled_at: new Date().toISOString(),
@@ -201,17 +175,8 @@ export async function POST(request: NextRequest) {
 
       const subId = typeof subscriptionId === 'string' ? subscriptionId : subscriptionId.id
 
-      // Essayer subscriptions d'abord
-      const { data: subExists } = await supabase
-        .from('subscriptions')
-        .select('id')
-        .eq('stripe_subscription_id', subId)
-        .single()
-
-      const failTable = subExists ? 'subscriptions' : 'planning_subscriptions'
-
       await supabase
-        .from(failTable)
+        .from('subscriptions')
         .update({
           status: 'past_due',
           updated_at: new Date().toISOString(),

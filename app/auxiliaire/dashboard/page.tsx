@@ -54,7 +54,6 @@ export default async function AuxiliaireDashboard() {
         firstName={userData.first_name}
         lastName={userData.last_name}
         currentPage="dashboard"
-        hasPlanning={false}
       />
 
       <div className="max-w-5xl mx-auto px-4 py-8 relative z-10">

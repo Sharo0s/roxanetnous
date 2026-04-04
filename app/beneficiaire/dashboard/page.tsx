@@ -50,7 +50,6 @@ export default async function BeneficiaireDashboard() {
         firstName={userData.first_name}
         lastName={userData.last_name}
         currentPage="dashboard"
-        hasPlanningSubscription={false}
       />
 
       <div className="max-w-5xl mx-auto px-4 py-8 relative z-10">

@@ -267,50 +267,6 @@ export async function sendSubscriptionCancelEmail(params: {
   }
 }
 
-export async function sendTeamInviteEmail(params: {
-  email: string
-  auxiliaireFirstName: string
-  beneficiaireFirstName: string
-  userId?: string
-}) {
-  try {
-    await resend.emails.send({
-      from: FROM_EMAIL,
-      to: params.email,
-      subject: `Vous avez ete ajoute a une equipe planning`,
-      html: `
-        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
-          <h1 style="color: #000;">Equipe planning</h1>
-          <p>Bonjour ${params.auxiliaireFirstName},</p>
-          <p>${params.beneficiaireFirstName} vous a ajoute a son equipe planning sur roxanetnous. Vous pouvez desormais consulter votre planning d'interventions.</p>
-          <p style="margin-top: 24px;">
-            <a href="${BASE_URL}/auxiliaire/planning" style="background: #000; color: #fff; padding: 12px 24px; text-decoration: none; display: inline-block;">
-              Voir mon planning
-            </a>
-          </p>
-        </div>
-      `,
-    })
-
-    await logNotification({
-      userId: params.userId,
-      email: params.email,
-      type: 'team_invite',
-      subject: 'Vous avez ete ajoute a une equipe planning',
-      status: 'sent',
-    })
-  } catch (error) {
-    await logNotification({
-      userId: params.userId,
-      email: params.email,
-      type: 'team_invite',
-      subject: 'Vous avez ete ajoute a une equipe planning',
-      status: 'error',
-      error: error instanceof Error ? error.message : 'Erreur inconnue',
-    })
-  }
-}
-
 export async function sendDisponibleReactivatedEmail(params: {
   email: string
   firstName: string

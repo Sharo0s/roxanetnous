@@ -10,8 +10,7 @@ type Props = {
   unreadCount: number
   firstName: string
   lastName: string
-  currentPage?: 'dashboard' | 'profil' | 'messages' | 'annonces' | 'abonnement' | 'planning' | 'other'
-  hasPlanningSubscription?: boolean
+  currentPage?: 'dashboard' | 'profil' | 'messages' | 'annonces' | 'abonnement' | 'other'
 }
 
 export function BeneficiaireHeader({
@@ -20,7 +19,6 @@ export function BeneficiaireHeader({
   firstName,
   lastName,
   currentPage,
-  hasPlanningSubscription,
 }: Props) {
   const [menuOpen, setMenuOpen] = useState(false)
 
@@ -44,11 +42,6 @@ export function BeneficiaireHeader({
           {currentPage !== 'profil' && (
             <Link href="/beneficiaire/profil" className="text-sm text-gray-600 hover:text-black">
               Mon profil
-            </Link>
-          )}
-          {hasPlanningSubscription && currentPage !== 'planning' && (
-            <Link href="/beneficiaire/planning" className="text-sm text-gray-600 hover:text-black">
-              Planning
             </Link>
           )}
           <span className="text-sm text-gray-600">
@@ -90,11 +83,6 @@ export function BeneficiaireHeader({
           {currentPage !== 'profil' && (
             <Link href="/beneficiaire/profil" className="text-sm text-gray-600 hover:text-black" onClick={() => setMenuOpen(false)}>
               Mon profil
-            </Link>
-          )}
-          {hasPlanningSubscription && currentPage !== 'planning' && (
-            <Link href="/beneficiaire/planning" className="text-sm text-gray-600 hover:text-black" onClick={() => setMenuOpen(false)}>
-              Planning
             </Link>
           )}
           <LogoutButton />
