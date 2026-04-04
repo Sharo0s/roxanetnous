@@ -199,7 +199,9 @@ export default async function AdminDashboard() {
 
           revenus: (
             <>
-              <RevenusTable data={revenus} />
+              <div className="mb-8">
+                <RevenusTable data={revenus} />
+              </div>
 
               {/* MRR par segment */}
               <div className="bg-white rounded-xl border overflow-hidden mb-8">
