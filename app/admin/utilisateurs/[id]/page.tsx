@@ -112,7 +112,7 @@ export default async function AdminUtilisateurDetailPage({
       {/* Navigation retour */}
       <Link
         href="/admin/utilisateurs"
-        className="inline-flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-black mb-8 px-3 py-1.5 -ml-3 rounded-lg hover:bg-white transition-colors"
+        className="inline-flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-black mb-8 px-3 py-1.5 -ml-3 rounded-lg bg-white transition-colors"
       >
         <span aria-hidden="true">&larr;</span> Retour aux utilisateurs
       </Link>
