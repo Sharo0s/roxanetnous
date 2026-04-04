@@ -134,7 +134,7 @@ export function InfiniteAnnoncesGrid({ annonces, badgesMap, userId, favorisIds =
                 href={`/recherche/${annonce.id}`}
                 className="mt-auto block w-full text-center px-4 py-2 bg-accent text-black rounded-lg btn-hover transition text-sm font-medium"
               >
-                Voir le profil
+                Voir son profil
               </Link>
             </div>
           )
