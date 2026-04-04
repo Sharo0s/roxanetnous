@@ -17,6 +17,10 @@ function formatMois(mois: string) {
   return date.toLocaleDateString('fr-FR', { month: 'short', year: '2-digit' })
 }
 
+function formatEur(n: number) {
+  return n.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' EUR'
+}
+
 function formatPlan(plan: string) {
   if (plan === 'annual' || plan === 'annuel') return 'Annuel'
   return 'Mensuel'
@@ -62,47 +66,53 @@ export default async function AdminDashboard() {
     ? (repartition.accompagnantes / repartition.total) * 100
     : 0
 
+  const inscriptionsRecentes = [...inscriptions].reverse()
+  const activiteRecente = [...activite].reverse()
+
+  const moisEnCours = activite.length > 0 ? activite[activite.length - 1] : null
+
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
       <h2 className="text-2xl font-bold text-gray-900 mb-6">Tableau de bord</h2>
 
-      {/* Queue de validation */}
-      <h3 className="text-lg font-semibold mb-4">Accompagnantes en attente de validation</h3>
-
+      {/* Queue de validation - compact quand vide */}
       {!pending || pending.length === 0 ? (
-        <div className="bg-white rounded-xl border p-8 text-center text-gray-500 mb-8">
+        <div className="bg-white rounded-lg border px-4 py-3 text-sm text-gray-500 mb-6">
           Aucune accompagnante en attente de validation.
         </div>
       ) : (
-        <div className="space-y-3 mb-8">
-          {pending.map((profile: any) => {
-            const u = profile.users as any
-            return (
-              <Link
-                key={profile.id}
-                href={`/admin/validation/${profile.id}`}
-                className="block bg-white rounded-xl border p-5 hover:border-accent hover:shadow-lg hover:-translate-y-1 transition-all duration-200"
-              >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-medium text-gray-900">
-                      {u?.first_name} {u?.last_name}
-                    </p>
-                    <p className="text-sm text-gray-500 mt-0.5">
-                      {u?.email}
-                    </p>
-                    <p className="text-sm text-gray-500 mt-1">
-                      {profile.ville} ({profile.code_postal}) — {(profile.diplomes as string[] || []).join(', ')} — {profile.experience}
-                    </p>
+        <>
+          <h3 className="text-lg font-semibold mb-4">Accompagnantes en attente de validation</h3>
+          <div className="space-y-3 mb-8">
+            {pending.map((profile: any) => {
+              const u = profile.users as any
+              return (
+                <Link
+                  key={profile.id}
+                  href={`/admin/validation/${profile.id}`}
+                  className="block bg-white rounded-xl border p-5 hover:border-accent hover:shadow-lg hover:-translate-y-1 transition-all duration-200"
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium text-gray-900">
+                        {u?.first_name} {u?.last_name}
+                      </p>
+                      <p className="text-sm text-gray-500 mt-0.5">
+                        {u?.email}
+                      </p>
+                      <p className="text-sm text-gray-500 mt-1">
+                        {profile.ville} ({profile.code_postal}) — {(profile.diplomes as string[] || []).join(', ')} — {profile.experience}
+                      </p>
+                    </div>
+                    <div className="text-sm text-gray-400">
+                      {new Date(profile.created_at).toLocaleDateString('fr-FR')}
+                    </div>
                   </div>
-                  <div className="text-sm text-gray-400">
-                    {new Date(profile.created_at).toLocaleDateString('fr-FR')}
-                  </div>
-                </div>
-              </Link>
-            )
-          })}
-        </div>
+                </Link>
+              )
+            })}
+          </div>
+        </>
       )}
 
       {/* Signalements */}
@@ -119,10 +129,10 @@ export default async function AdminDashboard() {
           overview: (
             <>
               {/* KPI Cards */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
                 <div className="bg-white rounded-xl border p-5">
                   <p className="text-sm text-gray-500">Revenu mensuel recurrent</p>
-                  <p className="text-3xl font-bold mt-1">{kpis.mrr.toFixed(2)} EUR</p>
+                  <p className="text-3xl font-bold mt-1">{formatEur(kpis.mrr)}</p>
                 </div>
                 <div className="bg-white rounded-xl border p-5">
                   <p className="text-sm text-gray-500">Actifs (30j)</p>
@@ -131,48 +141,21 @@ export default async function AdminDashboard() {
                 </div>
                 <div className="bg-white rounded-xl border p-5">
                   <p className="text-sm text-gray-500">Conversion</p>
-                  <p className="text-3xl font-bold mt-1">{kpis.tauxConversion.toFixed(1)}%</p>
+                  <p className={`text-3xl font-bold mt-1 ${kpis.tauxConversion >= 80 ? 'text-green-700' : kpis.tauxConversion >= 50 ? 'text-amber-600' : 'text-red-600'}`}>
+                    {kpis.tauxConversion.toFixed(1)}%
+                  </p>
                   <p className="text-xs text-gray-400 mt-1">{kpis.abonnesActifs} abonnes / {kpis.totalUsers}</p>
                 </div>
                 <div className="bg-white rounded-xl border p-5">
                   <p className="text-sm text-gray-500">Taux de resiliation</p>
-                  <p className="text-3xl font-bold mt-1">{kpis.churn.toFixed(1)}%</p>
+                  <p className={`text-3xl font-bold mt-1 ${kpis.churn <= 2 ? 'text-green-700' : kpis.churn <= 5 ? 'text-amber-600' : 'text-red-600'}`}>
+                    {kpis.churn.toFixed(1)}%
+                  </p>
                 </div>
               </div>
-            </>
-          ),
 
-          inscriptions: (
-            <>
-              {/* Inscriptions 12 derniers mois */}
-              <div className="bg-white rounded-xl border overflow-hidden mb-8">
-                <div className="px-4 py-3 border-b bg-accent/20">
-                  <h4 className="font-medium text-gray-700 text-sm">Inscriptions (12 derniers mois)</h4>
-                </div>
-                <table className="w-full text-sm">
-                  <thead className="bg-accent/20 border-b">
-                    <tr>
-                      <th className="text-left px-4 py-3 font-medium text-gray-500">Mois</th>
-                      <th className="text-right px-4 py-3 font-medium text-gray-500">Accompagnantes</th>
-                      <th className="text-right px-4 py-3 font-medium text-gray-500">Accompagnes</th>
-                      <th className="text-right px-4 py-3 font-medium text-gray-500">Total</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {inscriptions.map((row) => (
-                      <tr key={row.mois} className="border-b last:border-0 hover:bg-accent/10">
-                        <td className="px-4 py-3 font-medium">{formatMois(row.mois)}</td>
-                        <td className="px-4 py-3 text-right">{row.accompagnantes}</td>
-                        <td className="px-4 py-3 text-right">{row.accompagnes}</td>
-                        <td className="px-4 py-3 text-right font-medium">{row.total}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-
-              {/* Repartition accompagnantes / accompagnes */}
-              <div className="bg-white rounded-xl border p-5">
+              {/* Repartition utilisateurs */}
+              <div className="bg-white rounded-xl border p-5 mb-8">
                 <h4 className="font-medium text-gray-700 text-sm mb-3">Repartition des utilisateurs</h4>
                 <div className="flex items-center gap-4 mb-2">
                   <span className="text-sm text-gray-600 w-28">Accompagnantes</span>
@@ -195,7 +178,56 @@ export default async function AdminDashboard() {
                   <span className="text-sm font-medium w-20 text-right">{repartition.accompagnes} ({(100 - pctAux).toFixed(0)}%)</span>
                 </div>
               </div>
+
+              {/* Activite du mois en cours */}
+              {moisEnCours && (
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="bg-white rounded-xl border p-5">
+                    <p className="text-sm text-gray-500">Messages ce mois</p>
+                    <p className="text-3xl font-bold mt-1">{moisEnCours.messages}</p>
+                  </div>
+                  <div className="bg-white rounded-xl border p-5">
+                    <p className="text-sm text-gray-500">Conversations ce mois</p>
+                    <p className="text-3xl font-bold mt-1">{moisEnCours.conversations}</p>
+                  </div>
+                  <div className="bg-white rounded-xl border p-5">
+                    <p className="text-sm text-gray-500">Avis ce mois</p>
+                    <p className="text-3xl font-bold mt-1">{moisEnCours.avis}</p>
+                  </div>
+                </div>
+              )}
             </>
+          ),
+
+          inscriptions: (
+            <div className="bg-white rounded-xl border overflow-hidden">
+              <div className="px-4 py-3 border-b bg-accent/20">
+                <h4 className="font-medium text-gray-700 text-sm">Inscriptions (12 derniers mois)</h4>
+              </div>
+              <table className="w-full text-sm">
+                <thead className="bg-accent/20 border-b">
+                  <tr>
+                    <th className="text-left px-4 py-3 font-medium text-gray-500">Mois</th>
+                    <th className="text-right px-4 py-3 font-medium text-gray-500">Accompagnantes</th>
+                    <th className="text-right px-4 py-3 font-medium text-gray-500">Accompagnes</th>
+                    <th className="text-right px-4 py-3 font-medium text-gray-500">Total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {inscriptionsRecentes.map((row) => {
+                    const isZero = row.total === 0
+                    return (
+                      <tr key={row.mois} className={`border-b last:border-0 hover:bg-accent/10 ${isZero ? 'text-gray-300' : ''}`}>
+                        <td className={`px-4 py-3 ${isZero ? '' : 'font-medium'}`}>{formatMois(row.mois)}</td>
+                        <td className="px-4 py-3 text-right">{row.accompagnantes}</td>
+                        <td className="px-4 py-3 text-right">{row.accompagnes}</td>
+                        <td className={`px-4 py-3 text-right ${isZero ? '' : 'font-medium'}`}>{row.total}</td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+            </div>
           ),
 
           revenus: (
@@ -217,22 +249,22 @@ export default async function AdminDashboard() {
                     <tr className="border-b hover:bg-accent/10">
                       <td className="px-4 py-3">Accompagnante - Mensuel</td>
                       <td className="px-4 py-3 text-right">{mrrDetail.segments.accompagnante_mensuel.count}</td>
-                      <td className="px-4 py-3 text-right font-medium">{mrrDetail.segments.accompagnante_mensuel.mrr.toFixed(2)} EUR</td>
+                      <td className="px-4 py-3 text-right font-medium">{formatEur(mrrDetail.segments.accompagnante_mensuel.mrr)}</td>
                     </tr>
                     <tr className="border-b hover:bg-accent/10">
                       <td className="px-4 py-3">Accompagnante - Annuel</td>
                       <td className="px-4 py-3 text-right">{mrrDetail.segments.accompagnante_annuel.count}</td>
-                      <td className="px-4 py-3 text-right font-medium">{mrrDetail.segments.accompagnante_annuel.mrr.toFixed(2)} EUR</td>
+                      <td className="px-4 py-3 text-right font-medium">{formatEur(mrrDetail.segments.accompagnante_annuel.mrr)}</td>
                     </tr>
                     <tr className="border-b hover:bg-accent/10">
                       <td className="px-4 py-3">Accompagne - Mensuel</td>
                       <td className="px-4 py-3 text-right">{mrrDetail.segments.accompagne_mensuel.count}</td>
-                      <td className="px-4 py-3 text-right font-medium">{mrrDetail.segments.accompagne_mensuel.mrr.toFixed(2)} EUR</td>
+                      <td className="px-4 py-3 text-right font-medium">{formatEur(mrrDetail.segments.accompagne_mensuel.mrr)}</td>
                     </tr>
                     <tr className="border-b last:border-0 hover:bg-accent/10">
                       <td className="px-4 py-3">Accompagne - Annuel</td>
                       <td className="px-4 py-3 text-right">{mrrDetail.segments.accompagne_annuel.count}</td>
-                      <td className="px-4 py-3 text-right font-medium">{mrrDetail.segments.accompagne_annuel.mrr.toFixed(2)} EUR</td>
+                      <td className="px-4 py-3 text-right font-medium">{formatEur(mrrDetail.segments.accompagne_annuel.mrr)}</td>
                     </tr>
                   </tbody>
                 </table>
@@ -250,7 +282,9 @@ export default async function AdminDashboard() {
                 </div>
                 <div className="bg-white rounded-xl border p-5">
                   <p className="text-sm text-gray-500">Resiliations ce mois</p>
-                  <p className="text-3xl font-bold mt-1">{churn.taux.toFixed(1)}%</p>
+                  <p className={`text-3xl font-bold mt-1 ${churn.taux <= 2 ? 'text-green-700' : churn.taux <= 5 ? 'text-amber-600' : 'text-red-600'}`}>
+                    {churn.taux.toFixed(1)}%
+                  </p>
                   <p className="text-xs text-gray-400 mt-1">
                     {churn.annulations} annulation{churn.annulations > 1 ? 's' : ''} / {churn.abonnesDebutMois} debut de mois
                   </p>
@@ -315,14 +349,17 @@ export default async function AdminDashboard() {
                   </tr>
                 </thead>
                 <tbody>
-                  {activite.map((row) => (
-                    <tr key={row.mois} className="border-b last:border-0 hover:bg-accent/10">
-                      <td className="px-4 py-3 font-medium">{formatMois(row.mois)}</td>
-                      <td className="px-4 py-3 text-right">{row.messages}</td>
-                      <td className="px-4 py-3 text-right">{row.conversations}</td>
-                      <td className="px-4 py-3 text-right">{row.avis}</td>
-                    </tr>
-                  ))}
+                  {activiteRecente.map((row) => {
+                    const isZero = row.messages === 0 && row.conversations === 0 && row.avis === 0
+                    return (
+                      <tr key={row.mois} className={`border-b last:border-0 hover:bg-accent/10 ${isZero ? 'text-gray-300' : ''}`}>
+                        <td className={`px-4 py-3 ${isZero ? '' : 'font-medium'}`}>{formatMois(row.mois)}</td>
+                        <td className="px-4 py-3 text-right">{row.messages}</td>
+                        <td className="px-4 py-3 text-right">{row.conversations}</td>
+                        <td className="px-4 py-3 text-right">{row.avis}</td>
+                      </tr>
+                    )
+                  })}
                 </tbody>
               </table>
             </div>
