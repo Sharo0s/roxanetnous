@@ -2,12 +2,12 @@ import { createClient } from '@/lib/supabase/server'
 import { DIPLOMES, EXPERIENCE_LEVELS } from '@/lib/constants'
 import { UtilisateursClient } from '@/components/admin/utilisateurs-client'
 
-export type AuxiliaireRow = {
+export type AccompagnanteRow = {
   id: string
   email: string
   first_name: string
   last_name: string
-  role: 'auxiliaire'
+  role: 'accompagnante'
   created_at: string
   ville: string | null
   code_postal: string | null
@@ -17,12 +17,12 @@ export type AuxiliaireRow = {
   profile_id: string | null
 }
 
-export type BeneficiaireRow = {
+export type AccompagneRow = {
   id: string
   email: string
   first_name: string
   last_name: string
-  role: 'beneficiaire'
+  role: 'accompagne'
   created_at: string
   ville: string | null
   code_postal: string | null
@@ -31,39 +31,39 @@ export type BeneficiaireRow = {
 export default async function AdminUtilisateursPage() {
   const supabaseAdmin = await createClient({ serviceRole: true })
 
-  // Charger les auxiliaires avec leur profil
-  // Hint FK necessaire car auxiliaires_profiles a 2 FK vers users (user_id + validated_by)
+  // Charger les accompagnantes avec leur profil
+  // Hint FK necessaire car accompagnantes_profiles a 2 FK vers users (user_id + validated_by)
   const { data: auxUsers } = await supabaseAdmin
     .from('users')
     .select(`
       id, email, first_name, last_name, role, created_at,
-      auxiliaires_profiles!auxiliaires_profiles_user_id_fkey (id, ville, code_postal, validation_status, diplomes, experience)
+      accompagnantes_profiles!accompagnantes_profiles_user_id_fkey (id, ville, code_postal, validation_status, diplomes, experience)
     `)
-    .eq('role', 'auxiliaire')
+    .eq('role', 'accompagnante')
     .order('created_at', { ascending: false })
     .limit(5000)
 
-  // Charger les beneficiaires avec leur profil
+  // Charger les accompagnes avec leur profil
   const { data: benUsers } = await supabaseAdmin
     .from('users')
     .select(`
       id, email, first_name, last_name, role, created_at,
-      beneficiaires_profiles (ville, code_postal)
+      accompagnes_profiles (ville, code_postal)
     `)
-    .eq('role', 'beneficiaire')
+    .eq('role', 'accompagne')
     .order('created_at', { ascending: false })
     .limit(5000)
 
-  const auxiliaires: AuxiliaireRow[] = (auxUsers || []).map((u: any) => {
-    const p = Array.isArray(u.auxiliaires_profiles)
-      ? u.auxiliaires_profiles[0]
-      : u.auxiliaires_profiles
+  const accompagnantes: AccompagnanteRow[] = (auxUsers || []).map((u: any) => {
+    const p = Array.isArray(u.accompagnantes_profiles)
+      ? u.accompagnantes_profiles[0]
+      : u.accompagnantes_profiles
     return {
       id: u.id,
       email: u.email,
       first_name: u.first_name,
       last_name: u.last_name,
-      role: 'auxiliaire' as const,
+      role: 'accompagnante' as const,
       created_at: u.created_at,
       ville: p?.ville || null,
       code_postal: p?.code_postal || null,
@@ -74,16 +74,16 @@ export default async function AdminUtilisateursPage() {
     }
   })
 
-  const beneficiaires: BeneficiaireRow[] = (benUsers || []).map((u: any) => {
-    const p = Array.isArray(u.beneficiaires_profiles)
-      ? u.beneficiaires_profiles[0]
-      : u.beneficiaires_profiles
+  const accompagnes: AccompagneRow[] = (benUsers || []).map((u: any) => {
+    const p = Array.isArray(u.accompagnes_profiles)
+      ? u.accompagnes_profiles[0]
+      : u.accompagnes_profiles
     return {
       id: u.id,
       email: u.email,
       first_name: u.first_name,
       last_name: u.last_name,
-      role: 'beneficiaire' as const,
+      role: 'accompagne' as const,
       created_at: u.created_at,
       ville: p?.ville || null,
       code_postal: p?.code_postal || null,
@@ -91,17 +91,17 @@ export default async function AdminUtilisateursPage() {
   })
 
   // Compter par statut de validation
-  const enAttenteCount = auxiliaires.filter(
+  const enAttenteCount = accompagnantes.filter(
     (a) => a.validation_status === 'en_attente'
   ).length
-  const validesCount = auxiliaires.filter(
+  const validesCount = accompagnantes.filter(
     (a) => a.validation_status === 'valide'
   ).length
 
   return (
     <UtilisateursClient
-      auxiliaires={auxiliaires}
-      beneficiaires={beneficiaires}
+      accompagnantes={accompagnantes}
+      accompagnes={accompagnes}
       enAttenteCount={enAttenteCount}
       validesCount={validesCount}
       diplomeLabels={Object.fromEntries(DIPLOMES.map((d) => [d.value, d.label]))}

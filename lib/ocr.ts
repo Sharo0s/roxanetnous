@@ -39,7 +39,7 @@ export async function analyzeDocument(
   // Verifier si le fichier est un PDF (analyse manuelle requise)
   if (storagePath.toLowerCase().endsWith('.pdf')) {
     await supabase.from('ocr_results').insert({
-      auxiliaire_profile_id: profileId,
+      accompagnante_profile_id: profileId,
       document_type: documentType,
       storage_path: storagePath,
       extracted_text: null,
@@ -86,7 +86,7 @@ export async function analyzeDocument(
   if (!visionResponse.ok) {
     console.error('OCR: erreur API Vision', visionResponse.status)
     await supabase.from('ocr_results').insert({
-      auxiliaire_profile_id: profileId,
+      accompagnante_profile_id: profileId,
       document_type: documentType,
       storage_path: storagePath,
       extracted_text: null,
@@ -105,7 +105,7 @@ export async function analyzeDocument(
   if (annotation?.error) {
     console.error('OCR: erreur Vision', annotation.error.message)
     await supabase.from('ocr_results').insert({
-      auxiliaire_profile_id: profileId,
+      accompagnante_profile_id: profileId,
       document_type: documentType,
       storage_path: storagePath,
       extracted_text: null,
@@ -128,7 +128,7 @@ export async function analyzeDocument(
 
   // Recuperer le profil pour la verification de coherence
   const { data: profile } = await supabase
-    .from('auxiliaires_profiles')
+    .from('accompagnantes_profiles')
     .select('*, users:user_id (first_name, last_name)')
     .eq('id', profileId)
     .single()
@@ -139,7 +139,7 @@ export async function analyzeDocument(
   }
 
   await supabase.from('ocr_results').insert({
-    auxiliaire_profile_id: profileId,
+    accompagnante_profile_id: profileId,
     document_type: documentType,
     storage_path: storagePath,
     extracted_text: extractedText.slice(0, 5000),
@@ -197,9 +197,9 @@ function checkCoherence(
     // Mots-cles associes aux diplomes
     const diplomeKeywords: Record<string, string[]> = {
       deaes: ['deaes', 'accompagnant educatif', 'accompagnant éducatif', 'social'],
-      de_auxiliaire_vie: ['auxiliaire de vie', 'auxiliaire vie', 'deavs'],
+      de_accompagnante_vie: ['accompagnante de vie', 'accompagnante vie', 'deavs'],
       aide_soignante: ['aide-soignante', 'aide soignante', 'deas'],
-      auxiliaire_gerontologie: ['gerontologie', 'gérontologie', 'auxiliaire'],
+      accompagnante_gerontologie: ['gerontologie', 'gérontologie', 'accompagnante'],
       aide_medico_psychologique: ['medico-psychologique', 'médico-psychologique', 'amp', 'deamp'],
       assistant_soin_gerontologie: ['assistant', 'soin', 'gerontologie', 'gérontologie'],
       assistant_vie_familles: ['assistant', 'vie', 'familles', 'advf'],

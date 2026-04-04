@@ -11,7 +11,7 @@ type Annonce = {
   description: string
   ville: string
   code_postal: string
-  auxiliaires_profiles: {
+  accompagnantes_profiles: {
     diplomes: string[]
     experience: string
     specialites: string[]
@@ -60,7 +60,7 @@ export function InfiniteAnnoncesGrid({ annonces, badgesMap, userId, favorisIds =
     <>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
         {visible.map((annonce: any) => {
-          const profile = annonce.auxiliaires_profiles
+          const profile = annonce.accompagnantes_profiles
           const u = profile?.users
           const diplomeLabel = (profile?.diplomes as string[] || []).map((d: string) => DIPLOMES.find((dp) => dp.value === d)?.label || d).join(', ')
           const expLabel = EXPERIENCE_LEVELS.find((e) => e.value === profile?.experience)?.label || profile?.experience
@@ -75,7 +75,7 @@ export function InfiniteAnnoncesGrid({ annonces, badgesMap, userId, favorisIds =
                 <div className="absolute top-3 right-3">
                   <FavoriButton
                     annonceId={annonce.id}
-                    type="auxiliaire"
+                    type="accompagnante"
                     initialIsFavori={favorisIds.includes(annonce.id)}
                   />
                 </div>
@@ -149,7 +149,7 @@ export function InfiniteAnnoncesGrid({ annonces, badgesMap, userId, favorisIds =
 
       {!hasMore && annonces.length > PER_PAGE && (
         <p className="text-center text-sm text-gray-400 py-6">
-          {annonces.length} auxiliaires affiches
+          {annonces.length} accompagnantes affiches
         </p>
       )}
     </>

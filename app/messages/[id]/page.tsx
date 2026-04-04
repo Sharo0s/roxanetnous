@@ -3,8 +3,8 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { ChatWindow } from '@/components/messages/chat-window'
 import { markMessagesAsRead } from '@/app/actions/messages'
-import { AuxiliaireHeader } from '@/components/layout/auxiliaire-header'
-import { BeneficiaireHeader } from '@/components/layout/beneficiaire-header'
+import { AccompagnanteHeader } from '@/components/layout/accompagnante-header'
+import { AccompagneHeader } from '@/components/layout/accompagne-header'
 import { getUnreadCount } from '@/lib/unread-count'
 
 export default async function ConversationPage({
@@ -31,13 +31,13 @@ export default async function ConversationPage({
     .from('conversations')
     .select(`
       id,
-      auxiliaire_id,
-      beneficiaire_id,
-      auxiliaires_profiles:auxiliaire_id (
+      accompagnante_id,
+      accompagne_id,
+      accompagnantes_profiles:accompagnante_id (
         user_id,
         users:user_id (first_name, last_name)
       ),
-      beneficiaires_profiles:beneficiaire_id (
+      accompagnes_profiles:accompagne_id (
         user_id,
         users:user_id (first_name, last_name)
       )
@@ -48,8 +48,8 @@ export default async function ConversationPage({
   if (!conversation) redirect('/messages')
 
   // Verifier que l'utilisateur fait partie de la conversation
-  const auxProfile = conversation.auxiliaires_profiles as any
-  const benProfile = conversation.beneficiaires_profiles as any
+  const auxProfile = conversation.accompagnantes_profiles as any
+  const benProfile = conversation.accompagnes_profiles as any
 
   if (auxProfile?.user_id !== user.id && benProfile?.user_id !== user.id) {
     redirect('/messages')
@@ -59,13 +59,13 @@ export default async function ConversationPage({
     ? benProfile?.users
     : auxProfile?.users
 
-  // Recuperer le lien profil de l'interlocuteur (si auxiliaire)
+  // Recuperer le lien profil de l'interlocuteur (si accompagnante)
   let otherProfileUrl: string | null = null
-  if (userData.role === 'beneficiaire' && conversation.auxiliaire_id) {
+  if (userData.role === 'accompagne' && conversation.accompagnante_id) {
     const { data: auxAnnonce } = await supabase
-      .from('annonces_auxiliaires')
+      .from('annonces_accompagnantes')
       .select('id')
-      .eq('auxiliaire_id', conversation.auxiliaire_id)
+      .eq('accompagnante_id', conversation.accompagnante_id)
       .eq('status', 'publiee')
       .limit(1)
       .single()
@@ -88,8 +88,8 @@ export default async function ConversationPage({
 
   return (
     <main className="min-h-screen kraft bg-kraft flex flex-col">
-      {userData.role === 'auxiliaire' ? (
-        <AuxiliaireHeader
+      {userData.role === 'accompagnante' ? (
+        <AccompagnanteHeader
           userId={user.id}
           unreadCount={unreadCount}
           firstName={userData.first_name}
@@ -97,7 +97,7 @@ export default async function ConversationPage({
           currentPage="messages"
         />
       ) : (
-        <BeneficiaireHeader
+        <AccompagneHeader
           userId={user.id}
           unreadCount={unreadCount}
           firstName={userData.first_name}

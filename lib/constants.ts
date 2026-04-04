@@ -3,10 +3,10 @@ export const DIPLOMES = [
   { value: 'aide_soignante', label: 'Aide-soignante' },
   { value: 'assistant_soin_gerontologie', label: 'Assistant de soin en gerontologie' },
   { value: 'assistant_vie_familles', label: 'Assistant de vie aux familles' },
-  { value: 'auxiliaire_gerontologie', label: 'Auxiliaire en gerontologie' },
+  { value: 'accompagnante_gerontologie', label: 'Accompagnante en gerontologie' },
   { value: 'bac_pro_assp', label: 'BAC PRO ASSP' },
   { value: 'deaes', label: 'DEAES (Accompagnant Educatif et Social)' },
-  { value: 'de_auxiliaire_vie', label: "Diplome d'Etat Auxiliaire de Vie" },
+  { value: 'de_accompagnante_vie', label: "Diplome d'Etat Accompagnante de Vie" },
   { value: 'autre', label: 'Autre diplome' },
   { value: 'sans_diplome', label: 'Sans diplome' },
 ] as const

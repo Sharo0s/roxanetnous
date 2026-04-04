@@ -21,8 +21,8 @@ export async function createCheckoutSession(formData: FormData): Promise<void> {
 
   if (!userData) redirect('/')
 
-  const role = userData.role as 'auxiliaire' | 'beneficiaire'
-  if (role !== 'auxiliaire' && role !== 'beneficiaire') redirect('/')
+  const role = userData.role as 'accompagnante' | 'accompagne'
+  if (role !== 'accompagnante' && role !== 'accompagne') redirect('/')
 
   const priceId = getStripePriceId(role, plan)
   if (!priceId) redirect(`/${role}/abonnement`)
@@ -41,7 +41,7 @@ export async function createCheckoutSession(formData: FormData): Promise<void> {
   }
 
   const trialDays = getTrialDays(plan)
-  const dashboardPath = role === 'auxiliaire' ? '/auxiliaire' : '/beneficiaire'
+  const dashboardPath = role === 'accompagnante' ? '/accompagnante' : '/accompagne'
 
   const sessionParams: Record<string, unknown> = {
     customer: customerId,
@@ -77,7 +77,7 @@ export async function createPortalSession(): Promise<void> {
     .eq('id', user.id)
     .single()
 
-  const role = userData?.role || 'auxiliaire'
+  const role = userData?.role || 'accompagnante'
   const subStatus = await getSubscriptionStatus(user.id)
 
   if (!subStatus.stripeCustomerId) redirect(`/${role}/abonnement`)
@@ -102,7 +102,7 @@ export async function cancelSubscription(): Promise<void> {
     .eq('id', user.id)
     .single()
 
-  const role = userData?.role || 'auxiliaire'
+  const role = userData?.role || 'accompagnante'
   const subStatus = await getSubscriptionStatus(user.id)
 
   if (!subStatus.stripeSubscriptionId) redirect(`/${role}/abonnement`)

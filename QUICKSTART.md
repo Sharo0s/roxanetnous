@@ -56,7 +56,7 @@
 
 Dis-moi "continue" et je t'aiderai à implémenter :
 1. Pages d'authentification (login, register)
-2. Formulaire inscription auxiliaire
+2. Formulaire inscription accompagnante
 3. Dashboard admin
 4. Ou autre chose selon tes priorités
 

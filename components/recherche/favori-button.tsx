@@ -5,7 +5,7 @@ import { toggleFavori } from '@/app/actions/favoris'
 
 type Props = {
   annonceId: string
-  type: 'auxiliaire' | 'beneficiaire'
+  type: 'accompagnante' | 'accompagne'
   initialIsFavori: boolean
 }
 

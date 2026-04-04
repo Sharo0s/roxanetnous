@@ -10,47 +10,47 @@ export default async function AdminAnnoncesPage({
   const params = await searchParams
 
   const supabaseAdmin = await createClient({ serviceRole: true })
-  const type = params.type || 'auxiliaire'
+  const type = params.type || 'accompagnante'
 
   // Charger les counts des deux types en parallele
   const [auxResult, benResult] = await Promise.all([
-    type === 'auxiliaire'
+    type === 'accompagnante'
       ? supabaseAdmin
-          .from('annonces_auxiliaires')
+          .from('annonces_accompagnantes')
           .select(`
             id, titre, ville, code_postal, status, created_at, published_at, vues, contacts_count,
-            auxiliaires_profiles:auxiliaire_id (
+            accompagnantes_profiles:accompagnante_id (
               users:user_id (first_name, last_name, email)
             )
           `)
           .order('created_at', { ascending: false })
       : supabaseAdmin
-          .from('annonces_auxiliaires')
+          .from('annonces_accompagnantes')
           .select('id', { count: 'exact', head: true }),
-    type === 'beneficiaire'
+    type === 'accompagne'
       ? supabaseAdmin
-          .from('annonces_beneficiaires')
+          .from('annonces_accompagnes')
           .select(`
             id, titre, ville, code_postal, status, created_at, published_at,
-            beneficiaires_profiles:beneficiaire_id (
+            accompagnes_profiles:accompagne_id (
               users:user_id (first_name, last_name, email)
             )
           `)
           .order('created_at', { ascending: false })
       : supabaseAdmin
-          .from('annonces_beneficiaires')
+          .from('annonces_accompagnes')
           .select('id', { count: 'exact', head: true }),
   ])
 
-  const rawAnnonces = (type === 'auxiliaire' ? auxResult.data : benResult.data) || []
-  const auxCount = type === 'auxiliaire' ? rawAnnonces.length : (auxResult.count ?? 0)
-  const benCount = type === 'beneficiaire' ? rawAnnonces.length : (benResult.count ?? 0)
+  const rawAnnonces = (type === 'accompagnante' ? auxResult.data : benResult.data) || []
+  const auxCount = type === 'accompagnante' ? rawAnnonces.length : (auxResult.count ?? 0)
+  const benCount = type === 'accompagne' ? rawAnnonces.length : (benResult.count ?? 0)
 
   // Transformer les donnees pour le composant client
   const annonces = rawAnnonces.map((annonce: any) => {
-    const profileData = type === 'auxiliaire'
-      ? annonce.auxiliaires_profiles
-      : annonce.beneficiaires_profiles
+    const profileData = type === 'accompagnante'
+      ? annonce.accompagnantes_profiles
+      : annonce.accompagnes_profiles
     const u = (profileData as any)?.users
     return {
       id: annonce.id,
@@ -60,7 +60,7 @@ export default async function AdminAnnoncesPage({
       status: annonce.status,
       created_at: annonce.created_at,
       auteur_nom: u ? `${u.first_name} ${u.last_name}` : '',
-      type: type as 'auxiliaire' | 'beneficiaire',
+      type: type as 'accompagnante' | 'accompagne',
     }
   })
 
@@ -70,24 +70,24 @@ export default async function AdminAnnoncesPage({
 
         <div className="flex gap-2 mb-6">
           <Link
-            href="/admin/annonces?type=auxiliaire"
+            href="/admin/annonces?type=accompagnante"
             className={`px-4 py-2 rounded-lg text-sm font-medium transition btn-hover ${
-              type === 'auxiliaire' ? 'bg-accent text-black' : 'bg-white border border-gray-300 text-gray-700 hover:border-accent'
+              type === 'accompagnante' ? 'bg-accent text-black' : 'bg-white border border-gray-300 text-gray-700 hover:border-accent'
             }`}
           >
-            Auxiliaires ({auxCount})
+            Accompagnantes ({auxCount})
           </Link>
           <Link
-            href="/admin/annonces?type=beneficiaire"
+            href="/admin/annonces?type=accompagne"
             className={`px-4 py-2 rounded-lg text-sm font-medium transition btn-hover ${
-              type === 'beneficiaire' ? 'bg-accent text-black' : 'bg-white border border-gray-300 text-gray-700 hover:border-accent'
+              type === 'accompagne' ? 'bg-accent text-black' : 'bg-white border border-gray-300 text-gray-700 hover:border-accent'
             }`}
           >
-            Beneficiaires ({benCount})
+            Accompagnes ({benCount})
           </Link>
         </div>
 
-        <AnnoncesSearchTable annonces={annonces} type={type as 'auxiliaire' | 'beneficiaire'} />
+        <AnnoncesSearchTable annonces={annonces} type={type as 'accompagnante' | 'accompagne'} />
       </div>
   )
 }

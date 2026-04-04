@@ -10,10 +10,10 @@ const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://roxanetnous.fr'
 
 export const metadata: Metadata = {
   title: {
-    default: 'roxanetnous - Auxiliaires de vie verifies',
+    default: 'roxanetnous - Accompagnantes de vie verifiees',
     template: '%s | roxanetnous',
   },
-  description: 'Trouvez un auxiliaire de vie verifie pres de chez vous. Profils valides manuellement, matching intelligent sur 5 criteres, messagerie securisee.',
+  description: 'Trouvez une accompagnante de vie verifiee pres de chez vous. Profils valides manuellement, matching intelligent sur 5 criteres, messagerie securisee.',
   metadataBase: new URL(BASE_URL),
   alternates: {
     canonical: '/',
@@ -23,13 +23,13 @@ export const metadata: Metadata = {
     locale: 'fr_FR',
     url: BASE_URL,
     siteName: 'roxanetnous',
-    title: 'roxanetnous - Auxiliaires de vie verifies',
-    description: 'Trouvez un auxiliaire de vie verifie pres de chez vous. Profils valides manuellement, matching intelligent sur 5 criteres, messagerie securisee.',
+    title: 'roxanetnous - Accompagnantes de vie verifiees',
+    description: 'Trouvez une accompagnante de vie verifiee pres de chez vous. Profils valides manuellement, matching intelligent sur 5 criteres, messagerie securisee.',
   },
   twitter: {
     card: 'summary',
-    title: 'roxanetnous - Auxiliaires de vie verifies',
-    description: 'Trouvez un auxiliaire de vie verifie pres de chez vous.',
+    title: 'roxanetnous - Accompagnantes de vie verifiees',
+    description: 'Trouvez une accompagnante de vie verifiee pres de chez vous.',
   },
   robots: {
     index: true,

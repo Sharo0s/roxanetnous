@@ -3,58 +3,58 @@
 import { createClient } from '@/lib/supabase/server'
 import { sendFavoriDisponibleEmail } from '@/lib/emails'
 
-export async function notifyFavoriBeneficiaires(auxiliaireUserId: string) {
+export async function notifyFavoriAccompagnes(accompagnanteUserId: string) {
   const supabase = await createClient({ serviceRole: true })
 
-  // Trouver le profil auxiliaire
+  // Trouver le profil accompagnante
   const { data: auxProfile } = await supabase
-    .from('auxiliaires_profiles')
+    .from('accompagnantes_profiles')
     .select('id')
-    .eq('user_id', auxiliaireUserId)
+    .eq('user_id', accompagnanteUserId)
     .single()
 
   if (!auxProfile) return
 
-  // Trouver les annonces de cet auxiliaire
+  // Trouver les annonces de cette accompagnante
   const { data: annonces } = await supabase
-    .from('annonces_auxiliaires')
+    .from('annonces_accompagnantes')
     .select('id')
-    .eq('auxiliaire_id', auxProfile.id)
+    .eq('accompagnante_id', auxProfile.id)
 
   if (!annonces || annonces.length === 0) return
 
   const annonceIds = annonces.map((a) => a.id)
 
-  // Trouver les beneficiaires qui ont mis en favori une annonce de cet auxiliaire
+  // Trouver les accompagnes qui ont mis en favori une annonce de cette accompagnante
   const { data: favoris } = await supabase
     .from('favoris')
     .select('user_id')
-    .in('annonce_auxiliaire_id', annonceIds)
+    .in('annonce_accompagnante_id', annonceIds)
 
   if (!favoris || favoris.length === 0) return
 
-  const beneficiaireUserIds = [...new Set(favoris.map((f) => f.user_id))]
+  const accompagneUserIds = [...new Set(favoris.map((f) => f.user_id))]
 
-  // Recuperer le prenom de l'auxiliaire
+  // Recuperer le prenom de l'accompagnante
   const { data: auxUser } = await supabase
     .from('users')
     .select('first_name')
-    .eq('id', auxiliaireUserId)
+    .eq('id', accompagnanteUserId)
     .single()
 
-  const auxFirstName = auxUser?.first_name || 'Un auxiliaire'
+  const auxFirstName = auxUser?.first_name || 'Une accompagnante'
 
-  // Recuperer les infos des beneficiaires et envoyer les mails
-  const { data: beneficiaires } = await supabase
+  // Recuperer les infos des accompagnes et envoyer les mails
+  const { data: accompagnes } = await supabase
     .from('users')
     .select('id, email, first_name')
-    .in('id', beneficiaireUserIds)
+    .in('id', accompagneUserIds)
 
-  for (const ben of beneficiaires || []) {
+  for (const ben of accompagnes || []) {
     await sendFavoriDisponibleEmail({
       email: ben.email,
-      beneficiaireFirstName: ben.first_name || 'Bonjour',
-      auxiliaireFirstName: auxFirstName,
+      accompagneFirstName: ben.first_name || 'Bonjour',
+      accompagnanteFirstName: auxFirstName,
       userId: ben.id,
     })
   }

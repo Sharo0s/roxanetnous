@@ -30,7 +30,7 @@ Statut : 🟡 Fondations complètes, développement features en cours
 - ✅ **Relations** et contraintes configurées
 - ✅ **Indexes** pour performance
 - ✅ **RLS Policies** (40+ policies de sécurité)
-- ✅ **Fonctions helper** (is_admin, is_auxiliaire, etc.)
+- ✅ **Fonctions helper** (is_admin, is_accompagnante, etc.)
 
 ### Documentation
 - ✅ **README.md** complet
@@ -64,13 +64,13 @@ Statut : 🟡 Fondations complètes, développement features en cours
 - ⏸️ Server actions auth
 - ⏸️ Formulaires avec validation
 
-### Phase 2 : Inscription Auxiliaire (4-5h)
+### Phase 2 : Inscription Accompagnante (4-5h)
 - ⏸️ Formulaire multi-étapes (6 étapes)
 - ⏸️ Upload justificatifs
 - ⏸️ Intégration Storage Supabase
 
 ### Phase 3 : Dashboard Admin (3-4h)
-- ⏸️ Liste auxiliaires en attente
+- ⏸️ Liste accompagnantes en attente
 - ⏸️ Validation/Refus/Compléments
 - ⏸️ Emails de notification
 
@@ -81,7 +81,7 @@ Statut : 🟡 Fondations complètes, développement features en cours
 - ⏸️ Customer Portal
 
 ### Phase 5 : Marketplace (4-5h)
-- ⏸️ Recherche auxiliaires
+- ⏸️ Recherche accompagnantes
 - ⏸️ Création annonces
 - ⏸️ Système favoris
 - ⏸️ Détail annonces + badges

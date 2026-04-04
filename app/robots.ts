@@ -9,8 +9,8 @@ export default function robots(): MetadataRoute.Robots {
         userAgent: '*',
         allow: '/',
         disallow: [
-          '/auxiliaire/',
-          '/beneficiaire/',
+          '/accompagnante/',
+          '/accompagne/',
           '/admin/',
           '/messages/',
           '/favoris/',

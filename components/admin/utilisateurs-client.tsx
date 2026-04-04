@@ -2,9 +2,9 @@
 
 import { useState, useMemo } from 'react'
 import Link from 'next/link'
-import type { AuxiliaireRow, BeneficiaireRow } from '@/app/admin/utilisateurs/page'
+import type { AccompagnanteRow, AccompagneRow } from '@/app/admin/utilisateurs/page'
 
-type Tab = 'auxiliaires' | 'beneficiaires'
+type Tab = 'accompagnantes' | 'accompagnes'
 
 const VALIDATION_LABELS: Record<string, string> = {
   en_attente: 'En attente',
@@ -21,26 +21,26 @@ const VALIDATION_STYLES: Record<string, string> = {
 }
 
 export function UtilisateursClient({
-  auxiliaires,
-  beneficiaires,
+  accompagnantes,
+  accompagnes,
   enAttenteCount,
   validesCount,
   diplomeLabels,
   experienceLabels,
 }: {
-  auxiliaires: AuxiliaireRow[]
-  beneficiaires: BeneficiaireRow[]
+  accompagnantes: AccompagnanteRow[]
+  accompagnes: AccompagneRow[]
   enAttenteCount: number
   validesCount: number
   diplomeLabels: Record<string, string>
   experienceLabels: Record<string, string>
 }) {
-  const [tab, setTab] = useState<Tab>('auxiliaires')
+  const [tab, setTab] = useState<Tab>('accompagnantes')
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState<string>('tous')
 
-  const filteredAuxiliaires = useMemo(() => {
-    let result = auxiliaires
+  const filteredAccompagnantes = useMemo(() => {
+    let result = accompagnantes
     if (search) {
       const q = search.toLowerCase()
       result = result.filter(
@@ -55,19 +55,19 @@ export function UtilisateursClient({
       result = result.filter((u) => u.validation_status === statusFilter)
     }
     return result
-  }, [auxiliaires, search, statusFilter])
+  }, [accompagnantes, search, statusFilter])
 
-  const filteredBeneficiaires = useMemo(() => {
-    if (!search) return beneficiaires
+  const filteredAccompagnes = useMemo(() => {
+    if (!search) return accompagnes
     const q = search.toLowerCase()
-    return beneficiaires.filter(
+    return accompagnes.filter(
       (u) =>
         u.first_name?.toLowerCase().includes(q) ||
         u.last_name?.toLowerCase().includes(q) ||
         u.email?.toLowerCase().includes(q) ||
         u.ville?.toLowerCase().includes(q)
     )
-  }, [beneficiaires, search])
+  }, [accompagnes, search])
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
@@ -76,29 +76,29 @@ export function UtilisateursClient({
       {/* Onglets */}
       <div className="flex gap-2 mb-6">
         <button
-          onClick={() => { setTab('auxiliaires'); setStatusFilter('tous') }}
+          onClick={() => { setTab('accompagnantes'); setStatusFilter('tous') }}
           className={`px-4 py-2 rounded-lg text-sm font-medium transition btn-hover ${
-            tab === 'auxiliaires'
+            tab === 'accompagnantes'
               ? 'bg-accent text-black'
               : 'bg-white border border-gray-300 text-gray-700 hover:border-accent'
           }`}
         >
-          Auxiliaires ({auxiliaires.length})
+          Accompagnantes ({accompagnantes.length})
         </button>
         <button
-          onClick={() => { setTab('beneficiaires'); setStatusFilter('tous') }}
+          onClick={() => { setTab('accompagnes'); setStatusFilter('tous') }}
           className={`px-4 py-2 rounded-lg text-sm font-medium transition btn-hover ${
-            tab === 'beneficiaires'
+            tab === 'accompagnes'
               ? 'bg-accent text-black'
               : 'bg-white border border-gray-300 text-gray-700 hover:border-accent'
           }`}
         >
-          Beneficiaires ({beneficiaires.length})
+          Accompagnes ({accompagnes.length})
         </button>
       </div>
 
       {/* KPIs */}
-      {tab === 'auxiliaires' ? (
+      {tab === 'accompagnantes' ? (
         <div className="grid grid-cols-3 gap-4 mb-6">
           <button
             onClick={() => setStatusFilter('tous')}
@@ -107,7 +107,7 @@ export function UtilisateursClient({
             }`}
           >
             <p className="text-sm text-gray-500">Total</p>
-            <p className="text-3xl font-bold mt-1">{auxiliaires.length}</p>
+            <p className="text-3xl font-bold mt-1">{accompagnantes.length}</p>
           </button>
           <button
             onClick={() => setStatusFilter('en_attente')}
@@ -132,12 +132,12 @@ export function UtilisateursClient({
         <div className="grid grid-cols-2 gap-4 mb-6">
           <div className="bg-white rounded-xl border p-5">
             <p className="text-sm text-gray-500">Total</p>
-            <p className="text-3xl font-bold mt-1">{beneficiaires.length}</p>
+            <p className="text-3xl font-bold mt-1">{accompagnes.length}</p>
           </div>
           <div className="bg-white rounded-xl border p-5">
             <p className="text-sm text-gray-500">Ce mois</p>
             <p className="text-3xl font-bold mt-1">
-              {beneficiaires.filter((u) => {
+              {accompagnes.filter((u) => {
                 const d = new Date(u.created_at)
                 const now = new Date()
                 return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear()
@@ -158,8 +158,8 @@ export function UtilisateursClient({
         />
       </div>
 
-      {/* Filtre statut auxiliaires */}
-      {tab === 'auxiliaires' && (
+      {/* Filtre statut accompagnantes */}
+      {tab === 'accompagnantes' && (
         <div className="flex gap-2 mb-4 flex-wrap">
           {['tous', 'en_attente', 'valide', 'refuse', 'a_completer'].map((s) => (
             <button
@@ -178,32 +178,32 @@ export function UtilisateursClient({
       )}
 
       {/* Tableau */}
-      {tab === 'auxiliaires' ? (
-        <AuxiliairesTable
-          auxiliaires={filteredAuxiliaires}
+      {tab === 'accompagnantes' ? (
+        <AccompagnantesTable
+          accompagnantes={filteredAccompagnantes}
           diplomeLabels={diplomeLabels}
           experienceLabels={experienceLabels}
         />
       ) : (
-        <BeneficiairesTable beneficiaires={filteredBeneficiaires} />
+        <AccompagnesTable accompagnes={filteredAccompagnes} />
       )}
     </div>
   )
 }
 
-function AuxiliairesTable({
-  auxiliaires,
+function AccompagnantesTable({
+  accompagnantes,
   diplomeLabels,
   experienceLabels,
 }: {
-  auxiliaires: AuxiliaireRow[]
+  accompagnantes: AccompagnanteRow[]
   diplomeLabels: Record<string, string>
   experienceLabels: Record<string, string>
 }) {
-  if (auxiliaires.length === 0) {
+  if (accompagnantes.length === 0) {
     return (
       <div className="bg-white rounded-xl border p-8 text-center text-gray-500">
-        Aucun auxiliaire ne correspond a ces criteres.
+        Aucune accompagnante ne correspond a ces criteres.
       </div>
     )
   }
@@ -224,7 +224,7 @@ function AuxiliairesTable({
             </tr>
           </thead>
           <tbody>
-            {auxiliaires.map((u) => {
+            {accompagnantes.map((u) => {
               const firstDiplome = u.diplomes?.[0]
               const diplomeText = firstDiplome ? diplomeLabels[firstDiplome] || firstDiplome : '-'
               const moreCount = (u.diplomes?.length || 0) - 1
@@ -283,15 +283,15 @@ function AuxiliairesTable({
   )
 }
 
-function BeneficiairesTable({
-  beneficiaires,
+function AccompagnesTable({
+  accompagnes,
 }: {
-  beneficiaires: BeneficiaireRow[]
+  accompagnes: AccompagneRow[]
 }) {
-  if (beneficiaires.length === 0) {
+  if (accompagnes.length === 0) {
     return (
       <div className="bg-white rounded-xl border p-8 text-center text-gray-500">
-        Aucun beneficiaire ne correspond a ces criteres.
+        Aucun accompagne ne correspond a ces criteres.
       </div>
     )
   }
@@ -309,7 +309,7 @@ function BeneficiairesTable({
             </tr>
           </thead>
           <tbody>
-            {beneficiaires.map((u) => (
+            {accompagnes.map((u) => (
               <tr key={u.id} className="border-b last:border-0 hover:bg-accent/10">
                 <td className="px-4 py-3">
                   <div className="font-medium text-gray-900">

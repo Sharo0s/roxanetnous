@@ -43,11 +43,11 @@ async function testConnection() {
 
     const tables = [
       'users',
-      'auxiliaires_profiles',
-      'beneficiaires_profiles',
+      'accompagnantes_profiles',
+      'accompagnes_profiles',
       'subscriptions',
-      'annonces_auxiliaires',
-      'annonces_beneficiaires',
+      'annonces_accompagnantes',
+      'annonces_accompagnes',
       'favoris',
       'conversations',
       'messages',

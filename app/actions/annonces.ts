@@ -11,7 +11,7 @@ export type AnnonceResult = {
   success?: boolean
 }
 
-export async function createAnnonceAuxiliaire(data: {
+export async function createAnnonceAccompagnante(data: {
   description: string
   ville: string
   code_postal: string
@@ -24,7 +24,7 @@ export async function createAnnonceAuxiliaire(data: {
   if (!user) return { error: 'Non connecte.' }
 
   const { data: profile } = await supabase
-    .from('auxiliaires_profiles')
+    .from('accompagnantes_profiles')
     .select('id, validation_status')
     .eq('user_id', user.id)
     .single()
@@ -51,9 +51,9 @@ export async function createAnnonceAuxiliaire(data: {
   const coords = await geocodeAddress(data.ville.trim(), data.code_postal.trim())
 
   const { data: insertedAnnonce, error } = await supabase
-    .from('annonces_auxiliaires')
+    .from('annonces_accompagnantes')
     .insert({
-      auxiliaire_id: profile.id,
+      accompagnante_id: profile.id,
       titre: '',
       description: data.description.trim(),
       ville: data.ville.trim(),
@@ -70,27 +70,27 @@ export async function createAnnonceAuxiliaire(data: {
     return { error: 'Erreur lors de la creation de l\'annonce.' }
   }
 
-  // Mettre a jour lat/lng sur le profil auxiliaire si pas encore renseigne
+  // Mettre a jour lat/lng sur le profil accompagnante si pas encore renseigne
   if (coords) {
     await supabase
-      .from('auxiliaires_profiles')
+      .from('accompagnantes_profiles')
       .update({ latitude: coords.lat, longitude: coords.lng })
       .eq('id', profile.id)
       .is('latitude', null)
   }
 
-  // Notifier les beneficiaires dont l'annonce correspond (fire-and-forget)
+  // Notifier les accompagnes dont l'annonce correspond (fire-and-forget)
   if (insertedAnnonce) {
     notifyMatchingUsers({
-      annonceType: 'auxiliaire',
+      annonceType: 'accompagnante',
       annonceId: insertedAnnonce.id,
     }).catch(() => {})
   }
 
-  redirect('/auxiliaire/annonces')
+  redirect('/accompagnante/annonces')
 }
 
-export async function updateAnnonceAuxiliaire(
+export async function updateAnnonceAccompagnante(
   annonceId: string,
   data: {
     description: string
@@ -106,7 +106,7 @@ export async function updateAnnonceAuxiliaire(
   if (!user) return { error: 'Non connecte.' }
 
   const { data: profile } = await supabase
-    .from('auxiliaires_profiles')
+    .from('accompagnantes_profiles')
     .select('id')
     .eq('user_id', user.id)
     .single()
@@ -118,7 +118,7 @@ export async function updateAnnonceAuxiliaire(
   }
 
   const { error } = await supabase
-    .from('annonces_auxiliaires')
+    .from('annonces_accompagnantes')
     .update({
       description: data.description.trim(),
       ville: data.ville.trim(),
@@ -127,16 +127,16 @@ export async function updateAnnonceAuxiliaire(
       disponibilites: data.disponibilites,
     })
     .eq('id', annonceId)
-    .eq('auxiliaire_id', profile.id)
+    .eq('accompagnante_id', profile.id)
 
   if (error) {
     return { error: 'Erreur lors de la mise a jour.' }
   }
 
-  redirect('/auxiliaire/annonces')
+  redirect('/accompagnante/annonces')
 }
 
-export async function updateAnnonceAuxiliaireStatus(
+export async function updateAnnonceAccompagnanteStatus(
   annonceId: string,
   status: 'publiee' | 'archivee'
 ): Promise<AnnonceResult> {
@@ -146,7 +146,7 @@ export async function updateAnnonceAuxiliaireStatus(
   if (!user) return { error: 'Non connecte.' }
 
   const { data: profile } = await supabase
-    .from('auxiliaires_profiles')
+    .from('accompagnantes_profiles')
     .select('id')
     .eq('user_id', user.id)
     .single()
@@ -159,10 +159,10 @@ export async function updateAnnonceAuxiliaireStatus(
   }
 
   const { error } = await supabase
-    .from('annonces_auxiliaires')
+    .from('annonces_accompagnantes')
     .update(updateData)
     .eq('id', annonceId)
-    .eq('auxiliaire_id', profile.id)
+    .eq('accompagnante_id', profile.id)
 
   if (error) {
     return { error: 'Erreur lors de la mise a jour.' }
@@ -171,7 +171,7 @@ export async function updateAnnonceAuxiliaireStatus(
   return { success: true }
 }
 
-export async function createAnnonceBeneficiaire(data: {
+export async function createAnnonceAccompagne(data: {
   titre: string
   description: string
   besoins_specifiques: string
@@ -186,7 +186,7 @@ export async function createAnnonceBeneficiaire(data: {
   disponibilites: Record<string, string[]>
   date_debut: string
   infos_complementaires: string
-  message_auxiliaires: string
+  message_accompagnantes: string
 }): Promise<AnnonceResult> {
   const supabase = await createClient()
 
@@ -199,7 +199,7 @@ export async function createAnnonceBeneficiaire(data: {
     .eq('id', user.id)
     .single()
 
-  if (!userData || userData.role !== 'beneficiaire') {
+  if (!userData || userData.role !== 'accompagne') {
     return { error: 'Acces non autorise.' }
   }
 
@@ -209,16 +209,16 @@ export async function createAnnonceBeneficiaire(data: {
     return { error: 'Un abonnement actif est requis pour publier une annonce.' }
   }
 
-  // Recuperer ou creer le profil beneficiaire
+  // Recuperer ou creer le profil accompagne
   let { data: profile } = await supabase
-    .from('beneficiaires_profiles')
+    .from('accompagnes_profiles')
     .select('id')
     .eq('user_id', user.id)
     .single()
 
   if (!profile) {
     const { data: newProfile, error: createError } = await supabase
-      .from('beneficiaires_profiles')
+      .from('accompagnes_profiles')
       .insert({
         user_id: user.id,
         ville: data.ville.trim(),
@@ -244,9 +244,9 @@ export async function createAnnonceBeneficiaire(data: {
   const coords = await geocodeAddress(data.ville.trim(), data.code_postal.trim() || '')
 
   const { data: insertedAnnonce, error } = await supabase
-    .from('annonces_beneficiaires')
+    .from('annonces_accompagnes')
     .insert({
-      beneficiaire_id: profile.id,
+      accompagne_id: profile.id,
       titre: data.titre.trim(),
       description: data.description.trim(),
       besoins_specifiques: data.besoins_specifiques.trim() || null,
@@ -263,7 +263,7 @@ export async function createAnnonceBeneficiaire(data: {
       disponibilites: data.disponibilites,
       date_debut: data.date_debut,
       infos_complementaires: data.infos_complementaires.trim() || null,
-      message_auxiliaires: data.message_auxiliaires.trim() || null,
+      message_accompagnantes: data.message_accompagnantes.trim() || null,
       status: 'publiee',
       published_at: new Date().toISOString(),
     })
@@ -274,18 +274,18 @@ export async function createAnnonceBeneficiaire(data: {
     return { error: 'Erreur lors de la creation de l\'annonce.' }
   }
 
-  // Notifier les auxiliaires dont le profil correspond (fire-and-forget)
+  // Notifier les accompagnantes dont le profil correspond (fire-and-forget)
   if (insertedAnnonce) {
     notifyMatchingUsers({
-      annonceType: 'beneficiaire',
+      annonceType: 'accompagne',
       annonceId: insertedAnnonce.id,
     }).catch(() => {})
   }
 
-  redirect('/beneficiaire/annonces')
+  redirect('/accompagne/annonces')
 }
 
-export async function updateAnnonceBeneficiaire(
+export async function updateAnnonceAccompagne(
   annonceId: string,
   data: {
     titre: string
@@ -301,7 +301,7 @@ export async function updateAnnonceBeneficiaire(
     disponibilites: Record<string, string[]>
     date_debut: string
     infos_complementaires: string
-    message_auxiliaires: string
+    message_accompagnantes: string
   }
 ): Promise<AnnonceResult> {
   const supabase = await createClient()
@@ -310,7 +310,7 @@ export async function updateAnnonceBeneficiaire(
   if (!user) return { error: 'Non connecte.' }
 
   const { data: profile } = await supabase
-    .from('beneficiaires_profiles')
+    .from('accompagnes_profiles')
     .select('id')
     .eq('user_id', user.id)
     .single()
@@ -328,7 +328,7 @@ export async function updateAnnonceBeneficiaire(
   const coords = await geocodeAddress(data.ville.trim(), data.code_postal.trim() || '')
 
   const { error } = await supabase
-    .from('annonces_beneficiaires')
+    .from('annonces_accompagnes')
     .update({
       titre: data.titre.trim(),
       description: data.description.trim(),
@@ -345,20 +345,20 @@ export async function updateAnnonceBeneficiaire(
       disponibilites: data.disponibilites,
       date_debut: data.date_debut,
       infos_complementaires: data.infos_complementaires.trim() || null,
-      message_auxiliaires: data.message_auxiliaires.trim() || null,
+      message_accompagnantes: data.message_accompagnantes.trim() || null,
       updated_at: new Date().toISOString(),
     })
     .eq('id', annonceId)
-    .eq('beneficiaire_id', profile.id)
+    .eq('accompagne_id', profile.id)
 
   if (error) {
     return { error: 'Erreur lors de la mise a jour de l\'annonce.' }
   }
 
-  redirect('/beneficiaire/annonces')
+  redirect('/accompagne/annonces')
 }
 
-export async function deleteAnnonceAuxiliaire(
+export async function deleteAnnonceAccompagnante(
   annonceId: string
 ): Promise<AnnonceResult> {
   const supabase = await createClient()
@@ -367,7 +367,7 @@ export async function deleteAnnonceAuxiliaire(
   if (!user) return { error: 'Non connecte.' }
 
   const { data: profile } = await supabase
-    .from('auxiliaires_profiles')
+    .from('accompagnantes_profiles')
     .select('id')
     .eq('user_id', user.id)
     .single()
@@ -375,10 +375,10 @@ export async function deleteAnnonceAuxiliaire(
   if (!profile) return { error: 'Profil non trouve.' }
 
   const { error } = await supabase
-    .from('annonces_auxiliaires')
+    .from('annonces_accompagnantes')
     .delete()
     .eq('id', annonceId)
-    .eq('auxiliaire_id', profile.id)
+    .eq('accompagnante_id', profile.id)
 
   if (error) {
     return { error: 'Erreur lors de la suppression.' }
@@ -387,7 +387,7 @@ export async function deleteAnnonceAuxiliaire(
   return { success: true }
 }
 
-export async function deleteAnnonceBeneficiaire(
+export async function deleteAnnonceAccompagne(
   annonceId: string
 ): Promise<AnnonceResult> {
   const supabase = await createClient()
@@ -396,7 +396,7 @@ export async function deleteAnnonceBeneficiaire(
   if (!user) return { error: 'Non connecte.' }
 
   const { data: profile } = await supabase
-    .from('beneficiaires_profiles')
+    .from('accompagnes_profiles')
     .select('id')
     .eq('user_id', user.id)
     .single()
@@ -404,10 +404,10 @@ export async function deleteAnnonceBeneficiaire(
   if (!profile) return { error: 'Profil non trouve.' }
 
   const { error } = await supabase
-    .from('annonces_beneficiaires')
+    .from('annonces_accompagnes')
     .delete()
     .eq('id', annonceId)
-    .eq('beneficiaire_id', profile.id)
+    .eq('accompagne_id', profile.id)
 
   if (error) {
     return { error: 'Erreur lors de la suppression.' }
@@ -416,7 +416,7 @@ export async function deleteAnnonceBeneficiaire(
   return { success: true }
 }
 
-export async function updateAnnonceBeneficiaireStatus(
+export async function updateAnnonceAccompagneStatus(
   annonceId: string,
   status: 'publiee' | 'archivee'
 ): Promise<AnnonceResult> {
@@ -426,7 +426,7 @@ export async function updateAnnonceBeneficiaireStatus(
   if (!user) return { error: 'Non connecte.' }
 
   const { data: profile } = await supabase
-    .from('beneficiaires_profiles')
+    .from('accompagnes_profiles')
     .select('id')
     .eq('user_id', user.id)
     .single()
@@ -439,10 +439,10 @@ export async function updateAnnonceBeneficiaireStatus(
   }
 
   const { error } = await supabase
-    .from('annonces_beneficiaires')
+    .from('annonces_accompagnes')
     .update(updateData)
     .eq('id', annonceId)
-    .eq('beneficiaire_id', profile.id)
+    .eq('accompagne_id', profile.id)
 
   if (error) {
     return { error: 'Erreur lors de la mise a jour.' }

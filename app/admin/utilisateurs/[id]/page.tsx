@@ -30,23 +30,23 @@ export default async function AdminUtilisateurDetailPage({
   let auxProfile: any = null
   let benProfile: any = null
 
-  if (userData.role === 'auxiliaire') {
+  if (userData.role === 'accompagnante') {
     const { data } = await supabaseAdmin
-      .from('auxiliaires_profiles')
+      .from('accompagnantes_profiles')
       .select('*')
       .eq('user_id', id)
       .single()
     auxProfile = data
-  } else if (userData.role === 'beneficiaire') {
+  } else if (userData.role === 'accompagne') {
     const { data } = await supabaseAdmin
-      .from('beneficiaires_profiles')
+      .from('accompagnes_profiles')
       .select('*')
       .eq('user_id', id)
       .single()
     benProfile = data
   }
 
-  // Generer les URLs signees pour les justificatifs auxiliaire
+  // Generer les URLs signees pour les justificatifs accompagnante
   let identiteUrl: string | null = null
   let permisUrl: string | null = null
   let cvUrl: string | null = null
@@ -204,7 +204,7 @@ export default async function AdminUtilisateurDetailPage({
           </div>
         )}
 
-        {/* Profil professionnel (auxiliaire) */}
+        {/* Profil professionnel (accompagnante) */}
         {auxProfile && (
           <div className="bg-white rounded-xl border p-6">
             <h3 className="font-semibold mb-4">Profil professionnel</h3>
@@ -229,7 +229,7 @@ export default async function AdminUtilisateurDetailPage({
           </div>
         )}
 
-        {/* Specialites (auxiliaire) */}
+        {/* Specialites (accompagnante) */}
         {auxProfile && specialiteLabels.length > 0 && (
           <div className="bg-white rounded-xl border p-6">
             <h3 className="font-semibold mb-4">Specialites ({specialiteLabels.length})</h3>
@@ -246,7 +246,7 @@ export default async function AdminUtilisateurDetailPage({
           </div>
         )}
 
-        {/* Disponibilites (auxiliaire) */}
+        {/* Disponibilites (accompagnante) */}
         {auxProfile && disponibilites && Object.keys(disponibilites).length > 0 && (
           <div className="bg-white rounded-xl border p-6 md:col-span-2">
             <h3 className="font-semibold mb-4">Disponibilites</h3>
@@ -283,7 +283,7 @@ export default async function AdminUtilisateurDetailPage({
           </div>
         )}
 
-        {/* Description (auxiliaire) */}
+        {/* Description (accompagnante) */}
         {auxProfile && (
           <div className="bg-white rounded-xl border p-6 md:col-span-2">
             <h3 className="font-semibold mb-4">Description</h3>
@@ -295,7 +295,7 @@ export default async function AdminUtilisateurDetailPage({
           </div>
         )}
 
-        {/* Justificatifs (auxiliaire) */}
+        {/* Justificatifs (accompagnante) */}
         {auxProfile && (
           <div className="bg-white rounded-xl border p-6 md:col-span-2">
             <h3 className="font-semibold mb-4">Justificatifs</h3>
@@ -314,7 +314,7 @@ export default async function AdminUtilisateurDetailPage({
         )}
       </div>
 
-      {/* Actions de validation (auxiliaire en attente) */}
+      {/* Actions de validation (accompagnante en attente) */}
       {auxProfile?.validation_status === 'en_attente' && (
         <div className="mt-8">
           <ValidationActions profileId={auxProfile.id} />
@@ -339,7 +339,7 @@ export default async function AdminUtilisateurDetailPage({
         </a>
         {auxProfile?.validation_status === 'valide' && (
           <Link
-            href={`/recherche?auxiliaire=${id}`}
+            href={`/recherche?accompagnante=${id}`}
             className="px-4 py-2 text-sm font-medium border border-gray-300 rounded-lg hover:border-accent transition-colors"
             target="_blank"
           >

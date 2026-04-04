@@ -6,7 +6,7 @@ import { revalidatePath } from 'next/cache'
 export async function adminUpdateAnnonceStatus(
   annonceId: string,
   status: 'publiee' | 'suspendue' | 'archivee',
-  type: 'auxiliaire' | 'beneficiaire'
+  type: 'accompagnante' | 'accompagne'
 ): Promise<{ error?: string }> {
   const supabase = await createClient()
 
@@ -25,7 +25,7 @@ export async function adminUpdateAnnonceStatus(
 
   const supabaseAdmin = await createClient({ serviceRole: true })
 
-  const table = type === 'auxiliaire' ? 'annonces_auxiliaires' : 'annonces_beneficiaires'
+  const table = type === 'accompagnante' ? 'annonces_accompagnantes' : 'annonces_accompagnes'
 
   const { error } = await supabaseAdmin
     .from(table)

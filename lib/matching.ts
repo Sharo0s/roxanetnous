@@ -3,7 +3,7 @@
 
 import { haversineDistance } from '@/lib/geocoding'
 
-type AuxiliaireProfile = {
+type AccompagnanteProfile = {
   specialites: string[]
   ville: string
   code_postal: string
@@ -29,16 +29,16 @@ type MatchCriteria = {
 const EXPERIENCE_ORDER = ['moins_3_ans', '3_10_ans', 'plus_10_ans']
 
 export function calculateMatchScore(
-  auxiliaire: AuxiliaireProfile,
+  accompagnante: AccompagnanteProfile,
   criteria: MatchCriteria
 ): { score: number; details: Record<string, number> } {
   const details: Record<string, number> = {}
 
   // 1. Specialites (40 points max)
-  // Nombre de specialites recherchees que l'auxiliaire possede
+  // Nombre de specialites recherchees que l'accompagnante possede
   if (criteria.specialites_recherchees.length > 0) {
     const matched = criteria.specialites_recherchees.filter((s) =>
-      auxiliaire.specialites.includes(s)
+      accompagnante.specialites.includes(s)
     ).length
     details.specialites = Math.round((matched / criteria.specialites_recherchees.length) * 40)
   } else {
@@ -48,18 +48,18 @@ export function calculateMatchScore(
   // 2. Localisation (25 points max)
   // Si lat/lng disponibles : scoring Haversine, sinon fallback ville/departement
   if (
-    auxiliaire.latitude != null &&
-    auxiliaire.longitude != null &&
+    accompagnante.latitude != null &&
+    accompagnante.longitude != null &&
     criteria.latitude != null &&
     criteria.longitude != null
   ) {
     const distance = haversineDistance(
-      auxiliaire.latitude,
-      auxiliaire.longitude,
+      accompagnante.latitude,
+      accompagnante.longitude,
       criteria.latitude,
       criteria.longitude
     )
-    const rayon = auxiliaire.rayon_km || 10
+    const rayon = accompagnante.rayon_km || 10
 
     if (distance <= rayon / 2) {
       details.localisation = 25
@@ -70,12 +70,12 @@ export function calculateMatchScore(
     } else {
       details.localisation = 0
     }
-  } else if (auxiliaire.ville.toLowerCase() === criteria.ville.toLowerCase()) {
+  } else if (accompagnante.ville.toLowerCase() === criteria.ville.toLowerCase()) {
     details.localisation = 25
   } else if (
     criteria.code_postal &&
-    auxiliaire.code_postal &&
-    auxiliaire.code_postal.substring(0, 2) === criteria.code_postal.substring(0, 2)
+    accompagnante.code_postal &&
+    accompagnante.code_postal.substring(0, 2) === criteria.code_postal.substring(0, 2)
   ) {
     details.localisation = 15
   } else {
@@ -85,7 +85,7 @@ export function calculateMatchScore(
   // 3. Experience (15 points max)
   if (criteria.experience_min) {
     const requiredIndex = EXPERIENCE_ORDER.indexOf(criteria.experience_min)
-    const auxIndex = EXPERIENCE_ORDER.indexOf(auxiliaire.experience)
+    const auxIndex = EXPERIENCE_ORDER.indexOf(accompagnante.experience)
     if (auxIndex >= requiredIndex) {
       details.experience = 15
     } else if (auxIndex === requiredIndex - 1) {
@@ -99,20 +99,20 @@ export function calculateMatchScore(
 
   // 4. Diplome (10 points max)
   if (criteria.diplome_requis) {
-    details.diplome = (auxiliaire.diplomes || []).includes(criteria.diplome_requis) ? 10 : 3
+    details.diplome = (accompagnante.diplomes || []).includes(criteria.diplome_requis) ? 10 : 3
   } else {
     details.diplome = 10
   }
 
   // 5. Disponibilites (10 points max)
-  if (criteria.disponibilites && auxiliaire.disponibilites) {
+  if (criteria.disponibilites && accompagnante.disponibilites) {
     let totalSlots = 0
     let matchedSlots = 0
 
     for (const [jour, creneaux] of Object.entries(criteria.disponibilites)) {
       for (const creneau of creneaux) {
         totalSlots++
-        if ((auxiliaire.disponibilites[jour] || []).includes(creneau)) {
+        if ((accompagnante.disponibilites[jour] || []).includes(creneau)) {
           matchedSlots++
         }
       }

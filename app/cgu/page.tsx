@@ -17,7 +17,7 @@ export default function CGUPage() {
             <p>
               Les presentes conditions generales d&apos;utilisation (CGU) regissent l&apos;acces et
               l&apos;utilisation de la plateforme roxanetnous, un service de mise en relation entre
-              auxiliaires de vie et beneficiaires.
+              accompagnantes de vie et accompagnes.
             </p>
           </section>
 
@@ -35,11 +35,11 @@ export default function CGUPage() {
             <p>Deux types de comptes sont disponibles :</p>
             <ul className="list-disc pl-5 mt-2 space-y-1">
               <li>
-                <strong>Auxiliaire de vie</strong> : professionnel proposant ses services d&apos;aide a
+                <strong>Accompagnante de vie</strong> : professionnel proposant ses services d&apos;aide a
                 domicile. Son profil est soumis a une validation manuelle (diplome, identite).
               </li>
               <li>
-                <strong>Beneficiaire</strong> : personne recherchant un auxiliaire de vie pour
+                <strong>Accompagne</strong> : personne recherchant une accompagnante de vie pour
                 elle-meme ou pour un proche.
               </li>
             </ul>
@@ -62,7 +62,7 @@ export default function CGUPage() {
               <li>Ne pas usurper l&apos;identite d&apos;un tiers</li>
               <li>Respecter les autres utilisateurs dans les echanges</li>
               <li>Ne pas utiliser la plateforme a des fins contraires a son objet</li>
-              <li>Fournir des justificatifs authentiques (pour les auxiliaires)</li>
+              <li>Fournir des justificatifs authentiques (pour les accompagnantes)</li>
             </ul>
           </section>
 
@@ -71,7 +71,7 @@ export default function CGUPage() {
             <p>
               roxanetnous est un service de mise en relation. La plateforme ne se substitue pas
               a un employeur et n&apos;est pas partie prenante dans la relation contractuelle entre
-              l&apos;auxiliaire et le beneficiaire. Chaque partie est responsable de ses obligations
+              l&apos;accompagnante et le accompagne. Chaque partie est responsable de ses obligations
               legales (contrat de travail, declarations, etc.).
             </p>
           </section>

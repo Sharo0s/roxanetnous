@@ -10,7 +10,7 @@ export type MessageResult = {
 }
 
 export async function getOrCreateConversation(
-  auxiliaireProfileId: string
+  accompagnanteProfileId: string
 ): Promise<MessageResult> {
   const supabase = await createClient()
 
@@ -23,20 +23,20 @@ export async function getOrCreateConversation(
     .eq('id', user.id)
     .single()
 
-  if (!userData || userData.role !== 'beneficiaire') {
-    return { error: 'Seuls les beneficiaires peuvent initier une conversation.' }
+  if (!userData || userData.role !== 'accompagne') {
+    return { error: 'Seuls les accompagnes peuvent initier une conversation.' }
   }
 
-  // Recuperer le profil beneficiaire
+  // Recuperer le profil accompagne
   let { data: benProfile } = await supabase
-    .from('beneficiaires_profiles')
+    .from('accompagnes_profiles')
     .select('id')
     .eq('user_id', user.id)
     .single()
 
   if (!benProfile) {
     const { data: newProfile, error: createError } = await supabase
-      .from('beneficiaires_profiles')
+      .from('accompagnes_profiles')
       .insert({ user_id: user.id })
       .select('id')
       .single()
@@ -51,8 +51,8 @@ export async function getOrCreateConversation(
   const { data: existing } = await supabase
     .from('conversations')
     .select('id')
-    .eq('auxiliaire_id', auxiliaireProfileId)
-    .eq('beneficiaire_id', benProfile.id)
+    .eq('accompagnante_id', accompagnanteProfileId)
+    .eq('accompagne_id', benProfile.id)
     .single()
 
   if (existing) {
@@ -63,8 +63,8 @@ export async function getOrCreateConversation(
   const { data: conversation, error } = await supabase
     .from('conversations')
     .insert({
-      auxiliaire_id: auxiliaireProfileId,
-      beneficiaire_id: benProfile.id,
+      accompagnante_id: accompagnanteProfileId,
+      accompagne_id: benProfile.id,
     })
     .select('id')
     .single()
@@ -76,8 +76,8 @@ export async function getOrCreateConversation(
   return { conversationId: conversation.id }
 }
 
-export async function getOrCreateConversationAsAuxiliaire(
-  beneficiaireProfileId: string
+export async function getOrCreateConversationAsAccompagnante(
+  accompagneProfileId: string
 ): Promise<MessageResult> {
   const supabase = await createClient()
 
@@ -90,26 +90,26 @@ export async function getOrCreateConversationAsAuxiliaire(
     .eq('id', user.id)
     .single()
 
-  if (!userData || userData.role !== 'auxiliaire') {
-    return { error: 'Seuls les auxiliaires peuvent utiliser cette fonction.' }
+  if (!userData || userData.role !== 'accompagnante') {
+    return { error: 'Seuls les accompagnantes peuvent utiliser cette fonction.' }
   }
 
   const { data: auxProfile } = await supabase
-    .from('auxiliaires_profiles')
+    .from('accompagnantes_profiles')
     .select('id')
     .eq('user_id', user.id)
     .single()
 
   if (!auxProfile) {
-    return { error: 'Profil auxiliaire introuvable.' }
+    return { error: 'Profil accompagnante introuvable.' }
   }
 
   // Verifier si une conversation existe deja
   const { data: existing } = await supabase
     .from('conversations')
     .select('id')
-    .eq('auxiliaire_id', auxProfile.id)
-    .eq('beneficiaire_id', beneficiaireProfileId)
+    .eq('accompagnante_id', auxProfile.id)
+    .eq('accompagne_id', accompagneProfileId)
     .single()
 
   if (existing) {
@@ -120,8 +120,8 @@ export async function getOrCreateConversationAsAuxiliaire(
   const { data: conversation, error } = await supabase
     .from('conversations')
     .insert({
-      auxiliaire_id: auxProfile.id,
-      beneficiaire_id: beneficiaireProfileId,
+      accompagnante_id: auxProfile.id,
+      accompagne_id: accompagneProfileId,
     })
     .select('id')
     .single()
@@ -151,10 +151,10 @@ export async function sendMessage(
     .from('conversations')
     .select(`
       id,
-      auxiliaire_id,
-      beneficiaire_id,
-      auxiliaires_profiles:auxiliaire_id (user_id),
-      beneficiaires_profiles:beneficiaire_id (user_id)
+      accompagnante_id,
+      accompagne_id,
+      accompagnantes_profiles:accompagnante_id (user_id),
+      accompagnes_profiles:accompagne_id (user_id)
     `)
     .eq('id', conversationId)
     .single()
@@ -163,8 +163,8 @@ export async function sendMessage(
     return { error: 'Conversation non trouvee.' }
   }
 
-  const auxProfile = conversation.auxiliaires_profiles as any
-  const benProfile = conversation.beneficiaires_profiles as any
+  const auxProfile = conversation.accompagnantes_profiles as any
+  const benProfile = conversation.accompagnes_profiles as any
 
   if (auxProfile?.user_id !== user.id && benProfile?.user_id !== user.id) {
     return { error: 'Acces non autorise a cette conversation.' }

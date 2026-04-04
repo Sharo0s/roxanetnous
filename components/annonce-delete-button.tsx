@@ -1,11 +1,11 @@
 'use client'
 
 import { useState } from 'react'
-import { deleteAnnonceAuxiliaire, deleteAnnonceBeneficiaire } from '@/app/actions/annonces'
+import { deleteAnnonceAccompagnante, deleteAnnonceAccompagne } from '@/app/actions/annonces'
 
 type Props = {
   annonceId: string
-  type: 'auxiliaire' | 'beneficiaire'
+  type: 'accompagnante' | 'accompagne'
 }
 
 export function AnnonceDeleteButton({ annonceId, type }: Props) {
@@ -14,9 +14,9 @@ export function AnnonceDeleteButton({ annonceId, type }: Props) {
 
   async function handleDelete() {
     setLoading(true)
-    const action = type === 'auxiliaire'
-      ? deleteAnnonceAuxiliaire
-      : deleteAnnonceBeneficiaire
+    const action = type === 'accompagnante'
+      ? deleteAnnonceAccompagnante
+      : deleteAnnonceAccompagne
     const result = await action(annonceId)
     if (result.error) {
       alert(result.error)

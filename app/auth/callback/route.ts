@@ -29,10 +29,10 @@ export async function GET(request: Request) {
 
         if (role === 'admin') {
           return NextResponse.redirect(`${origin}/admin`)
-        } else if (role === 'auxiliaire') {
-          return NextResponse.redirect(`${origin}/auxiliaire/dashboard`)
+        } else if (role === 'accompagnante') {
+          return NextResponse.redirect(`${origin}/accompagnante/dashboard`)
         } else {
-          return NextResponse.redirect(`${origin}/beneficiaire/dashboard`)
+          return NextResponse.redirect(`${origin}/accompagne/dashboard`)
         }
       }
     }

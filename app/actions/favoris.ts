@@ -5,14 +5,14 @@ import { revalidatePath } from 'next/cache'
 
 export async function toggleFavori(
   annonceId: string,
-  type: 'auxiliaire' | 'beneficiaire'
+  type: 'accompagnante' | 'accompagne'
 ): Promise<{ error?: string; isFavori?: boolean }> {
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'Non connecte.' }
 
-  const field = type === 'auxiliaire' ? 'annonce_auxiliaire_id' : 'annonce_beneficiaire_id'
+  const field = type === 'accompagnante' ? 'annonce_accompagnante_id' : 'annonce_accompagne_id'
 
   // Verifier si deja en favori
   const { data: existing } = await supabase
@@ -47,11 +47,11 @@ export async function toggleFavori(
 
   if (error) return { error: 'Erreur lors de l\'ajout du favori.' }
 
-  // Mettre a jour le compteur sur l'annonce auxiliaire
-  if (type === 'auxiliaire') {
+  // Mettre a jour le compteur sur l'annonce accompagnante
+  if (type === 'accompagnante') {
     await supabase
-      .from('annonces_auxiliaires')
-      .update({ favoris_count: (await supabase.from('favoris').select('id', { count: 'exact', head: true }).eq('annonce_auxiliaire_id', annonceId)).count || 0 })
+      .from('annonces_accompagnantes')
+      .update({ favoris_count: (await supabase.from('favoris').select('id', { count: 'exact', head: true }).eq('annonce_accompagnante_id', annonceId)).count || 0 })
       .eq('id', annonceId)
   }
 

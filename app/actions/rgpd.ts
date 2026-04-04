@@ -24,10 +24,10 @@ export async function exportUserData(): Promise<string> {
     { data: favoris },
   ] = await Promise.all([
     supabaseAdmin.from('users').select('*').eq('id', user.id).single(),
-    supabaseAdmin.from('auxiliaires_profiles').select('*').eq('user_id', user.id).single(),
-    supabaseAdmin.from('beneficiaires_profiles').select('*').eq('user_id', user.id).single(),
-    supabaseAdmin.from('annonces_auxiliaires').select('*').eq('auxiliaire_id', user.id),
-    supabaseAdmin.from('annonces_beneficiaires').select('*').eq('beneficiaire_id', user.id),
+    supabaseAdmin.from('accompagnantes_profiles').select('*').eq('user_id', user.id).single(),
+    supabaseAdmin.from('accompagnes_profiles').select('*').eq('user_id', user.id).single(),
+    supabaseAdmin.from('annonces_accompagnantes').select('*').eq('accompagnante_id', user.id),
+    supabaseAdmin.from('annonces_accompagnes').select('*').eq('accompagne_id', user.id),
     supabaseAdmin.from('avis').select('*').eq('auteur_id', user.id),
     supabaseAdmin.from('avis').select('*').eq('cible_id', user.id),
     supabaseAdmin.from('messages').select('*').eq('sender_id', user.id),
@@ -40,26 +40,26 @@ export async function exportUserData(): Promise<string> {
   let annoncesBenData = annoncesBen
   if (auxProfile) {
     const { data } = await supabaseAdmin
-      .from('annonces_auxiliaires')
+      .from('annonces_accompagnantes')
       .select('*')
-      .eq('auxiliaire_id', auxProfile.id)
+      .eq('accompagnante_id', auxProfile.id)
     annoncesAuxData = data
   }
   if (benProfile) {
     const { data } = await supabaseAdmin
-      .from('annonces_beneficiaires')
+      .from('annonces_accompagnes')
       .select('*')
-      .eq('beneficiaire_id', benProfile.id)
+      .eq('accompagne_id', benProfile.id)
     annoncesBenData = data
   }
 
   const exportData = {
     export_date: new Date().toISOString(),
     user: userData,
-    profil_auxiliaire: auxProfile,
-    profil_beneficiaire: benProfile,
-    annonces_auxiliaire: annoncesAuxData || [],
-    annonces_beneficiaire: annoncesBenData || [],
+    profil_accompagnante: auxProfile,
+    profil_accompagne: benProfile,
+    annonces_accompagnante: annoncesAuxData || [],
+    annonces_accompagne: annoncesBenData || [],
     avis_donnes: avisAuteur || [],
     avis_recus: avisCible || [],
     messages_envoyes: messages || [],

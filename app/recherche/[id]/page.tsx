@@ -8,8 +8,8 @@ import { AvisSection } from '@/components/recherche/avis-section'
 import { SignalementButton } from '@/components/signalement-button'
 import { getBadges } from '@/lib/badges'
 import { BadgesDisplay } from '@/components/badges-display'
-import { AuxiliaireHeader } from '@/components/layout/auxiliaire-header'
-import { BeneficiaireHeader } from '@/components/layout/beneficiaire-header'
+import { AccompagnanteHeader } from '@/components/layout/accompagnante-header'
+import { AccompagneHeader } from '@/components/layout/accompagne-header'
 import { getUnreadCount } from '@/lib/unread-count'
 
 export default async function AnnonceDetailPage({
@@ -33,10 +33,10 @@ export default async function AnnonceDetailPage({
   }
 
   const { data: annonce } = await supabase
-    .from('annonces_auxiliaires')
+    .from('annonces_accompagnantes')
     .select(`
       *,
-      auxiliaires_profiles!inner (
+      accompagnantes_profiles!inner (
         user_id,
         diplomes,
         experience,
@@ -55,12 +55,12 @@ export default async function AnnonceDetailPage({
     `)
     .eq('id', id)
     .eq('status', 'publiee')
-    .eq('auxiliaires_profiles.validation_status', 'valide')
+    .eq('accompagnantes_profiles.validation_status', 'valide')
     .single()
 
   if (!annonce) redirect('/recherche')
 
-  const profile = annonce.auxiliaires_profiles as any
+  const profile = annonce.accompagnantes_profiles as any
   const u = profile?.users
   const auxUserId = profile?.user_id
 
@@ -71,12 +71,12 @@ export default async function AnnonceDetailPage({
       .from('favoris')
       .select('id')
       .eq('user_id', user.id)
-      .eq('annonce_auxiliaire_id', id)
+      .eq('annonce_accompagnante_id', id)
       .single()
     isFavori = !!favori
   }
 
-  // Recuperer les avis pour cet auxiliaire
+  // Recuperer les avis pour cette accompagnante
   const { data: avisList } = await supabase
     .from('avis')
     .select(`
@@ -99,7 +99,7 @@ export default async function AnnonceDetailPage({
     ? avisFormatted.reduce((sum: number, a: any) => sum + a.note, 0) / avisFormatted.length
     : null
 
-  const canLeaveAvis = !!user && userData?.role === 'beneficiaire' && auxUserId !== user.id
+  const canLeaveAvis = !!user && userData?.role === 'accompagne' && auxUserId !== user.id
 
   // Fetch des badges
   const badgesMap = auxUserId ? await getBadges([auxUserId]) : {}
@@ -116,16 +116,16 @@ export default async function AnnonceDetailPage({
 
   return (
     <main className="min-h-screen kraft bg-kraft">
-      {userData?.role === 'auxiliaire' && user ? (
-        <AuxiliaireHeader
+      {userData?.role === 'accompagnante' && user ? (
+        <AccompagnanteHeader
           userId={user.id}
           unreadCount={unreadCount}
           firstName={userData.first_name}
           lastName={userData.last_name}
           currentPage="other"
         />
-      ) : userData?.role === 'beneficiaire' && user ? (
-        <BeneficiaireHeader
+      ) : userData?.role === 'accompagne' && user ? (
+        <AccompagneHeader
           userId={user.id}
           unreadCount={unreadCount}
           firstName={userData.first_name}
@@ -165,7 +165,7 @@ export default async function AnnonceDetailPage({
             </div>
           </div>
           {user && (
-            <FavoriButton annonceId={id} type="auxiliaire" initialIsFavori={isFavori} />
+            <FavoriButton annonceId={id} type="accompagnante" initialIsFavori={isFavori} />
           )}
         </div>
 
@@ -275,19 +275,19 @@ export default async function AnnonceDetailPage({
               </dl>
             </div>
 
-            {userData?.role === 'beneficiaire' ? (
+            {userData?.role === 'accompagne' ? (
               <div className="bg-white rounded-xl border p-6">
                 <h3 className="font-semibold mb-3">Contacter</h3>
                 <p className="text-sm text-gray-600 mb-4">
                   Envoyez un message pour en savoir plus ou proposer une mission.
                 </p>
-                <ContactButton auxiliaireProfileId={annonce.auxiliaire_id} />
+                <ContactButton accompagnanteProfileId={annonce.accompagnante_id} />
               </div>
             ) : !user ? (
               <div className="bg-white rounded-xl border p-6">
                 <h3 className="font-semibold mb-3">Interesse ?</h3>
                 <p className="text-sm text-gray-600 mb-4">
-                  Connectez-vous pour contacter cet auxiliaire.
+                  Connectez-vous pour contacter cette accompagnante.
                 </p>
                 <Link
                   href="/register"
@@ -300,7 +300,7 @@ export default async function AnnonceDetailPage({
 
             {user && (
               <div className="text-center pt-2">
-                <SignalementButton cibleType="annonce_auxiliaire" cibleId={id} />
+                <SignalementButton cibleType="annonce_accompagnante" cibleId={id} />
               </div>
             )}
           </div>

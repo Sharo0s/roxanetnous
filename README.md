@@ -2,7 +2,7 @@
   Si vous voulez retrouver l'etat actuel carte france, il suffira de faire :             
   git show 1d7f077:components/landing/hero-carte.tsx
 
-Plateforme de mise en relation entre auxiliaires de vie vérifiés et bénéficiaires.
+Plateforme de mise en relation entre accompagnantes de vie vérifiés et bénéficiaires.
 
 ## 🚀 Stack Technique
 
@@ -87,8 +87,8 @@ roxanetnous/
 ├── app/                          # Next.js App Router
 │   ├── (auth)/                   # Routes d'authentification
 │   ├── (public)/                 # Routes publiques
-│   ├── auxiliaire/               # Dashboard auxiliaire
-│   ├── beneficiaire/             # Dashboard bénéficiaire
+│   ├── accompagnante/               # Dashboard accompagnante
+│   ├── accompagne/             # Dashboard bénéficiaire
 │   ├── admin/                    # Dashboard admin
 │   ├── api/                      # API Routes
 │   │   ├── webhooks/stripe/      # Webhooks Stripe
@@ -125,11 +125,11 @@ roxanetnous/
 ### Base de données (18 tables)
 
 - `users` - Utilisateurs (extends auth.users)
-- `auxiliaires_profiles` - Profils auxiliaires
-- `beneficiaires_profiles` - Profils bénéficiaires
+- `accompagnantes_profiles` - Profils accompagnantes
+- `accompagnes_profiles` - Profils bénéficiaires
 - `subscriptions` - Abonnements Stripe
-- `annonces_auxiliaires` - Annonces auxiliaires
-- `annonces_beneficiaires` - Annonces bénéficiaires
+- `annonces_accompagnantes` - Annonces accompagnantes
+- `annonces_accompagnes` - Annonces bénéficiaires
 - `favoris` - Favoris (polymorphique)
 - `conversations` - Conversations
 - `messages` - Messages
@@ -143,7 +143,7 @@ roxanetnous/
 ### Fonctionnalités principales
 
 ✅ **Inscription & Validation**
-- Formulaire multi-étapes auxiliaires
+- Formulaire multi-étapes accompagnantes
 - Upload justificatifs (identité + diplôme)
 - Validation manuelle admin (objectif 48h)
 
@@ -153,7 +153,7 @@ roxanetnous/
 - Hard paywall (RLS)
 
 ✅ **Marketplace Bidirectionnelle**
-- Annonces auxiliaires + bénéficiaires
+- Annonces accompagnantes + bénéficiaires
 - Recherche et filtres avancés
 - Système de favoris
 

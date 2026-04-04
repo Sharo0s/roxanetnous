@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { sendDisponibleReactivatedEmail } from '@/lib/emails'
-import { notifyFavoriBeneficiaires } from '@/lib/notify-favori-disponible'
+import { notifyFavoriAccompagnes } from '@/lib/notify-favori-disponible'
 
 export async function GET(request: NextRequest) {
   const authHeader = request.headers.get('authorization')
@@ -12,9 +12,9 @@ export async function GET(request: NextRequest) {
 
   const supabase = await createClient({ serviceRole: true })
 
-  // Trouver les auxiliaires dont la date de retour est passee
+  // Trouver les accompagnantes dont la date de retour est passee
   const { data: profiles } = await supabase
-    .from('auxiliaires_profiles')
+    .from('accompagnantes_profiles')
     .select('user_id')
     .eq('disponible', false)
     .not('indisponible_jusqu_au', 'is', null)
@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
 
   // Reactiver les profils
   await supabase
-    .from('auxiliaires_profiles')
+    .from('accompagnantes_profiles')
     .update({ disponible: true, indisponible_jusqu_au: null })
     .in('user_id', userIds)
 
@@ -38,22 +38,22 @@ export async function GET(request: NextRequest) {
     .update({ disponible: true, updated_at: new Date().toISOString() })
     .in('user_id', userIds)
 
-  // Recuperer les infos des auxiliaires pour les mails
+  // Recuperer les infos des accompagnantes pour les mails
   const { data: users } = await supabase
     .from('users')
     .select('id, email, first_name')
     .in('id', userIds)
 
   for (const user of users || []) {
-    // Mail a l'auxiliaire
+    // Mail a l'accompagnante
     await sendDisponibleReactivatedEmail({
       email: user.email,
       firstName: user.first_name || 'Bonjour',
       userId: user.id,
     })
 
-    // Mail aux beneficiaires qui l'ont en favori
-    await notifyFavoriBeneficiaires(user.id)
+    // Mail aux accompagnes qui l'ont en favori
+    await notifyFavoriAccompagnes(user.id)
   }
 
   return NextResponse.json({ success: true, reactivated: userIds.length })

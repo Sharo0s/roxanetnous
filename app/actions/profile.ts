@@ -1,7 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
-import { notifyFavoriBeneficiaires } from '@/lib/notify-favori-disponible'
+import { notifyFavoriAccompagnes } from '@/lib/notify-favori-disponible'
 import { revalidatePath } from 'next/cache'
 
 export type ProfileResult = {
@@ -9,7 +9,7 @@ export type ProfileResult = {
   success?: boolean
 }
 
-export async function updateAuxiliaireProfile(data: {
+export async function updateAccompagnanteProfile(data: {
   diplomes: string[]
   experience: string
   specialites: string[]
@@ -33,7 +33,7 @@ export async function updateAuxiliaireProfile(data: {
     .eq('id', user.id)
     .single()
 
-  if (!userData || userData.role !== 'auxiliaire') {
+  if (!userData || userData.role !== 'accompagnante') {
     return { error: 'Acces non autorise.' }
   }
 
@@ -47,7 +47,7 @@ export async function updateAuxiliaireProfile(data: {
 
   // Verifier le statut actuel pour remettre en attente si necessaire
   const { data: currentProfile } = await supabase
-    .from('auxiliaires_profiles')
+    .from('accompagnantes_profiles')
     .select('validation_status')
     .eq('user_id', user.id)
     .single()
@@ -74,7 +74,7 @@ export async function updateAuxiliaireProfile(data: {
   }
 
   const { error } = await supabase
-    .from('auxiliaires_profiles')
+    .from('accompagnantes_profiles')
     .update(updateData)
     .eq('user_id', user.id)
 
@@ -82,8 +82,8 @@ export async function updateAuxiliaireProfile(data: {
     return { error: 'Erreur lors de la mise a jour du profil.' }
   }
 
-  revalidatePath('/auxiliaire/profil')
-  revalidatePath('/auxiliaire/dashboard')
+  revalidatePath('/accompagnante/profil')
+  revalidatePath('/accompagnante/dashboard')
   return { success: true }
 }
 
@@ -115,8 +115,8 @@ export async function updateUserInfo(data: {
     return { error: 'Erreur lors de la mise a jour.' }
   }
 
-  revalidatePath('/auxiliaire/profil')
-  revalidatePath('/beneficiaire/profil')
+  revalidatePath('/accompagnante/profil')
+  revalidatePath('/accompagne/profil')
   return { success: true }
 }
 
@@ -137,7 +137,7 @@ export async function toggleDisponible(indisponibleJusquAu?: string | null): Pro
   if (!user) return { error: 'Non connecte.' }
 
   const { data: profile } = await supabase
-    .from('auxiliaires_profiles')
+    .from('accompagnantes_profiles')
     .select('disponible')
     .eq('user_id', user.id)
     .single()
@@ -147,7 +147,7 @@ export async function toggleDisponible(indisponibleJusquAu?: string | null): Pro
   const newValue = !profile.disponible
 
   const { error } = await supabase
-    .from('auxiliaires_profiles')
+    .from('accompagnantes_profiles')
     .update({
       disponible: newValue,
       indisponible_jusqu_au: newValue ? null : (indisponibleJusquAu || null),
@@ -162,18 +162,18 @@ export async function toggleDisponible(indisponibleJusquAu?: string | null): Pro
     .update({ disponible: newValue, updated_at: new Date().toISOString() })
     .eq('user_id', user.id)
 
-  // Si repasse disponible, notifier les beneficiaires qui l'ont en favori (fire-and-forget)
+  // Si repasse disponible, notifier les accompagnes qui l'ont en favori (fire-and-forget)
   if (newValue) {
-    notifyFavoriBeneficiaires(user.id).catch(() => {})
+    notifyFavoriAccompagnes(user.id).catch(() => {})
   }
 
-  revalidatePath('/auxiliaire/profil')
-  revalidatePath('/auxiliaire/dashboard')
+  revalidatePath('/accompagnante/profil')
+  revalidatePath('/accompagnante/dashboard')
   revalidatePath('/recherche')
   return { success: true }
 }
 
-export async function updateBeneficiaireProfile(data: {
+export async function updateAccompagneProfile(data: {
   ville: string
   code_postal: string
   adresse: string
@@ -189,20 +189,20 @@ export async function updateBeneficiaireProfile(data: {
     .eq('id', user.id)
     .single()
 
-  if (!userData || userData.role !== 'beneficiaire') {
+  if (!userData || userData.role !== 'accompagne') {
     return { error: 'Acces non autorise.' }
   }
 
   // Verifier si le profil existe
   const { data: existing } = await supabase
-    .from('beneficiaires_profiles')
+    .from('accompagnes_profiles')
     .select('id')
     .eq('user_id', user.id)
     .single()
 
   if (existing) {
     const { error } = await supabase
-      .from('beneficiaires_profiles')
+      .from('accompagnes_profiles')
       .update({
         ville: data.ville.trim() || null,
         code_postal: data.code_postal.trim() || null,
@@ -214,7 +214,7 @@ export async function updateBeneficiaireProfile(data: {
     if (error) return { error: 'Erreur lors de la mise a jour.' }
   } else {
     const { error } = await supabase
-      .from('beneficiaires_profiles')
+      .from('accompagnes_profiles')
       .insert({
         user_id: user.id,
         ville: data.ville.trim() || null,
@@ -225,6 +225,6 @@ export async function updateBeneficiaireProfile(data: {
     if (error) return { error: 'Erreur lors de la creation du profil.' }
   }
 
-  revalidatePath('/beneficiaire/profil')
+  revalidatePath('/accompagne/profil')
   return { success: true }
 }

@@ -12,7 +12,7 @@ type AnnonceRow = {
   status: string
   created_at: string
   auteur_nom: string
-  type: 'auxiliaire' | 'beneficiaire'
+  type: 'accompagnante' | 'accompagne'
 }
 
 export function AnnoncesSearchTable({
@@ -20,7 +20,7 @@ export function AnnoncesSearchTable({
   type,
 }: {
   annonces: AnnonceRow[]
-  type: 'auxiliaire' | 'beneficiaire'
+  type: 'accompagnante' | 'accompagne'
 }) {
   const [search, setSearch] = useState('')
 

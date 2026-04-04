@@ -78,7 +78,8 @@ export async function updateSession(request: NextRequest) {
     // Try metadata first (set at signup), fallback to DB query
     let role: string | null = (user.user_metadata?.role as string) ?? null
 
-    if (!role) {
+    // Fallback to DB if metadata missing or contains legacy values
+    if (!role || !['accompagnante', 'accompagne', 'admin'].includes(role)) {
       const { data: userData } = await supabase
         .from('users')
         .select('role')
@@ -92,10 +93,10 @@ export async function updateSession(request: NextRequest) {
       const url = request.nextUrl.clone()
       if (role === 'admin') {
         url.pathname = '/admin'
-      } else if (role === 'auxiliaire') {
-        url.pathname = '/auxiliaire/dashboard'
+      } else if (role === 'accompagnante') {
+        url.pathname = '/accompagnante/dashboard'
       } else {
-        url.pathname = '/beneficiaire/dashboard'
+        url.pathname = '/accompagne/dashboard'
       }
       return NextResponse.redirect(url)
     }

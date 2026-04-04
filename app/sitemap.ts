@@ -17,9 +17,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${BASE_URL}/cgu`, lastModified: new Date(), changeFrequency: 'yearly', priority: 0.3 },
   ]
 
-  // Annonces auxiliaires publiees
+  // Annonces accompagnantes publiees
   const { data: annonces } = await supabase
-    .from('annonces_auxiliaires')
+    .from('annonces_accompagnantes')
     .select('id, updated_at')
     .eq('status', 'publiee')
 

@@ -17,10 +17,10 @@ export function RegisterForm() {
   const initialEmail = searchParams.get('email') || ''
 
   const [step, setStep] = useState<Step>(
-    initialRole === 'auxiliaire' || initialRole === 'beneficiaire' ? 'name' : 'role'
+    initialRole === 'accompagnante' || initialRole === 'accompagne' ? 'name' : 'role'
   )
-  const [role, setRole] = useState<'auxiliaire' | 'beneficiaire' | null>(
-    initialRole === 'auxiliaire' || initialRole === 'beneficiaire' ? initialRole : null
+  const [role, setRole] = useState<'accompagnante' | 'accompagne' | null>(
+    initialRole === 'accompagnante' || initialRole === 'accompagne' ? initialRole : null
   )
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
@@ -39,7 +39,7 @@ export function RegisterForm() {
     }, 100)
   }, [step])
 
-  function selectRole(r: 'auxiliaire' | 'beneficiaire') {
+  function selectRole(r: 'accompagnante' | 'accompagne') {
     setRole(r)
     setStep('name')
   }
@@ -141,29 +141,29 @@ export function RegisterForm() {
             <div className="grid grid-cols-2 gap-3">
               <button
                 type="button"
-                onClick={() => selectRole('auxiliaire')}
+                onClick={() => selectRole('accompagnante')}
                 className={`p-4 rounded-lg border-2 text-left transition ${
-                  role === 'auxiliaire'
+                  role === 'accompagnante'
                     ? 'border-accent bg-accent text-black'
                     : 'border-gray-200 hover:border-accent'
                 }`}
               >
                 <p className="font-semibold text-sm">Vos competences meritent que vous soyez trouve(e)</p>
-                <p className={`text-xs mt-1 ${role === 'auxiliaire' ? 'text-black/50' : 'text-gray-500'}`}>
+                <p className={`text-xs mt-1 ${role === 'accompagnante' ? 'text-black/50' : 'text-gray-500'}`}>
                   Au bon moment, au bon endroit
                 </p>
               </button>
               <button
                 type="button"
-                onClick={() => selectRole('beneficiaire')}
+                onClick={() => selectRole('accompagne')}
                 className={`p-4 rounded-lg border-2 text-left transition ${
-                  role === 'beneficiaire'
+                  role === 'accompagne'
                     ? 'border-accent bg-accent text-black'
                     : 'border-gray-200 hover:border-accent'
                 }`}
               >
                 <p className="font-semibold text-sm">Choisissez votre accompagnant(e)</p>
-                <p className={`text-xs mt-1 ${role === 'beneficiaire' ? 'text-black/50' : 'text-gray-500'}`}>
+                <p className={`text-xs mt-1 ${role === 'accompagne' ? 'text-black/50' : 'text-gray-500'}`}>
                   On s'occupe de tout
                 </p>
               </button>

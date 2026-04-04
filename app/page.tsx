@@ -11,17 +11,17 @@ export const revalidate = 120
 export default async function HomePage() {
   const supabase = await createClient({ serviceRole: true })
 
-  const { count: auxiliairesCount } = await supabase
-    .from('auxiliaires_profiles')
+  const { count: accompagnantesCount } = await supabase
+    .from('accompagnantes_profiles')
     .select('id', { count: 'exact', head: true })
     .eq('validation_status', 'valide')
 
-  const { count: beneficiairesCount } = await supabase
-    .from('beneficiaires_profiles')
+  const { count: accompagnesCount } = await supabase
+    .from('accompagnes_profiles')
     .select('id', { count: 'exact', head: true })
 
   const { data: villesData } = await supabase
-    .from('auxiliaires_profiles')
+    .from('accompagnantes_profiles')
     .select('ville, latitude, longitude')
     .eq('validation_status', 'valide')
 
@@ -82,7 +82,7 @@ export default async function HomePage() {
     '@type': 'WebApplication',
     name: 'roxanetnous',
     url: process.env.NEXT_PUBLIC_BASE_URL || 'https://roxanetnous.fr',
-    description: 'Plateforme de mise en relation entre auxiliaires de vie verifies et beneficiaires.',
+    description: 'Plateforme de mise en relation entre accompagnantes de vie verifies et accompagnes.',
     applicationCategory: 'HealthApplication',
     operatingSystem: 'Web',
     offers: [
@@ -143,13 +143,13 @@ export default async function HomePage() {
                   </Link>
                 </div>
 
-                {((auxiliairesCount || 0) > 0 || (beneficiairesCount || 0) > 0 || villesUniques.size > 0) && (
+                {((accompagnantesCount || 0) > 0 || (accompagnesCount || 0) > 0 || villesUniques.size > 0) && (
                   <div className="flex gap-8 justify-center md:justify-start pt-10">
-                    {(auxiliairesCount || 0) > 0 && (
-                      <AnimatedCounter end={auxiliairesCount || 0} label={`accompagnant(e)${(auxiliairesCount || 0) > 1 ? 's' : ''} verifie(e)${(auxiliairesCount || 0) > 1 ? 's' : ''}`} />
+                    {(accompagnantesCount || 0) > 0 && (
+                      <AnimatedCounter end={accompagnantesCount || 0} label={`accompagnant(e)${(accompagnantesCount || 0) > 1 ? 's' : ''} verifie(e)${(accompagnantesCount || 0) > 1 ? 's' : ''}`} />
                     )}
-                    {(beneficiairesCount || 0) > 0 && (
-                      <AnimatedCounter end={beneficiairesCount || 0} label={`accompagne(e)${(beneficiairesCount || 0) > 1 ? 's' : ''}`} />
+                    {(accompagnesCount || 0) > 0 && (
+                      <AnimatedCounter end={accompagnesCount || 0} label={`accompagne(e)${(accompagnesCount || 0) > 1 ? 's' : ''}`} />
                     )}
                     {villesUniques.size > 0 && (
                       <AnimatedCounter end={villesUniques.size} label={`ville${villesUniques.size > 1 ? 's' : ''}`} />
@@ -255,7 +255,7 @@ export default async function HomePage() {
                   ))}
                 </ul>
                 <Link
-                  href="/register?role=auxiliaire"
+                  href="/register?role=accompagnante"
                   className="block text-center mt-8 px-4 py-3 rounded-lg text-sm font-medium text-black btn-hover bg-accent"
                 >
                   Creer mon profil accompagnant(e)
@@ -274,7 +274,7 @@ export default async function HomePage() {
                   ))}
                 </ul>
                 <Link
-                  href="/register?role=beneficiaire"
+                  href="/register?role=accompagne"
                   className="block text-center mt-8 px-4 py-3 rounded-lg text-sm font-medium text-black btn-hover bg-accent"
                 >
                   Trouver un(e) accompagnant(e)

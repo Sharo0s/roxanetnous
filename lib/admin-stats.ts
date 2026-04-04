@@ -89,14 +89,14 @@ export async function getInscriptionsParMois() {
     .neq('role', 'admin')
 
   // Grouper par mois
-  const moisMap = new Map<string, { auxiliaires: number; beneficiaires: number }>()
+  const moisMap = new Map<string, { accompagnantes: number; accompagnes: number }>()
 
   // Initialiser les 12 mois
   for (let i = 0; i < 12; i++) {
     const d = new Date()
     d.setMonth(d.getMonth() - (11 - i))
     const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
-    moisMap.set(key, { auxiliaires: 0, beneficiaires: 0 })
+    moisMap.set(key, { accompagnantes: 0, accompagnes: 0 })
   }
 
   for (const u of users || []) {
@@ -104,34 +104,34 @@ export async function getInscriptionsParMois() {
     const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
     const entry = moisMap.get(key)
     if (!entry) continue
-    if (u.role === 'auxiliaire') entry.auxiliaires++
-    else if (u.role === 'beneficiaire') entry.beneficiaires++
+    if (u.role === 'accompagnante') entry.accompagnantes++
+    else if (u.role === 'accompagne') entry.accompagnes++
   }
 
   return Array.from(moisMap.entries()).map(([mois, data]) => ({
     mois,
     ...data,
-    total: data.auxiliaires + data.beneficiaires,
+    total: data.accompagnantes + data.accompagnes,
   }))
 }
 
 export async function getRepartitionRoles() {
   const supabase = await getAdmin()
 
-  const { count: auxiliaires } = await supabase
+  const { count: accompagnantes } = await supabase
     .from('users')
     .select('id', { count: 'exact', head: true })
-    .eq('role', 'auxiliaire')
+    .eq('role', 'accompagnante')
 
-  const { count: beneficiaires } = await supabase
+  const { count: accompagnes } = await supabase
     .from('users')
     .select('id', { count: 'exact', head: true })
-    .eq('role', 'beneficiaire')
+    .eq('role', 'accompagne')
 
   return {
-    auxiliaires: auxiliaires || 0,
-    beneficiaires: beneficiaires || 0,
-    total: (auxiliaires || 0) + (beneficiaires || 0),
+    accompagnantes: accompagnantes || 0,
+    accompagnes: accompagnes || 0,
+    total: (accompagnantes || 0) + (accompagnes || 0),
   }
 }
 
@@ -196,12 +196,12 @@ export async function getMrrDetail() {
     roleMap.set(u.id, u.role)
   }
 
-  // Segments: auxiliaire_mensuel, auxiliaire_annuel, beneficiaire_mensuel, beneficiaire_annuel
+  // Segments: accompagnante_mensuel, accompagnante_annuel, accompagne_mensuel, accompagne_annuel
   const segments = {
-    auxiliaire_mensuel: { count: 0, mrr: 0 },
-    auxiliaire_annuel: { count: 0, mrr: 0 },
-    beneficiaire_mensuel: { count: 0, mrr: 0 },
-    beneficiaire_annuel: { count: 0, mrr: 0 },
+    accompagnante_mensuel: { count: 0, mrr: 0 },
+    accompagnante_annuel: { count: 0, mrr: 0 },
+    accompagne_mensuel: { count: 0, mrr: 0 },
+    accompagne_annuel: { count: 0, mrr: 0 },
   }
 
   // Essai vs payants
@@ -209,7 +209,7 @@ export async function getMrrDetail() {
   let payants = 0
 
   for (const s of subs || []) {
-    const role = roleMap.get(s.user_id) || 'auxiliaire'
+    const role = roleMap.get(s.user_id) || 'accompagnante'
     const isAnnuel = s.plan_type === 'annual' || s.plan_type === 'annuel'
     const segmentKey = `${role}_${isAnnuel ? 'annuel' : 'mensuel'}` as keyof typeof segments
 

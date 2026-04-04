@@ -10,11 +10,11 @@ Il fait autorite sur les documents bmad en cas de contradiction.
 **Decision :** Tout ce qui concerne le tarif horaire, la modulation tarifaire PCH, la modulation tarifaire APA et le type aide_sociale est supprime du projet.
 
 **Perimetre supprime :**
-- Colonnes BDD : tarif_horaire, modulation_pch, modulation_apa (auxiliaires_profiles), tarif_min, tarif_max (annonces_auxiliaires), tarif_max, aide_sociale (annonces_beneficiaires), tarif (contrats), tarif_modulable_pch, tarif_modulable_apa (badges_cache)
+- Colonnes BDD : tarif_horaire, modulation_pch, modulation_apa (accompagnantes_profiles), tarif_min, tarif_max (annonces_accompagnantes), tarif_max, aide_sociale (annonces_accompagnes), tarif (contrats), tarif_modulable_pch, tarif_modulable_apa (badges_cache)
 - Type ENUM : aide_sociale_type
 - Trigger : trigger_update_badge_modulation + fonction update_badge_modulation_tarifaire()
 - Composant : step-tarification.tsx
-- Etape "Tarification" du formulaire onboarding auxiliaire
+- Etape "Tarification" du formulaire onboarding accompagnante
 
 **Regle :** Ne jamais reintroduire ces elements sauf demande explicite du client.
 
@@ -36,7 +36,7 @@ Il fait autorite sur les documents bmad en cas de contradiction.
 
 ## 2026-02-15 : Suppression fonctionnalite contrats PDF
 
-**Decision :** La generation automatique de contrats PDF entre auxiliaire et beneficiaire est supprimee du projet.
+**Decision :** La generation automatique de contrats PDF entre accompagnante et accompagne est supprimee du projet.
 
 **Perimetre supprime :**
 - Table BDD : contrats (supprimee, etait vide)

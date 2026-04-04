@@ -25,7 +25,7 @@ export default async function AdminDashboard() {
   const supabaseAdmin = await createClient({ serviceRole: true })
 
   const { data: pending } = await supabaseAdmin
-    .from('auxiliaires_profiles')
+    .from('accompagnantes_profiles')
     .select(`
       id,
       diplomes,
@@ -59,7 +59,7 @@ export default async function AdminDashboard() {
     ])
 
   const pctAux = repartition.total > 0
-    ? (repartition.auxiliaires / repartition.total) * 100
+    ? (repartition.accompagnantes / repartition.total) * 100
     : 0
 
   return (
@@ -67,11 +67,11 @@ export default async function AdminDashboard() {
         <h2 className="text-2xl font-bold text-gray-900 mb-6">Tableau de bord</h2>
 
         {/* Queue de validation */}
-        <h3 className="text-lg font-semibold mb-4">Auxiliaires en attente de validation</h3>
+        <h3 className="text-lg font-semibold mb-4">Accompagnantes en attente de validation</h3>
 
         {!pending || pending.length === 0 ? (
           <div className="bg-white rounded-xl border p-8 text-center text-gray-500 mb-8">
-            Aucun auxiliaire en attente de validation.
+            Aucune accompagnante en attente de validation.
           </div>
         ) : (
           <div className="space-y-3 mb-8">
@@ -148,8 +148,8 @@ export default async function AdminDashboard() {
               <thead className="bg-accent/20 border-b">
                 <tr>
                   <th className="text-left px-4 py-3 font-medium text-gray-500">Mois</th>
-                  <th className="text-right px-4 py-3 font-medium text-gray-500">Auxiliaires</th>
-                  <th className="text-right px-4 py-3 font-medium text-gray-500">Beneficiaires</th>
+                  <th className="text-right px-4 py-3 font-medium text-gray-500">Accompagnantes</th>
+                  <th className="text-right px-4 py-3 font-medium text-gray-500">Accompagnes</th>
                   <th className="text-right px-4 py-3 font-medium text-gray-500">Total</th>
                 </tr>
               </thead>
@@ -157,8 +157,8 @@ export default async function AdminDashboard() {
                 {inscriptions.map((row) => (
                   <tr key={row.mois} className="border-b last:border-0 hover:bg-accent/10">
                     <td className="px-4 py-3 font-medium">{formatMois(row.mois)}</td>
-                    <td className="px-4 py-3 text-right">{row.auxiliaires}</td>
-                    <td className="px-4 py-3 text-right">{row.beneficiaires}</td>
+                    <td className="px-4 py-3 text-right">{row.accompagnantes}</td>
+                    <td className="px-4 py-3 text-right">{row.accompagnes}</td>
                     <td className="px-4 py-3 text-right font-medium">{row.total}</td>
                   </tr>
                 ))}
@@ -166,28 +166,28 @@ export default async function AdminDashboard() {
             </table>
           </div>
 
-          {/* Repartition auxiliaires / beneficiaires */}
+          {/* Repartition accompagnantes / accompagnes */}
           <div className="bg-white rounded-xl border p-5 mb-8">
             <h4 className="font-medium text-gray-700 text-sm mb-3">Repartition des utilisateurs</h4>
             <div className="flex items-center gap-4 mb-2">
-              <span className="text-sm text-gray-600 w-28">Auxiliaires</span>
+              <span className="text-sm text-gray-600 w-28">Accompagnantes</span>
               <div className="flex-1 bg-gray-100 rounded-full h-6 overflow-hidden">
                 <div
                   className="bg-accent h-full rounded-full"
                   style={{ width: `${pctAux}%` }}
                 />
               </div>
-              <span className="text-sm font-medium w-20 text-right">{repartition.auxiliaires} ({pctAux.toFixed(0)}%)</span>
+              <span className="text-sm font-medium w-20 text-right">{repartition.accompagnantes} ({pctAux.toFixed(0)}%)</span>
             </div>
             <div className="flex items-center gap-4">
-              <span className="text-sm text-gray-600 w-28">Beneficiaires</span>
+              <span className="text-sm text-gray-600 w-28">Accompagnes</span>
               <div className="flex-1 bg-gray-100 rounded-full h-6 overflow-hidden">
                 <div
                   className="bg-gray-400 h-full rounded-full"
                   style={{ width: `${100 - pctAux}%` }}
                 />
               </div>
-              <span className="text-sm font-medium w-20 text-right">{repartition.beneficiaires} ({(100 - pctAux).toFixed(0)}%)</span>
+              <span className="text-sm font-medium w-20 text-right">{repartition.accompagnes} ({(100 - pctAux).toFixed(0)}%)</span>
             </div>
           </div>
 
@@ -238,24 +238,24 @@ export default async function AdminDashboard() {
               </thead>
               <tbody>
                 <tr className="border-b hover:bg-accent/10">
-                  <td className="px-4 py-3">Auxiliaire - Mensuel</td>
-                  <td className="px-4 py-3 text-right">{mrrDetail.segments.auxiliaire_mensuel.count}</td>
-                  <td className="px-4 py-3 text-right font-medium">{mrrDetail.segments.auxiliaire_mensuel.mrr.toFixed(2)} EUR</td>
+                  <td className="px-4 py-3">Accompagnante - Mensuel</td>
+                  <td className="px-4 py-3 text-right">{mrrDetail.segments.accompagnante_mensuel.count}</td>
+                  <td className="px-4 py-3 text-right font-medium">{mrrDetail.segments.accompagnante_mensuel.mrr.toFixed(2)} EUR</td>
                 </tr>
                 <tr className="border-b hover:bg-accent/10">
-                  <td className="px-4 py-3">Auxiliaire - Annuel</td>
-                  <td className="px-4 py-3 text-right">{mrrDetail.segments.auxiliaire_annuel.count}</td>
-                  <td className="px-4 py-3 text-right font-medium">{mrrDetail.segments.auxiliaire_annuel.mrr.toFixed(2)} EUR</td>
+                  <td className="px-4 py-3">Accompagnante - Annuel</td>
+                  <td className="px-4 py-3 text-right">{mrrDetail.segments.accompagnante_annuel.count}</td>
+                  <td className="px-4 py-3 text-right font-medium">{mrrDetail.segments.accompagnante_annuel.mrr.toFixed(2)} EUR</td>
                 </tr>
                 <tr className="border-b hover:bg-accent/10">
-                  <td className="px-4 py-3">Beneficiaire - Mensuel</td>
-                  <td className="px-4 py-3 text-right">{mrrDetail.segments.beneficiaire_mensuel.count}</td>
-                  <td className="px-4 py-3 text-right font-medium">{mrrDetail.segments.beneficiaire_mensuel.mrr.toFixed(2)} EUR</td>
+                  <td className="px-4 py-3">Accompagne - Mensuel</td>
+                  <td className="px-4 py-3 text-right">{mrrDetail.segments.accompagne_mensuel.count}</td>
+                  <td className="px-4 py-3 text-right font-medium">{mrrDetail.segments.accompagne_mensuel.mrr.toFixed(2)} EUR</td>
                 </tr>
                 <tr className="border-b last:border-0 hover:bg-accent/10">
-                  <td className="px-4 py-3">Beneficiaire - Annuel</td>
-                  <td className="px-4 py-3 text-right">{mrrDetail.segments.beneficiaire_annuel.count}</td>
-                  <td className="px-4 py-3 text-right font-medium">{mrrDetail.segments.beneficiaire_annuel.mrr.toFixed(2)} EUR</td>
+                  <td className="px-4 py-3">Accompagne - Annuel</td>
+                  <td className="px-4 py-3 text-right">{mrrDetail.segments.accompagne_annuel.count}</td>
+                  <td className="px-4 py-3 text-right font-medium">{mrrDetail.segments.accompagne_annuel.mrr.toFixed(2)} EUR</td>
                 </tr>
               </tbody>
             </table>

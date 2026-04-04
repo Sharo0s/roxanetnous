@@ -6,10 +6,10 @@ import { getOrCreateConversation } from '@/app/actions/messages'
 import { Button } from '@/components/ui/button'
 
 type Props = {
-  auxiliaireProfileId: string
+  accompagnanteProfileId: string
 }
 
-export function ContactButton({ auxiliaireProfileId }: Props) {
+export function ContactButton({ accompagnanteProfileId }: Props) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const router = useRouter()
@@ -18,7 +18,7 @@ export function ContactButton({ auxiliaireProfileId }: Props) {
     setLoading(true)
     setError(null)
 
-    const result = await getOrCreateConversation(auxiliaireProfileId)
+    const result = await getOrCreateConversation(accompagnanteProfileId)
 
     if (result.error) {
       setError(result.error)

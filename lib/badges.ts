@@ -11,7 +11,7 @@ export async function calculateAndUpdateBadges(userId: string): Promise<void> {
 
   // Verifier disponibilite
   const { data: profile } = await supabase
-    .from('auxiliaires_profiles')
+    .from('accompagnantes_profiles')
     .select('id, disponible')
     .eq('user_id', userId)
     .eq('validation_status', 'valide')
@@ -75,9 +75,9 @@ export async function calculateAndUpdateBadges(userId: string): Promise<void> {
 export async function calculateAllBadges(): Promise<{ processed: number }> {
   const supabase = await createClient({ serviceRole: true })
 
-  // Tous les auxiliaires valides
+  // Tous les accompagnantes valides
   const { data: profiles } = await supabase
-    .from('auxiliaires_profiles')
+    .from('accompagnantes_profiles')
     .select('user_id')
     .eq('validation_status', 'valide')
 

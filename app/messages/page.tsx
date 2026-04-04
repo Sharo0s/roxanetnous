@@ -1,8 +1,8 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { AuxiliaireHeader } from '@/components/layout/auxiliaire-header'
-import { BeneficiaireHeader } from '@/components/layout/beneficiaire-header'
+import { AccompagnanteHeader } from '@/components/layout/accompagnante-header'
+import { AccompagneHeader } from '@/components/layout/accompagne-header'
 import { getUnreadCount } from '@/lib/unread-count'
 
 export default async function MessagesPage() {
@@ -22,39 +22,39 @@ export default async function MessagesPage() {
   // Recuperer le profil selon le role
   let profileId: string | null = null
 
-  if (userData.role === 'auxiliaire') {
+  if (userData.role === 'accompagnante') {
     const { data: profile } = await supabase
-      .from('auxiliaires_profiles')
+      .from('accompagnantes_profiles')
       .select('id')
       .eq('user_id', user.id)
       .single()
     profileId = profile?.id || null
-  } else if (userData.role === 'beneficiaire') {
+  } else if (userData.role === 'accompagne') {
     const { data: profile } = await supabase
-      .from('beneficiaires_profiles')
+      .from('accompagnes_profiles')
       .select('id')
       .eq('user_id', user.id)
       .single()
     profileId = profile?.id || null
   }
 
-  if (!profileId) redirect(userData.role === 'auxiliaire' ? '/auxiliaire/dashboard' : '/beneficiaire/dashboard')
+  if (!profileId) redirect(userData.role === 'accompagnante' ? '/accompagnante/dashboard' : '/accompagne/dashboard')
 
   // Recuperer les conversations
-  const profileField = userData.role === 'auxiliaire' ? 'auxiliaire_id' : 'beneficiaire_id'
+  const profileField = userData.role === 'accompagnante' ? 'accompagnante_id' : 'accompagne_id'
 
   const { data: conversations } = await supabase
     .from('conversations')
     .select(`
       id,
       last_message_at,
-      auxiliaire_id,
-      beneficiaire_id,
-      auxiliaires_profiles:auxiliaire_id (
+      accompagnante_id,
+      accompagne_id,
+      accompagnantes_profiles:accompagnante_id (
         user_id,
         users:user_id (first_name, last_name)
       ),
-      beneficiaires_profiles:beneficiaire_id (
+      accompagnes_profiles:accompagne_id (
         user_id,
         users:user_id (first_name, last_name)
       )
@@ -76,13 +76,13 @@ export default async function MessagesPage() {
     }
   }
 
-  const dashboardUrl = userData.role === 'auxiliaire' ? '/auxiliaire/dashboard' : '/beneficiaire/dashboard'
+  const dashboardUrl = userData.role === 'accompagnante' ? '/accompagnante/dashboard' : '/accompagne/dashboard'
   const unreadCount = await getUnreadCount(user.id)
 
   return (
     <main className="min-h-screen kraft bg-kraft">
-      {userData.role === 'auxiliaire' ? (
-        <AuxiliaireHeader
+      {userData.role === 'accompagnante' ? (
+        <AccompagnanteHeader
           userId={user.id}
           unreadCount={unreadCount}
           firstName={userData.first_name}
@@ -90,7 +90,7 @@ export default async function MessagesPage() {
           currentPage="messages"
         />
       ) : (
-        <BeneficiaireHeader
+        <AccompagneHeader
           userId={user.id}
           unreadCount={unreadCount}
           firstName={userData.first_name}
@@ -105,18 +105,18 @@ export default async function MessagesPage() {
         {!conversations || conversations.length === 0 ? (
           <div className="bg-white rounded-xl border p-8 text-center">
             <p className="text-gray-500">Aucune conversation pour le moment.</p>
-            {userData.role === 'beneficiaire' && (
+            {userData.role === 'accompagne' && (
               <Link href="/recherche" className="text-sm text-black underline mt-2 inline-block">
-                Rechercher un auxiliaire
+                Rechercher une accompagnante
               </Link>
             )}
           </div>
         ) : (
           <div className="space-y-2">
             {conversations.map((conv: any) => {
-              const otherUser = userData.role === 'auxiliaire'
-                ? (conv.beneficiaires_profiles as any)?.users
-                : (conv.auxiliaires_profiles as any)?.users
+              const otherUser = userData.role === 'accompagnante'
+                ? (conv.accompagnes_profiles as any)?.users
+                : (conv.accompagnantes_profiles as any)?.users
               const unread = unreadCounts[conv.id] || 0
 
               return (

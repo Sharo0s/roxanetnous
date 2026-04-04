@@ -18,7 +18,7 @@ export default async function ValidationDetailPage({
   const supabaseAdmin = await createClient({ serviceRole: true })
 
   const { data: profile } = await supabaseAdmin
-    .from('auxiliaires_profiles')
+    .from('accompagnantes_profiles')
     .select(`
       *,
       users:user_id (first_name, last_name, email, phone, created_at)
@@ -81,7 +81,7 @@ export default async function ValidationDetailPage({
   await supabaseAdmin.from('admin_actions_log').insert({
     admin_id: user.id,
     action_type: 'consultation_justificatif',
-    target_type: 'auxiliaire',
+    target_type: 'accompagnante',
     target_id: id,
     details: { viewed_at: new Date().toISOString() },
   })

@@ -5,7 +5,7 @@ import { creerSignalement } from '@/app/actions/signalements'
 import { Button } from '@/components/ui/button'
 
 type Props = {
-  cibleType: 'user' | 'annonce_auxiliaire' | 'annonce_beneficiaire' | 'avis' | 'message'
+  cibleType: 'user' | 'annonce_accompagnante' | 'annonce_accompagne' | 'avis' | 'message'
   cibleId: string
 }
 

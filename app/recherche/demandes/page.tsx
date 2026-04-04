@@ -1,9 +1,9 @@
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import { SPECIALITES, DIPLOMES, EXPERIENCE_LEVELS } from '@/lib/constants'
-import { AuxiliaireHeader } from '@/components/layout/auxiliaire-header'
+import { AccompagnanteHeader } from '@/components/layout/accompagnante-header'
 import { getUnreadCount } from '@/lib/unread-count'
-import { ContactBeneficiaireButton } from '@/components/messages/contact-beneficiaire-button'
+import { ContactAccompagneButton } from '@/components/messages/contact-accompagne-button'
 
 type SearchParams = {
   ville?: string
@@ -11,7 +11,7 @@ type SearchParams = {
   page?: string
 }
 
-export default async function DemandesBeneficiairesPage({
+export default async function DemandesAccompagnesPage({
   searchParams,
 }: {
   searchParams: Promise<SearchParams>
@@ -32,7 +32,7 @@ export default async function DemandesBeneficiairesPage({
   }
 
   let query = supabase
-    .from('annonces_beneficiaires')
+    .from('annonces_accompagnes')
     .select('*')
     .eq('status', 'publiee')
     .order('published_at', { ascending: false })
@@ -56,8 +56,8 @@ export default async function DemandesBeneficiairesPage({
 
   return (
     <main className="min-h-screen kraft bg-kraft">
-      {userData?.role === 'auxiliaire' && user ? (
-        <AuxiliaireHeader
+      {userData?.role === 'accompagnante' && user ? (
+        <AccompagnanteHeader
           userId={user.id}
           unreadCount={unreadCount}
           firstName={userData.first_name}
@@ -73,7 +73,7 @@ export default async function DemandesBeneficiairesPage({
             <div className="flex items-center gap-4">
               {userData ? (
                 <Link
-                  href="/beneficiaire/dashboard"
+                  href="/accompagne/dashboard"
                   className="text-sm text-gray-600 hover:text-black"
                 >
                   Mon espace
@@ -89,7 +89,7 @@ export default async function DemandesBeneficiairesPage({
       )}
 
       <div className="max-w-6xl mx-auto px-4 py-8 relative z-10">
-        <h2 className="text-2xl font-bold text-gray-900 mb-6">Demandes des beneficiaires</h2>
+        <h2 className="text-2xl font-bold text-gray-900 mb-6">Demandes des accompagnes</h2>
 
         {!annonces || annonces.length === 0 ? (
           <div className="bg-white rounded-xl border p-8 text-center">
@@ -138,8 +138,8 @@ export default async function DemandesBeneficiairesPage({
                     <span>{annonce.niveau_dependance === 'besoins_plus' ? 'Besoins +' : annonce.niveau_dependance === 'besoins_plus_plus' ? 'Besoins ++' : 'Besoins +++'}</span>
                   </div>
 
-                  {userData?.role === 'auxiliaire' && (
-                    <ContactBeneficiaireButton beneficiaireProfileId={annonce.beneficiaire_id} />
+                  {userData?.role === 'accompagnante' && (
+                    <ContactAccompagneButton accompagneProfileId={annonce.accompagne_id} />
                   )}
                 </div>
               )

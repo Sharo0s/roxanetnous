@@ -6,15 +6,15 @@ import { InfiniteAnnoncesGrid } from '@/components/recherche/infinite-annonces-g
 import { getBadges } from '@/lib/badges'
 import { BadgesDisplay } from '@/components/badges-display'
 import { FavoriButton } from '@/components/recherche/favori-button'
-import { AuxiliaireHeader } from '@/components/layout/auxiliaire-header'
-import { BeneficiaireHeader } from '@/components/layout/beneficiaire-header'
+import { AccompagnanteHeader } from '@/components/layout/accompagnante-header'
+import { AccompagneHeader } from '@/components/layout/accompagne-header'
 import { getUnreadCount } from '@/lib/unread-count'
 import { calculateMatchScore } from '@/lib/matching'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: 'Rechercher un(e) accompagnant(e) de vie',
-  description: 'Trouvez un auxiliaire de vie verifie pres de chez vous. Filtrez par specialite, localisation et experience.',
+  description: 'Trouvez une accompagnante de vie verifiee pres de chez vous. Filtrez par specialite, localisation et experience.',
 }
 
 type SearchParams = {
@@ -45,14 +45,14 @@ export default async function RecherchePage({
     userData = data
   }
 
-  // Requete les annonces auxiliaires publiees
+  // Requete les annonces accompagnantes publiees
   // On utilise le service role pour permettre l'acces aux visiteurs non connectes
   const supabaseAdmin = await createClient({ serviceRole: true })
   let query = supabaseAdmin
-    .from('annonces_auxiliaires')
+    .from('annonces_accompagnantes')
     .select(`
       *,
-      auxiliaires_profiles!inner (
+      accompagnantes_profiles!inner (
         diplomes,
         experience,
         specialites,
@@ -65,7 +65,7 @@ export default async function RecherchePage({
       )
     `)
     .eq('status', 'publiee')
-    .eq('auxiliaires_profiles.validation_status', 'valide')
+    .eq('accompagnantes_profiles.validation_status', 'valide')
     .order('published_at', { ascending: false })
 
   // Filtre par ville
@@ -77,21 +77,21 @@ export default async function RecherchePage({
   if (params.specialite) {
     const specs = params.specialite.split(',').filter(Boolean)
     if (specs.length > 0) {
-      query = query.overlaps('auxiliaires_profiles.specialites', specs)
+      query = query.overlaps('accompagnantes_profiles.specialites', specs)
     }
   }
 
   // Filtre par experience
   if (params.experience) {
-    query = query.eq('auxiliaires_profiles.experience', params.experience)
+    query = query.eq('accompagnantes_profiles.experience', params.experience)
   }
 
   const { data: rawAnnonces } = await query
 
-  // Filter to only show auxiliaires with active subscription
+  // Filter to only show accompagnantes with active subscription
   let annonces = rawAnnonces || []
   if (annonces.length > 0) {
-    const userIds = annonces.map((a: any) => a.auxiliaires_profiles?.user_id).filter(Boolean)
+    const userIds = annonces.map((a: any) => a.accompagnantes_profiles?.user_id).filter(Boolean)
     const { data: activeSubs } = await supabaseAdmin
       .from('subscriptions')
       .select('user_id')
@@ -100,14 +100,14 @@ export default async function RecherchePage({
       .gte('current_period_end', new Date().toISOString())
 
     const activeUserIds = new Set((activeSubs || []).map((s) => s.user_id))
-    annonces = annonces.filter((a: any) => activeUserIds.has(a.auxiliaires_profiles?.user_id))
+    annonces = annonces.filter((a: any) => activeUserIds.has(a.accompagnantes_profiles?.user_id))
   }
 
   // Fetch des badges
-  const badgeUserIds = annonces.map((a: any) => a.auxiliaires_profiles?.user_id).filter(Boolean)
+  const badgeUserIds = annonces.map((a: any) => a.accompagnantes_profiles?.user_id).filter(Boolean)
   const badgesMap = await getBadges(badgeUserIds)
 
-  // Matching pour les beneficiaires avec annonce publiee
+  // Matching pour les accompagnes avec annonce publiee
   type ScoredAnnonce = {
     annonce: any
     score: number
@@ -118,18 +118,18 @@ export default async function RecherchePage({
 
   let allBenAnnonces: any[] = []
 
-  if (userData?.role === 'beneficiaire' && user) {
+  if (userData?.role === 'accompagne' && user) {
     const { data: benProfile } = await supabase
-      .from('beneficiaires_profiles')
+      .from('accompagnes_profiles')
       .select('id')
       .eq('user_id', user.id)
       .single()
 
     if (benProfile) {
       const { data: mesAnnonces } = await supabase
-        .from('annonces_beneficiaires')
+        .from('annonces_accompagnes')
         .select('id, titre, specialites_recherchees, ville, code_postal, latitude, longitude, diplome_requis, experience_min, disponibilites')
-        .eq('beneficiaire_id', benProfile.id)
+        .eq('accompagne_id', benProfile.id)
         .eq('status', 'publiee')
         .order('created_at', { ascending: false })
 
@@ -150,7 +150,7 @@ export default async function RecherchePage({
         }
 
         matchResults = annonces.map((a: any) => {
-          const auxProfile = a.auxiliaires_profiles
+          const auxProfile = a.accompagnantes_profiles
           const { score, details } = calculateMatchScore(
             {
               specialites: auxProfile.specialites || [],
@@ -179,26 +179,26 @@ export default async function RecherchePage({
   if (user) {
     const { data: favs } = await supabase
       .from('favoris')
-      .select('annonce_auxiliaire_id')
+      .select('annonce_accompagnante_id')
       .eq('user_id', user.id)
-      .not('annonce_auxiliaire_id', 'is', null)
-    favorisIds = (favs || []).map((f) => f.annonce_auxiliaire_id).filter(Boolean)
+      .not('annonce_accompagnante_id', 'is', null)
+    favorisIds = (favs || []).map((f) => f.annonce_accompagnante_id).filter(Boolean)
   }
 
   const unreadCount = user ? await getUnreadCount(user.id) : 0
 
   return (
     <main className="min-h-screen kraft bg-kraft">
-      {userData?.role === 'auxiliaire' && user ? (
-        <AuxiliaireHeader
+      {userData?.role === 'accompagnante' && user ? (
+        <AccompagnanteHeader
           userId={user.id}
           unreadCount={unreadCount}
           firstName={userData.first_name}
           lastName={userData.last_name}
           currentPage="other"
         />
-      ) : userData?.role === 'beneficiaire' && user ? (
-        <BeneficiaireHeader
+      ) : userData?.role === 'accompagne' && user ? (
+        <AccompagneHeader
           userId={user.id}
           unreadCount={unreadCount}
           firstName={userData.first_name}
@@ -219,7 +219,7 @@ export default async function RecherchePage({
       )}
 
       <div className="max-w-6xl mx-auto px-4 py-8 relative z-10">
-        <h2 className="text-2xl font-bold text-gray-900 mb-6">Trouver un auxiliaire de vie</h2>
+        <h2 className="text-2xl font-bold text-gray-900 mb-6">Trouver une accompagnante de vie</h2>
 
         <SearchFilters
           currentVille={params.ville || ''}
@@ -260,7 +260,7 @@ export default async function RecherchePage({
             </div>
             <div className="space-y-3">
               {matchResults.map(({ annonce }) => {
-                const profile = annonce.auxiliaires_profiles
+                const profile = annonce.accompagnantes_profiles
                 const u = profile?.users
                 const diplomeLabel = (profile?.diplomes as string[] || []).map((d: string) => DIPLOMES.find((dp) => dp.value === d)?.label || d).join(', ')
                 const expLabel = EXPERIENCE_LEVELS.find((e) => e.value === profile?.experience)?.label || profile?.experience
@@ -275,7 +275,7 @@ export default async function RecherchePage({
                       <div className="absolute top-3 right-3 z-10">
                         <FavoriButton
                           annonceId={annonce.id}
-                          type="auxiliaire"
+                          type="accompagnante"
                           initialIsFavori={favorisIds.includes(annonce.id)}
                         />
                       </div>
@@ -335,7 +335,7 @@ export default async function RecherchePage({
 
         {matchResults.length > 0 && (
           <div className="border-t border-gray-300 mt-8 mb-6 pt-6">
-            <h3 className="text-lg font-semibold text-gray-900">Tous les auxiliaires</h3>
+            <h3 className="text-lg font-semibold text-gray-900">Tous les accompagnantes</h3>
           </div>
         )}
 
@@ -344,7 +344,7 @@ export default async function RecherchePage({
             <p className="text-gray-500">{(params.ville || params.specialite || params.experience) ? 'Aucun resultat pour votre recherche.' : 'Lancez votre recherche.'}</p>
             {(params.ville || params.specialite || params.experience) && (
               <Link href="/recherche" className="text-sm text-black underline mt-2 inline-block">
-                Voir tous les auxiliaires
+                Voir tous les accompagnantes
               </Link>
             )}
           </div>

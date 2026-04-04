@@ -6,16 +6,16 @@ const MAX_NOTIFICATIONS = 20
 const MINIMUM_SCORE = 50
 
 export async function notifyMatchingUsers(params: {
-  annonceType: 'auxiliaire' | 'beneficiaire'
+  annonceType: 'accompagnante' | 'accompagne'
   annonceId: string
 }): Promise<void> {
   const supabase = await createClient({ serviceRole: true })
 
-  if (params.annonceType === 'beneficiaire') {
-    // Nouvelle annonce beneficiaire -> notifier les auxiliaires correspondants
+  if (params.annonceType === 'accompagne') {
+    // Nouvelle annonce accompagne -> notifier les accompagnantes correspondants
     const { data: annonce } = await supabase
-      .from('annonces_beneficiaires')
-      .select('id, titre, specialites_recherchees, ville, code_postal, latitude, longitude, diplome_requis, experience_min, disponibilites, beneficiaire_id')
+      .from('annonces_accompagnes')
+      .select('id, titre, specialites_recherchees, ville, code_postal, latitude, longitude, diplome_requis, experience_min, disponibilites, accompagne_id')
       .eq('id', params.annonceId)
       .single()
 
@@ -32,15 +32,15 @@ export async function notifyMatchingUsers(params: {
       longitude: annonce.longitude ? Number(annonce.longitude) : undefined,
     }
 
-    // Recuperer les auxiliaires valides avec abonnement actif
+    // Recuperer les accompagnantes valides avec abonnement actif
     const { data: auxProfiles } = await supabase
-      .from('auxiliaires_profiles')
+      .from('accompagnantes_profiles')
       .select('user_id, specialites, ville, code_postal, experience, diplomes, disponibilites, rayon_km, latitude, longitude')
       .eq('validation_status', 'valide')
 
     if (!auxProfiles || auxProfiles.length === 0) return
 
-    // Filtrer les auxiliaires avec abonnement actif
+    // Filtrer les accompagnantes avec abonnement actif
     const userIds = auxProfiles.map((p) => p.user_id).filter(Boolean)
     const { data: activeSubs } = await supabase
       .from('subscriptions')
@@ -86,7 +86,7 @@ export async function notifyMatchingUsers(params: {
         await sendMatchingNotificationEmail({
           email: userData.email,
           firstName: userData.first_name || '',
-          type: 'nouvelle_annonce_beneficiaire',
+          type: 'nouvelle_annonce_accompagne',
           annonceTitle: annonce.titre,
           annonceId: annonce.id,
           score: match.score,
@@ -95,12 +95,12 @@ export async function notifyMatchingUsers(params: {
       }
     }
   } else {
-    // Nouvelle annonce auxiliaire -> notifier les beneficiaires qui ont des annonces correspondantes
+    // Nouvelle annonce accompagnante -> notifier les accompagnes qui ont des annonces correspondantes
     const { data: auxAnnonce } = await supabase
-      .from('annonces_auxiliaires')
+      .from('annonces_accompagnantes')
       .select(`
         id, titre, ville, code_postal, rayon_km, disponibilites,
-        auxiliaires_profiles:auxiliaire_id!inner (
+        accompagnantes_profiles:accompagnante_id!inner (
           user_id, specialites, ville, code_postal, experience, diplomes,
           disponibilites, rayon_km, latitude, longitude
         )
@@ -110,12 +110,12 @@ export async function notifyMatchingUsers(params: {
 
     if (!auxAnnonce) return
 
-    const auxProfile = auxAnnonce.auxiliaires_profiles as any
+    const auxProfile = auxAnnonce.accompagnantes_profiles as any
 
-    // Recuperer les annonces beneficiaires publiees
+    // Recuperer les annonces accompagnes publiees
     const { data: benAnnonces } = await supabase
-      .from('annonces_beneficiaires')
-      .select('id, titre, specialites_recherchees, ville, code_postal, latitude, longitude, diplome_requis, experience_min, disponibilites, beneficiaire_id')
+      .from('annonces_accompagnes')
+      .select('id, titre, specialites_recherchees, ville, code_postal, latitude, longitude, diplome_requis, experience_min, disponibilites, accompagne_id')
       .eq('status', 'publiee')
 
     if (!benAnnonces || benAnnonces.length === 0) return
@@ -132,7 +132,7 @@ export async function notifyMatchingUsers(params: {
       longitude: auxProfile.longitude ? Number(auxProfile.longitude) : undefined,
     }
 
-    // Calculer les scores pour chaque annonce beneficiaire
+    // Calculer les scores pour chaque annonce accompagne
     const matches = benAnnonces
       .map((ann) => {
         const criteria = {
@@ -146,23 +146,23 @@ export async function notifyMatchingUsers(params: {
           longitude: ann.longitude ? Number(ann.longitude) : undefined,
         }
         const { score } = calculateMatchScore(auxProfileData, criteria)
-        return { annonceId: ann.id, beneficiaireId: ann.beneficiaire_id, titre: ann.titre, score }
+        return { annonceId: ann.id, accompagneId: ann.accompagne_id, titre: ann.titre, score }
       })
       .filter((m) => m.score >= MINIMUM_SCORE)
       .sort((a, b) => b.score - a.score)
       .slice(0, MAX_NOTIFICATIONS)
 
-    // Recuperer les user_id des beneficiaires
-    const beneficiaireIds = [...new Set(matches.map((m) => m.beneficiaireId))]
+    // Recuperer les user_id des accompagnes
+    const accompagneIds = [...new Set(matches.map((m) => m.accompagneId))]
     const { data: benProfiles } = await supabase
-      .from('beneficiaires_profiles')
+      .from('accompagnes_profiles')
       .select('id, user_id')
-      .in('id', beneficiaireIds)
+      .in('id', accompagneIds)
 
     const benUserMap = new Map((benProfiles || []).map((p) => [p.id, p.user_id]))
 
     for (const match of matches) {
-      const userId = benUserMap.get(match.beneficiaireId)
+      const userId = benUserMap.get(match.accompagneId)
       if (!userId) continue
 
       const { data: userData } = await supabase
@@ -175,7 +175,7 @@ export async function notifyMatchingUsers(params: {
         await sendMatchingNotificationEmail({
           email: userData.email,
           firstName: userData.first_name || '',
-          type: 'nouveau_profil_auxiliaire',
+          type: 'nouveau_profil_accompagnante',
           annonceTitle: auxAnnonce.titre,
           annonceId: auxAnnonce.id,
           score: match.score,

@@ -38,9 +38,9 @@
 
 **À implémenter :**
 1. Page `/login` (connexion)
-2. Page `/register` (choix rôle: auxiliaire ou bénéficiaire)
-3. Page `/register/auxiliaire` (inscription auxiliaire simple)
-4. Page `/register/beneficiaire` (inscription bénéficiaire simple)
+2. Page `/register` (choix rôle: accompagnante ou bénéficiaire)
+3. Page `/register/accompagnante` (inscription accompagnante simple)
+4. Page `/register/accompagne` (inscription bénéficiaire simple)
 5. Server actions pour auth (signup, login, logout)
 
 **Fichiers à créer :**
@@ -48,8 +48,8 @@
 app/(auth)/
   ├── login/page.tsx
   ├── register/page.tsx
-  ├── register/auxiliaire/page.tsx
-  └── register/beneficiaire/page.tsx
+  ├── register/accompagnante/page.tsx
+  └── register/accompagne/page.tsx
 
 app/actions/
   └── auth.ts
@@ -57,9 +57,9 @@ app/actions/
 
 ---
 
-### Phase 2 : Inscription Auxiliaire Multi-étapes (4-5h)
+### Phase 2 : Inscription Accompagnante Multi-étapes (4-5h)
 
-**Objectif :** Formulaire complet d'inscription auxiliaire avec upload de justificatifs
+**Objectif :** Formulaire complet d'inscription accompagnante avec upload de justificatifs
 
 **À implémenter :**
 1. Formulaire multi-étapes (6 étapes)
@@ -72,10 +72,10 @@ app/actions/
 
 **Fichiers à créer :**
 ```
-app/auxiliaire/
+app/accompagnante/
   └── onboarding/page.tsx
 
-components/auxiliaire/
+components/accompagnante/
   ├── OnboardingStep1.tsx
   ├── OnboardingStep2.tsx
   ├── OnboardingStep3.tsx
@@ -84,18 +84,18 @@ components/auxiliaire/
   └── OnboardingStep6.tsx
 
 app/actions/
-  └── auxiliaire.ts
+  └── accompagnante.ts
 ```
 
 ---
 
 ### Phase 3 : Dashboard Admin (3-4h)
 
-**Objectif :** Interface pour valider les auxiliaires
+**Objectif :** Interface pour valider les accompagnantes
 
 **À implémenter :**
-1. Liste des auxiliaires en attente
-2. Page de détail auxiliaire avec justificatifs
+1. Liste des accompagnantes en attente
+2. Page de détail accompagnante avec justificatifs
 3. Actions : Valider / Refuser / Demander complément
 4. Envoi d'emails selon décision
 
@@ -106,8 +106,8 @@ app/admin/
   └── validation/[id]/page.tsx
 
 components/admin/
-  ├── AuxiliairesList.tsx
-  ├── AuxiliaireDetail.tsx
+  ├── AccompagnantesList.tsx
+  ├── AccompagnanteDetail.tsx
   └── ValidationActions.tsx
 
 app/actions/
@@ -146,26 +146,26 @@ lib/stripe/
 **Objectif :** Permettre la recherche et création d'annonces
 
 **À implémenter :**
-1. Page de recherche auxiliaires (pour bénéficiaires)
-2. Formulaire création annonce auxiliaire
+1. Page de recherche accompagnantes (pour bénéficiaires)
+2. Formulaire création annonce accompagnante
 3. Formulaire création annonce bénéficiaire
 4. Page détail annonce avec badge système
 5. Système de favoris
 
 **Fichiers à créer :**
 ```
-app/beneficiaire/
+app/accompagne/
   ├── recherche/page.tsx
   ├── annonces/page.tsx
   └── annonces/nouvelle/page.tsx
 
-app/auxiliaire/
+app/accompagnante/
   ├── annonces/page.tsx
   └── annonces/nouvelle/page.tsx
 
 components/
   ├── AnnonceCard.tsx
-  ├── AuxiliaireCard.tsx
+  ├── AccompagnanteCard.tsx
   └── SearchFilters.tsx
 ```
 
@@ -201,7 +201,7 @@ app/api/cron/
 
 ### Phase 7 : Messagerie Real-time (3-4h)
 
-**Objectif :** Chat entre auxiliaires et bénéficiaires
+**Objectif :** Chat entre accompagnantes et bénéficiaires
 
 **À implémenter :**
 1. Liste des conversations
@@ -241,7 +241,7 @@ components/messages/
 3. 🚀 Créer les pages d'authentification (login, register)
 
 ### Demain (4-5h)
-1. 🚀 Formulaire inscription auxiliaire multi-étapes
+1. 🚀 Formulaire inscription accompagnante multi-étapes
 2. 🚀 Upload de justificatifs
 
 ### Après-demain (3-4h)
@@ -259,8 +259,8 @@ components/messages/
 
 ### Priorités
 1. **Authentification** = Bloquant pour tout le reste
-2. **Inscription auxiliaire** = Permet de tester le flow complet
-3. **Dashboard admin** = Permet de valider les auxiliaires
+2. **Inscription accompagnante** = Permet de tester le flow complet
+3. **Dashboard admin** = Permet de valider les accompagnantes
 4. **Stripe** = Permet de monétiser
 5. **Reste** = Selon tes priorités
 

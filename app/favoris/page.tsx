@@ -2,8 +2,8 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { SPECIALITES, DIPLOMES, EXPERIENCE_LEVELS } from '@/lib/constants'
-import { AuxiliaireHeader } from '@/components/layout/auxiliaire-header'
-import { BeneficiaireHeader } from '@/components/layout/beneficiaire-header'
+import { AccompagnanteHeader } from '@/components/layout/accompagnante-header'
+import { AccompagneHeader } from '@/components/layout/accompagne-header'
 import { getUnreadCount } from '@/lib/unread-count'
 
 export default async function FavorisPage() {
@@ -24,17 +24,17 @@ export default async function FavorisPage() {
     .from('favoris')
     .select(`
       id,
-      annonce_auxiliaire_id,
-      annonce_beneficiaire_id,
+      annonce_accompagnante_id,
+      annonce_accompagne_id,
       created_at,
-      annonces_auxiliaires:annonce_auxiliaire_id (
+      annonces_accompagnantes:annonce_accompagnante_id (
         id, description, ville, code_postal, status,
-        auxiliaires_profiles:auxiliaire_id (
+        accompagnantes_profiles:accompagnante_id (
           diplomes, experience, specialites,
           users:user_id (first_name, last_name)
         )
       ),
-      annonces_beneficiaires:annonce_beneficiaire_id (
+      annonces_accompagnes:annonce_accompagne_id (
         id, titre, description, ville, code_postal, status,
         specialites_recherchees, date_debut
       )
@@ -46,8 +46,8 @@ export default async function FavorisPage() {
 
   return (
     <main className="min-h-screen kraft bg-kraft">
-      {userData.role === 'auxiliaire' ? (
-        <AuxiliaireHeader
+      {userData.role === 'accompagnante' ? (
+        <AccompagnanteHeader
           userId={user.id}
           unreadCount={unreadCount}
           firstName={userData.first_name}
@@ -55,7 +55,7 @@ export default async function FavorisPage() {
           currentPage="other"
         />
       ) : (
-        <BeneficiaireHeader
+        <AccompagneHeader
           userId={user.id}
           unreadCount={unreadCount}
           firstName={userData.first_name}
@@ -71,15 +71,15 @@ export default async function FavorisPage() {
           <div className="bg-white rounded-xl border p-8 text-center">
             <p className="text-gray-500 mb-4">Aucun favori pour le moment.</p>
             <Link href="/recherche" className="text-sm text-black underline">
-              Rechercher des auxiliaires
+              Rechercher des accompagnantes
             </Link>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {favoris.map((fav: any) => {
-              if (fav.annonces_auxiliaires) {
-                const annonce = fav.annonces_auxiliaires
-                const profile = annonce.auxiliaires_profiles
+              if (fav.annonces_accompagnantes) {
+                const annonce = fav.annonces_accompagnantes
+                const profile = annonce.accompagnantes_profiles
                 const u = profile?.users
                 const diplomeLabel = (profile?.diplomes as string[] || []).map((d: string) => DIPLOMES.find((dp) => dp.value === d)?.label || d).join(', ')
 
@@ -113,8 +113,8 @@ export default async function FavorisPage() {
                 )
               }
 
-              if (fav.annonces_beneficiaires) {
-                const annonce = fav.annonces_beneficiaires
+              if (fav.annonces_accompagnes) {
+                const annonce = fav.annonces_accompagnes
                 const specLabels = (annonce.specialites_recherchees as string[] || []).slice(0, 3).map(
                   (s: string) => SPECIALITES.find((sp) => sp.value === s)?.label || s
                 )

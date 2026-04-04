@@ -5,13 +5,13 @@ export async function getUnreadCount(userId: string): Promise<number> {
 
   // Get conversation IDs where this user participates
   const { data: auxProfile } = await supabase
-    .from('auxiliaires_profiles')
+    .from('accompagnantes_profiles')
     .select('id')
     .eq('user_id', userId)
     .single()
 
   const { data: benProfile } = await supabase
-    .from('beneficiaires_profiles')
+    .from('accompagnes_profiles')
     .select('id')
     .eq('user_id', userId)
     .single()
@@ -22,9 +22,9 @@ export async function getUnreadCount(userId: string): Promise<number> {
   // Get conversations for this user
   let query = supabase.from('conversations').select('id')
   if (auxProfile) {
-    query = query.eq('auxiliaire_id', auxProfile.id)
+    query = query.eq('accompagnante_id', auxProfile.id)
   } else {
-    query = query.eq('beneficiaire_id', benProfile!.id)
+    query = query.eq('accompagne_id', benProfile!.id)
   }
   const { data: conversations } = await query
 

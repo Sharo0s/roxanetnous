@@ -9,7 +9,7 @@ export type ValidationResult = {
   success?: boolean
 }
 
-export async function validateAuxiliaire(
+export async function validateAccompagnante(
   profileId: string,
   decision: 'valide' | 'refuse' | 'a_completer',
   motif?: string
@@ -47,7 +47,7 @@ export async function validateAuxiliaire(
   }
 
   const { error: updateError } = await supabase
-    .from('auxiliaires_profiles')
+    .from('accompagnantes_profiles')
     .update(updateData)
     .eq('id', profileId)
 
@@ -61,7 +61,7 @@ export async function validateAuxiliaire(
   await supabaseAdmin.from('admin_actions_log').insert({
     admin_id: user.id,
     action_type: decision,
-    target_type: 'auxiliaire',
+    target_type: 'accompagnante',
     target_id: profileId,
     details: { motif: motif || null, decision },
   })
@@ -70,7 +70,7 @@ export async function validateAuxiliaire(
   void (async () => {
     try {
       const { data: auxProfile } = await supabaseAdmin
-        .from('auxiliaires_profiles')
+        .from('accompagnantes_profiles')
         .select('user_id')
         .eq('id', profileId)
         .single()

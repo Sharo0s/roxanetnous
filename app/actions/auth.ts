@@ -18,7 +18,7 @@ export async function signup(formData: FormData): Promise<AuthResult> {
   const password = formData.get('password') as string
   const firstName = formData.get('firstName') as string
   const lastName = formData.get('lastName') as string
-  const role = formData.get('role') as 'auxiliaire' | 'beneficiaire'
+  const role = formData.get('role') as 'accompagnante' | 'accompagne'
 
   if (!email || !password || !firstName || !lastName || !role) {
     return { error: 'Tous les champs sont requis.' }
@@ -138,10 +138,10 @@ export async function login(formData: FormData): Promise<AuthResult> {
 
   if (role === 'admin') {
     redirect('/admin')
-  } else if (role === 'auxiliaire') {
-    redirect('/auxiliaire/dashboard')
+  } else if (role === 'accompagnante') {
+    redirect('/accompagnante/dashboard')
   } else {
-    redirect('/beneficiaire/dashboard')
+    redirect('/accompagne/dashboard')
   }
 }
 
@@ -211,7 +211,7 @@ export async function deleteAccount(): Promise<AuthResult> {
     // 2. Delete Storage files (justificatifs)
     try {
       const { data: profile } = await supabaseAdmin
-        .from('auxiliaires_profiles')
+        .from('accompagnantes_profiles')
         .select('justificatif_identite_url, justificatif_diplome_url, justificatifs_autres')
         .eq('user_id', user.id)
         .single()

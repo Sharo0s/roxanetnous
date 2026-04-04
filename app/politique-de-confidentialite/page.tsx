@@ -26,7 +26,7 @@ export default function PolitiqueConfidentialitePage() {
             <ul className="list-disc pl-5 mt-2 space-y-1">
               <li>Donnees d&apos;identification : nom, prenom, adresse email, telephone</li>
               <li>Donnees de profil : ville, code postal, adresse, specialites, diplomes, experience</li>
-              <li>Documents justificatifs : piece d&apos;identite, diplome (pour les auxiliaires)</li>
+              <li>Documents justificatifs : piece d&apos;identite, diplome (pour les accompagnantes)</li>
               <li>Donnees d&apos;utilisation : annonces, messages, avis, favoris</li>
               <li>Donnees de paiement : gerees par Stripe (nous ne stockons pas les numeros de carte)</li>
             </ul>
@@ -36,8 +36,8 @@ export default function PolitiqueConfidentialitePage() {
             <h2 className="text-lg font-semibold text-black mb-2">Finalites du traitement</h2>
             <ul className="list-disc pl-5 space-y-1">
               <li>Creation et gestion de votre compte utilisateur</li>
-              <li>Mise en relation entre auxiliaires de vie et beneficiaires</li>
-              <li>Verification des qualifications des auxiliaires</li>
+              <li>Mise en relation entre accompagnantes de vie et accompagnes</li>
+              <li>Verification des qualifications des accompagnantes</li>
               <li>Gestion des abonnements et paiements</li>
               <li>Envoi de notifications liees au service (messages, validation de profil)</li>
               <li>Moderation et securite de la plateforme</li>

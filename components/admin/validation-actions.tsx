@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { validateAuxiliaire } from '@/app/actions/admin'
+import { validateAccompagnante } from '@/app/actions/admin'
 import { Button } from '@/components/ui/button'
 
 type Props = {
@@ -24,7 +24,7 @@ export function ValidationActions({ profileId }: Props) {
 
     setError(null)
     setLoading(true)
-    const result = await validateAuxiliaire(profileId, action, motif || undefined)
+    const result = await validateAccompagnante(profileId, action, motif || undefined)
     if (result?.error) {
       setError(result.error)
       setLoading(false)
@@ -66,7 +66,7 @@ export function ValidationActions({ profileId }: Props) {
 
       {action === 'valide' ? (
         <p className="text-sm text-gray-600 mb-4">
-          Ce profil sera marque comme valide. L'auxiliaire pourra acceder a la plateforme.
+          Ce profil sera marque comme valide. L'accompagnante pourra acceder a la plateforme.
         </p>
       ) : (
         <div className="mb-4">
