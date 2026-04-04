@@ -274,7 +274,7 @@ export default async function RecherchePage({
           <div className="mt-6 mb-8">
             <div className="flex items-center justify-between mb-4">
               <div>
-                <h3 className="text-lg font-semibold text-gray-900">Les profils que nous vous recommandons</h3>
+                <h3 className="text-lg font-semibold text-gray-900">Les accompagnantes que nous vous recommandons</h3>
                 {allBenAnnonces.length > 1 ? (
                   <form className="flex items-center gap-2 mt-1">
                     <label className="text-xs text-gray-500">Annonce de reference :</label>
