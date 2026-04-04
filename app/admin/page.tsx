@@ -11,6 +11,7 @@ import {
   getDernieresAnnulations,
 } from '@/lib/admin-stats'
 import { DashboardTabs } from '@/components/admin/dashboard-tabs'
+import { PeriodSelector } from '@/components/admin/period-selector'
 
 function formatMois(mois: string) {
   const [year, month] = mois.split('-')
@@ -67,9 +68,6 @@ export default async function AdminDashboard() {
   const pctAux = repartition.total > 0
     ? (repartition.accompagnantes / repartition.total) * 100
     : 0
-
-  const inscriptionsRecentes = inscriptions
-  const activiteRecente = activite
 
   const moisEnCours = activite.length > 0 ? activite[activite.length - 1] : null
 
@@ -202,65 +200,67 @@ export default async function AdminDashboard() {
           ),
 
           inscriptions: (
-            <div className="bg-white rounded-xl border overflow-hidden">
-              <div className="px-4 py-3 border-b bg-accent/20">
-                <h4 className="font-medium text-gray-700 text-sm">Inscriptions (12 derniers mois)</h4>
-              </div>
-              <table className="w-full text-sm">
-                <thead className="bg-accent/20 border-b">
-                  <tr>
-                    <th className="text-left px-4 py-3 font-medium text-gray-500">Mois</th>
-                    <th className="text-right px-4 py-3 font-medium text-gray-500">Accompagnantes</th>
-                    <th className="text-right px-4 py-3 font-medium text-gray-500">Accompagnes</th>
-                    <th className="text-right px-4 py-3 font-medium text-gray-500">Total</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {inscriptionsRecentes.map((row) => {
-                    const isZero = row.total === 0
-                    return (
-                      <tr key={row.mois} className={`border-b last:border-0 hover:bg-accent/10 ${isZero ? 'text-gray-300' : ''}`}>
-                        <td className={`px-4 py-3 ${isZero ? '' : 'font-medium'}`}>{formatMois(row.mois)}</td>
-                        <td className="px-4 py-3 text-right">{row.accompagnantes}</td>
-                        <td className="px-4 py-3 text-right">{row.accompagnes}</td>
-                        <td className={`px-4 py-3 text-right ${isZero ? '' : 'font-medium'}`}>{row.total}</td>
+            <PeriodSelector data={inscriptions}>
+              {(filtered) => (
+                <div className="bg-white rounded-xl border overflow-hidden">
+                  <table className="w-full text-sm">
+                    <thead className="bg-accent/20 border-b">
+                      <tr>
+                        <th className="text-left px-4 py-3 font-medium text-gray-500">Mois</th>
+                        <th className="text-right px-4 py-3 font-medium text-gray-500">Accompagnantes</th>
+                        <th className="text-right px-4 py-3 font-medium text-gray-500">Accompagnes</th>
+                        <th className="text-right px-4 py-3 font-medium text-gray-500">Total</th>
                       </tr>
-                    )
-                  })}
-                </tbody>
-              </table>
-            </div>
+                    </thead>
+                    <tbody>
+                      {filtered.map((row) => {
+                        const isZero = row.total === 0
+                        return (
+                          <tr key={row.mois} className={`border-b last:border-0 hover:bg-accent/10 ${isZero ? 'text-gray-300' : ''}`}>
+                            <td className={`px-4 py-3 ${isZero ? '' : 'font-medium'}`}>{formatMois(row.mois)}</td>
+                            <td className="px-4 py-3 text-right">{row.accompagnantes}</td>
+                            <td className="px-4 py-3 text-right">{row.accompagnes}</td>
+                            <td className={`px-4 py-3 text-right ${isZero ? '' : 'font-medium'}`}>{row.total}</td>
+                          </tr>
+                        )
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </PeriodSelector>
           ),
 
           revenus: (
             <>
-              {/* Historique revenus 12 mois */}
-              <div className="bg-white rounded-xl border overflow-hidden mb-8">
-                <div className="px-4 py-3 border-b bg-accent/20">
-                  <h4 className="font-medium text-gray-700 text-sm">Revenus (12 derniers mois)</h4>
-                </div>
-                <table className="w-full text-sm">
-                  <thead className="bg-accent/20 border-b">
-                    <tr>
-                      <th className="text-left px-4 py-3 font-medium text-gray-500">Mois</th>
-                      <th className="text-right px-4 py-3 font-medium text-gray-500">Abonnes</th>
-                      <th className="text-right px-4 py-3 font-medium text-gray-500">MRR</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {revenus.map((row) => {
-                      const isZero = row.abonnes === 0
-                      return (
-                        <tr key={row.mois} className={`border-b last:border-0 hover:bg-accent/10 ${isZero ? 'text-gray-300' : ''}`}>
-                          <td className={`px-4 py-3 ${isZero ? '' : 'font-medium'}`}>{formatMois(row.mois)}</td>
-                          <td className="px-4 py-3 text-right">{row.abonnes}</td>
-                          <td className={`px-4 py-3 text-right ${isZero ? '' : 'font-medium'}`}>{formatEur(row.mrr)}</td>
+              {/* Historique revenus */}
+              <PeriodSelector data={revenus}>
+                {(filtered) => (
+                  <div className="bg-white rounded-xl border overflow-hidden mb-8">
+                    <table className="w-full text-sm">
+                      <thead className="bg-accent/20 border-b">
+                        <tr>
+                          <th className="text-left px-4 py-3 font-medium text-gray-500">Mois</th>
+                          <th className="text-right px-4 py-3 font-medium text-gray-500">Abonnes</th>
+                          <th className="text-right px-4 py-3 font-medium text-gray-500">MRR</th>
                         </tr>
-                      )
-                    })}
-                  </tbody>
-                </table>
-              </div>
+                      </thead>
+                      <tbody>
+                        {filtered.map((row) => {
+                          const isZero = row.abonnes === 0
+                          return (
+                            <tr key={row.mois} className={`border-b last:border-0 hover:bg-accent/10 ${isZero ? 'text-gray-300' : ''}`}>
+                              <td className={`px-4 py-3 ${isZero ? '' : 'font-medium'}`}>{formatMois(row.mois)}</td>
+                              <td className="px-4 py-3 text-right">{row.abonnes}</td>
+                              <td className={`px-4 py-3 text-right ${isZero ? '' : 'font-medium'}`}>{formatEur(row.mrr)}</td>
+                            </tr>
+                          )
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </PeriodSelector>
 
               {/* MRR par segment */}
               <div className="bg-white rounded-xl border overflow-hidden mb-8">
@@ -365,34 +365,35 @@ export default async function AdminDashboard() {
           ),
 
           activite: (
-            <div className="bg-white rounded-xl border overflow-hidden">
-              <div className="px-4 py-3 border-b bg-accent/20">
-                <h4 className="font-medium text-gray-700 text-sm">Activite (12 derniers mois)</h4>
-              </div>
-              <table className="w-full text-sm">
-                <thead className="bg-accent/20 border-b">
-                  <tr>
-                    <th className="text-left px-4 py-3 font-medium text-gray-500">Mois</th>
-                    <th className="text-right px-4 py-3 font-medium text-gray-500">Messages</th>
-                    <th className="text-right px-4 py-3 font-medium text-gray-500">Conversations</th>
-                    <th className="text-right px-4 py-3 font-medium text-gray-500">Avis</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {activiteRecente.map((row) => {
-                    const isZero = row.messages === 0 && row.conversations === 0 && row.avis === 0
-                    return (
-                      <tr key={row.mois} className={`border-b last:border-0 hover:bg-accent/10 ${isZero ? 'text-gray-300' : ''}`}>
-                        <td className={`px-4 py-3 ${isZero ? '' : 'font-medium'}`}>{formatMois(row.mois)}</td>
-                        <td className="px-4 py-3 text-right">{row.messages}</td>
-                        <td className="px-4 py-3 text-right">{row.conversations}</td>
-                        <td className="px-4 py-3 text-right">{row.avis}</td>
+            <PeriodSelector data={activite}>
+              {(filtered) => (
+                <div className="bg-white rounded-xl border overflow-hidden">
+                  <table className="w-full text-sm">
+                    <thead className="bg-accent/20 border-b">
+                      <tr>
+                        <th className="text-left px-4 py-3 font-medium text-gray-500">Mois</th>
+                        <th className="text-right px-4 py-3 font-medium text-gray-500">Messages</th>
+                        <th className="text-right px-4 py-3 font-medium text-gray-500">Conversations</th>
+                        <th className="text-right px-4 py-3 font-medium text-gray-500">Avis</th>
                       </tr>
-                    )
-                  })}
-                </tbody>
-              </table>
-            </div>
+                    </thead>
+                    <tbody>
+                      {filtered.map((row) => {
+                        const isZero = row.messages === 0 && row.conversations === 0 && row.avis === 0
+                        return (
+                          <tr key={row.mois} className={`border-b last:border-0 hover:bg-accent/10 ${isZero ? 'text-gray-300' : ''}`}>
+                            <td className={`px-4 py-3 ${isZero ? '' : 'font-medium'}`}>{formatMois(row.mois)}</td>
+                            <td className="px-4 py-3 text-right">{row.messages}</td>
+                            <td className="px-4 py-3 text-right">{row.conversations}</td>
+                            <td className="px-4 py-3 text-right">{row.avis}</td>
+                          </tr>
+                        )
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </PeriodSelector>
           ),
         }}
       </DashboardTabs>

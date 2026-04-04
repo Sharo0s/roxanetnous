@@ -77,31 +77,29 @@ export async function getKpis() {
 export async function getInscriptionsParMois() {
   const supabase = await getAdmin()
 
-  const douzesMoisAgo = new Date()
-  douzesMoisAgo.setMonth(douzesMoisAgo.getMonth() - 11)
-  douzesMoisAgo.setDate(1)
-  douzesMoisAgo.setHours(0, 0, 0, 0)
-
   const { data: users } = await supabase
     .from('users')
     .select('role, created_at')
-    .gte('created_at', douzesMoisAgo.toISOString())
     .neq('role', 'admin')
+    .order('created_at', { ascending: true })
 
-  // Grouper par mois
+  if (!users?.length) return []
+
+  // Determiner la plage : du premier utilisateur jusqu'a maintenant
+  const first = new Date(users[0].created_at)
+  const now = new Date()
   const moisMap = new Map<string, { accompagnantes: number; accompagnes: number }>()
 
-  // Initialiser les 12 mois
-  for (let i = 0; i < 12; i++) {
-    const d = new Date()
-    d.setMonth(d.getMonth() - (11 - i))
+  const d = new Date(first.getFullYear(), first.getMonth(), 1)
+  while (d <= now) {
     const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
     moisMap.set(key, { accompagnantes: 0, accompagnes: 0 })
+    d.setMonth(d.getMonth() + 1)
   }
 
-  for (const u of users || []) {
-    const d = new Date(u.created_at)
-    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
+  for (const u of users) {
+    const ud = new Date(u.created_at)
+    const key = `${ud.getFullYear()}-${String(ud.getMonth() + 1).padStart(2, '0')}`
     const entry = moisMap.get(key)
     if (!entry) continue
     if (u.role === 'accompagnante') entry.accompagnantes++
@@ -138,31 +136,36 @@ export async function getRepartitionRoles() {
 export async function getActiviteParMois() {
   const supabase = await getAdmin()
 
-  const douzeMoisAgo = new Date()
-  douzeMoisAgo.setMonth(douzeMoisAgo.getMonth() - 11)
-  douzeMoisAgo.setDate(1)
-  douzeMoisAgo.setHours(0, 0, 0, 0)
-  const since = douzeMoisAgo.toISOString()
-
   const [{ data: messages }, { data: conversations }, { data: avis }] = await Promise.all([
-    supabase.from('messages').select('created_at').gte('created_at', since),
-    supabase.from('conversations').select('created_at').gte('created_at', since),
-    supabase.from('avis').select('created_at').gte('created_at', since),
+    supabase.from('messages').select('created_at').order('created_at', { ascending: true }),
+    supabase.from('conversations').select('created_at').order('created_at', { ascending: true }),
+    supabase.from('avis').select('created_at').order('created_at', { ascending: true }),
   ])
 
-  // Initialiser les 12 mois
+  // Trouver la date la plus ancienne parmi toutes les sources
+  const allDates = [
+    ...(messages || []),
+    ...(conversations || []),
+    ...(avis || []),
+  ].map(item => new Date(item.created_at))
+
+  if (allDates.length === 0) return []
+
+  const first = new Date(Math.min(...allDates.map(d => d.getTime())))
+  const now = new Date()
+
   const moisMap = new Map<string, { messages: number; conversations: number; avis: number }>()
-  for (let i = 0; i < 12; i++) {
-    const d = new Date()
-    d.setMonth(d.getMonth() - (11 - i))
+  const d = new Date(first.getFullYear(), first.getMonth(), 1)
+  while (d <= now) {
     const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
     moisMap.set(key, { messages: 0, conversations: 0, avis: 0 })
+    d.setMonth(d.getMonth() + 1)
   }
 
   function addToMonth(items: { created_at: string }[] | null, field: 'messages' | 'conversations' | 'avis') {
     for (const item of items || []) {
-      const d = new Date(item.created_at)
-      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
+      const id = new Date(item.created_at)
+      const key = `${id.getFullYear()}-${String(id.getMonth() + 1).padStart(2, '0')}`
       const entry = moisMap.get(key)
       if (entry) entry[field]++
     }
@@ -184,30 +187,31 @@ export async function getRevenusParMois() {
   const { data: subs } = await supabase
     .from('subscriptions')
     .select('plan_type, created_at, cancelled_at, status')
+    .order('created_at', { ascending: true })
 
-  // Generer les 12 derniers mois
+  if (!subs?.length) return []
+
+  // Plage : du premier abonnement jusqu'a maintenant
+  const first = new Date(subs[0].created_at)
+  const now = new Date()
   const mois: string[] = []
-  for (let i = 11; i >= 0; i--) {
-    const d = new Date()
-    d.setMonth(d.getMonth() - i)
+  const d = new Date(first.getFullYear(), first.getMonth(), 1)
+  while (d <= now) {
     mois.push(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`)
+    d.setMonth(d.getMonth() + 1)
   }
 
   return mois.map((m) => {
     const [year, month] = m.split('-').map(Number)
-    // Fin du mois : dernier jour a 23:59:59
     const finDuMois = new Date(year, month, 0, 23, 59, 59)
-    // Debut du mois
     const debutDuMois = new Date(year, month - 1, 1)
 
     let abonnes = 0
     let mrr = 0
 
-    for (const s of subs || []) {
+    for (const s of subs) {
       const createdAt = new Date(s.created_at)
-      // L'abonnement existait-il avant la fin du mois ?
       if (createdAt > finDuMois) continue
-      // L'abonnement etait-il deja annule avant le debut du mois ?
       if (s.cancelled_at) {
         const cancelledAt = new Date(s.cancelled_at)
         if (cancelledAt < debutDuMois) continue

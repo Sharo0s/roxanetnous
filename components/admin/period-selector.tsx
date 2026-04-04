@@ -1,0 +1,75 @@
+'use client'
+
+import { useState, useMemo } from 'react'
+
+type PeriodOption = '12m' | string // '12m' ou une annee comme '2025', '2026'
+
+export function PeriodSelector<T extends { mois: string }>({
+  data,
+  children,
+}: {
+  data: T[]
+  children: (filtered: T[]) => React.ReactNode
+}) {
+  // Extraire les annees disponibles
+  const years = useMemo(() => {
+    const set = new Set<string>()
+    for (const row of data) {
+      set.add(row.mois.split('-')[0])
+    }
+    return Array.from(set).sort()
+  }, [data])
+
+  const [period, setPeriod] = useState<PeriodOption>('12m')
+
+  const filtered = useMemo(() => {
+    if (period === '12m') {
+      return data.slice(-12)
+    }
+    if (period === 'all') {
+      return data
+    }
+    return data.filter((row) => row.mois.startsWith(period))
+  }, [data, period])
+
+  return (
+    <div>
+      <div className="flex gap-2 mb-4">
+        <button
+          onClick={() => setPeriod('12m')}
+          className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
+            period === '12m'
+              ? 'bg-gray-900 text-white'
+              : 'bg-white border text-gray-600 hover:bg-gray-50'
+          }`}
+        >
+          12 derniers mois
+        </button>
+        {years.map((y) => (
+          <button
+            key={y}
+            onClick={() => setPeriod(y)}
+            className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
+              period === y
+                ? 'bg-gray-900 text-white'
+                : 'bg-white border text-gray-600 hover:bg-gray-50'
+            }`}
+          >
+            {y}
+          </button>
+        ))}
+        <button
+          onClick={() => setPeriod('all')}
+          className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
+            period === 'all'
+              ? 'bg-gray-900 text-white'
+              : 'bg-white border text-gray-600 hover:bg-gray-50'
+          }`}
+        >
+          Tout
+        </button>
+      </div>
+      {children(filtered)}
+    </div>
+  )
+}
