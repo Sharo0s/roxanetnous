@@ -6,7 +6,7 @@ import { HeroCarte } from '@/components/landing/hero-carte'
 import { AnimatedCounter } from '@/components/landing/animated-counter'
 import { createClient } from '@/lib/supabase/server'
 
-export const revalidate = 180
+export const revalidate = 120
 
 export default async function HomePage() {
   const supabase = await createClient({ serviceRole: true })
