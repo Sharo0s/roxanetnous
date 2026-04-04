@@ -25,7 +25,7 @@ export function DashboardTabs({ children }: {
             onClick={() => setActive(tab.id)}
             className={`px-4 py-2.5 text-sm font-medium whitespace-nowrap border-b-2 transition-colors ${
               active === tab.id
-                ? 'border-accent text-black'
+                ? 'border-accent text-accent'
                 : 'border-transparent text-gray-500 hover:text-black hover:border-gray-300'
             }`}
           >
