@@ -129,19 +129,19 @@ export default async function AdminDashboard() {
                   <p className="text-3xl font-bold mt-1">{formatEur(kpis.mrr)}</p>
                 </div>
                 <div className="bg-white rounded-xl border p-5">
-                  <p className="text-sm text-gray-500">Actifs (30j)</p>
+                  <p className="text-sm text-gray-500">Utilisateurs actifs (30 derniers jours)</p>
                   <p className="text-3xl font-bold mt-1">{kpis.actifs30j}</p>
-                  <p className="text-xs text-gray-400 mt-1">sur {kpis.totalUsers} inscrits</p>
+                  <p className="text-xs text-gray-400 mt-1">sur {kpis.totalUsers} inscrits au total</p>
                 </div>
                 <div className="bg-white rounded-xl border p-5">
-                  <p className="text-sm text-gray-500">Conversion</p>
+                  <p className="text-sm text-gray-500">Taux de conversion (inscrits vers abonnes)</p>
                   <p className={`text-3xl font-bold mt-1 ${kpis.tauxConversion >= 80 ? 'text-green-700' : kpis.tauxConversion >= 50 ? 'text-amber-600' : 'text-red-600'}`}>
                     {kpis.tauxConversion.toFixed(1)}%
                   </p>
-                  <p className="text-xs text-gray-400 mt-1">{kpis.abonnesActifs} abonnes / {kpis.totalUsers}</p>
+                  <p className="text-xs text-gray-400 mt-1">{kpis.abonnesActifs} abonnes sur {kpis.totalUsers} inscrits</p>
                 </div>
                 <div className="bg-white rounded-xl border p-5">
-                  <p className="text-sm text-gray-500">Taux de resiliation</p>
+                  <p className="text-sm text-gray-500">Taux de resiliation (ce mois)</p>
                   <p className={`text-3xl font-bold mt-1 ${kpis.churn <= 2 ? 'text-green-700' : kpis.churn <= 5 ? 'text-amber-600' : 'text-red-600'}`}>
                     {kpis.churn.toFixed(1)}%
                   </p>
@@ -177,15 +177,15 @@ export default async function AdminDashboard() {
               {moisEnCours && (
                 <div className="grid grid-cols-3 gap-4">
                   <div className="bg-white rounded-xl border p-5">
-                    <p className="text-sm text-gray-500">Messages ce mois</p>
+                    <p className="text-sm text-gray-500">Messages envoyes ce mois</p>
                     <p className="text-3xl font-bold mt-1">{moisEnCours.messages}</p>
                   </div>
                   <div className="bg-white rounded-xl border p-5">
-                    <p className="text-sm text-gray-500">Conversations ce mois</p>
+                    <p className="text-sm text-gray-500">Nouvelles conversations ce mois</p>
                     <p className="text-3xl font-bold mt-1">{moisEnCours.conversations}</p>
                   </div>
                   <div className="bg-white rounded-xl border p-5">
-                    <p className="text-sm text-gray-500">Avis ce mois</p>
+                    <p className="text-sm text-gray-500">Avis deposes ce mois</p>
                     <p className="text-3xl font-bold mt-1">{moisEnCours.avis}</p>
                   </div>
                 </div>
