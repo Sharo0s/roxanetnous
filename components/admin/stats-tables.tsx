@@ -27,7 +27,7 @@ function PeriodButtons({ data, period, setPeriod }: {
 
   const btnClass = (active: boolean) =>
     `px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
-      active ? 'bg-accent text-white' : 'bg-white border text-gray-600 hover:bg-gray-50'
+      active ? 'bg-accent text-black' : 'bg-white border text-gray-600 hover:bg-gray-50'
     }`
 
   return (
