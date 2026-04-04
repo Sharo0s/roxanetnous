@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { DIPLOMES, EXPERIENCE_LEVELS, SPECIALITES, JOURS_SEMAINE, CRENEAUX } from '@/lib/constants'
 import { ValidationActions } from '@/components/admin/validation-actions'
+import { DeleteUserButton } from '@/components/admin/delete-user-button'
 
 export default async function AdminUtilisateurDetailPage({
   params,
@@ -346,6 +347,14 @@ export default async function AdminUtilisateurDetailPage({
             Voir le profil public
           </Link>
         )}
+      </div>
+
+      {/* Suppression */}
+      <div className="mt-8 pt-8 border-t">
+        <DeleteUserButton
+          userId={userData.id}
+          userName={`${userData.first_name} ${userData.last_name}`}
+        />
       </div>
     </div>
   )
