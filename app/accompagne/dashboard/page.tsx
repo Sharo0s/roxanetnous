@@ -117,6 +117,32 @@ export default async function AccompagneDashboard() {
             </Link>
           </div>
 
+          <div className="bg-white rounded-xl border p-6">
+            <h3 className="font-semibold text-lg mb-2">Messages</h3>
+            <p className="text-gray-600 mb-4">
+              Consultez vos conversations avec les accompagnant(e)s.
+            </p>
+            <Link
+              href="/messages"
+              className="inline-flex items-center px-4 py-2 bg-accent text-black rounded-lg btn-hover transition text-sm font-medium"
+            >
+              Voir mes messages
+            </Link>
+          </div>
+
+          <div className="bg-white rounded-xl border p-6">
+            <h3 className="font-semibold text-lg mb-2">Mon profil</h3>
+            <p className="text-gray-600 mb-4">
+              Consultez et modifiez vos informations personnelles.
+            </p>
+            <Link
+              href="/accompagne/profil"
+              className="inline-flex items-center px-4 py-2 bg-accent text-black rounded-lg btn-hover transition text-sm font-medium"
+            >
+              Voir mon profil
+            </Link>
+          </div>
+
         </div>
       </div>
     </main>
