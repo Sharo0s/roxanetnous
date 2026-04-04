@@ -112,9 +112,9 @@ export default async function AdminUtilisateurDetailPage({
       {/* Navigation retour */}
       <Link
         href="/admin/utilisateurs"
-        className="inline-flex items-center text-sm text-gray-500 hover:text-accent mb-8 transition-colors"
+        className="inline-flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-black mb-8 px-3 py-1.5 -ml-3 rounded-lg hover:bg-white transition-colors"
       >
-        &larr; Retour aux utilisateurs
+        <span aria-hidden="true">&larr;</span> Retour aux utilisateurs
       </Link>
 
       {/* En-tete utilisateur */}
@@ -378,7 +378,7 @@ export default async function AdminUtilisateurDetailPage({
       </div>
 
       {/* Suppression */}
-      <div className="mt-10 pt-8 border-t border-gray-300">
+      <div className="mt-10 pt-8 border-t border-black">
         <DeleteUserButton
           userId={userData.id}
           userName={`${userData.first_name} ${userData.last_name}`}
