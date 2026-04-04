@@ -124,7 +124,7 @@ export default async function RecherchePage({
 
   let allBenAnnonces: any[] = []
 
-  if (userData?.role === 'accompagne' && user) {
+  if (hasFilters && userData?.role === 'accompagne' && user) {
     const { data: benProfile } = await supabase
       .from('accompagnes_profiles')
       .select('id')
