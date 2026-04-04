@@ -6,7 +6,7 @@ import { useEffect, useState, useRef } from 'react'
 // Bounding box: lon [-5.2, -0.9], lat [47.2, 48.95]
 // Facteur de correction cos(48deg) ~ 0.67 pour compenser la deformation Mercator
 function geoToSvg(lon: number, lat: number): [number, number] {
-  const x = (lon + 5.2) * (460 / 2.9) + 20
+  const x = (lon + 5.2) * (460 / 2.5) + 20
   const y = 480 - (lat - 47.2) * (460 / 1.75) - 20
   return [Math.round(x * 10) / 10, Math.round(y * 10) / 10]
 }
@@ -129,7 +129,7 @@ export function HeroCarte({ villes }: { villes: VilleCoord[] }) {
 
   return (
     <div ref={containerRef} className="w-full">
-      <svg viewBox="-20 -20 740 540" className="w-full h-auto" aria-hidden="true">
+      <svg viewBox="-20 -20 830 540" className="w-full h-auto" aria-hidden="true">
         {/* Contour Bretagne */}
         <path
           ref={pathRef}
