@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { LogoutButton } from '@/components/auth/logout-button'
-import { UnreadBadge } from '@/components/layout/unread-badge'
 
 type Props = {
   userId: string
@@ -31,17 +30,9 @@ export function AccompagnanteHeader({
 
         {/* Desktop */}
         <div className="hidden md:flex items-center gap-4">
-          {currentPage !== 'messages' && (
-            <UnreadBadge userId={userId} initialCount={unreadCount} />
-          )}
           {currentPage !== 'dashboard' && (
             <Link href="/accompagnante/dashboard" className="text-sm text-gray-600 hover:text-black">
               Mon espace
-            </Link>
-          )}
-          {currentPage !== 'profil' && (
-            <Link href="/accompagnante/profil" className="text-sm text-gray-600 hover:text-black">
-              Mon profil
             </Link>
           )}
           <span className="text-sm text-gray-600">
@@ -72,17 +63,9 @@ export function AccompagnanteHeader({
           <span className="text-sm font-medium text-black">
             {firstName} {lastName}
           </span>
-          {currentPage !== 'messages' && (
-            <UnreadBadge userId={userId} initialCount={unreadCount} />
-          )}
           {currentPage !== 'dashboard' && (
             <Link href="/accompagnante/dashboard" className="text-sm text-gray-600 hover:text-black" onClick={() => setMenuOpen(false)}>
               Mon espace
-            </Link>
-          )}
-          {currentPage !== 'profil' && (
-            <Link href="/accompagnante/profil" className="text-sm text-gray-600 hover:text-black" onClick={() => setMenuOpen(false)}>
-              Mon profil
             </Link>
           )}
           <LogoutButton />
