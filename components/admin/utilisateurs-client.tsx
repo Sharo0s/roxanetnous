@@ -376,7 +376,7 @@ function AccompagnesTable({
                     />
                     <Link
                       href={`/admin/utilisateurs/${u.id}`}
-                      className="px-3 py-1.5 text-xs font-medium text-white rounded-lg hover:opacity-80 transition-colors" style={{ backgroundColor: '#ffb06e' }}
+                      className="px-3 py-1.5 text-xs font-medium text-black rounded-lg hover:opacity-80 transition-colors" style={{ backgroundColor: '#ffb06e' }}
                     >
                       Voir
                     </Link>
