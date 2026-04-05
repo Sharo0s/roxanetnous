@@ -161,6 +161,9 @@ export default async function AdminDashboard() {
                   <p className={`text-3xl font-bold mt-1 ${kpis.churn <= 2 ? 'text-green-700' : kpis.churn <= 5 ? 'text-amber-600' : 'text-red-600'}`}>
                     {kpis.churn.toFixed(1)}%
                   </p>
+                  <p className="text-xs text-gray-400 mt-1">
+                    {kpis.churnAnnulations} annulation{kpis.churnAnnulations > 1 ? 's' : ''} / {kpis.churnAbonnesDebutMois} abonne{kpis.churnAbonnesDebutMois > 1 ? 's' : ''} en debut de mois
+                  </p>
                 </div>
               </div>
 

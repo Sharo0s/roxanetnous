@@ -69,6 +69,8 @@ export async function getKpis() {
     actifs30j: actifs30j || 0,
     tauxConversion,
     churn,
+    churnAnnulations: annulationsCeMois || 0,
+    churnAbonnesDebutMois: abonnesDebutMois,
     totalUsers: totalUsers || 0,
     abonnesActifs: abonnesActifs || 0,
   }
