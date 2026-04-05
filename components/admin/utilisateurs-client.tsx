@@ -14,6 +14,7 @@ export type AnnulationRow = {
   plan: string
   feedback: string | null
   comment: string | null
+  pending?: boolean
 }
 
 const FEEDBACK_LABELS: Record<string, string> = {
@@ -395,9 +396,12 @@ function ResiliationsPanel({ annulations }: { annulations: AnnulationRow[] }) {
               <p className="font-medium text-gray-900">{a.nom}</p>
               <p className="text-xs text-gray-400">{a.email}</p>
             </div>
-            <div className="text-right">
-              <span className="text-xs bg-gray-200 text-gray-700 px-2 py-0.5 rounded-full">{a.role}</span>
-              <p className="text-xs text-gray-400 mt-1">
+            <div className="text-right flex flex-col items-end gap-1">
+              <div className="flex gap-1.5">
+                <span className="text-xs bg-gray-200 text-gray-700 px-2 py-0.5 rounded-full">{a.role}</span>
+                {a.pending && <span className="text-xs bg-accent/30 text-gray-700 px-2 py-0.5 rounded-full">Prevue</span>}
+              </div>
+              <p className="text-xs text-gray-400">
                 {a.date ? new Date(a.date).toLocaleDateString('fr-FR') : '-'}
               </p>
             </div>

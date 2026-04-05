@@ -304,13 +304,27 @@ export async function getChurn() {
 export async function getDernieresAnnulations() {
   const supabase = await getAdmin()
 
-  const { data: annulations } = await supabase
+  // Annulations effectives (cancelled) + annulations prevues (active avec cancel_at)
+  const { data: cancelled } = await supabase
     .from('subscriptions')
-    .select('cancelled_at, plan_type, user_id, cancel_feedback, cancel_comment')
+    .select('cancelled_at, cancel_at, plan_type, user_id, cancel_feedback, cancel_comment, status')
     .eq('status', 'cancelled')
     .not('cancelled_at', 'is', null)
     .order('cancelled_at', { ascending: false })
     .limit(20)
+
+  const { data: pending } = await supabase
+    .from('subscriptions')
+    .select('cancelled_at, cancel_at, plan_type, user_id, cancel_feedback, cancel_comment, status')
+    .not('cancel_at', 'is', null)
+    .neq('status', 'cancelled')
+    .order('cancel_at', { ascending: false })
+    .limit(20)
+
+  const annulations = [
+    ...(pending || []).map(a => ({ ...a, _sortDate: a.cancel_at })),
+    ...(cancelled || []).map(a => ({ ...a, _sortDate: a.cancelled_at })),
+  ].sort((a, b) => new Date(b._sortDate!).getTime() - new Date(a._sortDate!).getTime()).slice(0, 20)
 
   if (!annulations?.length) return []
 
@@ -327,13 +341,14 @@ export async function getDernieresAnnulations() {
   return annulations.map(a => {
     const user = userMap.get(a.user_id)
     return {
-      date: a.cancelled_at,
+      date: a.cancelled_at || a.cancel_at,
       nom: user ? `${user.first_name} ${user.last_name}` : 'Inconnu',
       email: user?.email || '',
       role: user?.role || '',
       plan: a.plan_type || 'mensuel',
       feedback: a.cancel_feedback || null,
       comment: a.cancel_comment || null,
+      pending: a.status !== 'cancelled',
     }
   })
 }
