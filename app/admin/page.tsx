@@ -269,6 +269,10 @@ export default async function AdminDashboard() {
                 <div className="bg-white rounded-xl border p-5">
                   <p className="text-sm text-gray-500">Payants</p>
                   <p className="text-3xl font-bold mt-1">{mrrDetail.payants}</p>
+                  <div className="text-xs text-gray-400 mt-1 space-y-0.5">
+                    <p>{mrrDetail.segments.accompagnante_mensuel.count + mrrDetail.segments.accompagnante_annuel.count} accompagnantes ({mrrDetail.segments.accompagnante_mensuel.count} mens. / {mrrDetail.segments.accompagnante_annuel.count} ann.)</p>
+                    <p>{mrrDetail.segments.accompagne_mensuel.count + mrrDetail.segments.accompagne_annuel.count} accompagnes ({mrrDetail.segments.accompagne_mensuel.count} mens. / {mrrDetail.segments.accompagne_annuel.count} ann.)</p>
+                  </div>
                 </div>
                 <div className="bg-white rounded-xl border p-5">
                   <p className="text-sm text-gray-500">Resiliations ce mois</p>
