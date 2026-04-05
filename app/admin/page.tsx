@@ -218,8 +218,33 @@ export default async function AdminDashboard() {
 
           revenus: (
             <>
-              <div className="mb-8">
-                <RevenusTable data={revenus} />
+              {/* Essai gratuit vs Payants + Churn */}
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
+                <div className="bg-white rounded-xl border p-5">
+                  <p className="text-sm text-gray-500">En essai gratuit</p>
+                  <p className="text-3xl font-bold mt-1">{mrrDetail.essaiGratuit}</p>
+                  <div className="text-xs text-gray-400 mt-1 space-y-0.5">
+                    <p>{mrrDetail.essaiAccompagnantes} accompagnante{mrrDetail.essaiAccompagnantes > 1 ? 's' : ''}</p>
+                    <p>{mrrDetail.essaiAccompagnes} accompagne{mrrDetail.essaiAccompagnes > 1 ? 's' : ''}</p>
+                  </div>
+                </div>
+                <div className="bg-white rounded-xl border p-5">
+                  <p className="text-sm text-gray-500">Payants</p>
+                  <p className="text-3xl font-bold mt-1">{mrrDetail.payants}</p>
+                  <div className="text-xs text-gray-400 mt-1 space-y-0.5">
+                    <p>{mrrDetail.segments.accompagnante_mensuel.count + mrrDetail.segments.accompagnante_annuel.count} accompagnantes ({mrrDetail.segments.accompagnante_mensuel.count} mens. / {mrrDetail.segments.accompagnante_annuel.count} ann.)</p>
+                    <p>{mrrDetail.segments.accompagne_mensuel.count + mrrDetail.segments.accompagne_annuel.count} accompagnes ({mrrDetail.segments.accompagne_mensuel.count} mens. / {mrrDetail.segments.accompagne_annuel.count} ann.)</p>
+                  </div>
+                </div>
+                <div className="bg-white rounded-xl border p-5">
+                  <p className="text-sm text-gray-500">Resiliations ce mois</p>
+                  <p className={`text-3xl font-bold mt-1 ${churn.taux <= 2 ? 'text-green-700' : churn.taux <= 5 ? 'text-amber-600' : 'text-red-600'}`}>
+                    {churn.taux.toFixed(1)}%
+                  </p>
+                  <p className="text-xs text-gray-400 mt-1">
+                    {churn.annulations} annulation{churn.annulations > 1 ? 's' : ''} / {churn.abonnesDebutMois} debut de mois
+                  </p>
+                </div>
               </div>
 
               {/* MRR par segment */}
@@ -260,33 +285,8 @@ export default async function AdminDashboard() {
                 </table>
               </div>
 
-              {/* Essai gratuit vs Payants + Churn */}
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
-                <div className="bg-white rounded-xl border p-5">
-                  <p className="text-sm text-gray-500">En essai gratuit</p>
-                  <p className="text-3xl font-bold mt-1">{mrrDetail.essaiGratuit}</p>
-                  <div className="text-xs text-gray-400 mt-1 space-y-0.5">
-                    <p>{mrrDetail.essaiAccompagnantes} accompagnante{mrrDetail.essaiAccompagnantes > 1 ? 's' : ''}</p>
-                    <p>{mrrDetail.essaiAccompagnes} accompagne{mrrDetail.essaiAccompagnes > 1 ? 's' : ''}</p>
-                  </div>
-                </div>
-                <div className="bg-white rounded-xl border p-5">
-                  <p className="text-sm text-gray-500">Payants</p>
-                  <p className="text-3xl font-bold mt-1">{mrrDetail.payants}</p>
-                  <div className="text-xs text-gray-400 mt-1 space-y-0.5">
-                    <p>{mrrDetail.segments.accompagnante_mensuel.count + mrrDetail.segments.accompagnante_annuel.count} accompagnantes ({mrrDetail.segments.accompagnante_mensuel.count} mens. / {mrrDetail.segments.accompagnante_annuel.count} ann.)</p>
-                    <p>{mrrDetail.segments.accompagne_mensuel.count + mrrDetail.segments.accompagne_annuel.count} accompagnes ({mrrDetail.segments.accompagne_mensuel.count} mens. / {mrrDetail.segments.accompagne_annuel.count} ann.)</p>
-                  </div>
-                </div>
-                <div className="bg-white rounded-xl border p-5">
-                  <p className="text-sm text-gray-500">Resiliations ce mois</p>
-                  <p className={`text-3xl font-bold mt-1 ${churn.taux <= 2 ? 'text-green-700' : churn.taux <= 5 ? 'text-amber-600' : 'text-red-600'}`}>
-                    {churn.taux.toFixed(1)}%
-                  </p>
-                  <p className="text-xs text-gray-400 mt-1">
-                    {churn.annulations} annulation{churn.annulations > 1 ? 's' : ''} / {churn.abonnesDebutMois} debut de mois
-                  </p>
-                </div>
+              <div className="mb-8">
+                <RevenusTable data={revenus} />
               </div>
 
               {/* Dernieres annulations */}
