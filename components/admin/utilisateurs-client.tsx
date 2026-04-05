@@ -4,7 +4,28 @@ import { useState, useMemo } from 'react'
 import Link from 'next/link'
 import type { AccompagnanteRow, AccompagneRow } from '@/app/admin/utilisateurs/page'
 
-type Tab = 'accompagnantes' | 'accompagnes'
+type Tab = 'accompagnantes' | 'accompagnes' | 'resiliations'
+
+export type AnnulationRow = {
+  date: string | null
+  nom: string
+  email: string
+  role: string
+  plan: string
+  feedback: string | null
+  comment: string | null
+}
+
+const FEEDBACK_LABELS: Record<string, string> = {
+  customer_service: 'Service client',
+  low_quality: 'Qualite insuffisante',
+  missing_features: 'Fonctionnalites manquantes',
+  switched_service: 'Passe a un concurrent',
+  too_complex: 'Trop complexe',
+  too_expensive: 'Trop cher',
+  unused: 'Non utilise',
+  other: 'Autre',
+}
 
 const VALIDATION_LABELS: Record<string, string> = {
   en_attente: 'En attente',
@@ -27,6 +48,7 @@ export function UtilisateursClient({
   validesCount,
   diplomeLabels,
   experienceLabels,
+  annulations = [],
 }: {
   accompagnantes: AccompagnanteRow[]
   accompagnes: AccompagneRow[]
@@ -34,6 +56,7 @@ export function UtilisateursClient({
   validesCount: number
   diplomeLabels: Record<string, string>
   experienceLabels: Record<string, string>
+  annulations?: AnnulationRow[]
 }) {
   const [tab, setTab] = useState<Tab>('accompagnantes')
   const [search, setSearch] = useState('')
@@ -95,10 +118,22 @@ export function UtilisateursClient({
         >
           Accompagnes ({accompagnes.length})
         </button>
+        {annulations.length > 0 && (
+          <button
+            onClick={() => { setTab('resiliations'); setStatusFilter('tous') }}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition btn-hover ${
+              tab === 'resiliations'
+                ? 'bg-accent text-black'
+                : 'bg-white border border-gray-300 text-gray-700 hover:border-accent'
+            }`}
+          >
+            Resiliations ({annulations.length})
+          </button>
+        )}
       </div>
 
       {/* KPIs */}
-      {tab === 'accompagnantes' ? (
+      {tab === 'resiliations' ? null : tab === 'accompagnantes' ? (
         <div className="grid grid-cols-3 gap-4 mb-6">
           <button
             onClick={() => setStatusFilter('tous')}
@@ -148,7 +183,7 @@ export function UtilisateursClient({
       )}
 
       {/* Recherche */}
-      <div className="mb-4">
+      {tab !== 'resiliations' && <div className="mb-4">
         <input
           type="text"
           placeholder="Rechercher par nom, email ou ville..."
@@ -156,7 +191,7 @@ export function UtilisateursClient({
           onChange={(e) => setSearch(e.target.value)}
           className="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-xl text-sm focus:outline-none focus:border-accent transition-colors"
         />
-      </div>
+      </div>}
 
       {/* Filtre statut accompagnantes */}
       {tab === 'accompagnantes' && (
@@ -184,8 +219,10 @@ export function UtilisateursClient({
           diplomeLabels={diplomeLabels}
           experienceLabels={experienceLabels}
         />
-      ) : (
+      ) : tab === 'accompagnes' ? (
         <AccompagnesTable accompagnes={filteredAccompagnes} />
+      ) : (
+        <ResiliationsPanel annulations={annulations} />
       )}
     </div>
   )
@@ -336,6 +373,57 @@ function AccompagnesTable({
           </tbody>
         </table>
       </div>
+    </div>
+  )
+}
+
+function ResiliationsPanel({ annulations }: { annulations: AnnulationRow[] }) {
+  if (annulations.length === 0) {
+    return (
+      <div className="bg-white rounded-xl border p-8 text-center text-gray-500">
+        Aucune resiliation.
+      </div>
+    )
+  }
+
+  return (
+    <div className="space-y-3">
+      {annulations.map((a, i) => (
+        <div key={i} className="bg-white rounded-xl border p-5">
+          <div className="flex items-start justify-between mb-3">
+            <div>
+              <p className="font-medium text-gray-900">{a.nom}</p>
+              <p className="text-xs text-gray-400">{a.email}</p>
+            </div>
+            <div className="text-right">
+              <span className="text-xs bg-gray-200 text-gray-700 px-2 py-0.5 rounded-full">{a.role}</span>
+              <p className="text-xs text-gray-400 mt-1">
+                {a.date ? new Date(a.date).toLocaleDateString('fr-FR') : '-'}
+              </p>
+            </div>
+          </div>
+          <div className="flex gap-4 text-sm">
+            <div>
+              <span className="text-gray-500">Plan : </span>
+              <span className="font-medium">{a.plan === 'annuel' || a.plan === 'annual' ? 'Annuel' : 'Mensuel'}</span>
+            </div>
+            {a.feedback && (
+              <div>
+                <span className="text-gray-500">Raison : </span>
+                <span className="font-medium">{FEEDBACK_LABELS[a.feedback] || a.feedback}</span>
+              </div>
+            )}
+          </div>
+          {a.comment && (
+            <div className="mt-3 p-3 bg-gray-50 rounded-lg text-sm text-gray-700">
+              {a.comment}
+            </div>
+          )}
+          {!a.feedback && !a.comment && (
+            <p className="text-sm text-gray-400 mt-1">Aucun motif renseigne</p>
+          )}
+        </div>
+      ))}
     </div>
   )
 }
