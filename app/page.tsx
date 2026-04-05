@@ -289,6 +289,13 @@ export default async function HomePage() {
         {/* ===== OFFRES ===== */}
         <section className="px-4 pt-16 pb-24 md:pb-28 kraft bg-kraft relative">
           <div className="max-w-4xl mx-auto relative z-10">
+            {launchOfferActive && (
+              <div className="bg-accent text-black text-center py-3 px-6 rounded-xl mb-6 max-w-2xl mx-auto">
+                <p className="text-lg font-bold">
+                  Offre de lancement : 2 mois offerts pour les premiers inscrits !
+                </p>
+              </div>
+            )}
             <h2 className="text-2xl font-bold text-center text-black mb-2">Tarif unique, simple</h2>
             <p className="text-center text-sm text-black mb-10">
               Meme prix pour les accompagnant(e)s et les accompagne(e)s.            </p>
@@ -324,11 +331,6 @@ export default async function HomePage() {
                 </Link>
               </div>
             </div>
-            {launchOfferActive && (
-              <p className="text-center text-sm text-black mt-6">
-                Offre de lancement : 2 mois offerts pour les premiers inscrits.
-              </p>
-            )}
           </div>
           <svg viewBox="0 0 1440 60" preserveAspectRatio="none" className="absolute bottom-0 left-0 w-full h-8 md:h-12 z-[2]">
             <path d="M0,30 Q360,60 720,30 T1440,30 L1440,60 L0,60 Z" fill="white" />
