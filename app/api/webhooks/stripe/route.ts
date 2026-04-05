@@ -145,6 +145,7 @@ export async function POST(request: NextRequest) {
       const newPriceId = subscription.items.data[0]?.price.id || null
       const newPlanType = newPriceId ? derivePlanType(newPriceId) : existing.plan_type
 
+      const cancellation = (subscription as any).cancellation_details
       const updateData: Record<string, unknown> = {
         status: subscription.status === 'active' ? 'active' : subscription.status === 'past_due' ? 'past_due' : subscription.status === 'canceled' ? 'cancelled' : subscription.status,
         current_period_start: period.currentPeriodStart,
@@ -153,6 +154,8 @@ export async function POST(request: NextRequest) {
         cancelled_at: subscription.canceled_at ? new Date(subscription.canceled_at * 1000).toISOString() : null,
         stripe_price_id: newPriceId,
         plan_type: newPlanType,
+        cancel_feedback: cancellation?.feedback || null,
+        cancel_comment: cancellation?.comment || null,
         updated_at: new Date().toISOString(),
       }
 

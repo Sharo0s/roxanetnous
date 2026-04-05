@@ -22,6 +22,22 @@ function formatPlan(plan: string) {
   return 'Mensuel'
 }
 
+const FEEDBACK_LABELS: Record<string, string> = {
+  customer_service: 'Service client',
+  low_quality: 'Qualite insuffisante',
+  missing_features: 'Fonctionnalites manquantes',
+  switched_service: 'Passe a un concurrent',
+  too_complex: 'Trop complexe',
+  too_expensive: 'Trop cher',
+  unused: 'Non utilise',
+  other: 'Autre',
+}
+
+function formatFeedback(feedback: string | null) {
+  if (!feedback) return '-'
+  return FEEDBACK_LABELS[feedback] || feedback
+}
+
 export default async function AdminDashboard() {
   const supabaseAdmin = await createClient({ serviceRole: true })
 
@@ -280,6 +296,8 @@ export default async function AdminDashboard() {
                         <th className="text-left px-4 py-3 font-medium text-gray-500">Email</th>
                         <th className="text-left px-4 py-3 font-medium text-gray-500">Role</th>
                         <th className="text-left px-4 py-3 font-medium text-gray-500">Plan</th>
+                        <th className="text-left px-4 py-3 font-medium text-gray-500">Raison</th>
+                        <th className="text-left px-4 py-3 font-medium text-gray-500">Commentaire</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -296,6 +314,8 @@ export default async function AdminDashboard() {
                             </span>
                           </td>
                           <td className="px-4 py-3">{formatPlan(a.plan)}</td>
+                          <td className="px-4 py-3 text-gray-500">{formatFeedback(a.feedback)}</td>
+                          <td className="px-4 py-3 text-gray-500 max-w-48 truncate">{a.comment || '-'}</td>
                         </tr>
                       ))}
                     </tbody>

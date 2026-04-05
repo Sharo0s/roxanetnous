@@ -306,7 +306,7 @@ export async function getDernieresAnnulations() {
 
   const { data: annulations } = await supabase
     .from('subscriptions')
-    .select('cancelled_at, plan_type, user_id')
+    .select('cancelled_at, plan_type, user_id, cancel_feedback, cancel_comment')
     .eq('status', 'cancelled')
     .not('cancelled_at', 'is', null)
     .order('cancelled_at', { ascending: false })
@@ -332,6 +332,8 @@ export async function getDernieresAnnulations() {
       email: user?.email || '',
       role: user?.role || '',
       plan: a.plan_type || 'mensuel',
+      feedback: a.cancel_feedback || null,
+      comment: a.cancel_comment || null,
     }
   })
 }

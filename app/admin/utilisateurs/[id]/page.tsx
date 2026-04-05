@@ -418,6 +418,20 @@ export default async function AdminUtilisateurDetailPage({
                   <dd className="font-medium">{new Date(subscriptionStatus.cancelAt).toLocaleDateString('fr-FR')}</dd>
                 </div>
               )}
+              {subscriptionStatus.cancelFeedback && (
+                <div className="flex justify-between">
+                  <dt className="text-gray-500">Raison</dt>
+                  <dd className="font-medium">{
+                    { customer_service: 'Service client', low_quality: 'Qualite insuffisante', missing_features: 'Fonctionnalites manquantes', switched_service: 'Passe a un concurrent', too_complex: 'Trop complexe', too_expensive: 'Trop cher', unused: 'Non utilise', other: 'Autre' }[subscriptionStatus.cancelFeedback] || subscriptionStatus.cancelFeedback
+                  }</dd>
+                </div>
+              )}
+              {subscriptionStatus.cancelComment && (
+                <div className="flex justify-between">
+                  <dt className="text-gray-500">Commentaire</dt>
+                  <dd className="font-medium text-right max-w-xs">{subscriptionStatus.cancelComment}</dd>
+                </div>
+              )}
               {subscriptionStatus.active && !subscriptionStatus.cancelAt && (
                 <CancelSubscriptionButton
                   userId={id}

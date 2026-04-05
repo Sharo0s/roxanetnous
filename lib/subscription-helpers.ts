@@ -12,6 +12,8 @@ export type SubscriptionInfo = {
   planType: 'mensuel' | 'annuel' | null
   stripePriceId: string | null
   trialEnd: string | null
+  cancelFeedback: string | null
+  cancelComment: string | null
 }
 
 export type PaymentMethod = {
@@ -59,7 +61,7 @@ export async function getSubscriptionStatus(userId: string): Promise<Subscriptio
 
   const { data } = await supabase
     .from('subscriptions')
-    .select('status, current_period_end, cancel_at, stripe_customer_id, stripe_subscription_id, plan_type, stripe_price_id, trial_end')
+    .select('status, current_period_end, cancel_at, stripe_customer_id, stripe_subscription_id, plan_type, stripe_price_id, trial_end, cancel_feedback, cancel_comment')
     .eq('user_id', userId)
     .order('created_at', { ascending: false })
     .limit(1)
@@ -76,6 +78,8 @@ export async function getSubscriptionStatus(userId: string): Promise<Subscriptio
       planType: null,
       stripePriceId: null,
       trialEnd: null,
+      cancelFeedback: null,
+      cancelComment: null,
     }
   }
 
@@ -92,6 +96,8 @@ export async function getSubscriptionStatus(userId: string): Promise<Subscriptio
     planType: data.plan_type as 'mensuel' | 'annuel' | null,
     stripePriceId: data.stripe_price_id,
     trialEnd: data.trial_end,
+    cancelFeedback: data.cancel_feedback,
+    cancelComment: data.cancel_comment,
   }
 }
 
