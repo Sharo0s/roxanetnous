@@ -27,10 +27,14 @@ function getSubscriptionPeriod(subscription: Stripe.Subscription) {
 
 function derivePlanType(priceId: string): 'mensuel' | 'annuel' {
   const annualPrices = [
+    process.env.STRIPE_PRICE_AUXILIAIRE_ANNUEL,
+    process.env.STRIPE_PRICE_BENEFICIAIRE_ANNUEL,
     process.env.STRIPE_PRICE_ACCOMPAGNANTE_ANNUEL,
     process.env.STRIPE_PRICE_ACCOMPAGNE_ANNUEL,
   ].filter(Boolean)
   const monthlyPrices = [
+    process.env.STRIPE_PRICE_AUXILIAIRE_MENSUEL,
+    process.env.STRIPE_PRICE_BENEFICIAIRE_MENSUEL,
     process.env.STRIPE_PRICE_ACCOMPAGNANTE_MENSUEL,
     process.env.STRIPE_PRICE_ACCOMPAGNE_MENSUEL,
   ].filter(Boolean)

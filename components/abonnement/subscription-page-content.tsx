@@ -131,11 +131,7 @@ export function SubscriptionPageContent({
               <div className="flex items-center justify-between">
                 <div className="text-sm">
                   <p className="text-gray-900 font-medium">Passer a l&apos;annuel</p>
-                  <p className="text-gray-500">
-                    {amount
-                      ? `Economisez environ ${formatAmount(amount.amount * 12 - 49.99)}/an avec la formule annuelle`
-                      : 'Economisez avec la formule annuelle'}
-                  </p>
+                  <p className="text-gray-500">La formule annuelle offre un meilleur tarif au mois</p>
                 </div>
                 <form action={switchPlan}>
                   <input type="hidden" name="plan" value="annuel" />
@@ -151,10 +147,7 @@ export function SubscriptionPageContent({
               <div className="flex items-center justify-between">
                 <div className="text-sm">
                   <p className="text-gray-900 font-medium">Passer au mensuel</p>
-                  <p className="text-gray-500">
-                    {amount
-                      ? `Vous passerez au tarif mensuel au lieu de ${formatAmount(amount.amount / 12)}/mois`
-                      : 'Le tarif mensuel est plus eleve que le tarif annuel rapporte au mois'}
+                  <p className="text-gray-500">Le tarif mensuel est plus eleve que le tarif annuel rapporte au mois
                   </p>
                 </div>
                 <form action={switchPlan}>
