@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { stripe } from '@/lib/stripe'
 import { createServerClient } from '@supabase/ssr'
-import { sendSubscriptionConfirmEmail, sendSubscriptionCancelEmail } from '@/lib/emails'
+import { sendSubscriptionConfirmEmail, sendSubscriptionCancelEmail, sendPlanChangeEmail, sendRenewalReminderEmail } from '@/lib/emails'
 import type Stripe from 'stripe'
 
 function getSupabaseAdmin() {
@@ -23,6 +23,38 @@ function getSubscriptionPeriod(subscription: Stripe.Subscription) {
     currentPeriodStart: item ? new Date(item.current_period_start * 1000).toISOString() : null,
     currentPeriodEnd: item ? new Date(item.current_period_end * 1000).toISOString() : null,
   }
+}
+
+function derivePlanType(priceId: string): 'mensuel' | 'annuel' {
+  const annualPrices = [
+    process.env.STRIPE_PRICE_ACCOMPAGNANTE_ANNUEL,
+    process.env.STRIPE_PRICE_ACCOMPAGNE_ANNUEL,
+  ].filter(Boolean)
+  const monthlyPrices = [
+    process.env.STRIPE_PRICE_ACCOMPAGNANTE_MENSUEL,
+    process.env.STRIPE_PRICE_ACCOMPAGNE_MENSUEL,
+  ].filter(Boolean)
+  if (annualPrices.includes(priceId)) return 'annuel'
+  if (monthlyPrices.includes(priceId)) return 'mensuel'
+  // Fallback : si le prix ne correspond a aucune env var connue, defaut mensuel
+  return 'mensuel'
+}
+
+async function hasRecentNotification(
+  supabase: ReturnType<typeof getSupabaseAdmin>,
+  userId: string,
+  type: string,
+  hoursAgo: number = 24,
+): Promise<boolean> {
+  const since = new Date(Date.now() - hoursAgo * 60 * 60 * 1000).toISOString()
+  const { data } = await supabase
+    .from('notifications_log')
+    .select('id')
+    .eq('user_id', userId)
+    .eq('type', type)
+    .gte('sent_at', since)
+    .limit(1)
+  return (data?.length ?? 0) > 0
 }
 
 export async function POST(request: NextRequest) {
@@ -79,7 +111,7 @@ export async function POST(request: NextRequest) {
       // Send confirmation email
       const { data: userData } = await supabase
         .from('users')
-        .select('email, first_name')
+        .select('email, first_name, role')
         .eq('id', userId)
         .single()
 
@@ -87,6 +119,7 @@ export async function POST(request: NextRequest) {
         await sendSubscriptionConfirmEmail({
           email: userData.email,
           firstName: userData.first_name || '',
+          role: userData.role as 'accompagnante' | 'accompagne',
           userId,
         })
       }
@@ -98,31 +131,55 @@ export async function POST(request: NextRequest) {
 
       const { data: existing } = await supabase
         .from('subscriptions')
-        .select('user_id')
+        .select('user_id, stripe_price_id, plan_type')
         .eq('stripe_subscription_id', subscription.id)
         .single()
 
       if (!existing) break
 
       const period = getSubscriptionPeriod(subscription)
+      const newPriceId = subscription.items.data[0]?.price.id || null
+      const newPlanType = newPriceId ? derivePlanType(newPriceId) : existing.plan_type
+
       const updateData: Record<string, unknown> = {
         status: subscription.status === 'active' ? 'active' : subscription.status === 'past_due' ? 'past_due' : subscription.status === 'canceled' ? 'cancelled' : subscription.status,
         current_period_start: period.currentPeriodStart,
         current_period_end: period.currentPeriodEnd,
+        cancel_at: subscription.cancel_at ? new Date(subscription.cancel_at * 1000).toISOString() : null,
+        cancelled_at: subscription.canceled_at ? new Date(subscription.canceled_at * 1000).toISOString() : null,
+        stripe_price_id: newPriceId,
+        plan_type: newPlanType,
         updated_at: new Date().toISOString(),
-      }
-
-      if (subscription.cancel_at) {
-        updateData.cancel_at = new Date(subscription.cancel_at * 1000).toISOString()
-      }
-      if (subscription.canceled_at) {
-        updateData.cancelled_at = new Date(subscription.canceled_at * 1000).toISOString()
       }
 
       await supabase
         .from('subscriptions')
         .update(updateData)
         .eq('stripe_subscription_id', subscription.id)
+
+      // Detect plan change and send email
+      if (newPriceId && existing.stripe_price_id && newPriceId !== existing.stripe_price_id) {
+        const oldPlanType = existing.plan_type || 'mensuel'
+        const alreadySent = await hasRecentNotification(supabase, existing.user_id, 'plan_change')
+        if (!alreadySent) {
+          const { data: userData } = await supabase
+            .from('users')
+            .select('email, first_name, role')
+            .eq('id', existing.user_id)
+            .single()
+
+          if (userData) {
+            await sendPlanChangeEmail({
+              email: userData.email,
+              firstName: userData.first_name || '',
+              oldPlan: oldPlanType,
+              newPlan: newPlanType,
+              role: userData.role as 'accompagnante' | 'accompagne',
+              userId: existing.user_id,
+            })
+          }
+        }
+      }
 
       break
     }
@@ -152,7 +209,7 @@ export async function POST(request: NextRequest) {
       if (deletedUserId) {
         const { data: userData } = await supabase
           .from('users')
-          .select('email, first_name')
+          .select('email, first_name, role')
           .eq('id', deletedUserId)
           .single()
 
@@ -160,6 +217,7 @@ export async function POST(request: NextRequest) {
           await sendSubscriptionCancelEmail({
             email: userData.email,
             firstName: userData.first_name || '',
+            role: userData.role as 'accompagnante' | 'accompagne',
             userId: deletedUserId,
           })
         }
@@ -182,6 +240,53 @@ export async function POST(request: NextRequest) {
           updated_at: new Date().toISOString(),
         })
         .eq('stripe_subscription_id', subId)
+
+      break
+    }
+
+    case 'invoice.upcoming': {
+      const invoice = event.data.object as Stripe.Invoice
+
+      const customerId = typeof invoice.customer === 'string'
+        ? invoice.customer
+        : invoice.customer?.id
+
+      if (!customerId) break
+
+      const { data: sub } = await supabase
+        .from('subscriptions')
+        .select('user_id, stripe_price_id')
+        .eq('stripe_customer_id', customerId)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single()
+
+      if (!sub) break
+
+      const { data: userData } = await supabase
+        .from('users')
+        .select('email, first_name, role')
+        .eq('id', sub.user_id)
+        .single()
+
+      if (!userData) break
+
+      const alreadySent = await hasRecentNotification(supabase, sub.user_id, 'renewal_reminder')
+      if (!alreadySent) {
+        const amount = (invoice.amount_due ?? 0) / 100
+        const periodEnd = invoice.period_end
+          ? new Date(invoice.period_end * 1000).toISOString()
+          : new Date().toISOString()
+
+        await sendRenewalReminderEmail({
+          email: userData.email,
+          firstName: userData.first_name || '',
+          renewalDate: periodEnd,
+          amount,
+          role: userData.role as 'accompagnante' | 'accompagne',
+          userId: sub.user_id,
+        })
+      }
 
       break
     }

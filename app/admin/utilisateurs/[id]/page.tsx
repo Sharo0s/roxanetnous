@@ -4,6 +4,8 @@ import Link from 'next/link'
 import { DIPLOMES, EXPERIENCE_LEVELS, SPECIALITES, JOURS_SEMAINE, CRENEAUX } from '@/lib/constants'
 import { ValidationActions } from '@/components/admin/validation-actions'
 import { DeleteUserButton } from '@/components/admin/delete-user-button'
+import { CancelSubscriptionButton } from '@/components/admin/cancel-subscription-button'
+import { getSubscriptionStatus } from '@/lib/subscription-helpers'
 
 export default async function AdminUtilisateurDetailPage({
   params,
@@ -17,6 +19,17 @@ export default async function AdminUtilisateurDetailPage({
   if (!user) redirect('/login')
 
   const supabaseAdmin = await createClient({ serviceRole: true })
+
+  // Verifier que l'utilisateur connecte est admin
+  const { data: currentUserData } = await supabaseAdmin
+    .from('users')
+    .select('role')
+    .eq('id', user.id)
+    .single()
+
+  if (!currentUserData || currentUserData.role !== 'admin') {
+    redirect('/')
+  }
 
   // Charger l'utilisateur
   const { data: userData } = await supabaseAdmin
@@ -84,6 +97,9 @@ export default async function AdminUtilisateurDetailPage({
       }
     }
   }
+
+  // Charger l'abonnement
+  const subscriptionStatus = await getSubscriptionStatus(id)
 
   // Logger la consultation
   await supabaseAdmin.from('admin_actions_log').insert({
@@ -357,6 +373,63 @@ export default async function AdminUtilisateurDetailPage({
           </div>
         )}
       </div>
+
+      {/* Abonnement */}
+      {(userData.role === 'accompagnante' || userData.role === 'accompagne') && (
+        <div className="bg-white rounded-xl border p-6 mt-6">
+          <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4">Abonnement</h3>
+          {subscriptionStatus.status ? (
+            <dl className="space-y-3 text-sm">
+              <div className="flex justify-between items-center">
+                <dt className="text-gray-500">Statut</dt>
+                <dd>
+                  <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${
+                    subscriptionStatus.active
+                      ? subscriptionStatus.cancelAt ? 'bg-gray-200 text-gray-700' : 'bg-accent text-black'
+                      : 'bg-gray-100 text-gray-600'
+                  }`}>
+                    {subscriptionStatus.status === 'trialing'
+                      ? 'Essai gratuit'
+                      : subscriptionStatus.cancelAt
+                        ? 'Annulation prevue'
+                        : subscriptionStatus.status === 'active'
+                          ? 'Actif'
+                          : subscriptionStatus.status === 'past_due'
+                            ? 'Paiement en retard'
+                            : 'Annule'}
+                  </span>
+                </dd>
+              </div>
+              {subscriptionStatus.planType && (
+                <div className="flex justify-between">
+                  <dt className="text-gray-500">Formule</dt>
+                  <dd className="font-medium">{subscriptionStatus.planType === 'annuel' ? 'Annuel' : 'Mensuel'}</dd>
+                </div>
+              )}
+              {subscriptionStatus.currentPeriodEnd && (
+                <div className="flex justify-between">
+                  <dt className="text-gray-500">Prochaine echeance</dt>
+                  <dd className="font-medium">{new Date(subscriptionStatus.currentPeriodEnd).toLocaleDateString('fr-FR')}</dd>
+                </div>
+              )}
+              {subscriptionStatus.cancelAt && (
+                <div className="flex justify-between">
+                  <dt className="text-gray-500">Fin d&apos;acces prevue</dt>
+                  <dd className="font-medium">{new Date(subscriptionStatus.cancelAt).toLocaleDateString('fr-FR')}</dd>
+                </div>
+              )}
+              {subscriptionStatus.active && !subscriptionStatus.cancelAt && (
+                <CancelSubscriptionButton
+                  userId={id}
+                  userName={`${userData.first_name} ${userData.last_name}`}
+                />
+              )}
+            </dl>
+          ) : (
+            <p className="text-sm text-gray-400">Aucun abonnement</p>
+          )}
+        </div>
+      )}
 
       {/* Actions rapides */}
       <div className="mt-8 flex flex-wrap gap-3">

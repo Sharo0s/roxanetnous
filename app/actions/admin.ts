@@ -205,3 +205,49 @@ export async function adminDeleteUser(userId: string): Promise<{ error?: string 
 
   redirect('/admin/utilisateurs')
 }
+
+export async function adminCancelSubscription(formData: FormData): Promise<{ error?: string }> {
+  const userId = formData.get('userId') as string
+  if (!userId) return { error: 'userId manquant.' }
+
+  const supabase = await createClient()
+  const { data: { user: adminUser } } = await supabase.auth.getUser()
+  if (!adminUser) redirect('/login')
+
+  const supabaseAdmin = await createClient({ serviceRole: true })
+
+  // Verifier que l'appelant est admin
+  const { data: adminData } = await supabaseAdmin
+    .from('users')
+    .select('role')
+    .eq('id', adminUser.id)
+    .single()
+
+  if (!adminData || adminData.role !== 'admin') {
+    return { error: 'Acces refuse.' }
+  }
+
+  const subStatus = await getSubscriptionStatus(userId)
+  if (!subStatus.stripeSubscriptionId) {
+    return { error: 'Aucun abonnement actif.' }
+  }
+
+  try {
+    await stripe.subscriptions.update(subStatus.stripeSubscriptionId, {
+      cancel_at_period_end: true,
+    })
+  } catch {
+    return { error: 'Erreur lors de l\'annulation via Stripe.' }
+  }
+
+  // Logger l'action
+  await supabaseAdmin.from('admin_actions_log').insert({
+    admin_id: adminUser.id,
+    action_type: 'annulation_abonnement',
+    target_type: 'subscription',
+    target_id: userId,
+    details: { cancelled_at: new Date().toISOString() },
+  })
+
+  redirect(`/admin/utilisateurs/${userId}`)
+}

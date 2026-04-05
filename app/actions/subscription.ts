@@ -113,3 +113,119 @@ export async function cancelSubscription(): Promise<void> {
 
   redirect(`/${role}/abonnement`)
 }
+
+export async function cancelSubscriptionFromModal(): Promise<{
+  success: boolean
+  cancelAt: string | null
+  error?: string
+}> {
+  const supabase = await createClient()
+
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { success: false, cancelAt: null, error: 'Non connecte.' }
+
+  const subStatus = await getSubscriptionStatus(user.id)
+  if (!subStatus.stripeSubscriptionId || !subStatus.active) {
+    return { success: false, cancelAt: null, error: 'Aucun abonnement actif.' }
+  }
+
+  try {
+    const updated = await stripe.subscriptions.update(subStatus.stripeSubscriptionId, {
+      cancel_at_period_end: true,
+    })
+
+    const cancelAt = updated.cancel_at
+      ? new Date(updated.cancel_at * 1000).toISOString()
+      : subStatus.currentPeriodEnd
+
+    return { success: true, cancelAt }
+  } catch {
+    return { success: false, cancelAt: null, error: 'Erreur lors de la resiliation.' }
+  }
+}
+
+export async function switchPlan(formData: FormData): Promise<void> {
+  const newPlan = formData.get('plan') as PlanType
+  if (!newPlan || (newPlan !== 'mensuel' && newPlan !== 'annuel')) {
+    return
+  }
+
+  const supabase = await createClient()
+
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect('/login')
+
+  const { data: userData } = await supabase
+    .from('users')
+    .select('role')
+    .eq('id', user.id)
+    .single()
+
+  if (!userData) redirect('/')
+
+  const role = userData.role as 'accompagnante' | 'accompagne'
+  const subscription = await getSubscriptionStatus(user.id)
+
+  if (subscription.status !== 'active' || subscription.cancelAt) {
+    redirect(`/${role}/abonnement`)
+  }
+
+  if (newPlan === subscription.planType) {
+    redirect(`/${role}/abonnement`)
+  }
+
+  const newPriceId = getStripePriceId(role, newPlan)
+  if (!newPriceId || !subscription.stripeSubscriptionId) {
+    redirect(`/${role}/abonnement`)
+  }
+
+  try {
+    const stripeSubscription = await stripe.subscriptions.retrieve(subscription.stripeSubscriptionId)
+    const itemId = stripeSubscription.items.data[0]?.id
+
+    if (!itemId) redirect(`/${role}/abonnement`)
+
+    await stripe.subscriptions.update(subscription.stripeSubscriptionId, {
+      items: [{ id: itemId, price: newPriceId }],
+      proration_behavior: 'create_prorations',
+    })
+  } catch {
+    redirect(`/${role}/abonnement?error=switch_failed`)
+  }
+
+  const { revalidatePath } = await import('next/cache')
+  revalidatePath(`/${role}/abonnement`)
+  redirect(`/${role}/abonnement`)
+}
+
+export async function reactivateSubscription(): Promise<void> {
+  const supabase = await createClient()
+
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect('/login')
+
+  const { data: userData } = await supabase
+    .from('users')
+    .select('role')
+    .eq('id', user.id)
+    .single()
+
+  const role = userData?.role || 'accompagnante'
+  const subStatus = await getSubscriptionStatus(user.id)
+
+  if (!subStatus.stripeSubscriptionId || !subStatus.cancelAt) {
+    redirect(`/${role}/abonnement`)
+  }
+
+  try {
+    await stripe.subscriptions.update(subStatus.stripeSubscriptionId, {
+      cancel_at_period_end: false,
+    })
+  } catch {
+    redirect(`/${role}/abonnement?error=reactivate_failed`)
+  }
+
+  const { revalidatePath } = await import('next/cache')
+  revalidatePath(`/${role}/abonnement`)
+  redirect(`/${role}/abonnement`)
+}

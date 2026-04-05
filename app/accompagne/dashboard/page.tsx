@@ -2,7 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { getUnreadCount } from '@/lib/unread-count'
-import { hasActiveSubscription } from '@/lib/subscription-helpers'
+import { getSubscriptionStatus } from '@/lib/subscription-helpers'
 import { AccompagneSubscriptionBanner } from '@/components/accompagne/subscription-banner'
 import { AccompagneHeader } from '@/components/layout/accompagne-header'
 
@@ -20,10 +20,11 @@ export default async function AccompagneDashboard() {
 
   if (!userData || userData.role !== 'accompagne') redirect('/')
 
-  const [unreadCount, subscribed] = await Promise.all([
+  const [unreadCount, subscription] = await Promise.all([
     getUnreadCount(user.id),
-    hasActiveSubscription(user.id),
+    getSubscriptionStatus(user.id),
   ])
+  const subscribed = subscription.active
 
   // Recuperer les annonces du accompagne
   const { data: profile } = await supabase
@@ -140,6 +141,25 @@ export default async function AccompagneDashboard() {
               className="inline-flex items-center px-4 py-2 bg-accent text-black rounded-lg btn-hover transition text-sm font-medium"
             >
               Voir mon profil
+            </Link>
+          </div>
+
+          <div className="bg-white rounded-xl border p-6">
+            <h3 className="font-semibold text-lg mb-2">Mon abonnement</h3>
+            <p className="text-gray-600 mb-4">
+              {subscription.status === 'trialing'
+                ? `Essai gratuit - Fin le ${subscription.trialEnd ? new Date(subscription.trialEnd).toLocaleDateString('fr-FR') : subscription.currentPeriodEnd ? new Date(subscription.currentPeriodEnd).toLocaleDateString('fr-FR') : '-'}`
+                : subscription.cancelAt
+                  ? `Expire le ${new Date(subscription.cancelAt).toLocaleDateString('fr-FR')}`
+                  : subscribed
+                    ? `${subscription.planType === 'annuel' ? 'Annuel' : 'Mensuel'} - Prochaine echeance : ${subscription.currentPeriodEnd ? new Date(subscription.currentPeriodEnd).toLocaleDateString('fr-FR') : '-'}`
+                    : 'Aucun abonnement actif'}
+            </p>
+            <Link
+              href="/accompagne/abonnement"
+              className="inline-flex items-center px-4 py-2 bg-accent text-black rounded-lg btn-hover transition text-sm font-medium"
+            >
+              Gerer mon abonnement
             </Link>
           </div>
 

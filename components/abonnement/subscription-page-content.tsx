@@ -1,13 +1,27 @@
-import { createCheckoutSession, createPortalSession, cancelSubscription } from '@/app/actions/subscription'
+import { createCheckoutSession, createPortalSession, switchPlan, reactivateSubscription } from '@/app/actions/subscription'
 import { isLaunchOffer } from '@/lib/stripe'
-import type { SubscriptionInfo } from '@/lib/subscription-helpers'
+import type { SubscriptionInfo, PaymentMethod, Invoice, SubscriptionAmount } from '@/lib/subscription-helpers'
+import { CancelModal } from './cancel-modal'
+
+const CONTACT_EMAIL = 'contact@roxanetnous.fr'
 
 export function SubscriptionPageContent({
   subscription,
+  paymentMethod,
+  invoices,
+  role,
+  amount,
+  searchParams,
 }: {
   subscription: SubscriptionInfo
+  paymentMethod?: PaymentMethod | null
+  invoices?: Invoice[]
+  role?: 'accompagnante' | 'accompagne'
+  amount?: SubscriptionAmount | null
+  searchParams?: Record<string, string | string[] | undefined>
 }) {
   const launch = isLaunchOffer()
+  const switchError = searchParams?.error === 'switch_failed'
 
   const formatDate = (dateStr: string | null) => {
     if (!dateStr) return '-'
@@ -18,64 +32,243 @@ export function SubscriptionPageContent({
     })
   }
 
+  const formatAmount = (value: number) => {
+    return value.toFixed(2).replace('.', ',') + ' EUR'
+  }
+
   if (subscription.active) {
+    const planLabel = subscription.planType === 'annuel' ? 'Annuel' : 'Mensuel'
+    const isTrialing = subscription.status === 'trialing'
+    const hasCancelAt = !!subscription.cancelAt
+
     return (
       <div className="space-y-4">
+        {/* Details de l'abonnement */}
         <div className="bg-white rounded-xl border p-6">
           <div className="flex items-center gap-3 mb-4">
-            <h3 className="font-semibold text-lg">Abonnement actif</h3>
+            <h3 className="font-semibold text-lg">Details de l&apos;abonnement</h3>
             <span className="px-2 py-1 rounded-full text-xs font-medium bg-accent text-black">
-              {subscription.status === 'trialing' ? 'Essai gratuit' : 'Actif'}
+              {isTrialing ? 'Essai gratuit' : hasCancelAt ? 'Annulation prevue' : 'Actif'}
             </span>
           </div>
 
-          <div className="space-y-2 text-sm">
-            {subscription.status === 'trialing' && (
+          <dl className="space-y-3 text-sm">
+            <div className="flex justify-between">
+              <dt className="text-gray-600">Formule</dt>
+              <dd className="text-gray-900 font-medium">{planLabel}</dd>
+            </div>
+            {amount && (
               <div className="flex justify-between">
-                <span className="text-gray-600">Fin de l'essai gratuit</span>
-                <span className="text-gray-900 font-medium">{formatDate(subscription.currentPeriodEnd)}</span>
+                <dt className="text-gray-600">Montant</dt>
+                <dd className="text-gray-900 font-medium">
+                  {formatAmount(amount.amount)}/{amount.interval === 'year' ? 'an' : 'mois'}
+                </dd>
               </div>
             )}
-            {subscription.status !== 'trialing' && (
+            {isTrialing ? (
               <div className="flex justify-between">
-                <span className="text-gray-600">Prochaine echeance</span>
-                <span className="text-gray-900 font-medium">{formatDate(subscription.currentPeriodEnd)}</span>
+                <dt className="text-gray-600">Fin de l&apos;essai gratuit</dt>
+                <dd className="text-gray-900 font-medium">{formatDate(subscription.trialEnd || subscription.currentPeriodEnd)}</dd>
+              </div>
+            ) : (
+              <div className="flex justify-between">
+                <dt className="text-gray-600">Prochaine echeance</dt>
+                <dd className="text-gray-900 font-medium">{formatDate(subscription.currentPeriodEnd)}</dd>
               </div>
             )}
-            {subscription.cancelAt && (
+            {hasCancelAt && (
               <div className="flex justify-between">
-                <span className="text-gray-600">Annulation prevue le</span>
-                <span className="text-gray-900 font-medium">{formatDate(subscription.cancelAt)}</span>
+                <dt className="text-gray-600">Fin d&apos;acces prevue le</dt>
+                <dd className="text-gray-900 font-medium">{formatDate(subscription.cancelAt)}</dd>
+              </div>
+            )}
+          </dl>
+        </div>
+
+        {/* Moyen de paiement */}
+        <div className="bg-white rounded-xl border p-6">
+          <h3 className="font-semibold text-lg mb-4">Moyen de paiement</h3>
+          {paymentMethod ? (
+            <div className="flex items-center justify-between">
+              <div className="text-sm">
+                <p className="text-gray-900 font-medium capitalize">{paymentMethod.brand} **** {paymentMethod.last4}</p>
+                <p className="text-gray-500">Expire {paymentMethod.expMonth.toString().padStart(2, '0')}/{paymentMethod.expYear}</p>
+              </div>
+              <form action={createPortalSession}>
+                <button
+                  type="submit"
+                  className="px-4 py-2 text-sm font-medium border border-gray-300 text-gray-700 rounded-lg hover:border-gray-400 transition-colors"
+                >
+                  Modifier
+                </button>
+              </form>
+            </div>
+          ) : (
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-gray-500">Information indisponible</p>
+              <form action={createPortalSession}>
+                <button
+                  type="submit"
+                  className="px-4 py-2 text-sm font-medium border border-gray-300 text-gray-700 rounded-lg hover:border-gray-400 transition-colors"
+                >
+                  Gerer via Stripe
+                </button>
+              </form>
+            </div>
+          )}
+        </div>
+
+        {/* Changer de formule (pas en trial, pas en annulation) */}
+        {!isTrialing && !hasCancelAt && (
+          <div className="bg-white rounded-xl border p-6">
+            <h3 className="font-semibold text-lg mb-4">Changer de formule</h3>
+            {switchError && (
+              <p className="text-sm text-red-600 mb-4">
+                Une erreur est survenue lors du changement de formule. Veuillez reessayer.
+              </p>
+            )}
+            {subscription.planType === 'mensuel' ? (
+              <div className="flex items-center justify-between">
+                <div className="text-sm">
+                  <p className="text-gray-900 font-medium">Passer a l&apos;annuel</p>
+                  <p className="text-gray-500">
+                    {amount
+                      ? `Economisez environ ${formatAmount(amount.amount * 12 - 49.99)}/an avec la formule annuelle`
+                      : 'Economisez avec la formule annuelle'}
+                  </p>
+                </div>
+                <form action={switchPlan}>
+                  <input type="hidden" name="plan" value="annuel" />
+                  <button
+                    type="submit"
+                    className="px-4 py-2.5 text-sm font-medium bg-accent text-black rounded-lg btn-hover transition-colors"
+                  >
+                    Passer a l&apos;annuel
+                  </button>
+                </form>
+              </div>
+            ) : (
+              <div className="flex items-center justify-between">
+                <div className="text-sm">
+                  <p className="text-gray-900 font-medium">Passer au mensuel</p>
+                  <p className="text-gray-500">
+                    {amount
+                      ? `Vous passerez au tarif mensuel au lieu de ${formatAmount(amount.amount / 12)}/mois`
+                      : 'Le tarif mensuel est plus eleve que le tarif annuel rapporte au mois'}
+                  </p>
+                </div>
+                <form action={switchPlan}>
+                  <input type="hidden" name="plan" value="mensuel" />
+                  <button
+                    type="submit"
+                    className="px-4 py-2.5 text-sm font-medium border border-gray-300 text-gray-700 rounded-lg hover:border-gray-400 transition-colors"
+                  >
+                    Passer au mensuel
+                  </button>
+                </form>
               </div>
             )}
           </div>
+        )}
+
+        {/* Reactiver (si annulation prevue) */}
+        {hasCancelAt && (
+          <div className="bg-white rounded-xl border p-6">
+            <div className="flex items-center justify-between">
+              <div className="text-sm">
+                <p className="text-gray-900 font-medium">Reactiver mon abonnement</p>
+                <p className="text-gray-500">Annuler la resiliation et conserver votre acces</p>
+              </div>
+              <form action={reactivateSubscription}>
+                <button
+                  type="submit"
+                  className="px-4 py-2.5 text-sm font-medium bg-accent text-black rounded-lg btn-hover transition-colors"
+                >
+                  Reactiver
+                </button>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* Historique des factures */}
+        <div className="bg-white rounded-xl border p-6">
+          <h3 className="font-semibold text-lg mb-4">Historique des factures</h3>
+          {invoices && invoices.length > 0 ? (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b">
+                    <th className="text-left py-2 text-gray-500 font-medium">Date</th>
+                    <th className="text-left py-2 text-gray-500 font-medium">Montant</th>
+                    <th className="text-left py-2 text-gray-500 font-medium">Statut</th>
+                    <th className="text-right py-2 text-gray-500 font-medium">Facture</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {invoices.map((invoice) => (
+                    <tr key={invoice.id} className="border-b last:border-0">
+                      <td className="py-3 text-gray-900">
+                        {new Date(invoice.date).toLocaleDateString('fr-FR')}
+                      </td>
+                      <td className="py-3 text-gray-900">{formatAmount(invoice.amount)}</td>
+                      <td className="py-3">
+                        <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-accent/20 text-black">
+                          Paye
+                        </span>
+                      </td>
+                      <td className="py-3 text-right">
+                        {invoice.pdfUrl ? (
+                          <a
+                            href={invoice.pdfUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-sm font-medium text-gray-700 hover:text-black transition-colors"
+                          >
+                            Telecharger
+                          </a>
+                        ) : (
+                          <span className="text-gray-400">-</span>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <p className="text-sm text-gray-500">
+              {subscription.status === 'trialing'
+                ? 'Aucune facture pendant l\'essai gratuit.'
+                : 'Aucune facture disponible.'}
+            </p>
+          )}
         </div>
 
-        <div className="flex gap-3">
-          <form action={createPortalSession}>
-            <button
-              type="submit"
-              className="px-4 py-2 bg-accent text-black rounded-lg btn-hover transition text-sm font-medium"
-            >
-              Gerer mon abonnement
-            </button>
-          </form>
+        {/* Resilier (si pas deja en annulation) */}
+        {!hasCancelAt && (
+          <div className="flex justify-start">
+            <CancelModal subscription={subscription} />
+          </div>
+        )}
 
-          {!subscription.cancelAt && (
-            <form action={cancelSubscription}>
-              <button
-                type="submit"
-                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:border-accent transition text-sm font-medium"
-              >
-                Annuler
-              </button>
-            </form>
-          )}
+        {/* Mentions legales */}
+        <div className="text-xs text-gray-500 space-y-1 pt-4">
+          <p>
+            Conformement a la legislation, vous disposez d&apos;un droit de retractation de 14 jours a compter de la souscription.
+            Pour l&apos;exercer, contactez-nous a{' '}
+            <a href={`mailto:${CONTACT_EMAIL}`} className="underline hover:text-gray-700">{CONTACT_EMAIL}</a>.
+          </p>
+          <p>
+            Consultez nos{' '}
+            <a href="/cgu" className="underline hover:text-gray-700">Conditions Generales d&apos;Utilisation</a>.
+          </p>
         </div>
       </div>
     )
   }
 
+  // Vue non-abonne (pricing cards) — inchangee
   return (
     <div className="space-y-4">
       {launch && (

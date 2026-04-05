@@ -1,4 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
+import { stripe } from '@/lib/stripe'
+import type Stripe from 'stripe'
 
 export type SubscriptionInfo = {
   active: boolean
@@ -7,6 +9,29 @@ export type SubscriptionInfo = {
   cancelAt: string | null
   stripeCustomerId: string | null
   stripeSubscriptionId: string | null
+  planType: 'mensuel' | 'annuel' | null
+  stripePriceId: string | null
+  trialEnd: string | null
+}
+
+export type PaymentMethod = {
+  brand: string
+  last4: string
+  expMonth: number
+  expYear: number
+}
+
+export type Invoice = {
+  id: string
+  date: string
+  amount: number
+  status: string
+  pdfUrl: string | null
+}
+
+export type SubscriptionAmount = {
+  amount: number
+  interval: 'month' | 'year'
 }
 
 export async function hasActiveSubscription(userId: string): Promise<boolean> {
@@ -34,7 +59,7 @@ export async function getSubscriptionStatus(userId: string): Promise<Subscriptio
 
   const { data } = await supabase
     .from('subscriptions')
-    .select('status, current_period_end, cancel_at, stripe_customer_id, stripe_subscription_id')
+    .select('status, current_period_end, cancel_at, stripe_customer_id, stripe_subscription_id, plan_type, stripe_price_id, trial_end')
     .eq('user_id', userId)
     .order('created_at', { ascending: false })
     .limit(1)
@@ -48,6 +73,9 @@ export async function getSubscriptionStatus(userId: string): Promise<Subscriptio
       cancelAt: null,
       stripeCustomerId: null,
       stripeSubscriptionId: null,
+      planType: null,
+      stripePriceId: null,
+      trialEnd: null,
     }
   }
 
@@ -61,5 +89,63 @@ export async function getSubscriptionStatus(userId: string): Promise<Subscriptio
     cancelAt: data.cancel_at,
     stripeCustomerId: data.stripe_customer_id,
     stripeSubscriptionId: data.stripe_subscription_id,
+    planType: data.plan_type as 'mensuel' | 'annuel' | null,
+    stripePriceId: data.stripe_price_id,
+    trialEnd: data.trial_end,
+  }
+}
+
+export async function getPaymentMethod(stripeCustomerId: string): Promise<PaymentMethod | null> {
+  try {
+    const customer = await stripe.customers.retrieve(stripeCustomerId, {
+      expand: ['invoice_settings.default_payment_method'],
+    }) as Stripe.Customer
+
+    const pm = customer.invoice_settings?.default_payment_method
+    if (!pm || typeof pm === 'string') return null
+
+    const card = pm.card
+    if (!card) return null
+
+    return {
+      brand: card.brand,
+      last4: card.last4,
+      expMonth: card.exp_month,
+      expYear: card.exp_year,
+    }
+  } catch {
+    return null
+  }
+}
+
+export async function getInvoices(stripeCustomerId: string): Promise<Invoice[]> {
+  try {
+    const invoices = await stripe.invoices.list({
+      customer: stripeCustomerId,
+      limit: 24,
+      status: 'paid',
+    })
+
+    return invoices.data.map((inv) => ({
+      id: inv.id,
+      date: new Date((inv.created ?? 0) * 1000).toISOString(),
+      amount: (inv.amount_paid ?? 0) / 100,
+      status: inv.status || 'unknown',
+      pdfUrl: inv.invoice_pdf || null,
+    }))
+  } catch {
+    return []
+  }
+}
+
+export async function getSubscriptionAmount(stripePriceId: string): Promise<SubscriptionAmount | null> {
+  try {
+    const price = await stripe.prices.retrieve(stripePriceId)
+    return {
+      amount: (price.unit_amount ?? 0) / 100,
+      interval: price.recurring?.interval === 'year' ? 'year' : 'month',
+    }
+  } catch {
+    return null
   }
 }

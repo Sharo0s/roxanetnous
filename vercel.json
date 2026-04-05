@@ -7,6 +7,10 @@
     {
       "path": "/api/cron/reactivate-disponible",
       "schedule": "0 6 * * *"
+    },
+    {
+      "path": "/api/cron/expiration-reminder",
+      "schedule": "0 8 * * *"
     }
   ]
 }

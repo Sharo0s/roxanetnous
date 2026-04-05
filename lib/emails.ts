@@ -8,6 +8,10 @@ const resend = new Resend(process.env.RESEND_API_KEY)
 const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || 'roxanetnous <onboarding@resend.dev>'
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'
 
+function escapeHtml(str: string): string {
+  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+}
+
 async function logNotification(params: {
   userId?: string
   email: string
@@ -47,7 +51,7 @@ export async function sendWelcomeEmail(params: {
       subject: 'Bienvenue sur roxanetnous',
       html: `
         <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
-          <h1 style="color: #000;">Bienvenue ${params.firstName},</h1>
+          <h1 style="color: #000;">Bienvenue ${escapeHtml(params.firstName)},</h1>
           <p>Votre compte ${roleLabel} a ete cree avec succes sur roxanetnous.</p>
           ${params.role === 'accompagnante' ? '<p>Pour apparaitre sur la plateforme, completez votre profil professionnel puis soumettez-le a validation.</p>' : '<p>Vous pouvez des maintenant rechercher une accompagnante de vie ou publier une annonce.</p>'}
           <p style="margin-top: 24px;">
@@ -105,7 +109,7 @@ export async function sendValidationResultEmail(params: {
       html: `
         <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
           <h1 style="color: #000;">${subjects[params.decision]}</h1>
-          <p>Bonjour ${params.firstName},</p>
+          <p>Bonjour ${escapeHtml(params.firstName)},</p>
           <p>${messages[params.decision]}</p>
           <p style="margin-top: 24px;">
             <a href="${BASE_URL}/accompagnante/profil" style="background: #000; color: #fff; padding: 12px 24px; text-decoration: none; display: inline-block;">
@@ -146,12 +150,12 @@ export async function sendNewMessageEmail(params: {
     await resend.emails.send({
       from: FROM_EMAIL,
       to: params.email,
-      subject: `Nouveau message de ${params.senderFirstName}`,
+      subject: `Nouveau message de ${escapeHtml(params.senderFirstName)}`,
       html: `
         <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
           <h1 style="color: #000;">Nouveau message</h1>
-          <p>Bonjour ${params.recipientFirstName},</p>
-          <p>${params.senderFirstName} vous a envoye un message sur roxanetnous.</p>
+          <p>Bonjour ${escapeHtml(params.recipientFirstName)},</p>
+          <p>${escapeHtml(params.senderFirstName)} vous a envoye un message sur roxanetnous.</p>
           <p style="margin-top: 24px;">
             <a href="${BASE_URL}/messages/${params.conversationId}" style="background: #000; color: #fff; padding: 12px 24px; text-decoration: none; display: inline-block;">
               Lire le message
@@ -165,7 +169,7 @@ export async function sendNewMessageEmail(params: {
       userId: params.userId,
       email: params.email,
       type: 'new_message',
-      subject: `Nouveau message de ${params.senderFirstName}`,
+      subject: `Nouveau message de ${escapeHtml(params.senderFirstName)}`,
       status: 'sent',
     })
   } catch (error) {
@@ -173,7 +177,7 @@ export async function sendNewMessageEmail(params: {
       userId: params.userId,
       email: params.email,
       type: 'new_message',
-      subject: `Nouveau message de ${params.senderFirstName}`,
+      subject: `Nouveau message de ${escapeHtml(params.senderFirstName)}`,
       status: 'error',
       error: error instanceof Error ? error.message : 'Erreur inconnue',
     })
@@ -183,8 +187,10 @@ export async function sendNewMessageEmail(params: {
 export async function sendSubscriptionConfirmEmail(params: {
   email: string
   firstName: string
+  role?: 'accompagnante' | 'accompagne'
   userId?: string
 }) {
+  const role = params.role || 'accompagnante'
   try {
     await resend.emails.send({
       from: FROM_EMAIL,
@@ -193,10 +199,10 @@ export async function sendSubscriptionConfirmEmail(params: {
       html: `
         <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
           <h1 style="color: #000;">Abonnement active</h1>
-          <p>Bonjour ${params.firstName},</p>
+          <p>Bonjour ${escapeHtml(params.firstName)},</p>
           <p>Votre abonnement roxanetnous est desormais actif. Vos annonces sont maintenant visibles dans les recherches.</p>
           <p style="margin-top: 24px;">
-            <a href="${BASE_URL}/accompagnante/abonnement" style="background: #000; color: #fff; padding: 12px 24px; text-decoration: none; display: inline-block;">
+            <a href="${BASE_URL}/${role}/abonnement" style="background: #000; color: #fff; padding: 12px 24px; text-decoration: none; display: inline-block;">
               Gerer mon abonnement
             </a>
           </p>
@@ -226,8 +232,10 @@ export async function sendSubscriptionConfirmEmail(params: {
 export async function sendSubscriptionCancelEmail(params: {
   email: string
   firstName: string
+  role?: 'accompagnante' | 'accompagne'
   userId?: string
 }) {
+  const role = params.role || 'accompagnante'
   try {
     await resend.emails.send({
       from: FROM_EMAIL,
@@ -236,11 +244,11 @@ export async function sendSubscriptionCancelEmail(params: {
       html: `
         <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
           <h1 style="color: #000;">Abonnement annule</h1>
-          <p>Bonjour ${params.firstName},</p>
+          <p>Bonjour ${escapeHtml(params.firstName)},</p>
           <p>Votre abonnement roxanetnous a ete annule. Vos annonces ne seront plus visibles dans les recherches a la fin de la periode en cours.</p>
           <p>Vous pouvez vous reabonner a tout moment.</p>
           <p style="margin-top: 24px;">
-            <a href="${BASE_URL}/accompagnante/abonnement" style="background: #000; color: #fff; padding: 12px 24px; text-decoration: none; display: inline-block;">
+            <a href="${BASE_URL}/${role}/abonnement" style="background: #000; color: #fff; padding: 12px 24px; text-decoration: none; display: inline-block;">
               Se reabonner
             </a>
           </p>
@@ -280,7 +288,7 @@ export async function sendDisponibleReactivatedEmail(params: {
       html: `
         <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
           <h1 style="color: #000;">Vous etes de nouveau disponible</h1>
-          <p>Bonjour ${params.firstName},</p>
+          <p>Bonjour ${escapeHtml(params.firstName)},</p>
           <p>Votre date de retour est arrivee, votre profil est automatiquement repasse en disponible sur roxanetnous.</p>
           <p>Si vous souhaitez prolonger votre indisponibilite, vous pouvez le faire depuis votre profil.</p>
           <p style="margin-top: 24px;">
@@ -321,12 +329,12 @@ export async function sendFavoriDisponibleEmail(params: {
     await resend.emails.send({
       from: FROM_EMAIL,
       to: params.email,
-      subject: `${params.accompagnanteFirstName} est de nouveau disponible`,
+      subject: `${escapeHtml(params.accompagnanteFirstName)} est de nouveau disponible`,
       html: `
         <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
           <h1 style="color: #000;">Bonne nouvelle !</h1>
-          <p>Bonjour ${params.accompagneFirstName},</p>
-          <p>${params.accompagnanteFirstName}, que vous suivez dans vos favoris, est de nouveau disponible sur roxanetnous.</p>
+          <p>Bonjour ${escapeHtml(params.accompagneFirstName)},</p>
+          <p>${escapeHtml(params.accompagnanteFirstName)}, que vous suivez dans vos favoris, est de nouveau disponible sur roxanetnous.</p>
           <p style="margin-top: 24px;">
             <a href="${BASE_URL}/recherche" style="background: #000; color: #fff; padding: 12px 24px; text-decoration: none; display: inline-block;">
               Voir le profil
@@ -340,7 +348,7 @@ export async function sendFavoriDisponibleEmail(params: {
       userId: params.userId,
       email: params.email,
       type: 'favori_disponible',
-      subject: `${params.accompagnanteFirstName} est de nouveau disponible`,
+      subject: `${escapeHtml(params.accompagnanteFirstName)} est de nouveau disponible`,
       status: 'sent',
     })
   } catch (error) {
@@ -348,7 +356,7 @@ export async function sendFavoriDisponibleEmail(params: {
       userId: params.userId,
       email: params.email,
       type: 'favori_disponible',
-      subject: `${params.accompagnanteFirstName} est de nouveau disponible`,
+      subject: `${escapeHtml(params.accompagnanteFirstName)} est de nouveau disponible`,
       status: 'error',
       error: error instanceof Error ? error.message : 'Erreur inconnue',
     })
@@ -385,10 +393,10 @@ export async function sendMatchingNotificationEmail(params: {
       html: `
         <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
           <h1 style="color: #000;">${subject}</h1>
-          <p>Bonjour ${params.firstName},</p>
+          <p>Bonjour ${escapeHtml(params.firstName)},</p>
           <p>${description}</p>
           <p style="margin: 16px 0; padding: 12px; background: #f5f5f5; border-radius: 8px;">
-            <strong>${params.annonceTitle}</strong><br/>
+            <strong>${escapeHtml(params.annonceTitle)}</strong><br/>
             <span style="color: #666;">Score de compatibilite : ${params.score}/100</span>
           </p>
           <p style="margin-top: 24px;">
@@ -412,6 +420,156 @@ export async function sendMatchingNotificationEmail(params: {
       userId: params.userId,
       email: params.email,
       type: `matching_${params.type}`,
+      subject,
+      status: 'error',
+      error: error instanceof Error ? error.message : 'Erreur inconnue',
+    })
+  }
+}
+
+export async function sendPlanChangeEmail(params: {
+  email: string
+  firstName: string
+  oldPlan: string
+  newPlan: string
+  role: 'accompagnante' | 'accompagne'
+  userId?: string
+}) {
+  const planLabels: Record<string, string> = { mensuel: 'Mensuel', annuel: 'Annuel' }
+  const subject = 'Changement de formule confirme'
+
+  try {
+    await resend.emails.send({
+      from: FROM_EMAIL,
+      to: params.email,
+      subject,
+      html: `
+        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+          <h1 style="color: #000;">Changement de formule confirme</h1>
+          <p>Bonjour ${escapeHtml(params.firstName)},</p>
+          <p>Votre abonnement roxanetnous est passe de la formule <strong>${planLabels[params.oldPlan] || params.oldPlan}</strong> a la formule <strong>${planLabels[params.newPlan] || params.newPlan}</strong>.</p>
+          <p>Le prorata sera applique automatiquement sur votre prochaine facture.</p>
+          <p style="margin-top: 24px;">
+            <a href="${BASE_URL}/${params.role}/abonnement" style="background: #000; color: #fff; padding: 12px 24px; text-decoration: none; display: inline-block;">
+              Gerer mon abonnement
+            </a>
+          </p>
+        </div>
+      `,
+    })
+
+    await logNotification({
+      userId: params.userId,
+      email: params.email,
+      type: 'plan_change',
+      subject,
+      status: 'sent',
+    })
+  } catch (error) {
+    await logNotification({
+      userId: params.userId,
+      email: params.email,
+      type: 'plan_change',
+      subject,
+      status: 'error',
+      error: error instanceof Error ? error.message : 'Erreur inconnue',
+    })
+  }
+}
+
+export async function sendRenewalReminderEmail(params: {
+  email: string
+  firstName: string
+  renewalDate: string
+  amount: number
+  role: 'accompagnante' | 'accompagne'
+  userId?: string
+}) {
+  const subject = 'Votre abonnement sera renouvele prochainement'
+  const formattedDate = new Date(params.renewalDate).toLocaleDateString('fr-FR')
+  const formattedAmount = params.amount.toFixed(2).replace('.', ',')
+
+  try {
+    await resend.emails.send({
+      from: FROM_EMAIL,
+      to: params.email,
+      subject,
+      html: `
+        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+          <h1 style="color: #000;">Renouvellement a venir</h1>
+          <p>Bonjour ${escapeHtml(params.firstName)},</p>
+          <p>Votre abonnement roxanetnous sera renouvele prochainement, le ${formattedDate}, pour un montant de ${formattedAmount} EUR.</p>
+          <p>Si vous souhaitez modifier ou annuler votre abonnement, vous pouvez le faire depuis votre espace.</p>
+          <p style="margin-top: 24px;">
+            <a href="${BASE_URL}/${params.role}/abonnement" style="background: #000; color: #fff; padding: 12px 24px; text-decoration: none; display: inline-block;">
+              Gerer mon abonnement
+            </a>
+          </p>
+        </div>
+      `,
+    })
+
+    await logNotification({
+      userId: params.userId,
+      email: params.email,
+      type: 'renewal_reminder',
+      subject,
+      status: 'sent',
+    })
+  } catch (error) {
+    await logNotification({
+      userId: params.userId,
+      email: params.email,
+      type: 'renewal_reminder',
+      subject,
+      status: 'error',
+      error: error instanceof Error ? error.message : 'Erreur inconnue',
+    })
+  }
+}
+
+export async function sendExpirationReminderEmail(params: {
+  email: string
+  firstName: string
+  expirationDate: string
+  role: 'accompagnante' | 'accompagne'
+  userId?: string
+}) {
+  const subject = 'Votre abonnement expire bientot'
+  const formattedDate = new Date(params.expirationDate).toLocaleDateString('fr-FR')
+
+  try {
+    await resend.emails.send({
+      from: FROM_EMAIL,
+      to: params.email,
+      subject,
+      html: `
+        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+          <h1 style="color: #000;">Votre abonnement expire bientot</h1>
+          <p>Bonjour ${escapeHtml(params.firstName)},</p>
+          <p>Votre abonnement roxanetnous prend fin le ${formattedDate}. Apres cette date, vos annonces ne seront plus visibles dans les recherches et vous n'aurez plus acces a la messagerie.</p>
+          <p>Vous pouvez reactiver votre abonnement ou vous reabonner a tout moment.</p>
+          <p style="margin-top: 24px;">
+            <a href="${BASE_URL}/${params.role}/abonnement" style="background: #000; color: #fff; padding: 12px 24px; text-decoration: none; display: inline-block;">
+              Gerer mon abonnement
+            </a>
+          </p>
+        </div>
+      `,
+    })
+
+    await logNotification({
+      userId: params.userId,
+      email: params.email,
+      type: 'expiration_reminder',
+      subject,
+      status: 'sent',
+    })
+  } catch (error) {
+    await logNotification({
+      userId: params.userId,
+      email: params.email,
+      type: 'expiration_reminder',
       subject,
       status: 'error',
       error: error instanceof Error ? error.message : 'Erreur inconnue',
