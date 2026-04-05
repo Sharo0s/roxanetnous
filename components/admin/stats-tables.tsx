@@ -125,6 +125,66 @@ export function RevenusTable({ data }: {
   )
 }
 
+type MrrSegmentRow = {
+  mois: string
+  accompagnante_mensuel: { count: number; mrr: number }
+  accompagnante_annuel: { count: number; mrr: number }
+  accompagne_mensuel: { count: number; mrr: number }
+  accompagne_annuel: { count: number; mrr: number }
+  total: number
+}
+
+export function MrrSegmentTable({ data }: { data: MrrSegmentRow[] }) {
+  const { period, setPeriod, filtered } = useFiltered(data)
+
+  return (
+    <div>
+      <PeriodButtons data={data} period={period} setPeriod={setPeriod} />
+      <div className="bg-white rounded-xl border overflow-hidden">
+        <table className="w-full text-sm">
+          <thead className="bg-accent/20 border-b">
+            <tr>
+              <th className="text-left px-4 py-3 font-medium text-gray-500">Mois</th>
+              <th className="text-right px-4 py-3 font-medium text-gray-500">Acc. Mens.</th>
+              <th className="text-right px-4 py-3 font-medium text-gray-500">Acc. Ann.</th>
+              <th className="text-right px-4 py-3 font-medium text-gray-500">Acg. Mens.</th>
+              <th className="text-right px-4 py-3 font-medium text-gray-500">Acg. Ann.</th>
+              <th className="text-right px-4 py-3 font-medium text-gray-500">MRR Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filtered.map((row) => {
+              const isZero = row.total === 0
+              return (
+                <tr key={row.mois} className={`border-b last:border-0 hover:bg-accent/10 ${isZero ? 'text-gray-300' : ''}`}>
+                  <td className={`px-4 py-3 ${isZero ? '' : 'font-medium'}`}>{formatMois(row.mois)}</td>
+                  <td className="px-4 py-3 text-right">
+                    <span>{row.accompagnante_mensuel.count}</span>
+                    <span className="text-gray-400 ml-1 text-xs">({formatEur(row.accompagnante_mensuel.mrr)})</span>
+                  </td>
+                  <td className="px-4 py-3 text-right">
+                    <span>{row.accompagnante_annuel.count}</span>
+                    <span className="text-gray-400 ml-1 text-xs">({formatEur(row.accompagnante_annuel.mrr)})</span>
+                  </td>
+                  <td className="px-4 py-3 text-right">
+                    <span>{row.accompagne_mensuel.count}</span>
+                    <span className="text-gray-400 ml-1 text-xs">({formatEur(row.accompagne_mensuel.mrr)})</span>
+                  </td>
+                  <td className="px-4 py-3 text-right">
+                    <span>{row.accompagne_annuel.count}</span>
+                    <span className="text-gray-400 ml-1 text-xs">({formatEur(row.accompagne_annuel.mrr)})</span>
+                  </td>
+                  <td className={`px-4 py-3 text-right ${isZero ? '' : 'font-medium'}`}>{formatEur(row.total)}</td>
+                </tr>
+              )
+            })}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  )
+}
+
 export function ActiviteTable({ data }: {
   data: { mois: string; messages: number; conversations: number; avis: number }[]
 }) {

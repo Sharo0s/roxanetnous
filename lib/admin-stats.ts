@@ -280,6 +280,71 @@ export async function getMrrDetail() {
   return { segments, essaiGratuit, essaiAccompagnantes, essaiAccompagnes, payants }
 }
 
+export async function getMrrParSegmentParMois() {
+  const supabase = await getAdmin()
+
+  const { data: subs } = await supabase
+    .from('subscriptions')
+    .select('plan_type, user_id, created_at, cancelled_at, status')
+    .order('created_at', { ascending: true })
+
+  if (!subs?.length) return []
+
+  const { data: users } = await supabase
+    .from('users')
+    .select('id, role')
+    .neq('role', 'admin')
+
+  const roleMap = new Map<string, string>()
+  for (const u of users || []) {
+    roleMap.set(u.id, u.role)
+  }
+
+  // Plage : du premier abonnement jusqu'a maintenant
+  const first = new Date(subs[0].created_at)
+  const now = new Date()
+  const mois: string[] = []
+  const d = new Date(first.getFullYear(), first.getMonth(), 1)
+  while (d <= now) {
+    mois.push(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`)
+    d.setMonth(d.getMonth() + 1)
+  }
+
+  return mois.map((m) => {
+    const [year, month] = m.split('-').map(Number)
+    const finDuMois = new Date(year, month, 0, 23, 59, 59)
+    const debutDuMois = new Date(year, month - 1, 1)
+
+    const seg = {
+      accompagnante_mensuel: { count: 0, mrr: 0 },
+      accompagnante_annuel: { count: 0, mrr: 0 },
+      accompagne_mensuel: { count: 0, mrr: 0 },
+      accompagne_annuel: { count: 0, mrr: 0 },
+    }
+
+    for (const s of subs) {
+      const createdAt = new Date(s.created_at)
+      if (createdAt > finDuMois) continue
+      if (s.cancelled_at) {
+        const cancelledAt = new Date(s.cancelled_at)
+        if (cancelledAt < debutDuMois) continue
+      }
+
+      const role = roleMap.get(s.user_id) || 'accompagnante'
+      const isAnnuel = s.plan_type === 'annual' || s.plan_type === 'annuel'
+      const key = `${role}_${isAnnuel ? 'annuel' : 'mensuel'}` as keyof typeof seg
+      if (seg[key]) {
+        seg[key].count++
+        seg[key].mrr += mrrFromPlanType(s.plan_type)
+      }
+    }
+
+    const total = seg.accompagnante_mensuel.mrr + seg.accompagnante_annuel.mrr + seg.accompagne_mensuel.mrr + seg.accompagne_annuel.mrr
+
+    return { mois: m, ...seg, total }
+  })
+}
+
 export async function getChurn() {
   const supabase = await getAdmin()
 

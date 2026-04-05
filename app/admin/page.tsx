@@ -7,11 +7,12 @@ import {
   getActiviteParMois,
   getRevenusParMois,
   getMrrDetail,
+  getMrrParSegmentParMois,
   getChurn,
   getDernieresAnnulations,
 } from '@/lib/admin-stats'
 import { DashboardTabs } from '@/components/admin/dashboard-tabs'
-import { InscriptionsTable, RevenusTable, ActiviteTable, ResiliationsTable } from '@/components/admin/stats-tables'
+import { InscriptionsTable, RevenusTable, MrrSegmentTable, ActiviteTable, ResiliationsTable } from '@/components/admin/stats-tables'
 
 function formatEur(n: number) {
   return n.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' EUR'
@@ -63,7 +64,7 @@ export default async function AdminDashboard() {
     .select('id', { count: 'exact', head: true })
     .eq('status', 'en_attente')
 
-  const [kpis, inscriptions, repartition, activite, revenus, mrrDetail, churn, annulations] =
+  const [kpis, inscriptions, repartition, activite, revenus, mrrDetail, mrrSegmentParMois, churn, annulations] =
     await Promise.all([
       getKpis(),
       getInscriptionsParMois(),
@@ -71,6 +72,7 @@ export default async function AdminDashboard() {
       getActiviteParMois(),
       getRevenusParMois(),
       getMrrDetail(),
+      getMrrParSegmentParMois(),
       getChurn(),
       getDernieresAnnulations(),
     ])
@@ -255,38 +257,8 @@ export default async function AdminDashboard() {
 
               {/* MRR par segment */}
               <h4 className="font-medium text-gray-700 text-sm mb-3">Revenu mensuel recurrent par segment</h4>
-              <div className="bg-white rounded-xl border overflow-hidden mb-8">
-                <table className="w-full text-sm">
-                  <thead className="bg-accent/20 border-b">
-                    <tr>
-                      <th className="text-left px-4 py-3 font-medium text-gray-500">Segment</th>
-                      <th className="text-right px-4 py-3 font-medium text-gray-500">Abonnes</th>
-                      <th className="text-right px-4 py-3 font-medium text-gray-500">Revenu mensuel</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr className="border-b hover:bg-accent/10">
-                      <td className="px-4 py-3">Accompagnante - Mensuel</td>
-                      <td className="px-4 py-3 text-right">{mrrDetail.segments.accompagnante_mensuel.count}</td>
-                      <td className="px-4 py-3 text-right font-medium">{formatEur(mrrDetail.segments.accompagnante_mensuel.mrr)}</td>
-                    </tr>
-                    <tr className="border-b hover:bg-accent/10">
-                      <td className="px-4 py-3">Accompagnante - Annuel</td>
-                      <td className="px-4 py-3 text-right">{mrrDetail.segments.accompagnante_annuel.count}</td>
-                      <td className="px-4 py-3 text-right font-medium">{formatEur(mrrDetail.segments.accompagnante_annuel.mrr)}</td>
-                    </tr>
-                    <tr className="border-b hover:bg-accent/10">
-                      <td className="px-4 py-3">Accompagne - Mensuel</td>
-                      <td className="px-4 py-3 text-right">{mrrDetail.segments.accompagne_mensuel.count}</td>
-                      <td className="px-4 py-3 text-right font-medium">{formatEur(mrrDetail.segments.accompagne_mensuel.mrr)}</td>
-                    </tr>
-                    <tr className="border-b last:border-0 hover:bg-accent/10">
-                      <td className="px-4 py-3">Accompagne - Annuel</td>
-                      <td className="px-4 py-3 text-right">{mrrDetail.segments.accompagne_annuel.count}</td>
-                      <td className="px-4 py-3 text-right font-medium">{formatEur(mrrDetail.segments.accompagne_annuel.mrr)}</td>
-                    </tr>
-                  </tbody>
-                </table>
+              <div className="mb-8">
+                <MrrSegmentTable data={mrrSegmentParMois} />
               </div>
 
               <div className="mb-8">
