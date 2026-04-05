@@ -55,35 +55,29 @@ export function GrantSubscriptionModal({ userId, userName }: Props) {
                   {userName} recevra un abonnement gratuit (sans paiement).
                 </p>
 
-                <div className="space-y-2 mb-6">
-                  <label className="flex items-center gap-3 p-3 border rounded-lg cursor-pointer hover:border-accent transition-colors">
-                    <input
-                      type="radio"
-                      name="plan"
-                      value="mensuel"
-                      checked={plan === 'mensuel'}
-                      onChange={() => setPlan('mensuel')}
-                      className="accent-accent"
-                    />
-                    <div>
-                      <div className="text-sm font-medium">Mensuel</div>
-                      <div className="text-xs text-gray-400">Renouvellement chaque mois</div>
-                    </div>
-                  </label>
-                  <label className="flex items-center gap-3 p-3 border rounded-lg cursor-pointer hover:border-accent transition-colors">
-                    <input
-                      type="radio"
-                      name="plan"
-                      value="annuel"
-                      checked={plan === 'annuel'}
-                      onChange={() => setPlan('annuel')}
-                      className="accent-accent"
-                    />
-                    <div>
-                      <div className="text-sm font-medium">Annuel</div>
-                      <div className="text-xs text-gray-400">Renouvellement chaque annee</div>
-                    </div>
-                  </label>
+                <div className="flex gap-2 mb-6">
+                  <button
+                    type="button"
+                    onClick={() => setPlan('mensuel')}
+                    className={`flex-1 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
+                      plan === 'mensuel'
+                        ? 'bg-accent text-black'
+                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    }`}
+                  >
+                    Mensuel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setPlan('annuel')}
+                    className={`flex-1 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
+                      plan === 'annuel'
+                        ? 'bg-accent text-black'
+                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    }`}
+                  >
+                    Annuel
+                  </button>
                 </div>
 
                 <div className="flex gap-3">
