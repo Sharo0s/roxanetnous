@@ -48,10 +48,10 @@ export function GrantSubscriptionModal({ userId, userName }: Props) {
           <div className="relative bg-white rounded-xl max-w-md w-full mx-4 p-6">
             {step === 'choose' && (
               <>
-                <h3 className="text-lg font-semibold text-gray-900 mb-1">
+                <h3 className="text-lg font-semibold text-gray-900 mb-1 text-left">
                   Offrir un abonnement
                 </h3>
-                <p className="text-sm text-gray-500 mb-4">
+                <p className="text-sm text-gray-500 mb-4 text-left">
                   {userName} recevra un abonnement gratuit (sans paiement).
                 </p>
 
