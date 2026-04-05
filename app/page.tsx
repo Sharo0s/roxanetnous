@@ -184,7 +184,7 @@ export default async function HomePage() {
         </svg>
 
         {/* ===== COMMENT CA MARCHE ===== */}
-        <section className="px-4 py-16 kraft bg-kraft">
+        <section className="px-4 pt-16 pb-24 md:pb-28 kraft bg-kraft relative">
           <div className="max-w-3xl mx-auto relative z-10">
             <h2 className="text-2xl font-bold text-center text-black mb-12">
               Comment ca marche RoxanetNous
@@ -211,14 +211,10 @@ export default async function HomePage() {
               ))}
             </div>
           </div>
+          <svg viewBox="0 0 1440 60" preserveAspectRatio="none" className="absolute bottom-0 left-0 w-full h-8 md:h-12 z-[2]">
+            <path d="M0,30 Q360,60 720,30 T1440,30 L1440,60 L0,60 Z" fill="white" />
+          </svg>
         </section>
-
-        <svg viewBox="0 0 1440 60" preserveAspectRatio="none" className="w-full h-8 md:h-12 block -mb-px bg-kraft">
-          <defs><pattern id="kraft-wave-2" patternUnits="userSpaceOnUse" width="256" height="256"><image href="/kraft-noise.png" width="256" height="256" /></pattern></defs>
-          <path d="M0,0 L1440,0 L1440,30 Q1080,60 720,30 T0,30 Z" fill="#F5E1C8" />
-          <path d="M0,0 L1440,0 L1440,30 Q1080,60 720,30 T0,30 Z" fill="url(#kraft-wave-2)" opacity="0.35" style={{ mixBlendMode: 'multiply' }} />
-          <path d="M0,30 Q360,60 720,30 T1440,30 L1440,60 L0,60 Z" fill="white" />
-        </svg>
 
         {/* ===== AVIS ===== */}
         {avisWithNames.length > 0 && (
@@ -291,7 +287,7 @@ export default async function HomePage() {
         </svg>
 
         {/* ===== OFFRES ===== */}
-        <section className="px-4 py-16 kraft bg-kraft">
+        <section className="px-4 pt-16 pb-24 md:pb-28 kraft bg-kraft relative">
           <div className="max-w-4xl mx-auto relative z-10">
             <h2 className="text-2xl font-bold text-center text-black mb-2">Tarif unique, simple</h2>
             <p className="text-center text-sm text-black mb-10">
@@ -334,14 +330,10 @@ export default async function HomePage() {
               </p>
             )}
           </div>
+          <svg viewBox="0 0 1440 60" preserveAspectRatio="none" className="absolute bottom-0 left-0 w-full h-8 md:h-12 z-[2]">
+            <path d="M0,30 Q360,60 720,30 T1440,30 L1440,60 L0,60 Z" fill="white" />
+          </svg>
         </section>
-
-        <svg viewBox="0 0 1440 60" preserveAspectRatio="none" className="w-full h-8 md:h-12 block -mb-px bg-kraft">
-          <defs><pattern id="kraft-wave-4" patternUnits="userSpaceOnUse" width="256" height="256"><image href="/kraft-noise.png" width="256" height="256" /></pattern></defs>
-          <path d="M0,0 L1440,0 L1440,30 Q1080,60 720,30 T0,30 Z" fill="#F5E1C8" />
-          <path d="M0,0 L1440,0 L1440,30 Q1080,60 720,30 T0,30 Z" fill="url(#kraft-wave-4)" opacity="0.35" style={{ mixBlendMode: 'multiply' }} />
-          <path d="M0,30 Q360,60 720,30 T1440,30 L1440,60 L0,60 Z" fill="white" />
-        </svg>
 
         {/* ===== FAQ ===== */}
         <section className="px-4 py-16 bg-white">
