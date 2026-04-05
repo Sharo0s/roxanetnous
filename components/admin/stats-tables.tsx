@@ -161,3 +161,105 @@ export function ActiviteTable({ data }: {
     </div>
   )
 }
+
+// --- Resiliations ---
+
+const FEEDBACK_LABELS: Record<string, string> = {
+  customer_service: 'Service client',
+  low_quality: 'Qualite insuffisante',
+  missing_features: 'Fonctionnalites manquantes',
+  switched_service: 'Passe a un concurrent',
+  too_complex: 'Trop complexe',
+  too_expensive: 'Trop cher',
+  unused: 'Non utilise',
+  other: 'Autre',
+}
+
+type AnnulationRow = {
+  date: string | null
+  nom: string
+  email: string
+  role: string
+  plan: string
+  feedback: string | null
+  comment: string | null
+  pending?: boolean
+}
+
+type PeriodFilter = 'ce-mois' | '3-mois' | '12-mois' | 'tout'
+
+export function ResiliationsTable({ data }: { data: AnnulationRow[] }) {
+  const [period, setPeriod] = useState<PeriodFilter>('3-mois')
+
+  const filtered = useMemo(() => {
+    if (period === 'tout') return data
+    const now = new Date()
+    let cutoff: Date
+    if (period === 'ce-mois') {
+      cutoff = new Date(now.getFullYear(), now.getMonth(), 1)
+    } else if (period === '3-mois') {
+      cutoff = new Date(now.getFullYear(), now.getMonth() - 3, 1)
+    } else {
+      cutoff = new Date(now.getFullYear() - 1, now.getMonth(), 1)
+    }
+    return data.filter((a) => {
+      if (!a.date) return true
+      return new Date(a.date) >= cutoff
+    })
+  }, [data, period])
+
+  const btnClass = (active: boolean) =>
+    `px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
+      active ? 'bg-accent text-black' : 'bg-white border text-gray-600 hover:bg-gray-50'
+    }`
+
+  return (
+    <div>
+      <div className="flex gap-2 mb-4">
+        <button onClick={() => setPeriod('ce-mois')} className={btnClass(period === 'ce-mois')}>Ce mois</button>
+        <button onClick={() => setPeriod('3-mois')} className={btnClass(period === '3-mois')}>3 derniers mois</button>
+        <button onClick={() => setPeriod('12-mois')} className={btnClass(period === '12-mois')}>12 derniers mois</button>
+        <button onClick={() => setPeriod('tout')} className={btnClass(period === 'tout')}>Tout</button>
+      </div>
+      <div className="bg-white rounded-xl border overflow-hidden">
+        {filtered.length === 0 ? (
+          <div className="p-8 text-center text-gray-500 text-sm">
+            Aucune resiliation sur cette periode.
+          </div>
+        ) : (
+          <table className="w-full text-sm">
+            <thead className="bg-accent/20 border-b">
+              <tr>
+                <th className="text-left px-4 py-3 font-medium text-gray-500">Date</th>
+                <th className="text-left px-4 py-3 font-medium text-gray-500">Nom</th>
+                <th className="text-left px-4 py-3 font-medium text-gray-500">Email</th>
+                <th className="text-left px-4 py-3 font-medium text-gray-500">Role</th>
+                <th className="text-left px-4 py-3 font-medium text-gray-500">Plan</th>
+                <th className="text-left px-4 py-3 font-medium text-gray-500">Raison</th>
+                <th className="text-left px-4 py-3 font-medium text-gray-500">Commentaire</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.map((a, i) => (
+                <tr key={i} className="border-b last:border-0 hover:bg-accent/10">
+                  <td className="px-4 py-3 text-gray-400 whitespace-nowrap">
+                    {a.date ? new Date(a.date).toLocaleDateString('fr-FR') : '-'}
+                    {a.pending && <span className="ml-1 text-xs bg-accent/30 text-gray-700 px-1.5 py-0.5 rounded-full">Prevue</span>}
+                  </td>
+                  <td className="px-4 py-3 font-medium">{a.nom}</td>
+                  <td className="px-4 py-3 text-gray-500">{a.email}</td>
+                  <td className="px-4 py-3">
+                    <span className="text-xs bg-gray-200 text-gray-700 px-2 py-0.5 rounded-full">{a.role}</span>
+                  </td>
+                  <td className="px-4 py-3">{a.plan === 'annuel' || a.plan === 'annual' ? 'Annuel' : 'Mensuel'}</td>
+                  <td className="px-4 py-3 text-gray-500">{a.feedback ? FEEDBACK_LABELS[a.feedback] || a.feedback : '-'}</td>
+                  <td className="px-4 py-3 text-gray-500 max-w-48 truncate">{a.comment || '-'}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
+    </div>
+  )
+}

@@ -11,7 +11,7 @@ import {
   getDernieresAnnulations,
 } from '@/lib/admin-stats'
 import { DashboardTabs } from '@/components/admin/dashboard-tabs'
-import { InscriptionsTable, RevenusTable, ActiviteTable } from '@/components/admin/stats-tables'
+import { InscriptionsTable, RevenusTable, ActiviteTable, ResiliationsTable } from '@/components/admin/stats-tables'
 
 function formatEur(n: number) {
   return n.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' EUR'
@@ -254,10 +254,8 @@ export default async function AdminDashboard() {
               </div>
 
               {/* MRR par segment */}
+              <h4 className="font-medium text-gray-700 text-sm mb-3">Revenu mensuel recurrent par segment</h4>
               <div className="bg-white rounded-xl border overflow-hidden mb-8">
-                <div className="px-4 py-3 border-b bg-accent/20">
-                  <h4 className="font-medium text-gray-700 text-sm">Revenu mensuel recurrent par segment</h4>
-                </div>
                 <table className="w-full text-sm">
                   <thead className="bg-accent/20 border-b">
                     <tr>
@@ -295,50 +293,9 @@ export default async function AdminDashboard() {
                 <RevenusTable data={revenus} />
               </div>
 
-              {/* Dernieres annulations */}
-              <div className="bg-white rounded-xl border overflow-hidden">
-                <div className="px-4 py-3 border-b bg-accent/20">
-                  <h4 className="font-medium text-gray-700 text-sm">Dernieres resiliations</h4>
-                </div>
-                {annulations.length === 0 ? (
-                  <div className="p-8 text-center text-gray-500 text-sm">
-                    Aucune annulation.
-                  </div>
-                ) : (
-                  <table className="w-full text-sm">
-                    <thead className="bg-accent/20 border-b">
-                      <tr>
-                        <th className="text-left px-4 py-3 font-medium text-gray-500">Date</th>
-                        <th className="text-left px-4 py-3 font-medium text-gray-500">Nom</th>
-                        <th className="text-left px-4 py-3 font-medium text-gray-500">Email</th>
-                        <th className="text-left px-4 py-3 font-medium text-gray-500">Role</th>
-                        <th className="text-left px-4 py-3 font-medium text-gray-500">Plan</th>
-                        <th className="text-left px-4 py-3 font-medium text-gray-500">Raison</th>
-                        <th className="text-left px-4 py-3 font-medium text-gray-500">Commentaire</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {annulations.map((a, i) => (
-                        <tr key={i} className="border-b last:border-0 hover:bg-accent/10">
-                          <td className="px-4 py-3">
-                            {a.date ? new Date(a.date).toLocaleDateString('fr-FR') : '-'}
-                          </td>
-                          <td className="px-4 py-3 font-medium">{a.nom}</td>
-                          <td className="px-4 py-3 text-gray-500">{a.email}</td>
-                          <td className="px-4 py-3">
-                            <span className="text-xs bg-gray-200 text-gray-700 px-2 py-0.5 rounded-full">
-                              {a.role}
-                            </span>
-                          </td>
-                          <td className="px-4 py-3">{formatPlan(a.plan)}</td>
-                          <td className="px-4 py-3 text-gray-500">{formatFeedback(a.feedback)}</td>
-                          <td className="px-4 py-3 text-gray-500 max-w-48 truncate">{a.comment || '-'}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                )}
-              </div>
+              {/* Resiliations */}
+              <h4 className="font-medium text-gray-700 text-sm mb-3">Resiliations</h4>
+              <ResiliationsTable data={annulations} />
             </>
           ),
 
