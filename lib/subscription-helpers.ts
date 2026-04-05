@@ -95,8 +95,25 @@ export async function getSubscriptionStatus(userId: string): Promise<Subscriptio
   }
 }
 
-export async function getPaymentMethod(stripeCustomerId: string): Promise<PaymentMethod | null> {
+export async function getPaymentMethod(stripeCustomerId: string, stripeSubscriptionId?: string | null): Promise<PaymentMethod | null> {
   try {
+    // D'abord chercher sur l'abonnement
+    if (stripeSubscriptionId) {
+      const sub = await stripe.subscriptions.retrieve(stripeSubscriptionId, {
+        expand: ['default_payment_method'],
+      })
+      const subPm = sub.default_payment_method
+      if (subPm && typeof subPm !== 'string' && subPm.card) {
+        return {
+          brand: subPm.card.brand,
+          last4: subPm.card.last4,
+          expMonth: subPm.card.exp_month,
+          expYear: subPm.card.exp_year,
+        }
+      }
+    }
+
+    // Fallback : chercher sur le client
     const customer = await stripe.customers.retrieve(stripeCustomerId, {
       expand: ['invoice_settings.default_payment_method'],
     }) as Stripe.Customer

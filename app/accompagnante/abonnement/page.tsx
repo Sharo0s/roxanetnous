@@ -36,7 +36,7 @@ export default async function AbonnementAccompagnantePage({
 
   if (subscription.stripeCustomerId || subscription.stripePriceId) {
     const results = await Promise.allSettled([
-      subscription.stripeCustomerId ? getPaymentMethod(subscription.stripeCustomerId) : Promise.resolve(null),
+      subscription.stripeCustomerId ? getPaymentMethod(subscription.stripeCustomerId, subscription.stripeSubscriptionId) : Promise.resolve(null),
       subscription.stripeCustomerId ? getInvoices(subscription.stripeCustomerId) : Promise.resolve([]),
       subscription.stripePriceId ? getSubscriptionAmount(subscription.stripePriceId) : Promise.resolve(null),
     ])
