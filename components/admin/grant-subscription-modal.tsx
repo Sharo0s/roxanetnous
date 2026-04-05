@@ -39,7 +39,7 @@ export function GrantSubscriptionModal({ userId, userName }: Props) {
         onClick={() => setOpen(true)}
         className="px-3 py-1.5 text-xs font-medium bg-accent text-black rounded-lg hover:bg-accent/80 transition-colors"
       >
-        Offrir abo
+        Offrir&nbsp;un&nbsp;abo
       </button>
 
       {open && (
