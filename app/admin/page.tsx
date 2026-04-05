@@ -265,6 +265,10 @@ export default async function AdminDashboard() {
                 <div className="bg-white rounded-xl border p-5">
                   <p className="text-sm text-gray-500">En essai gratuit</p>
                   <p className="text-3xl font-bold mt-1">{mrrDetail.essaiGratuit}</p>
+                  <div className="text-xs text-gray-400 mt-1 space-y-0.5">
+                    <p>{mrrDetail.essaiAccompagnantes} accompagnante{mrrDetail.essaiAccompagnantes > 1 ? 's' : ''}</p>
+                    <p>{mrrDetail.essaiAccompagnes} accompagne{mrrDetail.essaiAccompagnes > 1 ? 's' : ''}</p>
+                  </div>
                 </div>
                 <div className="bg-white rounded-xl border p-5">
                   <p className="text-sm text-gray-500">Payants</p>

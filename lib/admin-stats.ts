@@ -255,6 +255,8 @@ export async function getMrrDetail() {
   // Essai vs payants
   let essaiGratuit = 0
   let payants = 0
+  let essaiAccompagnantes = 0
+  let essaiAccompagnes = 0
 
   for (const s of subs || []) {
     const role = roleMap.get(s.user_id) || 'accompagnante'
@@ -266,11 +268,16 @@ export async function getMrrDetail() {
       segments[segmentKey].mrr += mrrFromPlanType(s.plan_type)
     }
 
-    if (s.status === 'trialing') essaiGratuit++
-    else payants++
+    if (s.status === 'trialing') {
+      essaiGratuit++
+      if (role === 'accompagnante') essaiAccompagnantes++
+      else essaiAccompagnes++
+    } else {
+      payants++
+    }
   }
 
-  return { segments, essaiGratuit, payants }
+  return { segments, essaiGratuit, essaiAccompagnantes, essaiAccompagnes, payants }
 }
 
 export async function getChurn() {
