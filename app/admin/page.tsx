@@ -256,7 +256,7 @@ export default async function AdminDashboard() {
               </div>
 
               {/* MRR par segment */}
-              <h4 className="font-medium text-gray-700 text-sm mb-3">Revenu mensuel recurrent par segment</h4>
+              <h4 className="font-medium text-gray-700 text-sm mb-3">MRR par segment</h4>
               <div className="mb-8">
                 <MrrSegmentTable data={mrrSegmentParMois} />
               </div>
