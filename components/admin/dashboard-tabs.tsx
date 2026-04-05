@@ -18,15 +18,15 @@ export function DashboardTabs({ children }: {
 
   return (
     <div>
-      <div className="flex gap-1 border-b mb-6">
+      <div className="flex gap-2 mb-6">
         {tabs.map((tab) => (
           <button
             key={tab.id}
             onClick={() => setActive(tab.id)}
-            className={`px-4 py-2.5 text-sm font-medium whitespace-nowrap border-b-2 transition-colors ${
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition btn-hover ${
               active === tab.id
-                ? 'border-accent text-black'
-                : 'border-transparent text-gray-500 hover:text-black hover:border-gray-300'
+                ? 'bg-accent text-black'
+                : 'bg-white border border-gray-300 text-gray-700 hover:border-accent'
             }`}
           >
             {tab.label}
