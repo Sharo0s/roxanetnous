@@ -97,7 +97,7 @@ export function SubscriptionPageContent({
               <form action={createPortalSession}>
                 <button
                   type="submit"
-                  className="px-4 py-2 text-sm font-medium border border-gray-300 text-gray-700 rounded-lg hover:border-gray-400 transition-colors"
+                  className="px-4 py-2 text-sm font-medium bg-accent text-black rounded-lg btn-hover transition-colors"
                 >
                   Modifier
                 </button>
@@ -109,7 +109,7 @@ export function SubscriptionPageContent({
               <form action={createPortalSession}>
                 <button
                   type="submit"
-                  className="px-4 py-2 text-sm font-medium border border-gray-300 text-gray-700 rounded-lg hover:border-gray-400 transition-colors"
+                  className="px-4 py-2 text-sm font-medium bg-accent text-black rounded-lg btn-hover transition-colors"
                 >
                   Gerer via Stripe
                 </button>
@@ -154,7 +154,7 @@ export function SubscriptionPageContent({
                   <input type="hidden" name="plan" value="mensuel" />
                   <button
                     type="submit"
-                    className="px-4 py-2.5 text-sm font-medium border border-gray-300 text-gray-700 rounded-lg hover:border-gray-400 transition-colors"
+                    className="px-4 py-2.5 text-sm font-medium bg-accent text-black rounded-lg btn-hover transition-colors"
                   >
                     Passer au mensuel
                   </button>
