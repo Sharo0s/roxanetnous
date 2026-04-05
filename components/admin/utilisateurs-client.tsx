@@ -312,7 +312,7 @@ function AccompagnantesTable({
                       />
                       <Link
                         href={`/admin/utilisateurs/${u.id}`}
-                        className="px-3 py-1.5 text-xs font-medium border border-gray-300 rounded-lg hover:border-accent transition-colors"
+                        className="px-3 py-1.5 text-xs font-medium text-black rounded-lg hover:opacity-80 transition-colors" style={{ backgroundColor: '#ffb06e' }}
                       >
                         Voir
                       </Link>
@@ -401,46 +401,51 @@ function ResiliationsPanel({ annulations }: { annulations: AnnulationRow[] }) {
   }
 
   return (
-    <div className="space-y-3">
-      {annulations.map((a, i) => (
-        <div key={i} className="bg-white rounded-xl border p-5">
-          <div className="flex items-start justify-between mb-3">
-            <div>
-              <p className="font-medium text-gray-900">{a.nom}</p>
-              <p className="text-xs text-gray-400">{a.email}</p>
-            </div>
-            <div className="text-right flex flex-col items-end gap-1">
-              <div className="flex gap-1.5">
-                <span className="text-xs bg-gray-200 text-gray-700 px-2 py-0.5 rounded-full">{a.role}</span>
-                {a.pending && <span className="text-xs bg-accent/30 text-gray-700 px-2 py-0.5 rounded-full">Prevue</span>}
-              </div>
-              <p className="text-xs text-gray-400">
-                {a.date ? new Date(a.date).toLocaleDateString('fr-FR') : '-'}
-              </p>
-            </div>
-          </div>
-          <div className="flex gap-4 text-sm">
-            <div>
-              <span className="text-gray-500">Plan : </span>
-              <span className="font-medium">{a.plan === 'annuel' || a.plan === 'annual' ? 'Annuel' : 'Mensuel'}</span>
-            </div>
-            {a.feedback && (
-              <div>
-                <span className="text-gray-500">Raison : </span>
-                <span className="font-medium">{FEEDBACK_LABELS[a.feedback] || a.feedback}</span>
-              </div>
-            )}
-          </div>
-          {a.comment && (
-            <div className="mt-3 p-3 bg-gray-50 rounded-lg text-sm text-gray-700">
-              {a.comment}
-            </div>
-          )}
-          {!a.feedback && !a.comment && (
-            <p className="text-sm text-gray-400 mt-1">Aucun motif renseigne</p>
-          )}
-        </div>
-      ))}
+    <div className="bg-white rounded-xl border overflow-hidden">
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm">
+          <thead className="bg-accent/20 border-b">
+            <tr>
+              <th className="text-left px-4 py-3 font-medium text-gray-500">Nom</th>
+              <th className="text-left px-4 py-3 font-medium text-gray-500">Role</th>
+              <th className="text-left px-4 py-3 font-medium text-gray-500">Plan</th>
+              <th className="text-left px-4 py-3 font-medium text-gray-500">Raison</th>
+              <th className="text-left px-4 py-3 font-medium text-gray-500">Date</th>
+              <th className="text-right px-4 py-3 font-medium text-gray-500"></th>
+            </tr>
+          </thead>
+          <tbody>
+            {annulations.map((a, i) => (
+              <tr key={i} className="border-b last:border-0 hover:bg-accent/10">
+                <td className="px-4 py-3">
+                  <div className="font-medium text-gray-900">{a.nom}</div>
+                  <div className="text-xs text-gray-400">{a.email}</div>
+                </td>
+                <td className="px-4 py-3">
+                  <span className="text-xs bg-gray-200 text-gray-700 px-2 py-0.5 rounded-full">{a.role}</span>
+                </td>
+                <td className="px-4 py-3 text-gray-600">
+                  {a.plan === 'annuel' || a.plan === 'annual' ? 'Annuel' : 'Mensuel'}
+                </td>
+                <td className="px-4 py-3 text-gray-600">
+                  <div>
+                    {a.feedback ? FEEDBACK_LABELS[a.feedback] || a.feedback : <span className="text-gray-400">-</span>}
+                  </div>
+                  {a.comment && (
+                    <div className="text-xs text-gray-400 mt-0.5 line-clamp-1">{a.comment}</div>
+                  )}
+                </td>
+                <td className="px-4 py-3 text-gray-400">
+                  <div>{a.date ? new Date(a.date).toLocaleDateString('fr-FR') : '-'}</div>
+                  {a.pending && <span className="text-xs bg-accent/30 text-gray-700 px-2 py-0.5 rounded-full">Prevue</span>}
+                </td>
+                <td className="px-4 py-3 text-right">
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   )
 }
