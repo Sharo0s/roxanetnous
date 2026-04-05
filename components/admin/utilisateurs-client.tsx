@@ -3,6 +3,7 @@
 import { useState, useMemo } from 'react'
 import Link from 'next/link'
 import type { AccompagnanteRow, AccompagneRow } from '@/app/admin/utilisateurs/page'
+import { GrantSubscriptionModal } from './grant-subscription-modal'
 
 type Tab = 'accompagnantes' | 'accompagnes' | 'resiliations'
 
@@ -304,12 +305,18 @@ function AccompagnantesTable({
                     {new Date(u.created_at).toLocaleDateString('fr-FR')}
                   </td>
                   <td className="px-4 py-3 text-right">
-                    <Link
-                      href={`/admin/utilisateurs/${u.id}`}
-                      className="px-3 py-1.5 text-xs font-medium border border-gray-300 rounded-lg hover:border-accent transition-colors"
-                    >
-                      Voir
-                    </Link>
+                    <div className="flex gap-2 justify-end">
+                      <GrantSubscriptionModal
+                        userId={u.id}
+                        userName={`${u.first_name} ${u.last_name}`}
+                      />
+                      <Link
+                        href={`/admin/utilisateurs/${u.id}`}
+                        className="px-3 py-1.5 text-xs font-medium border border-gray-300 rounded-lg hover:border-accent transition-colors"
+                      >
+                        Voir
+                      </Link>
+                    </div>
                   </td>
                 </tr>
               )
@@ -362,12 +369,18 @@ function AccompagnesTable({
                   {new Date(u.created_at).toLocaleDateString('fr-FR')}
                 </td>
                 <td className="px-4 py-3 text-right">
-                  <Link
-                    href={`/admin/utilisateurs/${u.id}`}
-                    className="px-3 py-1.5 text-xs font-medium border border-gray-300 rounded-lg hover:border-accent transition-colors"
-                  >
-                    Voir
-                  </Link>
+                  <div className="flex gap-2 justify-end">
+                    <GrantSubscriptionModal
+                      userId={u.id}
+                      userName={`${u.first_name} ${u.last_name}`}
+                    />
+                    <Link
+                      href={`/admin/utilisateurs/${u.id}`}
+                      className="px-3 py-1.5 text-xs font-medium border border-gray-300 rounded-lg hover:border-accent transition-colors"
+                    >
+                      Voir
+                    </Link>
+                  </div>
                 </td>
               </tr>
             ))}

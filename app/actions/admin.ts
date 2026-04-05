@@ -206,6 +206,113 @@ export async function adminDeleteUser(userId: string): Promise<{ error?: string 
   redirect('/admin/utilisateurs')
 }
 
+export async function adminGrantSubscription(
+  userId: string,
+  planType: 'mensuel' | 'annuel'
+): Promise<{ error?: string; success?: boolean }> {
+  const supabase = await createClient()
+  const { data: { user: adminUser } } = await supabase.auth.getUser()
+  if (!adminUser) return { error: 'Non connecte.' }
+
+  const supabaseAdmin = await createClient({ serviceRole: true })
+
+  // Verifier que l'appelant est admin
+  const { data: adminData } = await supabaseAdmin
+    .from('users')
+    .select('role')
+    .eq('id', adminUser.id)
+    .single()
+
+  if (!adminData || adminData.role !== 'admin') {
+    return { error: 'Acces refuse.' }
+  }
+
+  // Charger l'utilisateur cible
+  const { data: targetUser } = await supabaseAdmin
+    .from('users')
+    .select('id, email, first_name, last_name, role')
+    .eq('id', userId)
+    .single()
+
+  if (!targetUser) return { error: 'Utilisateur introuvable.' }
+
+  const role = targetUser.role as 'accompagnante' | 'accompagne'
+  if (role !== 'accompagnante' && role !== 'accompagne') {
+    return { error: 'Role non eligible a un abonnement.' }
+  }
+
+  // Verifier s'il a deja un abonnement actif
+  const existingSub = await getSubscriptionStatus(userId)
+  if (existingSub.active) {
+    return { error: 'Cet utilisateur a deja un abonnement actif.' }
+  }
+
+  const priceId = (await import('@/lib/stripe')).getStripePriceId(role, planType)
+  if (!priceId) return { error: 'Prix introuvable pour ce plan.' }
+
+  try {
+    // Creer ou recuperer le client Stripe
+    let customerId = existingSub.stripeCustomerId
+    if (!customerId) {
+      const customer = await stripe.customers.create({
+        email: targetUser.email,
+        name: `${targetUser.first_name || ''} ${targetUser.last_name || ''}`.trim() || undefined,
+        metadata: { user_id: userId, role },
+      })
+      customerId = customer.id
+    }
+
+    // Creer un coupon 100% pour abonnement offert par admin
+    const coupon = await stripe.coupons.create({
+      percent_off: 100,
+      duration: 'forever',
+      name: `Offert par admin - ${targetUser.email}`,
+    })
+
+    // Creer l'abonnement Stripe avec coupon 100%
+    const subscription = await stripe.subscriptions.create({
+      customer: customerId,
+      items: [{ price: priceId }],
+      discounts: [{ coupon: coupon.id }],
+      metadata: { user_id: userId, role, plan: planType, granted_by_admin: adminUser.id },
+    })
+
+    const item = subscription.items.data[0]
+    const currentPeriodStart = item ? new Date(item.current_period_start * 1000).toISOString() : null
+    const currentPeriodEnd = item ? new Date(item.current_period_end * 1000).toISOString() : null
+
+    // Upsert dans Supabase (meme logique que le webhook)
+    await supabaseAdmin.from('subscriptions').upsert(
+      {
+        user_id: userId,
+        stripe_customer_id: customerId,
+        stripe_subscription_id: subscription.id,
+        stripe_price_id: priceId,
+        status: 'active',
+        plan_type: planType,
+        current_period_start: currentPeriodStart,
+        current_period_end: currentPeriodEnd,
+        first_subscription_date: new Date().toISOString(),
+      },
+      { onConflict: 'user_id' }
+    )
+
+    // Logger l'action admin
+    await supabaseAdmin.from('admin_actions_log').insert({
+      admin_id: adminUser.id,
+      action_type: 'grant_subscription',
+      target_type: 'subscription',
+      target_id: userId,
+      details: { plan_type: planType, stripe_subscription_id: subscription.id },
+    })
+
+    return { success: true }
+  } catch (e) {
+    console.error('adminGrantSubscription error:', e)
+    return { error: 'Erreur lors de la creation de l\'abonnement.' }
+  }
+}
+
 export async function adminCancelSubscription(formData: FormData): Promise<{ error?: string }> {
   const userId = formData.get('userId') as string
   if (!userId) return { error: 'userId manquant.' }
