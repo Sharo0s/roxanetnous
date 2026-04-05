@@ -287,26 +287,60 @@ export async function getChurn() {
   firstOfMonth.setDate(1)
   firstOfMonth.setHours(0, 0, 0, 0)
 
-  const { count: annulationsCeMois } = await supabase
+  // Annulations ce mois avec user_id pour le detail par role
+  const { data: annulationsData } = await supabase
     .from('subscriptions')
-    .select('id', { count: 'exact', head: true })
+    .select('user_id, plan_type')
     .eq('status', 'cancelled')
     .gte('cancelled_at', firstOfMonth.toISOString())
+
+  const annulationsCeMois = annulationsData?.length || 0
+
+  // Recuperer les roles des utilisateurs annules
+  const annulUserIds = (annulationsData || []).map(a => a.user_id)
+  let annulAccompagnantes = 0
+  let annulAccompagnes = 0
+  let annulMensuel = 0
+  let annulAnnuel = 0
+
+  if (annulUserIds.length > 0) {
+    const { data: annulUsers } = await supabase
+      .from('users')
+      .select('id, role')
+      .in('id', annulUserIds)
+
+    const roleMap = new Map<string, string>()
+    for (const u of annulUsers || []) {
+      roleMap.set(u.id, u.role)
+    }
+
+    for (const a of annulationsData || []) {
+      const role = roleMap.get(a.user_id)
+      if (role === 'accompagnante') annulAccompagnantes++
+      else annulAccompagnes++
+      if (a.plan_type === 'annuel' || a.plan_type === 'annual') annulAnnuel++
+      else annulMensuel++
+    }
+  }
 
   const { count: abonnesActifs } = await supabase
     .from('subscriptions')
     .select('id', { count: 'exact', head: true })
     .in('status', ['active', 'trialing'])
 
-  const abonnesDebutMois = (abonnesActifs || 0) + (annulationsCeMois || 0)
+  const abonnesDebutMois = (abonnesActifs || 0) + annulationsCeMois
   const taux = abonnesDebutMois > 0
-    ? ((annulationsCeMois || 0) / abonnesDebutMois) * 100
+    ? (annulationsCeMois / abonnesDebutMois) * 100
     : 0
 
   return {
     taux,
-    annulations: annulationsCeMois || 0,
+    annulations: annulationsCeMois,
     abonnesDebutMois,
+    annulAccompagnantes,
+    annulAccompagnes,
+    annulMensuel,
+    annulAnnuel,
   }
 }
 

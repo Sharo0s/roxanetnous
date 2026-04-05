@@ -241,9 +241,15 @@ export default async function AdminDashboard() {
                   <p className={`text-3xl font-bold mt-1 ${churn.taux <= 2 ? 'text-green-700' : churn.taux <= 5 ? 'text-amber-600' : 'text-red-600'}`}>
                     {churn.taux.toFixed(1)}%
                   </p>
-                  <p className="text-xs text-gray-400 mt-1">
-                    {churn.annulations} annulation{churn.annulations > 1 ? 's' : ''} / {churn.abonnesDebutMois} debut de mois
-                  </p>
+                  <div className="text-xs text-gray-400 mt-1 space-y-0.5">
+                    <p>{churn.annulations} annulation{churn.annulations > 1 ? 's' : ''} / {churn.abonnesDebutMois} abonne{churn.abonnesDebutMois > 1 ? 's' : ''} debut de mois</p>
+                    {churn.annulations > 0 && (
+                      <>
+                        <p>{churn.annulAccompagnantes} accompagnante{churn.annulAccompagnantes > 1 ? 's' : ''}, {churn.annulAccompagnes} accompagne{churn.annulAccompagnes > 1 ? 's' : ''}</p>
+                        <p>{churn.annulMensuel} mens., {churn.annulAnnuel} ann.</p>
+                      </>
+                    )}
+                  </div>
                 </div>
               </div>
 
