@@ -38,7 +38,7 @@ export default async function AdminUtilisateursPage() {
     .from('users')
     .select(`
       id, email, first_name, last_name, role, created_at,
-      accompagnantes_profiles!accompagnantes_profiles_user_id_fkey (id, ville, code_postal, validation_status, diplomes, experience)
+      accompagnantes_profiles!auxiliaires_profiles_user_id_fkey (id, ville, code_postal, validation_status, diplomes, experience)
     `)
     .eq('role', 'accompagnante')
     .order('created_at', { ascending: false })
