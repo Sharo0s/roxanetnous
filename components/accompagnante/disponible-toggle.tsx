@@ -49,15 +49,24 @@ export function DisponibleToggle({ initial, initialIndisponibleJusquAu, compact 
 
   const today = new Date().toISOString().split('T')[0]
 
+  async function handleCompactToggle() {
+    setLoading(true)
+    const result = await toggleDisponible(disponible ? null : null)
+    if (result.success) {
+      setDisponible(!disponible)
+    }
+    setLoading(false)
+  }
+
   if (compact) {
     return (
       <div className="flex items-center gap-2">
         <button
-          onClick={handleToggle}
-          disabled={loading || showDate}
+          onClick={handleCompactToggle}
+          disabled={loading}
           className={`relative w-9 h-5 rounded-full transition ${
             disponible ? 'bg-accent' : 'bg-gray-300'
-          } ${loading || showDate ? 'opacity-50' : ''}`}
+          } ${loading ? 'opacity-50' : ''}`}
         >
           <span
             className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white transition-transform ${
