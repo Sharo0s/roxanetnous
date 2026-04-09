@@ -61,56 +61,47 @@ export default async function AccompagnanteDashboard() {
       />
 
       <div className="max-w-5xl mx-auto px-4 py-8 relative z-10">
-        <div className="flex flex-col items-center mb-8">
+        <div className="flex items-start gap-5 mb-8 bg-white rounded-xl border p-5">
           <AvatarUpload
             currentUrl={userData.avatar_url}
             firstName={userData.first_name || ''}
             lastName={userData.last_name || ''}
             size="lg"
           />
-          <div className="flex items-center gap-2 mt-3">
-            <h2 className="text-xl font-bold text-gray-900">
-              {userData.first_name} {userData.last_name}
-            </h2>
-            {profile && <StatusBadge status={profile.validation_status} />}
-          </div>
-          {profile?.ville && (
-            <p className="text-sm text-gray-500 mt-0.5 flex items-center gap-1">
-              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
-                <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
-              </svg>
-              {profile.ville}{profile.rayon_km ? ` - ${profile.rayon_km} km` : ''}
-            </p>
-          )}
-          {profile?.specialites && (profile.specialites as string[]).length > 0 && (
-            <div className="flex flex-wrap justify-center gap-1.5 mt-2 max-w-md">
-              {(profile.specialites as string[]).map((s) => (
-                <span key={s} className="px-2 py-0.5 rounded-full bg-accent/20 text-xs font-medium text-gray-700">
-                  {s}
-                </span>
-              ))}
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2">
+              <h2 className="text-xl font-bold text-gray-900">
+                {userData.first_name} {userData.last_name}
+              </h2>
+              {profile && <StatusBadge status={profile.validation_status} />}
             </div>
-          )}
-          {profile && (
-            <div className="mt-2">
-              <DisponibleToggle
-                initial={profile.disponible ?? true}
-                initialIndisponibleJusquAu={profile.indisponible_jusqu_au}
-                compact
-              />
-            </div>
-          )}
-          <div className="flex items-center gap-1 mt-4 bg-white rounded-full border p-1">
-            <span className="px-4 py-1.5 rounded-full bg-accent text-sm font-medium text-black">
-              Dashboard
-            </span>
-            <Link
-              href="/accompagnante/profil"
-              className="px-4 py-1.5 rounded-full text-sm font-medium text-gray-500 hover:text-black transition"
-            >
-              Profil
-            </Link>
+            {profile?.ville && (
+              <p className="text-sm text-gray-500 mt-1 flex items-center gap-1">
+                <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
+                </svg>
+                {profile.ville}{profile.rayon_km ? ` - Sur ${profile.rayon_km} km` : ''}
+              </p>
+            )}
+            {profile?.specialites && (profile.specialites as string[]).length > 0 && (
+              <div className="flex flex-wrap gap-1.5 mt-2">
+                {(profile.specialites as string[]).map((s) => (
+                  <span key={s} className="px-2 py-0.5 rounded-full bg-accent/20 text-xs font-medium text-gray-700">
+                    {s}
+                  </span>
+                ))}
+              </div>
+            )}
+            {profile && (
+              <div className="mt-3">
+                <DisponibleToggle
+                  initial={profile.disponible ?? true}
+                  initialIndisponibleJusquAu={profile.indisponible_jusqu_au}
+                  compact
+                />
+              </div>
+            )}
           </div>
         </div>
 
@@ -129,58 +120,24 @@ export default async function AccompagnanteDashboard() {
           </div>
         ) : (
           <div className="space-y-4">
-            <div className="bg-white rounded-xl border p-6">
-              <div className="flex items-center gap-3 mb-2">
-                <h3 className="font-semibold text-lg">Statut du profil</h3>
-                <StatusBadge status={profile.validation_status} />
+            {(profile.validation_status === 'refuse' || profile.validation_status === 'a_completer') && (
+              <div className="p-4 rounded-xl border border-red-200 bg-red-50 text-sm">
+                <p className="font-medium text-red-800">
+                  {profile.validation_status === 'refuse'
+                    ? 'Votre profil a ete refuse. Veuillez corriger les informations demandees.'
+                    : 'Des informations complementaires sont demandees.'}
+                </p>
+                {profile.refus_motif && (
+                  <p className="text-red-700 mt-1">{profile.refus_motif}</p>
+                )}
+                <Link
+                  href="/accompagnante/profil"
+                  className="inline-flex items-center px-4 py-2 bg-accent text-black rounded-lg btn-hover transition text-sm font-medium mt-3"
+                >
+                  Modifier mon profil
+                </Link>
               </div>
-              {profile.validation_status === 'en_attente' && (
-                <p className="text-gray-600">
-                  Votre profil est en cours de verification par notre equipe.
-                </p>
-              )}
-              {profile.validation_status === 'valide' && (
-                <p className="text-gray-600">
-                  Votre profil est valide. Vous pouvez creer des annonces.
-                </p>
-              )}
-              {profile.validation_status === 'refuse' && (
-                <div>
-                  <p className="text-red-800 font-medium">
-                    Votre profil a ete refuse. Veuillez corriger les informations demandees.
-                  </p>
-                  {profile.refus_motif && (
-                    <p className="text-sm text-red-700 mt-2 p-3 bg-red-50 rounded-lg">
-                      Motif : {profile.refus_motif}
-                    </p>
-                  )}
-                  <Link
-                    href="/accompagnante/profil"
-                    className="inline-flex items-center px-4 py-2 bg-accent text-black rounded-lg btn-hover transition text-sm font-medium mt-3"
-                  >
-                    Modifier mon profil
-                  </Link>
-                </div>
-              )}
-              {profile.validation_status === 'a_completer' && (
-                <div>
-                  <p className="text-red-800 font-medium">
-                    Des informations complementaires sont demandees. Veuillez mettre a jour votre profil.
-                  </p>
-                  {profile.refus_motif && (
-                    <p className="text-sm text-red-700 mt-2 p-3 bg-red-50 rounded-lg">
-                      Details : {profile.refus_motif}
-                    </p>
-                  )}
-                  <Link
-                    href="/accompagnante/profil"
-                    className="inline-flex items-center px-4 py-2 bg-accent text-black rounded-lg btn-hover transition text-sm font-medium mt-3"
-                  >
-                    Modifier mon profil
-                  </Link>
-                </div>
-              )}
-            </div>
+            )}
 
             {profile.validation_status === 'valide' && !subscribed && (
               <SubscriptionBanner />
