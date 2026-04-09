@@ -228,3 +228,53 @@ export async function updateAccompagneProfile(data: {
   revalidatePath('/accompagne/profil')
   return { success: true }
 }
+
+export async function uploadAvatar(formData: FormData): Promise<ProfileResult> {
+  const supabase = await createClient()
+
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Non connecte.' }
+
+  const file = formData.get('file') as File
+  if (!file) return { error: 'Fichier requis.' }
+
+  const allowedTypes = ['image/jpeg', 'image/png', 'image/webp']
+  if (!allowedTypes.includes(file.type)) {
+    return { error: 'Format non supporte. Utilisez JPG, PNG ou WebP.' }
+  }
+
+  if (file.size > 5 * 1024 * 1024) {
+    return { error: 'Le fichier ne doit pas depasser 5 Mo.' }
+  }
+
+  const ext = file.name.split('.').pop()
+  const path = `${user.id}/avatar.${ext}`
+
+  const { error: uploadError } = await supabase.storage
+    .from('avatars')
+    .upload(path, file, {
+      cacheControl: '3600',
+      upsert: true,
+    })
+
+  if (uploadError) {
+    return { error: 'Erreur lors de l\'upload.' }
+  }
+
+  const { data: { publicUrl } } = supabase.storage
+    .from('avatars')
+    .getPublicUrl(path)
+
+  const { error: updateError } = await supabase
+    .from('users')
+    .update({ avatar_url: publicUrl, updated_at: new Date().toISOString() })
+    .eq('id', user.id)
+
+  if (updateError) {
+    return { error: 'Erreur lors de la mise a jour du profil.' }
+  }
+
+  revalidatePath('/accompagnante/dashboard')
+  revalidatePath('/accompagnante/profil')
+  return { success: true }
+}

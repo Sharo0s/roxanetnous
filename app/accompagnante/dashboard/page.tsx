@@ -5,6 +5,9 @@ import { getUnreadCount } from '@/lib/unread-count'
 import { getSubscriptionStatus } from '@/lib/subscription-helpers'
 import { SubscriptionBanner } from '@/components/accompagnante/subscription-banner'
 import { AccompagnanteHeader } from '@/components/layout/accompagnante-header'
+import { AvatarUpload } from '@/components/accompagnante/avatar-upload'
+import { DisponibleToggle } from '@/components/accompagnante/disponible-toggle'
+import { StatusBadge } from '@/components/accompagnante/status-badge'
 
 export default async function AccompagnanteDashboard() {
   const supabase = await createClient()
@@ -14,7 +17,7 @@ export default async function AccompagnanteDashboard() {
 
   const { data: userData } = await supabase
     .from('users')
-    .select('first_name, last_name, role')
+    .select('first_name, last_name, role, avatar_url')
     .eq('id', user.id)
     .single()
 
@@ -22,7 +25,7 @@ export default async function AccompagnanteDashboard() {
 
   const { data: profile } = await supabase
     .from('accompagnantes_profiles')
-    .select('id, validation_status, diplomes, refus_motif')
+    .select('id, validation_status, diplomes, refus_motif, ville, rayon_km, specialites, disponible, indisponible_jusqu_au')
     .eq('user_id', user.id)
     .single()
 
@@ -58,9 +61,58 @@ export default async function AccompagnanteDashboard() {
       />
 
       <div className="max-w-5xl mx-auto px-4 py-8 relative z-10">
-        <h2 className="text-2xl font-bold text-gray-900 mb-6">
-          Bonjour {userData.first_name}
-        </h2>
+        <div className="flex flex-col items-center mb-8">
+          <AvatarUpload
+            currentUrl={userData.avatar_url}
+            firstName={userData.first_name || ''}
+            lastName={userData.last_name || ''}
+            size="lg"
+          />
+          <div className="flex items-center gap-2 mt-3">
+            <h2 className="text-xl font-bold text-gray-900">
+              {userData.first_name} {userData.last_name}
+            </h2>
+            {profile && <StatusBadge status={profile.validation_status} />}
+          </div>
+          {profile?.ville && (
+            <p className="text-sm text-gray-500 mt-0.5 flex items-center gap-1">
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
+              </svg>
+              {profile.ville}{profile.rayon_km ? ` - ${profile.rayon_km} km` : ''}
+            </p>
+          )}
+          {profile?.specialites && (profile.specialites as string[]).length > 0 && (
+            <div className="flex flex-wrap justify-center gap-1.5 mt-2 max-w-md">
+              {(profile.specialites as string[]).map((s) => (
+                <span key={s} className="px-2 py-0.5 rounded-full bg-accent/20 text-xs font-medium text-gray-700">
+                  {s}
+                </span>
+              ))}
+            </div>
+          )}
+          {profile && (
+            <div className="mt-2">
+              <DisponibleToggle
+                initial={profile.disponible ?? true}
+                initialIndisponibleJusquAu={profile.indisponible_jusqu_au}
+                compact
+              />
+            </div>
+          )}
+          <div className="flex items-center gap-1 mt-4 bg-white rounded-full border p-1">
+            <span className="px-4 py-1.5 rounded-full bg-accent text-sm font-medium text-black">
+              Dashboard
+            </span>
+            <Link
+              href="/accompagnante/profil"
+              className="px-4 py-1.5 rounded-full text-sm font-medium text-gray-500 hover:text-black transition"
+            >
+              Profil
+            </Link>
+          </div>
+        </div>
 
         {!profile || !profile.diplomes || profile.diplomes.length === 0 ? (
           <div className="bg-white rounded-xl border p-6">
@@ -221,27 +273,5 @@ export default async function AccompagnanteDashboard() {
         )}
       </div>
     </main>
-  )
-}
-
-function StatusBadge({ status }: { status: string }) {
-  const styles: Record<string, string> = {
-    en_attente: 'bg-gray-200 text-gray-700',
-    valide: 'bg-accent text-black',
-    refuse: 'bg-red-50 text-red-800 border border-red-200',
-    a_completer: 'bg-red-50 text-red-800 border border-red-200',
-  }
-
-  const labels: Record<string, string> = {
-    en_attente: 'En attente',
-    valide: 'Valide',
-    refuse: 'Refuse',
-    a_completer: 'A completer',
-  }
-
-  return (
-    <span className={`px-2 py-1 rounded-full text-xs font-medium ${styles[status] || 'bg-gray-100 text-gray-600'}`}>
-      {labels[status] || status}
-    </span>
   )
 }
