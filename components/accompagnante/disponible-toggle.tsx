@@ -75,7 +75,7 @@ export function DisponibleToggle({ initial, initialIndisponibleJusquAu, compact 
           />
         </button>
         <span className={`text-xs font-medium ${disponible ? 'text-gray-700' : 'text-gray-400'}`}>
-          {disponible ? 'Disponible' : 'Indisponible'}
+          {disponible ? 'Je suis disponible' : 'Je suis indisponible'}
         </span>
       </div>
     )
