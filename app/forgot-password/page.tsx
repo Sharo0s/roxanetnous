@@ -31,17 +31,17 @@ export default function ForgotPasswordPage() {
           <Link href="/" className="text-3xl font-bold text-black">
             roxanetnous
           </Link>
-          <p className="mt-2 text-gray-600">Reinitialiser votre mot de passe</p>
+          <p className="mt-2 text-gray-600">Réinitialiser votre mot de passe</p>
         </div>
 
         {success ? (
           <div className="bg-white p-8 rounded-xl shadow-sm border text-center">
-            <p className="font-semibold text-gray-900 mb-2">Email envoye</p>
+            <p className="font-semibold text-gray-900 mb-2">Email envoyé</p>
             <p className="text-sm text-gray-600 mb-4">
-              Si un compte existe avec cette adresse, vous recevrez un lien pour reinitialiser votre mot de passe.
+              Si un compte existe avec cette adresse, vous recevrez un lien pour réinitialiser votre mot de passe.
             </p>
             <Link href="/login" className="text-sm text-black font-medium hover:underline">
-              Retour a la connexion
+              Retour à la connexion
             </Link>
           </div>
         ) : (
@@ -53,7 +53,7 @@ export default function ForgotPasswordPage() {
             )}
 
             <p className="text-sm text-gray-600">
-              Entrez votre adresse email. Vous recevrez un lien pour creer un nouveau mot de passe.
+              Entrez votre adresse email. Vous recevrez un lien pour créer un nouveau mot de passe.
             </p>
 
             <Input
@@ -72,7 +72,7 @@ export default function ForgotPasswordPage() {
 
         <p className="text-center mt-6 text-sm text-gray-600">
           <Link href="/login" className="text-black font-medium hover:underline">
-            Retour a la connexion
+            Retour à la connexion
           </Link>
         </p>
       </div>

@@ -7,9 +7,9 @@ const styles: Record<string, string> = {
 
 const labels: Record<string, string> = {
   en_attente: 'En attente',
-  valide: 'Valide',
-  refuse: 'Refuse',
-  a_completer: 'A completer',
+  valide: 'Validé',
+  refuse: 'Refusé',
+  a_completer: 'À compléter',
 }
 
 export function StatusBadge({ status }: { status: string }) {

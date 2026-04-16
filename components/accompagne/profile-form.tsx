@@ -71,7 +71,7 @@ export function AccompagneProfileForm({ userInfo, profile }: Props) {
       )}
       {success && (
         <div className="p-3 rounded-lg bg-gray-50 border text-gray-700 text-sm">
-          Profil mis a jour avec succes.
+          Profil mis à jour avec succès.
         </div>
       )}
 
@@ -79,7 +79,7 @@ export function AccompagneProfileForm({ userInfo, profile }: Props) {
         <h3 className="font-semibold mb-4">Informations personnelles</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Prenom</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Prénom</label>
             <input
               type="text"
               value={firstName}
@@ -106,7 +106,7 @@ export function AccompagneProfileForm({ userInfo, profile }: Props) {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Telephone</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Téléphone</label>
             <input
               type="tel"
               value={phone}

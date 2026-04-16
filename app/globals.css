@@ -1,8 +1,14 @@
 @import "tailwindcss";
 
 @theme {
-  --color-accent: #FFB06E;
-  --color-kraft: #F5E1C8;
+  --color-accent: #F4C8A3;
+  --color-kraft: #A8826B;
+  --font-sans: var(--font-body);
+  --font-heading: var(--font-heading);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
 }
 
 @keyframes marquee {

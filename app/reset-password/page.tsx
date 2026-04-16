@@ -36,9 +36,9 @@ export default function ResetPasswordPage() {
 
         {success ? (
           <div className="bg-white p-8 rounded-xl shadow-sm border text-center">
-            <p className="font-semibold text-gray-900 mb-2">Mot de passe mis a jour</p>
+            <p className="font-semibold text-gray-900 mb-2">Mot de passe mis à jour</p>
             <p className="text-sm text-gray-600 mb-4">
-              Votre mot de passe a ete modifie avec succes.
+              Votre mot de passe a été modifié avec succès.
             </p>
             <Link
               href="/login"
@@ -59,13 +59,13 @@ export default function ResetPasswordPage() {
               name="password"
               type="password"
               label="Nouveau mot de passe"
-              placeholder="8 caracteres minimum"
+              placeholder="8 caractères minimum"
               minLength={8}
               required
             />
 
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? 'Mise a jour...' : 'Mettre a jour le mot de passe'}
+              {loading ? 'Mise à jour...' : 'Mettre à jour le mot de passe'}
             </Button>
           </form>
         )}

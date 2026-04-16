@@ -15,16 +15,16 @@ export default async function AdminHistoriquePage() {
   const actionLabels: Record<string, string> = {
     valide: 'Validation profil',
     refuse: 'Refus profil',
-    a_completer: 'Demande complement',
+    a_completer: 'Demande complément',
     consultation_justificatif: 'Consultation justificatif',
     signalement_averti: 'Avertissement',
     signalement_suspendu: 'Suspension',
     signalement_supprime: 'Suppression',
-    signalement_ignore: 'Signalement ignore',
+    signalement_ignore: 'Signalement ignoré',
     annonce_suspendue: 'Annonce suspendue',
-    annonce_publiee: 'Annonce republiee',
-    annonce_archivee: 'Annonce archivee',
-    avis_masque: 'Avis masque',
+    annonce_publiee: 'Annonce republiée',
+    annonce_archivee: 'Annonce archivée',
+    avis_masque: 'Avis masqué',
   }
 
   return (
@@ -33,7 +33,7 @@ export default async function AdminHistoriquePage() {
 
         {!logs || logs.length === 0 ? (
           <div className="bg-white rounded-xl border p-8 text-center text-gray-500">
-            Aucune action enregistree.
+            Aucune action enregistrée.
           </div>
         ) : (
           <div className="bg-white rounded-xl border overflow-hidden">
@@ -44,7 +44,7 @@ export default async function AdminHistoriquePage() {
                   <th className="text-left px-4 py-3 font-medium text-gray-500">Admin</th>
                   <th className="text-left px-4 py-3 font-medium text-gray-500">Action</th>
                   <th className="text-left px-4 py-3 font-medium text-gray-500">Cible</th>
-                  <th className="text-left px-4 py-3 font-medium text-gray-500">Details</th>
+                  <th className="text-left px-4 py-3 font-medium text-gray-500">Détails</th>
                 </tr>
               </thead>
               <tbody>

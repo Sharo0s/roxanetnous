@@ -39,7 +39,7 @@ export function SignalementActions({ signalementId }: Props) {
       {error && <p className="text-xs text-red-600 mb-2">{error}</p>}
 
       <div className="mb-2">
-        <label className="block text-xs font-medium text-gray-700 mb-1">Decision</label>
+        <label className="block text-xs font-medium text-gray-700 mb-1">Décision</label>
         <select
           value={decision}
           onChange={(e) => setDecision(e.target.value as typeof decision)}

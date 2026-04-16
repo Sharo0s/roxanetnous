@@ -24,7 +24,7 @@ export function CookieBanner() {
       <div className="max-w-4xl mx-auto px-4 py-4 flex flex-col sm:flex-row items-center justify-between gap-4">
         <p className="text-sm text-gray-700">
           Ce site utilise uniquement des cookies essentiels au fonctionnement du service
-          (authentification, preferences). Aucun cookie publicitaire ou de suivi n&apos;est utilise.
+          (authentification, préférences). Aucun cookie publicitaire ou de suivi n&apos;est utilisé.
         </p>
         <button
           onClick={handleAccept}

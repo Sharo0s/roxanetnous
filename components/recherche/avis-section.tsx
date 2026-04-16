@@ -111,7 +111,7 @@ export function AvisSection({ cibleUserId, avisList, moyenneNote, canLeaveAvis }
             <textarea
               value={commentaire}
               onChange={(e) => setCommentaire(e.target.value)}
-              placeholder="Decrivez votre experience..."
+              placeholder="Décrivez votre expérience..."
               rows={3}
               className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black resize-none"
             />

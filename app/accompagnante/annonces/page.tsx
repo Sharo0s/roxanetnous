@@ -84,7 +84,7 @@ export default async function MesAnnoncesAccompagnante() {
                 href="/accompagnante/annonces/nouvelle"
                 className="inline-flex items-center px-4 py-2 bg-accent text-black rounded-lg btn-hover transition text-sm font-medium"
               >
-                Creer ma premiere annonce
+                Créer ma première annonce
               </Link>
             )}
           </div>
@@ -100,7 +100,7 @@ export default async function MesAnnoncesAccompagnante() {
                           ? 'bg-accent text-black'
                           : 'bg-gray-200 text-gray-600'
                       }`}>
-                        {annonce.status === 'publiee' ? 'Publiee' : 'Archivee'}
+                        {annonce.status === 'publiee' ? 'Publiée' : 'Archivée'}
                       </span>
                     </div>
                     <p className="text-sm text-gray-500">
@@ -110,7 +110,7 @@ export default async function MesAnnoncesAccompagnante() {
                     <div className="flex items-center gap-4 mt-3 text-xs text-gray-400">
                       <span>{annonce.vues} vues</span>
                       <span>{annonce.contacts_count} contacts</span>
-                      <span>Publiee le {new Date(annonce.published_at || annonce.created_at).toLocaleDateString('fr-FR')}</span>
+                      <span>Publiée le {new Date(annonce.published_at || annonce.created_at).toLocaleDateString('fr-FR')}</span>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">

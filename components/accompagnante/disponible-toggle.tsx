@@ -90,7 +90,7 @@ export function DisponibleToggle({ initial, initialIndisponibleJusquAu, compact 
           </p>
           <p className="text-xs text-gray-500 mt-0.5">
             {disponible
-              ? 'Les accompagnes voient que vous etes disponible.'
+              ? 'Les accompagnés voient que vous êtes disponible.'
               : dateRetour
                 ? `De retour le ${new Date(dateRetour).toLocaleDateString('fr-FR')}`
                 : 'Votre annonce reste visible mais sans le badge Disponible.'}

@@ -16,7 +16,7 @@ export async function creerSignalement(data: {
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { error: 'Non connecte.' }
+  if (!user) return { error: 'Non connecté.' }
 
   if (!data.motif.trim()) {
     return { error: 'Le motif est requis.' }

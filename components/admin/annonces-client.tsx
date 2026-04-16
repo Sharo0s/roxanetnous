@@ -49,7 +49,7 @@ export function AnnoncesSearchTable({
 
       {filtered.length === 0 ? (
         <div className="bg-white rounded-xl border p-8 text-center text-gray-500">
-          {search ? 'Aucune annonce ne correspond a ces criteres.' : 'Aucune annonce.'}
+          {search ? 'Aucune annonce ne correspond à ces critères.' : 'Aucune annonce.'}
         </div>
       ) : (
         <div className="bg-white rounded-xl border overflow-hidden">

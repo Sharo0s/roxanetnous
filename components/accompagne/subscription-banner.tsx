@@ -5,7 +5,7 @@ export function AccompagneSubscriptionBanner() {
     <div className="bg-white rounded-xl border-2 border-accent p-6">
       <h3 className="font-semibold text-lg mb-2">Abonnement requis</h3>
       <p className="text-gray-600 mb-4">
-        Souscrivez un abonnement pour acceder a la recherche d'accompagnantes et publier des annonces.
+        Souscrivez un abonnement pour accéder à la recherche d'accompagnantes et publier des annonces.
       </p>
       <Link
         href="/accompagne/abonnement"

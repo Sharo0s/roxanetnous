@@ -67,7 +67,7 @@ export function InscriptionsTable({ data }: {
             <tr>
               <th className="text-left px-4 py-3 font-medium text-gray-500">Mois</th>
               <th className="text-right px-4 py-3 font-medium text-gray-500">Accompagnantes</th>
-              <th className="text-right px-4 py-3 font-medium text-gray-500">Accompagnes</th>
+              <th className="text-right px-4 py-3 font-medium text-gray-500">Accompagnés</th>
               <th className="text-right px-4 py-3 font-medium text-gray-500">Total</th>
             </tr>
           </thead>
@@ -103,7 +103,7 @@ export function RevenusTable({ data }: {
           <thead className="bg-accent/20 border-b">
             <tr>
               <th className="text-left px-4 py-3 font-medium text-gray-500">Mois</th>
-              <th className="text-right px-4 py-3 font-medium text-gray-500">Abonnes</th>
+              <th className="text-right px-4 py-3 font-medium text-gray-500">Abonnés</th>
               <th className="text-right px-4 py-3 font-medium text-gray-500">MRR</th>
             </tr>
           </thead>
@@ -226,12 +226,12 @@ export function ActiviteTable({ data }: {
 
 const FEEDBACK_LABELS: Record<string, string> = {
   customer_service: 'Service client',
-  low_quality: 'Qualite insuffisante',
-  missing_features: 'Fonctionnalites manquantes',
-  switched_service: 'Passe a un concurrent',
+  low_quality: 'Qualité insuffisante',
+  missing_features: 'Fonctionnalités manquantes',
+  switched_service: 'Passé à un concurrent',
   too_complex: 'Trop complexe',
   too_expensive: 'Trop cher',
-  unused: 'Non utilise',
+  unused: 'Non utilisé',
   other: 'Autre',
 }
 
@@ -284,7 +284,7 @@ export function ResiliationsTable({ data }: { data: AnnulationRow[] }) {
       <div className="bg-white rounded-xl border overflow-hidden">
         {filtered.length === 0 ? (
           <div className="p-8 text-center text-gray-500 text-sm">
-            Aucune resiliation sur cette periode.
+            Aucune résiliation sur cette période.
           </div>
         ) : (
           <table className="w-full text-sm">
@@ -293,7 +293,7 @@ export function ResiliationsTable({ data }: { data: AnnulationRow[] }) {
                 <th className="text-left px-4 py-3 font-medium text-gray-500">Date</th>
                 <th className="text-left px-4 py-3 font-medium text-gray-500">Nom</th>
                 <th className="text-left px-4 py-3 font-medium text-gray-500">Email</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-500">Role</th>
+                <th className="text-left px-4 py-3 font-medium text-gray-500">Rôle</th>
                 <th className="text-left px-4 py-3 font-medium text-gray-500">Plan</th>
                 <th className="text-left px-4 py-3 font-medium text-gray-500">Raison</th>
                 <th className="text-left px-4 py-3 font-medium text-gray-500">Commentaire</th>
@@ -304,7 +304,7 @@ export function ResiliationsTable({ data }: { data: AnnulationRow[] }) {
                 <tr key={i} className="border-b last:border-0 hover:bg-accent/10">
                   <td className="px-4 py-3 text-gray-400 whitespace-nowrap">
                     {a.date ? new Date(a.date).toLocaleDateString('fr-FR') : '-'}
-                    {a.pending && <span className="ml-1 text-xs bg-accent/30 text-gray-700 px-1.5 py-0.5 rounded-full">Prevue</span>}
+                    {a.pending && <span className="ml-1 text-xs bg-accent/30 text-gray-700 px-1.5 py-0.5 rounded-full">Prévue</span>}
                   </td>
                   <td className="px-4 py-3 font-medium">{a.nom}</td>
                   <td className="px-4 py-3 text-gray-500">{a.email}</td>

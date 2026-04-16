@@ -16,10 +16,10 @@ export async function submitAvis(data: {
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { error: 'Non connecte.' }
+  if (!user) return { error: 'Non connecté.' }
 
   if (data.note < 1 || data.note > 5) {
-    return { error: 'La note doit etre entre 1 et 5.' }
+    return { error: 'La note doit être entre 1 et 5.' }
   }
 
   if (!data.commentaire.trim()) {
@@ -35,7 +35,7 @@ export async function submitAvis(data: {
     .single()
 
   if (existing) {
-    return { error: 'Vous avez deja laisse un avis pour cette personne.' }
+    return { error: 'Vous avez déjà laissé un avis pour cette personne.' }
   }
 
   const { error } = await supabase
@@ -59,7 +59,7 @@ export async function signalerAvis(avisId: string): Promise<AvisResult> {
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { error: 'Non connecte.' }
+  if (!user) return { error: 'Non connecté.' }
 
   const { error } = await supabase
     .from('avis')

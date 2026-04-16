@@ -13,13 +13,13 @@ export function Footer() {
               href="/mentions-legales"
               className="text-sm text-black hover:text-black transition"
             >
-              Mentions legales
+              Mentions légales
             </Link>
             <Link
               href="/politique-de-confidentialite"
               className="text-sm text-black hover:text-black transition"
             >
-              Politique de confidentialite
+              Politique de confidentialité
             </Link>
             <Link
               href="/cgu"

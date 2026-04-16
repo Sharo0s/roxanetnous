@@ -89,7 +89,7 @@ export default async function DemandesAccompagnesPage({
       )}
 
       <div className="max-w-6xl mx-auto px-4 py-8 relative z-10">
-        <h2 className="text-2xl font-bold text-gray-900 mb-6">Demandes des accompagnes</h2>
+        <h2 className="text-2xl font-bold text-gray-900 mb-6">Demandes des accompagnés</h2>
 
         {!annonces || annonces.length === 0 ? (
           <div className="bg-white rounded-xl border p-8 text-center">
@@ -112,7 +112,7 @@ export default async function DemandesAccompagnesPage({
                 <div key={annonce.id} className="bg-white rounded-xl border p-5 flex flex-col">
                   <h3 className="font-semibold text-gray-900 mb-1">{annonce.titre}</h3>
                   <p className="text-sm text-gray-500 mb-2">
-                    {annonce.ville} {annonce.code_postal && `(${annonce.code_postal})`} — Debut: {new Date(annonce.date_debut).toLocaleDateString('fr-FR')}
+                    {annonce.ville} {annonce.code_postal && `(${annonce.code_postal})`} — Début : {new Date(annonce.date_debut).toLocaleDateString('fr-FR')}
                   </p>
                   <p className="text-sm text-gray-600 line-clamp-3 mb-3">{annonce.description}</p>
 

@@ -14,7 +14,7 @@ import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: 'Rechercher un(e) accompagnant(e) de vie',
-  description: 'Trouvez une accompagnante de vie verifiee pres de chez vous. Filtrez par specialite, localisation et experience.',
+  description: 'Trouvez une accompagnante de vie vérifiée près de chez vous. Filtrez par spécialité, localisation et expérience.',
 }
 
 type SearchParams = {
@@ -277,7 +277,7 @@ export default async function RecherchePage({
                 <h3 className="text-lg font-semibold text-gray-900">Les accompagnantes que nous vous recommandons</h3>
                 {allBenAnnonces.length > 1 ? (
                   <form className="flex items-center gap-2 mt-1">
-                    <label className="text-xs text-gray-500">Annonce de reference :</label>
+                    <label className="text-xs text-gray-500">Annonce de référence :</label>
                     <select
                       name="annonce"
                       defaultValue={matchAnnonce.id}
@@ -296,7 +296,7 @@ export default async function RecherchePage({
                   </form>
                 ) : (
                   <p className="text-sm text-gray-500">
-                    Bases sur votre annonce : {matchAnnonce.titre}
+                    Basés sur votre annonce : {matchAnnonce.titre}
                   </p>
                 )}
               </div>
@@ -384,7 +384,7 @@ export default async function RecherchePage({
 
         {!annonces || annonces.length === 0 ? (
           <div className="bg-white rounded-xl border p-8 text-center mt-6">
-            <p className="text-gray-500">{(params.ville || params.specialite || params.experience) ? 'Aucun resultat pour votre recherche.' : 'Lancez votre recherche.'}</p>
+            <p className="text-gray-500">{(params.ville || params.specialite || params.experience) ? 'Aucun résultat pour votre recherche.' : 'Lancez votre recherche.'}</p>
             {(params.ville || params.specialite || params.experience) && (
               <Link href="/recherche" className="text-sm text-black underline mt-2 inline-block">
                 Voir tous les accompagnantes

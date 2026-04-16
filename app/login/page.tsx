@@ -29,7 +29,7 @@ export default function LoginPage() {
         router.push(`/register?email=${encodeURIComponent(email.trim())}`)
       }
     } catch {
-      setError('Erreur lors de la verification. Reessayez.')
+      setError('Erreur lors de la vérification. Réessayez.')
     } finally {
       setLoading(false)
     }
@@ -74,7 +74,7 @@ export default function LoginPage() {
             />
 
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? 'Verification...' : 'Continuer'}
+              {loading ? 'Vérification...' : 'Continuer'}
             </Button>
           </form>
         ) : (
@@ -111,7 +111,7 @@ export default function LoginPage() {
 
             <div className="text-center">
               <Link href="/forgot-password" className="text-sm text-gray-500 hover:text-black">
-                Mot de passe oublie ?
+                Mot de passe oublié ?
               </Link>
             </div>
           </form>

@@ -10,7 +10,7 @@ export async function toggleFavori(
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { error: 'Non connecte.' }
+  if (!user) return { error: 'Non connecté.' }
 
   const field = type === 'accompagnante' ? 'annonce_accompagnante_id' : 'annonce_accompagne_id'
 

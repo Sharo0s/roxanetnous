@@ -33,8 +33,8 @@ export function DeleteUserButton({ userId, userName }: { userId: string; userNam
   return (
     <div className="bg-red-50 border border-red-200 rounded-xl p-4">
       <p className="text-sm text-red-800 mb-3">
-        Supprimer definitivement <strong>{userName}</strong> ? Cette action est irreversible.
-        L'abonnement Stripe sera annule et toutes les donnees seront supprimees.
+        Supprimer définitivement <strong>{userName}</strong> ? Cette action est irréversible.
+        L'abonnement Stripe sera annulé et toutes les données seront supprimées.
       </p>
       {error && (
         <p className="text-sm text-red-600 mb-3">{error}</p>

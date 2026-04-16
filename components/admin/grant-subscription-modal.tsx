@@ -100,13 +100,13 @@ export function GrantSubscriptionModal({ userId, userName }: Props) {
             {step === 'loading' && (
               <div className="py-8 text-center">
                 <div className="inline-block h-6 w-6 border-2 border-accent border-t-transparent rounded-full animate-spin mb-3" />
-                <p className="text-sm text-gray-500">Creation de l'abonnement...</p>
+                <p className="text-sm text-gray-500">Création de l'abonnement...</p>
               </div>
             )}
 
             {step === 'done' && (
               <div className="py-6 text-center">
-                <p className="text-lg font-semibold text-gray-900 mb-2">Abonnement cree</p>
+                <p className="text-lg font-semibold text-gray-900 mb-2">Abonnement créé</p>
                 <p className="text-sm text-gray-500 mb-4">
                   {userName} a maintenant un abonnement {plan} gratuit.
                 </p>
@@ -130,7 +130,7 @@ export function GrantSubscriptionModal({ userId, userName }: Props) {
                   onClick={() => setStep('choose')}
                   className="px-4 py-2 text-sm font-medium border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
                 >
-                  Reessayer
+                  Réessayer
                 </button>
               </div>
             )}

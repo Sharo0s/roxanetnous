@@ -46,9 +46,9 @@ export function SubscriptionPageContent({
         {/* Details de l'abonnement */}
         <div className="bg-white rounded-xl border p-6">
           <div className="flex items-center gap-3 mb-4">
-            <h3 className="font-semibold text-lg">Details de l&apos;abonnement</h3>
+            <h3 className="font-semibold text-lg">Détails de l&apos;abonnement</h3>
             <span className="px-2 py-1 rounded-full text-xs font-medium bg-accent text-black">
-              {isTrialing ? 'Essai gratuit' : hasCancelAt ? 'Annulation prevue' : 'Actif'}
+              {isTrialing ? 'Essai gratuit' : hasCancelAt ? 'Annulation prévue' : 'Actif'}
             </span>
           </div>
 
@@ -72,13 +72,13 @@ export function SubscriptionPageContent({
               </div>
             ) : (
               <div className="flex justify-between">
-                <dt className="text-gray-600">Prochaine echeance</dt>
+                <dt className="text-gray-600">Prochaine échéance</dt>
                 <dd className="text-gray-900 font-medium">{formatDate(subscription.currentPeriodEnd)}</dd>
               </div>
             )}
             {hasCancelAt && (
               <div className="flex justify-between">
-                <dt className="text-gray-600">Fin d&apos;acces prevue le</dt>
+                <dt className="text-gray-600">Fin d&apos;accès prévue le</dt>
                 <dd className="text-gray-900 font-medium">{formatDate(subscription.cancelAt)}</dd>
               </div>
             )}
@@ -111,7 +111,7 @@ export function SubscriptionPageContent({
                   type="submit"
                   className="px-4 py-2 text-sm font-medium bg-accent text-black rounded-lg btn-hover transition-colors"
                 >
-                  Gerer via Stripe
+                  Gérer via Stripe
                 </button>
               </form>
             </div>
@@ -124,13 +124,13 @@ export function SubscriptionPageContent({
             <h3 className="font-semibold text-lg mb-4">Changer de formule</h3>
             {switchError && (
               <p className="text-sm text-red-600 mb-4">
-                Une erreur est survenue lors du changement de formule. Veuillez reessayer.
+                Une erreur est survenue lors du changement de formule. Veuillez réessayer.
               </p>
             )}
             {subscription.planType === 'mensuel' ? (
               <div className="flex items-center justify-between">
                 <div className="text-sm">
-                  <p className="text-gray-900 font-medium">Passer a l&apos;annuel</p>
+                  <p className="text-gray-900 font-medium">Passer à l&apos;annuel</p>
                   <p className="text-gray-500">La formule annuelle offre un meilleur tarif au mois</p>
                 </div>
                 <form action={switchPlan}>
@@ -139,7 +139,7 @@ export function SubscriptionPageContent({
                     type="submit"
                     className="px-4 py-2.5 text-sm font-medium bg-accent text-black rounded-lg btn-hover transition-colors"
                   >
-                    Passer a l&apos;annuel
+                    Passer à l&apos;annuel
                   </button>
                 </form>
               </div>
@@ -147,7 +147,7 @@ export function SubscriptionPageContent({
               <div className="flex items-center justify-between">
                 <div className="text-sm">
                   <p className="text-gray-900 font-medium">Passer au mensuel</p>
-                  <p className="text-gray-500">Le tarif mensuel est plus eleve que le tarif annuel rapporte au mois
+                  <p className="text-gray-500">Le tarif mensuel est plus élevé que le tarif annuel rapporté au mois
                   </p>
                 </div>
                 <form action={switchPlan}>
@@ -169,15 +169,15 @@ export function SubscriptionPageContent({
           <div className="bg-white rounded-xl border p-6">
             <div className="flex items-center justify-between">
               <div className="text-sm">
-                <p className="text-gray-900 font-medium">Reactiver mon abonnement</p>
-                <p className="text-gray-500">Annuler la resiliation et conserver votre acces</p>
+                <p className="text-gray-900 font-medium">Réactiver mon abonnement</p>
+                <p className="text-gray-500">Annuler la résiliation et conserver votre accès</p>
               </div>
               <form action={reactivateSubscription}>
                 <button
                   type="submit"
                   className="px-4 py-2.5 text-sm font-medium bg-accent text-black rounded-lg btn-hover transition-colors"
                 >
-                  Reactiver
+                  Réactiver
                 </button>
               </form>
             </div>
@@ -207,7 +207,7 @@ export function SubscriptionPageContent({
                       <td className="py-3 text-gray-900">{formatAmount(invoice.amount)}</td>
                       <td className="py-3">
                         <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-accent/20 text-black">
-                          Paye
+                          Payé
                         </span>
                       </td>
                       <td className="py-3 text-right">
@@ -218,7 +218,7 @@ export function SubscriptionPageContent({
                             rel="noopener noreferrer"
                             className="text-sm font-medium text-gray-700 hover:text-black transition-colors"
                           >
-                            Telecharger
+                            Télécharger
                           </a>
                         ) : (
                           <span className="text-gray-400">-</span>
@@ -248,13 +248,13 @@ export function SubscriptionPageContent({
         {/* Mentions legales */}
         <div className="text-xs text-gray-500 space-y-1 pt-4">
           <p>
-            Conformement a la legislation, vous disposez d&apos;un droit de retractation de 14 jours a compter de la souscription.
-            Pour l&apos;exercer, contactez-nous a{' '}
+            Conformément à la législation, vous disposez d&apos;un droit de rétractation de 14 jours à compter de la souscription.
+            Pour l&apos;exercer, contactez-nous à{' '}
             <a href={`mailto:${CONTACT_EMAIL}`} className="underline hover:text-gray-700">{CONTACT_EMAIL}</a>.
           </p>
           <p>
             Consultez nos{' '}
-            <a href="/cgu" className="underline hover:text-gray-700">Conditions Generales d&apos;Utilisation</a>.
+            <a href="/cgu" className="underline hover:text-gray-700">Conditions Générales d&apos;Utilisation</a>.
           </p>
         </div>
       </div>
@@ -285,11 +285,11 @@ export function SubscriptionPageContent({
           <ul className="space-y-2 text-sm text-gray-600 mb-6 flex-1">
             <li className="flex items-start gap-2">
               <span className="text-black font-bold mt-0.5">-</span>
-              <span>Acces complet a la plateforme</span>
+              <span>Accès complet à la plateforme</span>
             </li>
             <li className="flex items-start gap-2">
               <span className="text-black font-bold mt-0.5">-</span>
-              <span>Annulation a tout moment</span>
+              <span>Annulation à tout moment</span>
             </li>
           </ul>
           <form action={createCheckoutSession}>
@@ -317,11 +317,11 @@ export function SubscriptionPageContent({
           <ul className="space-y-2 text-sm text-gray-600 mb-6 flex-1">
             <li className="flex items-start gap-2">
               <span className="text-black font-bold mt-0.5">-</span>
-              <span>Acces complet a la plateforme</span>
+              <span>Accès complet à la plateforme</span>
             </li>
             <li className="flex items-start gap-2">
               <span className="text-black font-bold mt-0.5">-</span>
-              <span>Meilleur rapport qualite-prix</span>
+              <span>Meilleur rapport qualité-prix</span>
             </li>
           </ul>
           <form action={createCheckoutSession}>
@@ -338,7 +338,7 @@ export function SubscriptionPageContent({
 
       {subscription.status === 'cancelled' && (
         <p className="text-sm text-gray-500 text-center">
-          Votre abonnement precedent a ete annule. Vous pouvez vous reabonner a tout moment.
+          Votre abonnement précédent a été annulé. Vous pouvez vous réabonner à tout moment.
         </p>
       )}
     </div>

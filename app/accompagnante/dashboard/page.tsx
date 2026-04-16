@@ -107,15 +107,15 @@ export default async function AccompagnanteDashboard() {
 
         {!profile || !profile.diplomes || profile.diplomes.length === 0 ? (
           <div className="bg-white rounded-xl border p-6">
-            <h3 className="font-semibold text-lg mb-2">Completez votre profil</h3>
+            <h3 className="font-semibold text-lg mb-2">Complétez votre profil</h3>
             <p className="text-gray-600 mb-4">
-              Pour apparaitre sur la plateforme, vous devez d&#39;abord completer votre profil professionnel.
+              Pour apparaître sur la plateforme, vous devez d&#39;abord compléter votre profil professionnel.
             </p>
             <a
               href="/accompagnante/onboarding"
               className="inline-flex items-center px-4 py-2 bg-accent text-black rounded-lg btn-hover transition"
             >
-              Completer mon profil
+              Compléter mon profil
             </a>
           </div>
         ) : (
@@ -124,8 +124,8 @@ export default async function AccompagnanteDashboard() {
               <div className="p-4 rounded-xl border border-red-200 bg-red-50 text-sm">
                 <p className="font-medium text-red-800">
                   {profile.validation_status === 'refuse'
-                    ? 'Votre profil a ete refuse. Veuillez corriger les informations demandees.'
-                    : 'Des informations complementaires sont demandees.'}
+                    ? 'Votre profil a été refusé. Veuillez corriger les informations demandées.'
+                    : 'Des informations complémentaires sont demandées.'}
                 </p>
                 {profile.refus_motif && (
                   <p className="text-red-700 mt-1">{profile.refus_motif}</p>
@@ -150,14 +150,14 @@ export default async function AccompagnanteDashboard() {
                   {subscribed ? (
                     <>
                       <p className="text-gray-600 mb-1">
-                        {annoncesPubliees} annonce{annoncesPubliees > 1 ? 's' : ''} publiee{annoncesPubliees > 1 ? 's' : ''}
+                        {annoncesPubliees} annonce{annoncesPubliees > 1 ? 's' : ''} publiée{annoncesPubliees > 1 ? 's' : ''}
                       </p>
                       <p className="text-sm text-gray-400 mb-4">{annoncesCount} au total</p>
                       <Link
                         href="/accompagnante/annonces"
                         className="inline-flex items-center px-4 py-2 bg-accent text-black rounded-lg btn-hover transition text-sm font-medium"
                       >
-                        Gerer mes annonces
+                        Gérer mes annonces
                       </Link>
                     </>
                   ) : (
@@ -167,9 +167,9 @@ export default async function AccompagnanteDashboard() {
                   )}
                 </div>
                 <div className="bg-white rounded-xl border p-6">
-                  <h3 className="font-semibold text-lg mb-2">Demandes accompagnes</h3>
+                  <h3 className="font-semibold text-lg mb-2">Demandes accompagnés</h3>
                   <p className="text-gray-600 mb-4">
-                    Consultez les demandes des accompagnes.
+                    Consultez les demandes des accompagnés.
                   </p>
                   <Link
                     href="/recherche/demandes"
@@ -182,7 +182,7 @@ export default async function AccompagnanteDashboard() {
                 <div className="bg-white rounded-xl border p-6">
                   <h3 className="font-semibold text-lg mb-2">Messages</h3>
                   <p className="text-gray-600 mb-4">
-                    Consultez vos conversations avec les accompagnes.
+                    Consultez vos conversations avec les accompagnés.
                   </p>
                   <Link
                     href="/messages"
@@ -213,14 +213,14 @@ export default async function AccompagnanteDashboard() {
                       : subscription.cancelAt
                         ? `Expire le ${new Date(subscription.cancelAt).toLocaleDateString('fr-FR')}`
                         : subscribed
-                          ? `${subscription.planType === 'annuel' ? 'Annuel' : 'Mensuel'} - Prochaine echeance : ${subscription.currentPeriodEnd ? new Date(subscription.currentPeriodEnd).toLocaleDateString('fr-FR') : '-'}`
+                          ? `${subscription.planType === 'annuel' ? 'Annuel' : 'Mensuel'} - Prochaine échéance : ${subscription.currentPeriodEnd ? new Date(subscription.currentPeriodEnd).toLocaleDateString('fr-FR') : '-'}`
                           : 'Aucun abonnement actif'}
                   </p>
                   <Link
                     href="/accompagnante/abonnement"
                     className="inline-flex items-center px-4 py-2 bg-accent text-black rounded-lg btn-hover transition text-sm font-medium"
                   >
-                    Gerer mon abonnement
+                    Gérer mon abonnement
                   </Link>
                 </div>
 

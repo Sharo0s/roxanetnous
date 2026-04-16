@@ -19,7 +19,7 @@ export async function validateAccompagnante(
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { error: 'Non connecte.' }
+  if (!user) return { error: 'Non connecté.' }
 
   // Verifier que l'utilisateur est admin
   const { data: adminData } = await supabase
@@ -29,12 +29,12 @@ export async function validateAccompagnante(
     .single()
 
   if (!adminData || adminData.role !== 'admin') {
-    return { error: 'Acces non autorise.' }
+    return { error: 'Accès non autorisé.' }
   }
 
   // Verifier que le motif est fourni pour refus ou a_completer
   if ((decision === 'refuse' || decision === 'a_completer') && !motif) {
-    return { error: 'Le motif est requis pour un refus ou une demande de complement.' }
+    return { error: 'Le motif est requis pour un refus ou une demande de complément.' }
   }
 
   // Mettre a jour le profil
@@ -54,7 +54,7 @@ export async function validateAccompagnante(
     .eq('id', profileId)
 
   if (updateError) {
-    return { error: 'Erreur lors de la mise a jour du profil.' }
+    return { error: 'Erreur lors de la mise à jour du profil.' }
   }
 
   // Logger l'action admin
@@ -115,7 +115,7 @@ export async function adminDeleteUser(userId: string): Promise<{ error?: string 
     .single()
 
   if (!adminData || adminData.role !== 'admin') {
-    return { error: 'Acces refuse.' }
+    return { error: 'Accès refusé.' }
   }
 
   // Verifier que l'utilisateur cible existe et n'est pas admin
@@ -212,7 +212,7 @@ export async function adminGrantSubscription(
 ): Promise<{ error?: string; success?: boolean }> {
   const supabase = await createClient()
   const { data: { user: adminUser } } = await supabase.auth.getUser()
-  if (!adminUser) return { error: 'Non connecte.' }
+  if (!adminUser) return { error: 'Non connecté.' }
 
   const supabaseAdmin = await createClient({ serviceRole: true })
 
@@ -224,7 +224,7 @@ export async function adminGrantSubscription(
     .single()
 
   if (!adminData || adminData.role !== 'admin') {
-    return { error: 'Acces refuse.' }
+    return { error: 'Accès refusé.' }
   }
 
   // Charger l'utilisateur cible
@@ -238,13 +238,13 @@ export async function adminGrantSubscription(
 
   const role = targetUser.role as 'accompagnante' | 'accompagne'
   if (role !== 'accompagnante' && role !== 'accompagne') {
-    return { error: 'Role non eligible a un abonnement.' }
+    return { error: 'Rôle non éligible à un abonnement.' }
   }
 
   // Verifier s'il a deja un abonnement actif
   const existingSub = await getSubscriptionStatus(userId)
   if (existingSub.active) {
-    return { error: 'Cet utilisateur a deja un abonnement actif.' }
+    return { error: 'Cet utilisateur a déjà un abonnement actif.' }
   }
 
   const priceId = (await import('@/lib/stripe')).getStripePriceId(role, planType)
@@ -309,7 +309,7 @@ export async function adminGrantSubscription(
     return { success: true }
   } catch (e) {
     console.error('adminGrantSubscription error:', e)
-    return { error: 'Erreur lors de la creation de l\'abonnement.' }
+    return { error: 'Erreur lors de la création de l\'abonnement.' }
   }
 }
 
@@ -331,7 +331,7 @@ export async function adminCancelSubscription(formData: FormData): Promise<{ err
     .single()
 
   if (!adminData || adminData.role !== 'admin') {
-    return { error: 'Acces refuse.' }
+    return { error: 'Accès refusé.' }
   }
 
   const subStatus = await getSubscriptionStatus(userId)

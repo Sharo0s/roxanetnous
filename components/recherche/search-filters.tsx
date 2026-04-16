@@ -141,7 +141,7 @@ export function SearchFilters({ currentVille, currentSpecialite, currentExperien
           )}
         </div>
         <div ref={specRef} className="relative">
-          <label className="block text-xs font-medium text-gray-500 mb-1">Specialites</label>
+          <label className="block text-xs font-medium text-gray-500 mb-1">Spécialités</label>
           <button
             type="button"
             onClick={() => setSpecOpen(!specOpen)}
@@ -152,7 +152,7 @@ export function SearchFilters({ currentVille, currentSpecialite, currentExperien
                 ? 'Toutes'
                 : specialites.length === 1
                   ? SPECIALITES.find((s) => s.value === specialites[0])?.label || specialites[0]
-                  : `${specialites.length} selectionnees`}
+                  : `${specialites.length} sélectionnées`}
             </span>
             <svg className={`w-4 h-4 text-gray-400 transition ${specOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -178,7 +178,7 @@ export function SearchFilters({ currentVille, currentSpecialite, currentExperien
           )}
         </div>
         <div>
-          <label className="block text-xs font-medium text-gray-500 mb-1">Experience</label>
+          <label className="block text-xs font-medium text-gray-500 mb-1">Expérience</label>
           <select
             value={experience}
             onChange={(e) => setExperience(e.target.value)}

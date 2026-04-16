@@ -50,7 +50,7 @@ export function CancelModal({ subscription }: { subscription: SubscriptionInfo }
         onClick={handleOpen}
         className="px-4 py-2.5 text-sm font-medium border border-gray-300 text-gray-700 rounded-lg hover:border-gray-400 transition-colors"
       >
-        Resilier mon abonnement
+        Résilier mon abonnement
       </button>
 
       {open && (
@@ -62,15 +62,15 @@ export function CancelModal({ subscription }: { subscription: SubscriptionInfo }
           <div className="relative bg-white rounded-xl max-w-md w-full mx-4 p-6 shadow-xl">
             {step === 'confirm' && (
               <>
-                <h3 className="text-lg font-semibold mb-4">Resilier votre abonnement</h3>
+                <h3 className="text-lg font-semibold mb-4">Résilier votre abonnement</h3>
                 <div className="space-y-3 text-sm text-gray-600 mb-6">
-                  <p>Vous etes actuellement sur la formule <strong className="text-gray-900">{planLabel}</strong>.</p>
+                  <p>Vous êtes actuellement sur la formule <strong className="text-gray-900">{planLabel}</strong>.</p>
                   {periodEnd && (
-                    <p>Votre acces restera actif jusqu&apos;au <strong className="text-gray-900">{periodEnd}</strong>.</p>
+                    <p>Votre accès restera actif jusqu&apos;au <strong className="text-gray-900">{periodEnd}</strong>.</p>
                   )}
-                  <p>Apres la resiliation, vous perdrez l&apos;acces a :</p>
+                  <p>Après la résiliation, vous perdrez l&apos;accès à :</p>
                   <ul className="list-disc pl-5 space-y-1">
-                    <li>La visibilite de vos annonces dans les recherches</li>
+                    <li>La visibilité de vos annonces dans les recherches</li>
                     <li>La messagerie</li>
                     <li>Les notifications de matching</li>
                   </ul>
@@ -88,7 +88,7 @@ export function CancelModal({ subscription }: { subscription: SubscriptionInfo }
                     onClick={handleConfirm}
                     className="px-4 py-2.5 text-sm font-medium bg-gray-800 text-white rounded-lg hover:bg-gray-900 transition-colors"
                   >
-                    Confirmer la resiliation
+                    Confirmer la résiliation
                   </button>
                 </div>
               </>
@@ -97,15 +97,15 @@ export function CancelModal({ subscription }: { subscription: SubscriptionInfo }
             {step === 'loading' && (
               <div className="flex flex-col items-center py-8">
                 <div className="w-8 h-8 border-2 border-gray-300 border-t-gray-800 rounded-full animate-spin mb-4" />
-                <p className="text-sm text-gray-600">Resiliation en cours...</p>
+                <p className="text-sm text-gray-600">Résiliation en cours...</p>
               </div>
             )}
 
             {step === 'done' && (
               <>
-                <h3 className="text-lg font-semibold mb-4">Resiliation confirmee</h3>
+                <h3 className="text-lg font-semibold mb-4">Résiliation confirmée</h3>
                 <p className="text-sm text-gray-600 mb-6">
-                  Votre resiliation a ete prise en compte. Votre acces reste actif jusqu&apos;au{' '}
+                  Votre résiliation a été prise en compte. Votre accès reste actif jusqu&apos;au{' '}
                   <strong className="text-gray-900">
                     {cancelAt ? new Date(cancelAt).toLocaleDateString('fr-FR') : periodEnd}
                   </strong>.
@@ -139,7 +139,7 @@ export function CancelModal({ subscription }: { subscription: SubscriptionInfo }
                     onClick={() => setStep('confirm')}
                     className="px-4 py-2.5 text-sm font-medium bg-gray-800 text-white rounded-lg hover:bg-gray-900 transition-colors"
                   >
-                    Reessayer
+                    Réessayer
                   </button>
                 </div>
               </>

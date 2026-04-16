@@ -68,7 +68,7 @@ export default async function AccompagneDashboard() {
           <div className="bg-white rounded-xl border p-6">
             <h3 className="font-semibold text-lg mb-2">Rechercher un(e) accompagnant(e)</h3>
             <p className="text-gray-600 mb-4">
-              Trouvez l&#39;accompagnant(e) que vous avez besoin
+              Trouvez l&#39;accompagnant(e) dont vous avez besoin
             </p>
             <Link
               href="/recherche"
@@ -81,22 +81,22 @@ export default async function AccompagneDashboard() {
           <div className="bg-white rounded-xl border p-6">
             <h3 className="font-semibold text-lg mb-2">Publier une annonce</h3>
             <p className="text-gray-600 mb-4">
-              Decrivez vos besoins et recevez des candidatures.
+              Décrivez vos besoins et recevez des candidatures.
             </p>
             <Link
               href="/accompagne/annonces/nouvelle"
               className="inline-flex items-center px-4 py-2 bg-accent text-black rounded-lg btn-hover transition text-sm font-medium"
             >
-              Creer une annonce
+              Créer une annonce
             </Link>
           </div>
 
           <div className="bg-white rounded-xl border p-6">
             <h3 className="font-semibold text-lg mb-2">Mes annonces</h3>
             <p className="text-gray-600 mb-1">
-              {annoncesCount} annonce{annoncesCount > 1 ? 's' : ''} publiee{annoncesCount > 1 ? 's' : ''}
+              {annoncesCount} annonce{annoncesCount > 1 ? 's' : ''} publiée{annoncesCount > 1 ? 's' : ''}
             </p>
-            <p className="text-sm text-gray-400 mb-4">Gerez vos annonces de recherche.</p>
+            <p className="text-sm text-gray-400 mb-4">Gérez vos annonces de recherche.</p>
             <Link
               href="/accompagne/annonces"
               className="inline-flex items-center px-4 py-2 bg-accent text-black rounded-lg btn-hover transition text-sm font-medium"
@@ -152,14 +152,14 @@ export default async function AccompagneDashboard() {
                 : subscription.cancelAt
                   ? `Expire le ${new Date(subscription.cancelAt).toLocaleDateString('fr-FR')}`
                   : subscribed
-                    ? `${subscription.planType === 'annuel' ? 'Annuel' : 'Mensuel'} - Prochaine echeance : ${subscription.currentPeriodEnd ? new Date(subscription.currentPeriodEnd).toLocaleDateString('fr-FR') : '-'}`
+                    ? `${subscription.planType === 'annuel' ? 'Annuel' : 'Mensuel'} - Prochaine échéance : ${subscription.currentPeriodEnd ? new Date(subscription.currentPeriodEnd).toLocaleDateString('fr-FR') : '-'}`
                     : 'Aucun abonnement actif'}
             </p>
             <Link
               href="/accompagne/abonnement"
               className="inline-flex items-center px-4 py-2 bg-accent text-black rounded-lg btn-hover transition text-sm font-medium"
             >
-              Gerer mon abonnement
+              Gérer mon abonnement
             </Link>
           </div>
 

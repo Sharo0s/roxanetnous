@@ -10,10 +10,10 @@ type Props = {
 }
 
 const MOTIFS = [
-  'Contenu inapproprie',
+  'Contenu inapproprié',
   'Faux profil',
   'Comportement suspect',
-  'Harcelement',
+  'Harcèlement',
   'Autre',
 ]
 
@@ -27,7 +27,7 @@ export function SignalementButton({ cibleType, cibleId }: Props) {
 
   async function handleSubmit() {
     if (!motif) {
-      setError('Selectionnez un motif.')
+      setError('Sélectionnez un motif.')
       return
     }
 
@@ -52,7 +52,7 @@ export function SignalementButton({ cibleType, cibleId }: Props) {
 
   if (submitted) {
     return (
-      <p className="text-xs text-gray-400">Signalement envoye. Merci.</p>
+      <p className="text-xs text-gray-400">Signalement envoyé. Merci.</p>
     )
   }
 
@@ -62,7 +62,7 @@ export function SignalementButton({ cibleType, cibleId }: Props) {
         onClick={() => setOpen(true)}
         className="inline-flex items-center justify-center rounded-lg font-medium transition btn-hover bg-accent text-black h-10 px-4 py-2 w-full"
       >
-        Signaler ce profil a l&#39;equipe
+        Signaler ce profil à l&#39;équipe
       </button>
     )
   }
@@ -79,20 +79,20 @@ export function SignalementButton({ cibleType, cibleId }: Props) {
           onChange={(e) => setMotif(e.target.value)}
           className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#FFB06E]"
         >
-          <option value="">Selectionnez...</option>
+          <option value="">Sélectionnez...</option>
           {MOTIFS.map((m) => (
             <option key={m} value={m}>{m}</option>
           ))}
         </select>
       </div>
       <div>
-        <label className="block text-sm font-medium text-black mb-1">Details (optionnel)</label>
+        <label className="block text-sm font-medium text-black mb-1">Détails (optionnel)</label>
         <textarea
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           rows={4}
           className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#FFB06E] resize-none"
-          placeholder="Decrivez le probleme..."
+          placeholder="Décrivez le problème..."
         />
       </div>
       <div className="flex gap-2">

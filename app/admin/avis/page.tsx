@@ -35,7 +35,7 @@ export default async function AdminAvisPage() {
       <div className="max-w-6xl mx-auto px-4 py-8">
         {avisSignales && avisSignales.length > 0 && (
           <>
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Avis signales ({avisSignales.length})</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">Avis signalés ({avisSignales.length})</h2>
             <div className="space-y-3 mb-10">
               {avisSignales.map((avis: any) => (
                 <AvisCard key={avis.id} avis={avis} showActions adminId={user.id} />
@@ -44,7 +44,7 @@ export default async function AdminAvisPage() {
           </>
         )}
 
-        <h2 className="text-2xl font-bold text-gray-900 mb-4">Avis recents</h2>
+        <h2 className="text-2xl font-bold text-gray-900 mb-4">Avis récents</h2>
         {!avisRecents || avisRecents.length === 0 ? (
           <div className="bg-white rounded-xl border p-8 text-center text-gray-500">
             Aucun avis.
@@ -75,10 +75,10 @@ function AvisCard({ avis, showActions, adminId }: { avis: any; showActions: bool
               ))}
             </div>
             {avis.signale && (
-              <span className="px-2 py-0.5 bg-gray-200 text-gray-700 rounded-full text-xs font-medium border border-gray-400">Signale</span>
+              <span className="px-2 py-0.5 bg-gray-200 text-gray-700 rounded-full text-xs font-medium border border-gray-400">Signalé</span>
             )}
             {avis.masque && (
-              <span className="px-2 py-0.5 bg-gray-200 text-gray-500 rounded-full text-xs font-medium">Masque</span>
+              <span className="px-2 py-0.5 bg-gray-200 text-gray-500 rounded-full text-xs font-medium">Masqué</span>
             )}
           </div>
           <p className="text-sm text-gray-700 mb-2">{avis.commentaire}</p>

@@ -125,7 +125,7 @@ export function InfiniteAnnoncesGrid({ annonces, badgesMap, userId, favorisIds =
                     <span className="text-xs text-black/70">Permis B</span>
                   )}
                   {profile.vehicule && (
-                    <span className="text-xs text-black/70">Vehicule</span>
+                    <span className="text-xs text-black/70">Véhicule</span>
                   )}
                 </div>
               )}
@@ -149,7 +149,7 @@ export function InfiniteAnnoncesGrid({ annonces, badgesMap, userId, favorisIds =
 
       {!hasMore && annonces.length > PER_PAGE && (
         <p className="text-center text-sm text-gray-400 py-6">
-          {annonces.length} accompagnantes affiches
+          {annonces.length} accompagnantes affichées
         </p>
       )}
     </>

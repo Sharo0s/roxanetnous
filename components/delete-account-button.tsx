@@ -34,7 +34,7 @@ export function DeleteAccountButton() {
   return (
     <div className="border border-gray-300 rounded-lg p-4 space-y-3">
       <p className="text-sm text-gray-700">
-        Cette action est irreversible. Toutes vos donnees seront supprimees
+        Cette action est irréversible. Toutes vos données seront supprimées
         (profil, annonces, messages, abonnement).
       </p>
       <p className="text-sm text-gray-700">

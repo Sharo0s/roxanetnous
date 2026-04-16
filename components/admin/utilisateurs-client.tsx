@@ -20,20 +20,20 @@ export type AnnulationRow = {
 
 const FEEDBACK_LABELS: Record<string, string> = {
   customer_service: 'Service client',
-  low_quality: 'Qualite insuffisante',
-  missing_features: 'Fonctionnalites manquantes',
-  switched_service: 'Passe a un concurrent',
+  low_quality: 'Qualité insuffisante',
+  missing_features: 'Fonctionnalités manquantes',
+  switched_service: 'Passé à un concurrent',
   too_complex: 'Trop complexe',
   too_expensive: 'Trop cher',
-  unused: 'Non utilise',
+  unused: 'Non utilisé',
   other: 'Autre',
 }
 
 const VALIDATION_LABELS: Record<string, string> = {
   en_attente: 'En attente',
-  valide: 'Valide',
-  refuse: 'Refuse',
-  a_completer: 'A completer',
+  valide: 'Validé',
+  refuse: 'Refusé',
+  a_completer: 'À compléter',
 }
 
 const VALIDATION_STYLES: Record<string, string> = {
@@ -118,7 +118,7 @@ export function UtilisateursClient({
               : 'bg-white border border-gray-300 text-gray-700 hover:border-accent'
           }`}
         >
-          Accompagnes ({accompagnes.length})
+          Accompagnés ({accompagnes.length})
         </button>
         {annulations.length > 0 && (
           <button
@@ -129,7 +129,7 @@ export function UtilisateursClient({
                 : 'bg-white border border-gray-300 text-gray-700 hover:border-accent'
             }`}
           >
-            Resiliations ({annulations.length})
+            Résiliations ({annulations.length})
           </button>
         )}
       </div>
@@ -161,7 +161,7 @@ export function UtilisateursClient({
               statusFilter === 'valide' ? 'border-accent' : 'hover:border-gray-400'
             }`}
           >
-            <p className="text-sm text-gray-500">Valides</p>
+            <p className="text-sm text-gray-500">Validés</p>
             <p className="text-3xl font-bold mt-1">{validesCount}</p>
           </button>
         </div>
@@ -242,7 +242,7 @@ function AccompagnantesTable({
   if (accompagnantes.length === 0) {
     return (
       <div className="bg-white rounded-xl border p-8 text-center text-gray-500">
-        Aucune accompagnante ne correspond a ces criteres.
+        Aucune accompagnante ne correspond à ces critères.
       </div>
     )
   }
@@ -256,8 +256,8 @@ function AccompagnantesTable({
               <th className="text-left px-4 py-3 font-medium text-gray-500">Nom</th>
               <th className="text-left px-4 py-3 font-medium text-gray-500">Ville</th>
               <th className="text-left px-4 py-3 font-medium text-gray-500">Statut</th>
-              <th className="text-left px-4 py-3 font-medium text-gray-500">Diplome</th>
-              <th className="text-left px-4 py-3 font-medium text-gray-500">Experience</th>
+              <th className="text-left px-4 py-3 font-medium text-gray-500">Diplôme</th>
+              <th className="text-left px-4 py-3 font-medium text-gray-500">Expérience</th>
               <th className="text-left px-4 py-3 font-medium text-gray-500">Inscription</th>
               <th className="text-right px-4 py-3 font-medium text-gray-500"></th>
             </tr>
@@ -336,7 +336,7 @@ function AccompagnesTable({
   if (accompagnes.length === 0) {
     return (
       <div className="bg-white rounded-xl border p-8 text-center text-gray-500">
-        Aucun accompagne ne correspond a ces criteres.
+        Aucun accompagné ne correspond à ces critères.
       </div>
     )
   }
@@ -395,7 +395,7 @@ function ResiliationsPanel({ annulations }: { annulations: AnnulationRow[] }) {
   if (annulations.length === 0) {
     return (
       <div className="bg-white rounded-xl border p-8 text-center text-gray-500">
-        Aucune resiliation.
+        Aucune résiliation.
       </div>
     )
   }
@@ -407,7 +407,7 @@ function ResiliationsPanel({ annulations }: { annulations: AnnulationRow[] }) {
           <thead className="bg-accent/20 border-b">
             <tr>
               <th className="text-left px-4 py-3 font-medium text-gray-500">Nom</th>
-              <th className="text-left px-4 py-3 font-medium text-gray-500">Role</th>
+              <th className="text-left px-4 py-3 font-medium text-gray-500">Rôle</th>
               <th className="text-left px-4 py-3 font-medium text-gray-500">Plan</th>
               <th className="text-left px-4 py-3 font-medium text-gray-500">Raison</th>
               <th className="text-left px-4 py-3 font-medium text-gray-500">Date</th>
@@ -437,7 +437,7 @@ function ResiliationsPanel({ annulations }: { annulations: AnnulationRow[] }) {
                 </td>
                 <td className="px-4 py-3 text-gray-400">
                   <div>{a.date ? new Date(a.date).toLocaleDateString('fr-FR') : '-'}</div>
-                  {a.pending && <span className="text-xs bg-accent/30 text-gray-700 px-2 py-0.5 rounded-full">Prevue</span>}
+                  {a.pending && <span className="text-xs bg-accent/30 text-gray-700 px-2 py-0.5 rounded-full">Prévue</span>}
                 </td>
                 <td className="px-4 py-3 text-right">
                 </td>

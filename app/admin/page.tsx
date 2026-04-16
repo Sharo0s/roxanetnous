@@ -25,12 +25,12 @@ function formatPlan(plan: string) {
 
 const FEEDBACK_LABELS: Record<string, string> = {
   customer_service: 'Service client',
-  low_quality: 'Qualite insuffisante',
-  missing_features: 'Fonctionnalites manquantes',
-  switched_service: 'Passe a un concurrent',
+  low_quality: 'Qualité insuffisante',
+  missing_features: 'Fonctionnalités manquantes',
+  switched_service: 'Passé à un concurrent',
   too_complex: 'Trop complexe',
   too_expensive: 'Trop cher',
-  unused: 'Non utilise',
+  unused: 'Non utilisé',
   other: 'Autre',
 }
 
@@ -143,7 +143,7 @@ export default async function AdminDashboard() {
               {/* KPI Cards */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
                 <div className="bg-white rounded-xl border p-5">
-                  <p className="text-sm text-gray-500">Revenu mensuel recurrent</p>
+                  <p className="text-sm text-gray-500">Revenu mensuel récurrent</p>
                   <p className="text-3xl font-bold mt-1">{formatEur(kpis.mrr)}</p>
                 </div>
                 <div className="bg-white rounded-xl border p-5">
@@ -152,26 +152,26 @@ export default async function AdminDashboard() {
                   <p className="text-xs text-gray-400 mt-1">sur {kpis.totalUsers} inscrits au total</p>
                 </div>
                 <div className="bg-white rounded-xl border p-5">
-                  <p className="text-sm text-gray-500">Taux de conversion (inscrits vers abonnes)</p>
+                  <p className="text-sm text-gray-500">Taux de conversion (inscrits vers abonnés)</p>
                   <p className={`text-3xl font-bold mt-1 ${kpis.tauxConversion >= 80 ? 'text-green-700' : kpis.tauxConversion >= 50 ? 'text-amber-600' : 'text-red-600'}`}>
                     {kpis.tauxConversion.toFixed(1)}%
                   </p>
-                  <p className="text-xs text-gray-400 mt-1">{kpis.abonnesActifs} abonnes sur {kpis.totalUsers} inscrits</p>
+                  <p className="text-xs text-gray-400 mt-1">{kpis.abonnesActifs} abonnés sur {kpis.totalUsers} inscrits</p>
                 </div>
                 <div className="bg-white rounded-xl border p-5">
-                  <p className="text-sm text-gray-500">Taux de resiliation (ce mois)</p>
+                  <p className="text-sm text-gray-500">Taux de résiliation (ce mois)</p>
                   <p className={`text-3xl font-bold mt-1 ${kpis.churn <= 2 ? 'text-green-700' : kpis.churn <= 5 ? 'text-amber-600' : 'text-red-600'}`}>
                     {kpis.churn.toFixed(1)}%
                   </p>
                   <p className="text-xs text-gray-400 mt-1">
-                    {kpis.churnAnnulations} annulation{kpis.churnAnnulations > 1 ? 's' : ''} / {kpis.churnAbonnesDebutMois} abonne{kpis.churnAbonnesDebutMois > 1 ? 's' : ''} en debut de mois
+                    {kpis.churnAnnulations} annulation{kpis.churnAnnulations > 1 ? 's' : ''} / {kpis.churnAbonnesDebutMois} abonné{kpis.churnAbonnesDebutMois > 1 ? 's' : ''} en début de mois
                   </p>
                 </div>
               </div>
 
               {/* Repartition utilisateurs */}
               <div className="bg-white rounded-xl border p-5 mb-8">
-                <h4 className="font-medium text-gray-700 text-sm mb-3">Repartition des utilisateurs</h4>
+                <h4 className="font-medium text-gray-700 text-sm mb-3">Répartition des utilisateurs</h4>
                 <div className="flex items-center gap-4 mb-2">
                   <span className="text-sm text-gray-600 w-28">Accompagnantes</span>
                   <div className="flex-1 bg-gray-100 rounded-full h-6 overflow-hidden">
@@ -183,7 +183,7 @@ export default async function AdminDashboard() {
                   <span className="text-sm font-medium w-20 text-right">{repartition.accompagnantes} ({pctAux.toFixed(0)}%)</span>
                 </div>
                 <div className="flex items-center gap-4">
-                  <span className="text-sm text-gray-600 w-28">Accompagnes</span>
+                  <span className="text-sm text-gray-600 w-28">Accompagnés</span>
                   <div className="flex-1 bg-gray-100 rounded-full h-6 overflow-hidden">
                     <div
                       className="bg-gray-400 h-full rounded-full"
@@ -198,7 +198,7 @@ export default async function AdminDashboard() {
               {moisEnCours && (
                 <div className="grid grid-cols-3 gap-4">
                   <div className="bg-white rounded-xl border p-5">
-                    <p className="text-sm text-gray-500">Messages envoyes ce mois</p>
+                    <p className="text-sm text-gray-500">Messages envoyés ce mois</p>
                     <p className="text-3xl font-bold mt-1">{moisEnCours.messages}</p>
                   </div>
                   <div className="bg-white rounded-xl border p-5">
@@ -206,7 +206,7 @@ export default async function AdminDashboard() {
                     <p className="text-3xl font-bold mt-1">{moisEnCours.conversations}</p>
                   </div>
                   <div className="bg-white rounded-xl border p-5">
-                    <p className="text-sm text-gray-500">Avis deposes ce mois</p>
+                    <p className="text-sm text-gray-500">Avis déposés ce mois</p>
                     <p className="text-3xl font-bold mt-1">{moisEnCours.avis}</p>
                   </div>
                 </div>
@@ -227,7 +227,7 @@ export default async function AdminDashboard() {
                   <p className="text-3xl font-bold mt-1">{mrrDetail.essaiGratuit}</p>
                   <div className="text-xs text-gray-400 mt-1 space-y-0.5">
                     <p>{mrrDetail.essaiAccompagnantes} accompagnante{mrrDetail.essaiAccompagnantes > 1 ? 's' : ''}</p>
-                    <p>{mrrDetail.essaiAccompagnes} accompagne{mrrDetail.essaiAccompagnes > 1 ? 's' : ''}</p>
+                    <p>{mrrDetail.essaiAccompagnes} accompagné{mrrDetail.essaiAccompagnes > 1 ? 's' : ''}</p>
                   </div>
                 </div>
                 <div className="bg-white rounded-xl border p-5">
@@ -235,19 +235,19 @@ export default async function AdminDashboard() {
                   <p className="text-3xl font-bold mt-1">{mrrDetail.payants}</p>
                   <div className="text-xs text-gray-400 mt-1 space-y-0.5">
                     <p>{mrrDetail.segments.accompagnante_mensuel.count + mrrDetail.segments.accompagnante_annuel.count} accompagnantes ({mrrDetail.segments.accompagnante_mensuel.count} mens. / {mrrDetail.segments.accompagnante_annuel.count} ann.)</p>
-                    <p>{mrrDetail.segments.accompagne_mensuel.count + mrrDetail.segments.accompagne_annuel.count} accompagnes ({mrrDetail.segments.accompagne_mensuel.count} mens. / {mrrDetail.segments.accompagne_annuel.count} ann.)</p>
+                    <p>{mrrDetail.segments.accompagne_mensuel.count + mrrDetail.segments.accompagne_annuel.count} accompagnés ({mrrDetail.segments.accompagne_mensuel.count} mens. / {mrrDetail.segments.accompagne_annuel.count} ann.)</p>
                   </div>
                 </div>
                 <div className="bg-white rounded-xl border p-5">
-                  <p className="text-sm text-gray-500">Resiliations ce mois</p>
+                  <p className="text-sm text-gray-500">Résiliations ce mois</p>
                   <p className={`text-3xl font-bold mt-1 ${churn.taux <= 2 ? 'text-green-700' : churn.taux <= 5 ? 'text-amber-600' : 'text-red-600'}`}>
                     {churn.taux.toFixed(1)}%
                   </p>
                   <div className="text-xs text-gray-400 mt-1 space-y-0.5">
-                    <p>{churn.annulations} annulation{churn.annulations > 1 ? 's' : ''} / {churn.abonnesDebutMois} abonne{churn.abonnesDebutMois > 1 ? 's' : ''} debut de mois</p>
+                    <p>{churn.annulations} annulation{churn.annulations > 1 ? 's' : ''} / {churn.abonnesDebutMois} abonné{churn.abonnesDebutMois > 1 ? 's' : ''} début de mois</p>
                     {churn.annulations > 0 && (
                       <>
-                        <p>{churn.annulAccompagnantes} accompagnante{churn.annulAccompagnantes > 1 ? 's' : ''}, {churn.annulAccompagnes} accompagne{churn.annulAccompagnes > 1 ? 's' : ''}</p>
+                        <p>{churn.annulAccompagnantes} accompagnante{churn.annulAccompagnantes > 1 ? 's' : ''}, {churn.annulAccompagnes} accompagné{churn.annulAccompagnes > 1 ? 's' : ''}</p>
                         <p>{churn.annulMensuel} mens., {churn.annulAnnuel} ann.</p>
                       </>
                     )}
@@ -256,7 +256,7 @@ export default async function AdminDashboard() {
               </div>
 
               {/* MRR par segment */}
-              <h4 className="font-medium text-gray-700 text-sm mb-3">Revenu mensuel recurrent par segment</h4>
+              <h4 className="font-medium text-gray-700 text-sm mb-3">Revenu mensuel récurrent par segment</h4>
               <div className="mb-8">
                 <MrrSegmentTable data={mrrSegmentParMois} />
               </div>
@@ -266,7 +266,7 @@ export default async function AdminDashboard() {
               </div>
 
               {/* Resiliations */}
-              <h4 className="font-medium text-gray-700 text-sm mb-3">Resiliations</h4>
+              <h4 className="font-medium text-gray-700 text-sm mb-3">Résiliations</h4>
               <ResiliationsTable data={annulations} />
             </>
           ),

@@ -15,7 +15,7 @@ export async function getOrCreateConversation(
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { error: 'Non connecte.' }
+  if (!user) return { error: 'Non connecté.' }
 
   const { data: userData } = await supabase
     .from('users')
@@ -24,7 +24,7 @@ export async function getOrCreateConversation(
     .single()
 
   if (!userData || userData.role !== 'accompagne') {
-    return { error: 'Seuls les accompagnes peuvent initier une conversation.' }
+    return { error: 'Seuls les accompagnés peuvent initier une conversation.' }
   }
 
   // Recuperer le profil accompagne
@@ -42,7 +42,7 @@ export async function getOrCreateConversation(
       .single()
 
     if (createError || !newProfile) {
-      return { error: 'Erreur lors de la creation du profil.' }
+      return { error: 'Erreur lors de la création du profil.' }
     }
     benProfile = newProfile
   }
@@ -70,7 +70,7 @@ export async function getOrCreateConversation(
     .single()
 
   if (error || !conversation) {
-    return { error: 'Erreur lors de la creation de la conversation.' }
+    return { error: 'Erreur lors de la création de la conversation.' }
   }
 
   return { conversationId: conversation.id }
@@ -82,7 +82,7 @@ export async function getOrCreateConversationAsAccompagnante(
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { error: 'Non connecte.' }
+  if (!user) return { error: 'Non connecté.' }
 
   const { data: userData } = await supabase
     .from('users')
@@ -127,7 +127,7 @@ export async function getOrCreateConversationAsAccompagnante(
     .single()
 
   if (error || !conversation) {
-    return { error: 'Erreur lors de la creation de la conversation.' }
+    return { error: 'Erreur lors de la création de la conversation.' }
   }
 
   return { conversationId: conversation.id }
@@ -140,10 +140,10 @@ export async function sendMessage(
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { error: 'Non connecte.' }
+  if (!user) return { error: 'Non connecté.' }
 
   if (!content.trim()) {
-    return { error: 'Le message ne peut pas etre vide.' }
+    return { error: 'Le message ne peut pas être vide.' }
   }
 
   // Verifier que l'utilisateur fait partie de la conversation
@@ -160,14 +160,14 @@ export async function sendMessage(
     .single()
 
   if (!conversation) {
-    return { error: 'Conversation non trouvee.' }
+    return { error: 'Conversation non trouvée.' }
   }
 
   const auxProfile = conversation.accompagnantes_profiles as any
   const benProfile = conversation.accompagnes_profiles as any
 
   if (auxProfile?.user_id !== user.id && benProfile?.user_id !== user.id) {
-    return { error: 'Acces non autorise a cette conversation.' }
+    return { error: 'Accès non autorisé à cette conversation.' }
   }
 
   const { error } = await supabase

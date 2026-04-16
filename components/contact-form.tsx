@@ -22,8 +22,8 @@ export function ContactForm() {
   if (status === 'success') {
     return (
       <div className="bg-white border rounded-xl p-6 text-center">
-        <p className="font-semibold text-black mb-1">Message envoye</p>
-        <p className="text-sm text-black/50">Nous vous repondrons dans les meilleurs delais.</p>
+        <p className="font-semibold text-black mb-1">Message envoyé</p>
+        <p className="text-sm text-black/50">Nous vous répondrons dans les meilleurs délais.</p>
       </div>
     )
   }

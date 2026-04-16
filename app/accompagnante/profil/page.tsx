@@ -45,20 +45,20 @@ export default async function AccompagnanteProfilPage() {
 
         {profile.validation_status === 'en_attente' && (
           <div className="mb-6 p-4 rounded-xl border bg-gray-50 text-sm text-gray-700">
-            Votre profil est en cours de verification par notre equipe.
+            Votre profil est en cours de vérification par notre équipe.
           </div>
         )}
         {profile.validation_status === 'a_completer' && (
           <div className="mb-6 p-4 rounded-xl border border-red-200 bg-red-50 text-sm">
-            <p className="font-medium text-red-800">Des informations complementaires sont demandees.</p>
+            <p className="font-medium text-red-800">Des informations complémentaires sont demandées.</p>
             {profile.refus_motif && (
-              <p className="text-red-700 mt-1">Details : {profile.refus_motif}</p>
+              <p className="text-red-700 mt-1">Détails : {profile.refus_motif}</p>
             )}
           </div>
         )}
         {profile.validation_status === 'refuse' && (
           <div className="mb-6 p-4 rounded-xl border border-red-200 bg-red-50 text-sm">
-            <p className="font-medium text-red-800">Votre profil a ete refuse.</p>
+            <p className="font-medium text-red-800">Votre profil a été refusé.</p>
             {profile.refus_motif && (
               <p className="text-red-700 mt-1">Motif : {profile.refus_motif}</p>
             )}
@@ -90,9 +90,9 @@ export default async function AccompagnanteProfilPage() {
         />
 
         <div className="mt-10 pt-8 border-t">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Mes donnees personnelles</h3>
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Mes données personnelles</h3>
           <p className="text-sm text-gray-600 mb-4">
-            Conformement au RGPD, vous pouvez exporter ou supprimer vos donnees a tout moment.
+            Conformément au RGPD, vous pouvez exporter ou supprimer vos données à tout moment.
           </p>
           <div className="flex flex-wrap gap-3">
             <ExportDataButton />

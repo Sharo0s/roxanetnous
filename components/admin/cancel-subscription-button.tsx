@@ -49,8 +49,8 @@ export function CancelSubscriptionButton({
   return (
     <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 mt-4">
       <p className="text-sm text-gray-700 mb-3">
-        Etes-vous sur de vouloir annuler l&apos;abonnement de <strong>{userName}</strong> ?
-        L&apos;acces restera actif jusqu&apos;a la fin de la periode en cours.
+        Êtes-vous sûr de vouloir annuler l&apos;abonnement de <strong>{userName}</strong> ?
+        L&apos;accès restera actif jusqu&apos;à la fin de la période en cours.
       </p>
       {error && (
         <p className="text-sm text-red-600 mb-3">{error}</p>

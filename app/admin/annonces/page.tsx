@@ -83,7 +83,7 @@ export default async function AdminAnnoncesPage({
               type === 'accompagne' ? 'bg-accent text-black' : 'bg-white border border-gray-300 text-gray-700 hover:border-accent'
             }`}
           >
-            Accompagnes ({benCount})
+            Accompagnés ({benCount})
           </Link>
         </div>
 

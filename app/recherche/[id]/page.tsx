@@ -139,7 +139,7 @@ export default async function AnnonceDetailPage({
               roxanetnous
             </Link>
             <Link href="/recherche" className="text-sm text-gray-500 hover:text-black">
-              Retour a la recherche
+              Retour à la recherche
             </Link>
           </div>
         </header>
@@ -159,7 +159,7 @@ export default async function AnnonceDetailPage({
                 <BadgesDisplay badges={badgesMap[auxUserId]} />
               </div>
               <p className="text-black">
-                {diplomeLabel} — Experience : {expLabel}
+                {diplomeLabel} — Expérience : {expLabel}
                 {moyenneNote !== null && ` — ${moyenneNote.toFixed(1)}/5 (${avisFormatted.length} avis)`}
               </p>
             </div>
@@ -178,13 +178,13 @@ export default async function AnnonceDetailPage({
 
             {profile?.description && (
               <div className="bg-white rounded-xl border p-6">
-                <h3 className="font-semibold mb-3">A propos</h3>
+                <h3 className="font-semibold mb-3">À propos</h3>
                 <p className="text-sm text-gray-700 whitespace-pre-wrap break-words overflow-hidden">{profile.description}</p>
               </div>
             )}
 
             <div className="bg-white rounded-xl border p-6">
-              <h3 className="font-semibold mb-3">Specialites ({specLabels.length})</h3>
+              <h3 className="font-semibold mb-3">Spécialités ({specLabels.length})</h3>
               <div className="flex flex-wrap gap-2">
                 {specLabels.map((label: string, i: number) => (
                   <span key={i} className="px-3 py-1 bg-accent text-black rounded-full text-xs font-medium">
@@ -196,7 +196,7 @@ export default async function AnnonceDetailPage({
 
             {Object.keys(dispos).length > 0 && (
               <div className="bg-white rounded-xl border p-6">
-                <h3 className="font-semibold mb-3">Disponibilites</h3>
+                <h3 className="font-semibold mb-3">Disponibilités</h3>
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead>
@@ -257,13 +257,13 @@ export default async function AnnonceDetailPage({
                   <dd className="font-medium">{annonce.rayon_km} km</dd>
                 </div>
                 <div>
-                  <dt className="text-gray-500">Experience</dt>
+                  <dt className="text-gray-500">Expérience</dt>
                   <dd className="font-medium">{expLabel}</dd>
                 </div>
                 {profile?.permis_conduire && (
                   <div>
                     <dt className="text-gray-500">Permis de conduire</dt>
-                    <dd className="font-medium">Oui{profile.vehicule ? ' (avec vehicule)' : ''}</dd>
+                    <dd className="font-medium">Oui{profile.vehicule ? ' (avec véhicule)' : ''}</dd>
                   </div>
                 )}
                 {profile?.langues && profile.langues.length > 0 && (
@@ -285,7 +285,7 @@ export default async function AnnonceDetailPage({
               </div>
             ) : !user ? (
               <div className="bg-white rounded-xl border p-6">
-                <h3 className="font-semibold mb-3">Interesse ?</h3>
+                <h3 className="font-semibold mb-3">Intéressé ?</h3>
                 <p className="text-sm text-gray-600 mb-4">
                   Connectez-vous pour contacter cette accompagnante.
                 </p>
@@ -293,7 +293,7 @@ export default async function AnnonceDetailPage({
                   href="/register"
                   className="inline-flex items-center px-4 py-2 bg-accent text-black rounded-lg btn-hover transition text-sm font-medium w-full justify-center"
                 >
-                  Creer un compte
+                  Créer un compte
                 </Link>
               </div>
             ) : null}

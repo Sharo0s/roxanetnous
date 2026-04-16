@@ -207,7 +207,7 @@ export default async function AdminUtilisateurDetailPage({
             </div>
             {userData.phone && (
               <div className="flex justify-between">
-                <dt className="text-gray-500">Telephone</dt>
+                <dt className="text-gray-500">Téléphone</dt>
                 <dd className="font-medium text-right">{userData.phone}</dd>
               </div>
             )}
@@ -253,7 +253,7 @@ export default async function AdminUtilisateurDetailPage({
                   <dt className="text-gray-500">Permis de conduire</dt>
                   <dd className="font-medium text-right">
                     {auxProfile.permis_conduire
-                      ? `Oui${auxProfile.vehicule ? ' (avec vehicule)' : ''}`
+                      ? `Oui${auxProfile.vehicule ? ' (avec véhicule)' : ''}`
                       : 'Non'}
                   </dd>
                 </div>
@@ -268,13 +268,13 @@ export default async function AdminUtilisateurDetailPage({
             <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4">Profil professionnel</h3>
             <dl className="space-y-4 text-sm">
               <div className="flex justify-between">
-                <dt className="text-gray-500">Diplomes</dt>
+                <dt className="text-gray-500">Diplômes</dt>
                 <dd className="font-medium text-right">
                   {diplomeLabels.length > 0 ? diplomeLabels.join(', ') : '-'}
                 </dd>
               </div>
               <div className="flex justify-between">
-                <dt className="text-gray-500">Experience</dt>
+                <dt className="text-gray-500">Expérience</dt>
                 <dd className="font-medium text-right">{experienceLabel || '-'}</dd>
               </div>
               {auxProfile.langues && (auxProfile.langues as string[]).length > 0 && (
@@ -291,7 +291,7 @@ export default async function AdminUtilisateurDetailPage({
         {auxProfile && specialiteLabels.length > 0 && (
           <div className="bg-white rounded-xl border p-6">
             <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4">
-              Specialites <span className="text-gray-400 normal-case tracking-normal">({specialiteLabels.length})</span>
+              Spécialités <span className="text-gray-400 normal-case tracking-normal">({specialiteLabels.length})</span>
             </h3>
             <div className="flex flex-wrap gap-2">
               {specialiteLabels.map((label: string, i: number) => (
@@ -309,7 +309,7 @@ export default async function AdminUtilisateurDetailPage({
         {/* Disponibilites (accompagnante) */}
         {auxProfile && disponibilites && Object.keys(disponibilites).length > 0 && (
           <div className="bg-white rounded-xl border p-6 md:col-span-2">
-            <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4">Disponibilites</h3>
+            <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4">Disponibilités</h3>
             <div className="overflow-x-auto">
               <table className="w-full text-xs">
                 <thead>
@@ -361,13 +361,13 @@ export default async function AdminUtilisateurDetailPage({
             <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4">Justificatifs</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               <DocLink label="CV" url={cvUrl} />
-              <DocLink label="Piece d'identite" url={identiteUrl} />
+              <DocLink label="Pièce d'identité" url={identiteUrl} />
               <DocLink label="Permis de conduire" url={permisUrl} />
               {diplomeUrls.map((d, i) => (
-                <DocLink key={i} label={`Diplome : ${d.label}`} url={d.url} />
+                <DocLink key={i} label={`Diplôme : ${d.label}`} url={d.url} />
               ))}
               {diplomeUrls.length === 0 && (
-                <DocLink label="Diplomes" url={null} />
+                <DocLink label="Diplômes" url={null} />
               )}
             </div>
           </div>
@@ -391,12 +391,12 @@ export default async function AdminUtilisateurDetailPage({
                     {subscriptionStatus.status === 'trialing'
                       ? 'Essai gratuit'
                       : subscriptionStatus.cancelAt
-                        ? 'Annulation prevue'
+                        ? 'Annulation prévue'
                         : subscriptionStatus.status === 'active'
                           ? 'Actif'
                           : subscriptionStatus.status === 'past_due'
                             ? 'Paiement en retard'
-                            : 'Annule'}
+                            : 'Annulé'}
                   </span>
                 </dd>
               </div>
@@ -408,13 +408,13 @@ export default async function AdminUtilisateurDetailPage({
               )}
               {subscriptionStatus.currentPeriodEnd && (
                 <div className="flex justify-between">
-                  <dt className="text-gray-500">Prochaine echeance</dt>
+                  <dt className="text-gray-500">Prochaine échéance</dt>
                   <dd className="font-medium">{new Date(subscriptionStatus.currentPeriodEnd).toLocaleDateString('fr-FR')}</dd>
                 </div>
               )}
               {subscriptionStatus.cancelAt && (
                 <div className="flex justify-between">
-                  <dt className="text-gray-500">Fin d&apos;acces prevue</dt>
+                  <dt className="text-gray-500">Fin d&apos;accès prévue</dt>
                   <dd className="font-medium">{new Date(subscriptionStatus.cancelAt).toLocaleDateString('fr-FR')}</dd>
                 </div>
               )}
@@ -422,7 +422,7 @@ export default async function AdminUtilisateurDetailPage({
                 <div className="flex justify-between">
                   <dt className="text-gray-500">Raison</dt>
                   <dd className="font-medium">{
-                    { customer_service: 'Service client', low_quality: 'Qualite insuffisante', missing_features: 'Fonctionnalites manquantes', switched_service: 'Passe a un concurrent', too_complex: 'Trop complexe', too_expensive: 'Trop cher', unused: 'Non utilise', other: 'Autre' }[subscriptionStatus.cancelFeedback] || subscriptionStatus.cancelFeedback
+                    { customer_service: 'Service client', low_quality: 'Qualité insuffisante', missing_features: 'Fonctionnalités manquantes', switched_service: 'Passé à un concurrent', too_complex: 'Trop complexe', too_expensive: 'Trop cher', unused: 'Non utilisé', other: 'Autre' }[subscriptionStatus.cancelFeedback] || subscriptionStatus.cancelFeedback
                   }</dd>
                 </div>
               )}
@@ -485,9 +485,9 @@ function StatusBadge({ status }: { status: string }) {
 
   const labels: Record<string, string> = {
     en_attente: 'En attente',
-    valide: 'Valide',
-    refuse: 'Refuse',
-    a_completer: 'A completer',
+    valide: 'Validé',
+    refuse: 'Refusé',
+    a_completer: 'À compléter',
   }
 
   return (

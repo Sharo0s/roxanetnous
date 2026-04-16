@@ -25,15 +25,15 @@ export function StepJustificatifs({ onUpload }: Props) {
       <div>
         <h2 className="text-xl font-semibold mb-1">Justificatifs</h2>
         <p className="text-sm text-gray-500">
-          Uploadez votre piece d'identite pour la verification de votre profil.
-          Formats acceptes : PDF, JPG, PNG (max 10 Mo).
+          Uploadez votre pièce d'identité pour la vérification de votre profil.
+          Formats acceptés : PDF, JPG, PNG (max 10 Mo).
         </p>
       </div>
 
       {/* Piece d'identite */}
       <div className="space-y-2">
         <label className="block text-sm font-medium text-gray-700">
-          Piece d'identite
+          Pièce d'identité
         </label>
         <input
           ref={identiteRef}
@@ -60,14 +60,14 @@ export function StepJustificatifs({ onUpload }: Props) {
           ) : identiteFile ? (
             <span>{identiteFile}</span>
           ) : (
-            'Cliquez pour selectionner un fichier'
+            'Cliquez pour sélectionner un fichier'
           )}
         </button>
       </div>
 
       <p className="text-xs text-gray-400">
-        Ces documents seront verifies par notre equipe.
-        Votre profil sera visible une fois la verification terminee.
+        Ces documents seront vérifiés par notre équipe.
+        Votre profil sera visible une fois la vérification terminée.
       </p>
     </div>
   )

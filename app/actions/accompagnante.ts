@@ -25,7 +25,7 @@ export async function submitOnboarding(data: {
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { error: 'Non connecte.' }
+  if (!user) return { error: 'Non connecté.' }
 
   const { data: userData } = await supabase
     .from('users')
@@ -34,11 +34,11 @@ export async function submitOnboarding(data: {
     .single()
 
   if (!userData || userData.role !== 'accompagnante') {
-    return { error: 'Acces non autorise.' }
+    return { error: 'Accès non autorisé.' }
   }
 
   if (data.diplomes.length === 0 || !data.experience || data.specialites.length === 0) {
-    return { error: 'Diplomes, experience et specialites sont requis.' }
+    return { error: 'Diplômes, expérience et spécialités sont requis.' }
   }
 
   if (!data.ville || !data.code_postal) {
@@ -91,7 +91,7 @@ export async function submitOnboarding(data: {
   }
 
   if (error) {
-    return { error: 'Erreur lors de la creation du profil.' }
+    return { error: 'Erreur lors de la création du profil.' }
   }
 
   redirect('/accompagnante/dashboard')
@@ -101,7 +101,7 @@ export async function uploadJustificatif(formData: FormData): Promise<Onboarding
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { error: 'Non connecte.' }
+  if (!user) return { error: 'Non connecté.' }
 
   const file = formData.get('file') as File
   const type = formData.get('type') as string
@@ -112,11 +112,11 @@ export async function uploadJustificatif(formData: FormData): Promise<Onboarding
 
   const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png', 'image/webp']
   if (!allowedTypes.includes(file.type)) {
-    return { error: 'Format non supporte. Utilisez PDF, JPG, PNG ou WebP.' }
+    return { error: 'Format non supporté. Utilisez PDF, JPG, PNG ou WebP.' }
   }
 
   if (file.size > 10 * 1024 * 1024) {
-    return { error: 'Le fichier ne doit pas depasser 10 Mo.' }
+    return { error: 'Le fichier ne doit pas dépasser 10 Mo.' }
   }
 
   const ext = file.name.split('.').pop()
@@ -154,7 +154,7 @@ export async function uploadJustificatif(formData: FormData): Promise<Onboarding
       .eq('user_id', user.id)
 
     if (updateError) {
-      return { error: 'Erreur lors de la mise a jour du profil.' }
+      return { error: 'Erreur lors de la mise à jour du profil.' }
     }
   } else {
     const fieldMap: Record<string, string> = {
@@ -173,7 +173,7 @@ export async function uploadJustificatif(formData: FormData): Promise<Onboarding
       .eq('user_id', user.id)
 
     if (updateError) {
-      return { error: 'Erreur lors de la mise a jour du profil.' }
+      return { error: 'Erreur lors de la mise à jour du profil.' }
     }
   }
 

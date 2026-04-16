@@ -21,7 +21,7 @@ export async function createAnnonceAccompagnante(data: {
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { error: 'Non connecte.' }
+  if (!user) return { error: 'Non connecté.' }
 
   const { data: profile } = await supabase
     .from('accompagnantes_profiles')
@@ -29,9 +29,9 @@ export async function createAnnonceAccompagnante(data: {
     .eq('user_id', user.id)
     .single()
 
-  if (!profile) return { error: 'Profil non trouve.' }
+  if (!profile) return { error: 'Profil non trouvé.' }
   if (profile.validation_status !== 'valide') {
-    return { error: 'Votre profil doit etre valide pour publier une annonce.' }
+    return { error: 'Votre profil doit être validé pour publier une annonce.' }
   }
 
   // Verifier l'abonnement actif
@@ -67,7 +67,7 @@ export async function createAnnonceAccompagnante(data: {
     .single()
 
   if (error) {
-    return { error: 'Erreur lors de la creation de l\'annonce.' }
+    return { error: 'Erreur lors de la création de l\'annonce.' }
   }
 
   // Mettre a jour lat/lng sur le profil accompagnante si pas encore renseigne
@@ -103,7 +103,7 @@ export async function updateAnnonceAccompagnante(
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { error: 'Non connecte.' }
+  if (!user) return { error: 'Non connecté.' }
 
   const { data: profile } = await supabase
     .from('accompagnantes_profiles')
@@ -111,7 +111,7 @@ export async function updateAnnonceAccompagnante(
     .eq('user_id', user.id)
     .single()
 
-  if (!profile) return { error: 'Profil non trouve.' }
+  if (!profile) return { error: 'Profil non trouvé.' }
 
   if (!data.description.trim()) {
     return { error: 'La description est requise.' }
@@ -130,7 +130,7 @@ export async function updateAnnonceAccompagnante(
     .eq('accompagnante_id', profile.id)
 
   if (error) {
-    return { error: 'Erreur lors de la mise a jour.' }
+    return { error: 'Erreur lors de la mise à jour.' }
   }
 
   redirect('/accompagnante/annonces')
@@ -143,7 +143,7 @@ export async function updateAnnonceAccompagnanteStatus(
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { error: 'Non connecte.' }
+  if (!user) return { error: 'Non connecté.' }
 
   const { data: profile } = await supabase
     .from('accompagnantes_profiles')
@@ -151,7 +151,7 @@ export async function updateAnnonceAccompagnanteStatus(
     .eq('user_id', user.id)
     .single()
 
-  if (!profile) return { error: 'Profil non trouve.' }
+  if (!profile) return { error: 'Profil non trouvé.' }
 
   const updateData: Record<string, unknown> = { status }
   if (status === 'publiee') {
@@ -165,7 +165,7 @@ export async function updateAnnonceAccompagnanteStatus(
     .eq('accompagnante_id', profile.id)
 
   if (error) {
-    return { error: 'Erreur lors de la mise a jour.' }
+    return { error: 'Erreur lors de la mise à jour.' }
   }
 
   return { success: true }
@@ -191,7 +191,7 @@ export async function createAnnonceAccompagne(data: {
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { error: 'Non connecte.' }
+  if (!user) return { error: 'Non connecté.' }
 
   const { data: userData } = await supabase
     .from('users')
@@ -200,7 +200,7 @@ export async function createAnnonceAccompagne(data: {
     .single()
 
   if (!userData || userData.role !== 'accompagne') {
-    return { error: 'Acces non autorise.' }
+    return { error: 'Accès non autorisé.' }
   }
 
   // Verifier l'abonnement actif
@@ -228,7 +228,7 @@ export async function createAnnonceAccompagne(data: {
       .single()
 
     if (createError || !newProfile) {
-      return { error: 'Erreur lors de la creation du profil.' }
+      return { error: 'Erreur lors de la création du profil.' }
     }
     profile = newProfile
   }
@@ -238,7 +238,7 @@ export async function createAnnonceAccompagne(data: {
   }
 
   if (!data.ville.trim() || data.specialites_recherchees.length === 0) {
-    return { error: 'La ville et au moins une specialite sont requis.' }
+    return { error: 'La ville et au moins une spécialité sont requis.' }
   }
 
   const coords = await geocodeAddress(data.ville.trim(), data.code_postal.trim() || '')
@@ -271,7 +271,7 @@ export async function createAnnonceAccompagne(data: {
     .single()
 
   if (error) {
-    return { error: 'Erreur lors de la creation de l\'annonce.' }
+    return { error: 'Erreur lors de la création de l\'annonce.' }
   }
 
   // Notifier les accompagnantes dont le profil correspond (fire-and-forget)
@@ -307,7 +307,7 @@ export async function updateAnnonceAccompagne(
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { error: 'Non connecte.' }
+  if (!user) return { error: 'Non connecté.' }
 
   const { data: profile } = await supabase
     .from('accompagnes_profiles')
@@ -315,14 +315,14 @@ export async function updateAnnonceAccompagne(
     .eq('user_id', user.id)
     .single()
 
-  if (!profile) return { error: 'Profil non trouve.' }
+  if (!profile) return { error: 'Profil non trouvé.' }
 
   if (!data.titre.trim() || !data.description.trim()) {
     return { error: 'Le titre et la description sont requis.' }
   }
 
   if (!data.ville.trim() || data.specialites_recherchees.length === 0) {
-    return { error: 'La ville et au moins une specialite sont requis.' }
+    return { error: 'La ville et au moins une spécialité sont requis.' }
   }
 
   const coords = await geocodeAddress(data.ville.trim(), data.code_postal.trim() || '')
@@ -352,7 +352,7 @@ export async function updateAnnonceAccompagne(
     .eq('accompagne_id', profile.id)
 
   if (error) {
-    return { error: 'Erreur lors de la mise a jour de l\'annonce.' }
+    return { error: 'Erreur lors de la mise à jour de l\'annonce.' }
   }
 
   redirect('/accompagne/annonces')
@@ -364,7 +364,7 @@ export async function deleteAnnonceAccompagnante(
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { error: 'Non connecte.' }
+  if (!user) return { error: 'Non connecté.' }
 
   const { data: profile } = await supabase
     .from('accompagnantes_profiles')
@@ -372,7 +372,7 @@ export async function deleteAnnonceAccompagnante(
     .eq('user_id', user.id)
     .single()
 
-  if (!profile) return { error: 'Profil non trouve.' }
+  if (!profile) return { error: 'Profil non trouvé.' }
 
   const { error } = await supabase
     .from('annonces_accompagnantes')
@@ -393,7 +393,7 @@ export async function deleteAnnonceAccompagne(
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { error: 'Non connecte.' }
+  if (!user) return { error: 'Non connecté.' }
 
   const { data: profile } = await supabase
     .from('accompagnes_profiles')
@@ -401,7 +401,7 @@ export async function deleteAnnonceAccompagne(
     .eq('user_id', user.id)
     .single()
 
-  if (!profile) return { error: 'Profil non trouve.' }
+  if (!profile) return { error: 'Profil non trouvé.' }
 
   const { error } = await supabase
     .from('annonces_accompagnes')
@@ -423,7 +423,7 @@ export async function updateAnnonceAccompagneStatus(
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { error: 'Non connecte.' }
+  if (!user) return { error: 'Non connecté.' }
 
   const { data: profile } = await supabase
     .from('accompagnes_profiles')
@@ -431,7 +431,7 @@ export async function updateAnnonceAccompagneStatus(
     .eq('user_id', user.id)
     .single()
 
-  if (!profile) return { error: 'Profil non trouve.' }
+  if (!profile) return { error: 'Profil non trouvé.' }
 
   const updateData: Record<string, unknown> = { status }
   if (status === 'publiee') {
@@ -445,7 +445,7 @@ export async function updateAnnonceAccompagneStatus(
     .eq('accompagne_id', profile.id)
 
   if (error) {
-    return { error: 'Erreur lors de la mise a jour.' }
+    return { error: 'Erreur lors de la mise à jour.' }
   }
 
   return { success: true }

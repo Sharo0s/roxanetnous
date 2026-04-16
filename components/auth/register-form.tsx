@@ -59,7 +59,7 @@ export function RegisterForm() {
   async function submitPassword(e: React.FormEvent) {
     e.preventDefault()
     if (!password || password.length < 8) {
-      setError('Le mot de passe doit contenir au moins 8 caracteres.')
+      setError('Le mot de passe doit contenir au moins 8 caractères.')
       return
     }
     setError(null)
@@ -95,10 +95,10 @@ export function RegisterForm() {
           </Link>
           <div className="mt-8 bg-white p-8 rounded-xl shadow-sm border border-accent">
             <h2 className="text-xl font-semibold text-black mb-4">
-              Verifiez votre email
+              Vérifiez votre email
             </h2>
             <p className="text-gray-600 mb-2">
-              Un email de confirmation a ete envoye a :
+              Un email de confirmation a été envoyé à :
             </p>
             <p className="font-medium text-black mb-6">{email}</p>
             <p className="text-sm text-black/50 mb-6">
@@ -108,7 +108,7 @@ export function RegisterForm() {
               href="/login"
               className="inline-block px-6 py-2.5 bg-accent text-black rounded-lg text-sm font-medium btn-hover transition"
             >
-              Aller a la page de connexion
+              Aller à la page de connexion
             </Link>
           </div>
         </div>
@@ -123,7 +123,7 @@ export function RegisterForm() {
           <Link href="/" className="text-3xl font-bold text-black">
             roxanetnous
           </Link>
-          <p className="mt-2 text-gray-600">Creez votre compte</p>
+          <p className="mt-2 text-gray-600">Créez votre compte</p>
         </div>
 
         <div className="bg-white p-8 rounded-xl shadow-sm border space-y-6">
@@ -136,7 +136,7 @@ export function RegisterForm() {
           {/* Step 1 : Role */}
           <div className="animate-fade-in">
             <label className="block text-sm font-medium text-gray-700 mb-3">
-              Vous etes
+              Vous êtes
             </label>
             <div className="grid grid-cols-2 gap-3">
               <button
@@ -148,7 +148,7 @@ export function RegisterForm() {
                     : 'border-gray-200 hover:border-accent'
                 }`}
               >
-                <p className="font-semibold text-sm">Vos competences meritent que vous soyez trouve(e)</p>
+                <p className="font-semibold text-sm">Vos compétences méritent que vous soyez trouvé(e)</p>
                 <p className={`text-xs mt-1 ${role === 'accompagnante' ? 'text-black/50' : 'text-gray-500'}`}>
                   Au bon moment, au bon endroit
                 </p>
@@ -176,8 +176,8 @@ export function RegisterForm() {
               <div className="grid grid-cols-2 gap-4">
                 <Input
                   name="firstName"
-                  label="Prenom"
-                  placeholder="Prenom"
+                  label="Prénom"
+                  placeholder="Prénom"
                   required
                   value={firstName}
                   onChange={(e) => setFirstName(e.target.value)}
@@ -228,7 +228,7 @@ export function RegisterForm() {
                 name="password"
                 type="password"
                 label="Mot de passe"
-                placeholder="8 caracteres minimum"
+                placeholder="8 caractères minimum"
                 minLength={8}
                 required
                 value={password}
@@ -236,7 +236,7 @@ export function RegisterForm() {
                 autoFocus={isCurrent('password')}
               />
               <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? 'Creation du compte...' : 'Creer mon compte'}
+                {loading ? 'Création du compte...' : 'Créer mon compte'}
               </Button>
             </form>
           )}

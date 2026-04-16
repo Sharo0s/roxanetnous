@@ -34,13 +34,13 @@ export function ValidationActions({ profileId }: Props) {
   if (!action) {
     return (
       <div className="bg-white rounded-xl border p-6">
-        <h3 className="font-semibold mb-4">Decision</h3>
+        <h3 className="font-semibold mb-4">Décision</h3>
         <div className="flex gap-3">
           <Button onClick={() => setAction('valide')}>
             Valider le profil
           </Button>
           <Button variant="outline" onClick={() => setAction('a_completer')}>
-            Demander un complement
+            Demander un complément
           </Button>
           <Button variant="destructive" onClick={() => setAction('refuse')}>
             Refuser
@@ -55,7 +55,7 @@ export function ValidationActions({ profileId }: Props) {
       <h3 className="font-semibold mb-4">
         {action === 'valide' && 'Confirmer la validation'}
         {action === 'refuse' && 'Confirmer le refus'}
-        {action === 'a_completer' && 'Demande de complement'}
+        {action === 'a_completer' && 'Demande de complément'}
       </h3>
 
       {error && (
@@ -66,7 +66,7 @@ export function ValidationActions({ profileId }: Props) {
 
       {action === 'valide' ? (
         <p className="text-sm text-gray-600 mb-4">
-          Ce profil sera marque comme valide. L'accompagnante pourra acceder a la plateforme.
+          Ce profil sera marqué comme validé. L'accompagnante pourra accéder à la plateforme.
         </p>
       ) : (
         <div className="mb-4">
@@ -79,7 +79,7 @@ export function ValidationActions({ profileId }: Props) {
             placeholder={
               action === 'refuse'
                 ? 'Expliquez la raison du refus...'
-                : 'Precisez les documents ou informations manquants...'
+                : 'Précisez les documents ou informations manquants...'
             }
             rows={4}
             className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black resize-none"

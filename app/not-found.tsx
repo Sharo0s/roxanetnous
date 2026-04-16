@@ -6,14 +6,14 @@ export default function NotFound() {
       <div className="text-center max-w-md relative z-10">
         <h1 className="text-6xl font-bold text-black mb-4">404</h1>
         <p className="text-xl text-gray-600 mb-8">
-          Cette page n&#39;existe pas ou a ete deplacee.
+          Cette page n&#39;existe pas ou a été déplacée.
         </p>
         <div className="flex gap-4 justify-center">
           <Link
             href="/"
             className="px-6 py-3 bg-accent text-black rounded-lg transition text-sm font-medium btn-hover"
           >
-            Retour a l&#39;accueil
+            Retour à l&#39;accueil
           </Link>
           <Link
             href="/recherche"

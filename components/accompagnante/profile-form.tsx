@@ -187,7 +187,7 @@ export function AccompagnanteProfileForm({ userInfo, profile }: Props) {
         <h3 className="font-semibold mb-4">Informations personnelles</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Prenom</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Prénom</label>
             <input
               type="text"
               value={firstName}
@@ -214,7 +214,7 @@ export function AccompagnanteProfileForm({ userInfo, profile }: Props) {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Telephone</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Téléphone</label>
             <input
               type="tel"
               value={phone}
@@ -230,7 +230,7 @@ export function AccompagnanteProfileForm({ userInfo, profile }: Props) {
         <textarea
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          placeholder="Presentez-vous, votre parcours et votre approche..."
+          placeholder="Présentez-vous, votre parcours et votre approche..."
           rows={5}
           className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black resize-none"
         />
@@ -265,13 +265,13 @@ export function AccompagnanteProfileForm({ userInfo, profile }: Props) {
               ? 'Upload en cours...'
               : cvFileName
                 ? `Fichier : ${cvFileName}`
-                : 'Cliquez pour selectionner un fichier'}
+                : 'Cliquez pour sélectionner un fichier'}
           </button>
           <p className="text-xs text-gray-400">PDF, JPG, PNG ou WebP (max. 10 Mo)</p>
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Diplomes</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Diplômes</label>
           <div className="space-y-2 mb-4">
             {DIPLOMES.map((d) => {
               const isSelected = diplomes.includes(d.value)
@@ -339,7 +339,7 @@ export function AccompagnanteProfileForm({ userInfo, profile }: Props) {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Experience</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Expérience</label>
           <select
             value={experience}
             onChange={(e) => setExperience(e.target.value)}
@@ -353,7 +353,7 @@ export function AccompagnanteProfileForm({ userInfo, profile }: Props) {
       </div>
 
       <div className="bg-white rounded-xl border p-6">
-        <h3 className="font-semibold mb-4">Specialites</h3>
+        <h3 className="font-semibold mb-4">Spécialités</h3>
         <div className="flex flex-wrap gap-2">
           {SPECIALITES.map((spec) => (
             <button
@@ -442,13 +442,13 @@ export function AccompagnanteProfileForm({ userInfo, profile }: Props) {
               onChange={(e) => setVehicule(e.target.checked)}
               className="rounded border-gray-300"
             />
-            Vehicule personnel
+            Véhicule personnel
           </label>
         </div>
       </div>
 
       <div className="bg-white rounded-xl border p-6">
-        <h3 className="font-semibold mb-4">Disponibilites</h3>
+        <h3 className="font-semibold mb-4">Disponibilités</h3>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
@@ -490,7 +490,7 @@ export function AccompagnanteProfileForm({ userInfo, profile }: Props) {
 
       {success && (
         <div className="p-4 rounded-lg bg-accent text-black text-sm font-medium">
-          Profil mis a jour avec succes.
+          Profil mis à jour avec succès.
         </div>
       )}
       {error && (

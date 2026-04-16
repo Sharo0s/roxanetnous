@@ -41,7 +41,7 @@ export default async function AdminSignalementsPage() {
                               ? 'bg-accent text-black'
                               : 'bg-gray-100 text-gray-500'
                         }`}>
-                          {sig.status === 'en_attente' ? 'En attente' : sig.status === 'traite' ? 'Traite' : 'Ignore'}
+                          {sig.status === 'en_attente' ? 'En attente' : sig.status === 'traite' ? 'Traité' : 'Ignoré'}
                         </span>
                         <span className="text-xs text-gray-400 capitalize">{sig.cible_type.replace('_', ' ')}</span>
                       </div>
@@ -60,7 +60,7 @@ export default async function AdminSignalementsPage() {
                       </p>
                       {sig.decision && (
                         <p className="text-xs text-gray-500 mt-1">
-                          Decision: <span className="font-medium capitalize">{sig.decision}</span>
+                          Décision : <span className="font-medium capitalize">{sig.decision}</span>
                           {sig.notes_admin && ` — ${sig.notes_admin}`}
                         </p>
                       )}

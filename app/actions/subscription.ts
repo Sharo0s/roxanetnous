@@ -122,7 +122,7 @@ export async function cancelSubscriptionFromModal(): Promise<{
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { success: false, cancelAt: null, error: 'Non connecte.' }
+  if (!user) return { success: false, cancelAt: null, error: 'Non connecté.' }
 
   const subStatus = await getSubscriptionStatus(user.id)
   if (!subStatus.stripeSubscriptionId || !subStatus.active) {
@@ -140,7 +140,7 @@ export async function cancelSubscriptionFromModal(): Promise<{
 
     return { success: true, cancelAt }
   } catch {
-    return { success: false, cancelAt: null, error: 'Erreur lors de la resiliation.' }
+    return { success: false, cancelAt: null, error: 'Erreur lors de la résiliation.' }
   }
 }
 

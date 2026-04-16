@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { Footer } from '@/components/footer'
 import { ContactForm } from '@/components/contact-form'
 import { AvisMarquee } from '@/components/landing/avis-marquee'
@@ -82,7 +83,7 @@ export default async function HomePage() {
     '@type': 'WebApplication',
     name: 'roxanetnous',
     url: process.env.NEXT_PUBLIC_BASE_URL || 'https://roxanetnous.fr',
-    description: 'Plateforme de mise en relation entre accompagnantes de vie verifies et accompagnes.',
+    description: 'Plateforme de mise en relation entre accompagnantes de vie vérifiées et accompagnés.',
     applicationCategory: 'HealthApplication',
     operatingSystem: 'Web',
     offers: [
@@ -98,7 +99,7 @@ export default async function HomePage() {
         name: 'Abonnement annuel',
         price: '49.99',
         priceCurrency: 'EUR',
-        description: 'Abonnement annuel, economisez 17%',
+        description: 'Abonnement annuel, économisez 17%',
       },
     ],
   }
@@ -127,11 +128,18 @@ export default async function HomePage() {
           <div className="max-w-5xl mx-auto relative z-10">
             <div className="flex flex-col md:flex-row items-center gap-10 md:gap-16">
               <div className="flex-1 text-center md:text-left space-y-5">
-                <h1 className="text-5xl md:text-6xl font-bold text-black tracking-tight">
-                  roxanetnous
-                </h1>
-                <p className="text-xl text-black leading-relaxed">
-                  Donne vie a ton quotidien
+                <h1 className="sr-only">roxanetnous</h1>
+                <Image
+                  src="/logo-transparent.png"
+                  alt="roxanetnous"
+                  width={480}
+                  height={160}
+                  priority
+                  className="h-auto w-64 md:w-80 mx-auto md:mx-0"
+                />
+
+                <p className="text-xl text-white leading-relaxed">
+                  Donne vie à ton quotidien
                 </p>
 
                 <div className="flex gap-4 justify-center md:justify-start pt-4">
@@ -146,10 +154,10 @@ export default async function HomePage() {
                 {((accompagnantesCount || 0) > 0 || (accompagnesCount || 0) > 0 || villesUniques.size > 0) && (
                   <div className="flex gap-8 justify-center md:justify-start pt-10">
                     {(accompagnantesCount || 0) > 0 && (
-                      <AnimatedCounter end={accompagnantesCount || 0} label={`accompagnant(e)${(accompagnantesCount || 0) > 1 ? 's' : ''} verifie(e)${(accompagnantesCount || 0) > 1 ? 's' : ''}`} />
+                      <AnimatedCounter end={accompagnantesCount || 0} label={`accompagnant(e)${(accompagnantesCount || 0) > 1 ? 's' : ''} vérifié(e)${(accompagnantesCount || 0) > 1 ? 's' : ''}`} />
                     )}
                     {(accompagnesCount || 0) > 0 && (
-                      <AnimatedCounter end={accompagnesCount || 0} label={`accompagne(e)${(accompagnesCount || 0) > 1 ? 's' : ''}`} />
+                      <AnimatedCounter end={accompagnesCount || 0} label={`accompagné(e)${(accompagnesCount || 0) > 1 ? 's' : ''}`} />
                     )}
                     {villesUniques.size > 0 && (
                       <AnimatedCounter end={villesUniques.size} label={`ville${villesUniques.size > 1 ? 's' : ''}`} />
@@ -169,7 +177,7 @@ export default async function HomePage() {
         <section className="bg-accent">
           <div className="max-w-5xl mx-auto px-4 py-8 flex flex-col items-center gap-4 text-center md:flex-row md:justify-between md:text-left">
             <p className="text-base font-medium text-black tracking-wide">
-              Notre communaute de mise en relation entre accompagnants et accompagne(e)s
+              Notre communauté de mise en relation entre accompagnants et accompagné(e)s
             </p>
             <Link href="/recherche" className="rounded-full px-4 py-1.5 font-medium bg-black text-white btn-hover whitespace-nowrap text-sm shrink-0">
               Consulter les annonces
@@ -186,14 +194,14 @@ export default async function HomePage() {
         {/* ===== COMMENT CA MARCHE ===== */}
         <section className="px-4 pt-16 pb-24 md:pb-28 kraft bg-kraft relative">
           <div className="max-w-3xl mx-auto relative z-10">
-            <h2 className="text-2xl font-bold text-center text-black mb-12">
-              Comment ca marche RoxanetNous
+            <h2 className="text-2xl font-bold text-center text-white mb-12">
+              Comment ça marche RoxanetNous
             </h2>
             <div className="space-y-0">
               {[
-                { step: '1', title: 'Inscription', desc: "Creez votre compte en tant qu'accompagnant(e) ou accompagne(e).." },
-                { step: '2', title: 'Justificatifs', desc: "Accompagnant(e)s : deposez vos diplomes et piece d'identite. Accompagne(e)s : decrivez votre besoin." },
-                { step: '3', title: 'Validation', desc: 'Notre equipe verifie manuellement chaque profil accompagnant(e). Sous 48h.' },
+                { step: '1', title: 'Inscription', desc: "Créez votre compte en tant qu'accompagnant(e) ou accompagné(e).." },
+                { step: '2', title: 'Justificatifs', desc: "Accompagnant(e)s : déposez vos diplômes et pièce d'identité. Accompagné(e)s : décrivez votre besoin." },
+                { step: '3', title: 'Validation', desc: 'Notre équipe vérifie manuellement chaque profil accompagnant(e). Sous 48h.' },
                 { step: '4', title: 'Mise en relation', desc: 'Publiez votre annonce, nous vous recommandons les profils les plus compatibles. Premiers contacts en quelques jours.' },
               ].map((item, i) => (
                 <div key={item.step} className="flex gap-6 items-start">
@@ -204,8 +212,8 @@ export default async function HomePage() {
                     {i < 3 && <div className="w-px h-16 bg-accent/40" />}
                   </div>
                   <div className="pb-10">
-                    <h3 className="font-bold text-lg text-black">{item.title}</h3>
-                    <p className="text-sm mt-1 text-black">{item.desc}</p>
+                    <h3 className="font-bold text-lg text-white">{item.title}</h3>
+                    <p className="text-sm mt-1 text-white">{item.desc}</p>
                   </div>
                 </div>
               ))}
@@ -224,7 +232,7 @@ export default async function HomePage() {
                 Ce qu'en disent nos utilisateurs
               </h2>
               <p className="text-center text-sm text-black">
-                Avis verifies laisses sur la plateforme
+                Avis vérifiés laissés sur la plateforme
               </p>
             </div>
             <AvisMarquee avis={avisWithNames} />
@@ -241,7 +249,7 @@ export default async function HomePage() {
               <div className="border-2 border-accent rounded-xl p-8">
                 <h3 className="font-bold text-xl text-black mb-6">Accompagnant(e)s</h3>
                 <ul className="space-y-4 text-sm text-black">
-                  {['Profil verifie qui inspire confiance', 'Visibilite directe aupres des accompagne(e)s', 'Profils recommandes selon vos competences', 'Pas de commission. Vous fixez vos conditions.'].map((text) => (
+                  {['Profil vérifié qui inspire confiance', 'Visibilité directe auprès des accompagné(e)s', 'Profils recommandés selon vos compétences', 'Pas de commission. Vous fixez vos conditions.'].map((text) => (
                     <li key={text} className="flex gap-3">
                       <span className="shrink-0 w-5 h-5 rounded-full flex items-center justify-center bg-accent">
                         <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="black" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
@@ -254,13 +262,13 @@ export default async function HomePage() {
                   href="/register?role=accompagnante"
                   className="block text-center mt-8 px-4 py-3 rounded-lg text-sm font-medium text-black btn-hover bg-accent"
                 >
-                  Creer mon profil accompagnant(e)
+                  Créer mon profil accompagnant(e)
                 </Link>
               </div>
               <div className="border-2 border-accent rounded-xl p-8">
-                <h3 className="font-bold text-xl text-black mb-6">Accompagne(e)s et proches</h3>
+                <h3 className="font-bold text-xl text-black mb-6">Accompagné(e)s et proches</h3>
                 <ul className="space-y-4 text-sm text-black">
-                  {['Tous les profils verifies manuellement', 'Recherche par specialite, localisation, experience', 'Les profils que nous vous recommandons', 'Avis verifies pour vous guider'].map((text) => (
+                  {['Tous les profils vérifiés manuellement', 'Recherche par spécialité, localisation, expérience', 'Les profils que nous vous recommandons', 'Avis vérifiés pour vous guider'].map((text) => (
                     <li key={text} className="flex gap-3">
                       <span className="shrink-0 w-5 h-5 rounded-full flex items-center justify-center bg-accent">
                         <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="black" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
@@ -296,16 +304,16 @@ export default async function HomePage() {
                 </p>
               </div>
             )}
-            <h2 className="text-2xl font-bold text-center text-black mb-2">Tarif unique, simple</h2>
-            <p className="text-center text-sm text-black mb-10">
-              Meme prix pour les accompagnant(e)s et les accompagne(e)s.            </p>
+            <h2 className="text-2xl font-bold text-center text-white mb-2">Tarif unique, simple</h2>
+            <p className="text-center text-sm text-white mb-10">
+              Même prix pour les accompagnant(e)s et les accompagné(e)s.            </p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto">
               <div className="border border-accent rounded-xl p-6 bg-white flex flex-col">
                 <h3 className="font-bold text-lg text-black mb-1">Mensuel</h3>
                 <p className="text-3xl font-bold mb-1">
                   <span className="text-accent">4,99 EUR</span><span className="text-sm font-normal text-black"> / mois</span>
                 </p>
-                <p className="text-sm text-black mb-4">Sans engagement, resiliable a tout moment.</p>
+                <p className="text-sm text-black mb-4">Sans engagement, résiliable à tout moment.</p>
                 <Link
                   href="/register"
                   className="block text-center px-4 py-2 rounded-lg text-sm font-medium text-black btn-hover mt-auto bg-accent"
@@ -315,14 +323,14 @@ export default async function HomePage() {
               </div>
               <div className="border-2 border-accent rounded-xl p-6 bg-white relative flex flex-col">
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2 text-xs px-3 py-1 rounded-full font-medium text-black bg-accent">
-                  Recommande
+                  Recommandé
                 </div>
                 <h3 className="font-bold text-lg text-black mb-1">Annuel</h3>
                 <p className="text-3xl font-bold text-black mb-1 whitespace-nowrap">
                   <span className="text-xl font-normal text-black line-through mr-2">59,88 EUR</span>
                   <span className="text-accent">49,99 EUR</span><span className="text-sm font-normal text-black"> / an</span>
                 </p>
-                <p className="text-sm text-black mb-4">Soit 4,17 EUR / mois. Economisez 17%.</p>
+                <p className="text-sm text-black mb-4">Soit 4,17 EUR / mois. Économisez 17%.</p>
                 <Link
                   href="/register"
                   className="block text-center px-4 py-2 rounded-lg text-sm font-medium text-black btn-hover mt-auto bg-accent"
@@ -340,15 +348,15 @@ export default async function HomePage() {
         {/* ===== FAQ ===== */}
         <section className="px-4 py-16 bg-white">
           <div className="max-w-5xl mx-auto">
-            <h2 className="text-2xl font-bold text-center text-black mb-10">Questions frequentes</h2>
+            <h2 className="text-2xl font-bold text-center text-black mb-10">Questions fréquentes</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
               {[
-                { q: 'Comment fonctionne la verification des profils ?', a: "Chaque accompagnant(e) doit deposer ses diplomes et sa piece d'identite. Notre equipe verifie manuellement ces documents avant d'activer le profil." },
-                { q: "Combien coute l'abonnement ?", a: "L'abonnement mensuel est a 4,99 EUR/mois sans engagement. L'abonnement annuel est a 49,99 EUR/an, soit une economie de 17%." },
-                { q: 'Comment fonctionnent les recommandations de profils ?', a: 'Nous analysons 5 criteres (specialites, localisation, experience, diplome, disponibilites) pour vous recommander les profils les plus compatibles.' },
-                { q: 'Puis-je utiliser la plateforme sans abonnement ?', a: "Vous pouvez consulter les annonces publiees sans abonnement. L'abonnement est requis pour publier des annonces et acceder aux profils que nous vous recommandons." },
-                { q: 'Comment contacter un(e) accompagnant(e) ?', a: "Une fois inscrit en tant qu'accompagne(e), vous pouvez envoyer un message via la messagerie integree a partir de la fiche de l'accompagnant(e)." },
-                { q: 'Comment supprimer mon compte ?', a: 'Vous pouvez supprimer votre compte depuis les parametres de votre espace personnel. Toutes vos donnees seront supprimees conformement au RGPD.' },
+                { q: 'Comment fonctionne la vérification des profils ?', a: "Chaque accompagnant(e) doit déposer ses diplômes et sa pièce d'identité. Notre équipe vérifie manuellement ces documents avant d'activer le profil." },
+                { q: "Combien coûte l'abonnement ?", a: "L'abonnement mensuel est à 4,99 EUR/mois sans engagement. L'abonnement annuel est à 49,99 EUR/an, soit une économie de 17%." },
+                { q: 'Comment fonctionnent les recommandations de profils ?', a: 'Nous analysons 5 critères (spécialités, localisation, expérience, diplôme, disponibilités) pour vous recommander les profils les plus compatibles.' },
+                { q: 'Puis-je utiliser la plateforme sans abonnement ?', a: "Vous pouvez consulter les annonces publiées sans abonnement. L'abonnement est requis pour publier des annonces et accéder aux profils que nous vous recommandons." },
+                { q: 'Comment contacter un(e) accompagnant(e) ?', a: "Une fois inscrit en tant qu'accompagné(e), vous pouvez envoyer un message via la messagerie intégrée à partir de la fiche de l'accompagnant(e)." },
+                { q: 'Comment supprimer mon compte ?', a: 'Vous pouvez supprimer votre compte depuis les paramètres de votre espace personnel. Toutes vos données seront supprimées conformément au RGPD.' },
               ].map((faq, i) => (
                 <details key={i} className="group rounded-xl bg-white p-5 border border-accent">
                   <summary className="cursor-pointer flex gap-4 items-start">
@@ -376,9 +384,9 @@ export default async function HomePage() {
         {/* ===== CONTACT ===== */}
         <section className="px-4 py-16 kraft bg-kraft">
           <div className="max-w-md mx-auto relative z-10">
-            <h2 className="text-2xl font-bold text-center text-black mb-2">Une question ?</h2>
-            <p className="text-center text-black mb-6">
-              Notre equipe est disponible pour repondre a toutes vos questions.
+            <h2 className="text-2xl font-bold text-center text-white mb-2">Une question ?</h2>
+            <p className="text-center text-white mb-6">
+              Notre équipe est disponible pour répondre à toutes vos questions.
             </p>
             <ContactForm />
           </div>

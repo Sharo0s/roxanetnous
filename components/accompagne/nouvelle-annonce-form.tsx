@@ -51,11 +51,11 @@ export function NouvelleAnnonceAccompagneForm() {
       return
     }
     if (!ville.trim() || specialitesRecherchees.length === 0) {
-      setError('La ville et au moins une specialite sont requis.')
+      setError('La ville et au moins une spécialité sont requis.')
       return
     }
     if (!dateDebut) {
-      setError('La date de debut est requise.')
+      setError('La date de début est requise.')
       return
     }
 
@@ -89,7 +89,7 @@ export function NouvelleAnnonceAccompagneForm() {
   return (
     <div>
       <h2 className="text-2xl font-bold text-gray-900 mb-2">Publier une annonce</h2>
-      <p className="text-sm text-gray-500 mb-6">Etape {step} sur {totalSteps}</p>
+      <p className="text-sm text-gray-500 mb-6">Étape {step} sur {totalSteps}</p>
 
       <div className="flex gap-1 mb-8">
         {Array.from({ length: totalSteps }).map((_, i) => (
@@ -119,30 +119,30 @@ export function NouvelleAnnonceAccompagneForm() {
                   type="text"
                   value={titre}
                   onChange={(e) => setTitre(e.target.value)}
-                  placeholder="Ex: Recherche accompagnante de vie pour personne agee"
+                  placeholder="Ex: Recherche accompagnante de vie pour personne âgée"
                   className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
                 />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Description detaillee <span className="text-red-500">*</span>
+                  Description détaillée <span className="text-red-500">*</span>
                 </label>
                 <textarea
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Decrivez la situation, les besoins de la personne aidee..."
+                  placeholder="Décrivez la situation, les besoins de la personne aidée..."
                   rows={5}
                   className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black resize-none"
                 />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Besoins specifiques
+                  Besoins spécifiques
                 </label>
                 <textarea
                   value={besoinsSpecifiques}
                   onChange={(e) => setBesoinsSpecifiques(e.target.value)}
-                  placeholder="Particularites de la prise en charge, pathologies, etc."
+                  placeholder="Particularités de la prise en charge, pathologies, etc."
                   rows={3}
                   className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black resize-none"
                 />
@@ -151,7 +151,7 @@ export function NouvelleAnnonceAccompagneForm() {
           </div>
 
           <div className="bg-white rounded-xl border p-6">
-            <h3 className="font-semibold mb-4">Specialites recherchees <span className="text-red-500">*</span></h3>
+            <h3 className="font-semibold mb-4">Spécialités recherchées <span className="text-red-500">*</span></h3>
             <div className="flex flex-wrap gap-2">
               {SPECIALITES.map((spec) => (
                 <button
@@ -206,13 +206,13 @@ export function NouvelleAnnonceAccompagneForm() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Equipe en place
+                  Équipe en place
                 </label>
                 <input
                   type="text"
                   value={equipeEnPlace}
                   onChange={(e) => setEquipeEnPlace(e.target.value)}
-                  placeholder="Ex: Infirmiere le matin, kinesitherapeute 2x/semaine..."
+                  placeholder="Ex: Infirmière le matin, kinésithérapeute 2x/semaine..."
                   className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
                 />
               </div>
@@ -220,18 +220,18 @@ export function NouvelleAnnonceAccompagneForm() {
           </div>
 
           <div className="bg-white rounded-xl border p-6">
-            <h3 className="font-semibold mb-4">Criteres souhaites</h3>
+            <h3 className="font-semibold mb-4">Critères souhaités</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Diplome souhaite
+                  Diplôme souhaité
                 </label>
                 <select
                   value={diplomeRequis}
                   onChange={(e) => setDiplomeRequis(e.target.value)}
                   className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
                 >
-                  <option value="">Pas de preference</option>
+                  <option value="">Pas de préférence</option>
                   {DIPLOMES.map((d) => (
                     <option key={d.value} value={d.value}>{d.label}</option>
                   ))}
@@ -239,14 +239,14 @@ export function NouvelleAnnonceAccompagneForm() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Experience minimum
+                  Expérience minimum
                 </label>
                 <select
                   value={experienceMin}
                   onChange={(e) => setExperienceMin(e.target.value)}
                   className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
                 >
-                  <option value="">Pas de preference</option>
+                  <option value="">Pas de préférence</option>
                   {EXPERIENCE_LEVELS.map((e) => (
                     <option key={e.value} value={e.value}>{e.label}</option>
                   ))}
@@ -256,7 +256,7 @@ export function NouvelleAnnonceAccompagneForm() {
           </div>
 
           <div className="flex gap-3">
-            <Button variant="ghost" onClick={() => setStep(1)}>Precedent</Button>
+            <Button variant="ghost" onClick={() => setStep(1)}>Précédent</Button>
             <Button onClick={() => setStep(3)}>Suivant</Button>
           </div>
         </div>
@@ -280,7 +280,7 @@ export function NouvelleAnnonceAccompagneForm() {
 
             <div className="mb-6">
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Date de debut souhaitee <span className="text-red-500">*</span>
+                Date de début souhaitée <span className="text-red-500">*</span>
               </label>
               <input
                 type="date"
@@ -290,7 +290,7 @@ export function NouvelleAnnonceAccompagneForm() {
               />
             </div>
 
-            <h4 className="font-medium text-sm text-gray-700 mb-3">Disponibilites souhaitees</h4>
+            <h4 className="font-medium text-sm text-gray-700 mb-3">Disponibilités souhaitées</h4>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
@@ -346,11 +346,11 @@ export function NouvelleAnnonceAccompagneForm() {
       {step === 4 && (
         <div className="space-y-6">
           <div className="bg-white rounded-xl border p-6">
-            <h3 className="font-semibold mb-4">Informations complementaires</h3>
+            <h3 className="font-semibold mb-4">Informations complémentaires</h3>
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Informations complementaires
+                  Informations complémentaires
                 </label>
                 <textarea
                   value={infosComplementaires}
@@ -376,7 +376,7 @@ export function NouvelleAnnonceAccompagneForm() {
           </div>
 
           <div className="bg-white rounded-xl border p-6">
-            <h3 className="font-semibold mb-4">Recapitulatif</h3>
+            <h3 className="font-semibold mb-4">Récapitulatif</h3>
             <dl className="space-y-2 text-sm">
               <div className="flex justify-between">
                 <dt className="text-gray-500">Titre</dt>
@@ -393,11 +393,11 @@ export function NouvelleAnnonceAccompagneForm() {
                 </dd>
               </div>
               <div className="flex justify-between">
-                <dt className="text-gray-500">Debut</dt>
+                <dt className="text-gray-500">Début</dt>
                 <dd className="font-medium">{dateDebut ? new Date(dateDebut).toLocaleDateString('fr-FR') : '-'}</dd>
               </div>
               <div>
-                <dt className="text-gray-500 mb-1">Specialites ({specialitesRecherchees.length})</dt>
+                <dt className="text-gray-500 mb-1">Spécialités ({specialitesRecherchees.length})</dt>
                 <dd className="flex flex-wrap gap-1">
                   {specialitesRecherchees.map((s) => (
                     <span key={s} className="px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full text-xs">

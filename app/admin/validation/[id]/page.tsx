@@ -113,7 +113,7 @@ export default async function ValidationDetailPage({
               </div>
               {u?.phone && (
                 <div>
-                  <dt className="text-gray-500">Telephone</dt>
+                  <dt className="text-gray-500">Téléphone</dt>
                   <dd className="font-medium">{u.phone}</dd>
                 </div>
               )}
@@ -131,11 +131,11 @@ export default async function ValidationDetailPage({
             <h3 className="font-semibold mb-4">Profil professionnel</h3>
             <dl className="space-y-3 text-sm">
               <div>
-                <dt className="text-gray-500">Diplomes</dt>
+                <dt className="text-gray-500">Diplômes</dt>
                 <dd className="font-medium">{diplomeLabels.join(', ')}</dd>
               </div>
               <div>
-                <dt className="text-gray-500">Experience</dt>
+                <dt className="text-gray-500">Expérience</dt>
                 <dd className="font-medium">{experienceLabel}</dd>
               </div>
               <div>
@@ -149,7 +149,7 @@ export default async function ValidationDetailPage({
               {profile.permis_conduire && (
                 <div>
                   <dt className="text-gray-500">Permis de conduire</dt>
-                  <dd className="font-medium">Oui{profile.vehicule ? ' (avec vehicule)' : ''}</dd>
+                  <dd className="font-medium">Oui{profile.vehicule ? ' (avec véhicule)' : ''}</dd>
                 </div>
               )}
             </dl>
@@ -157,7 +157,7 @@ export default async function ValidationDetailPage({
 
           {/* Specialites */}
           <div className="bg-white rounded-xl border p-6">
-            <h3 className="font-semibold mb-4">Specialites ({specialiteLabels.length})</h3>
+            <h3 className="font-semibold mb-4">Spécialités ({specialiteLabels.length})</h3>
             <div className="flex flex-wrap gap-2">
               {specialiteLabels.map((label, i) => (
                 <span key={i} className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-xs font-medium">
@@ -197,7 +197,7 @@ export default async function ValidationDetailPage({
                 )}
               </div>
               <div>
-                <p className="text-sm text-gray-500 mb-2">Piece d'identite</p>
+                <p className="text-sm text-gray-500 mb-2">Pièce d'identité</p>
                 {identiteUrl ? (
                   <a
                     href={identiteUrl}
@@ -228,7 +228,7 @@ export default async function ValidationDetailPage({
               </div>
               {diplomeUrls.map((d, i) => (
                 <div key={i}>
-                  <p className="text-sm text-gray-500 mb-2">Diplome : {d.label}</p>
+                  <p className="text-sm text-gray-500 mb-2">Diplôme : {d.label}</p>
                   <a
                     href={d.url}
                     target="_blank"
@@ -241,7 +241,7 @@ export default async function ValidationDetailPage({
               ))}
               {diplomeUrls.length === 0 && (
                 <div>
-                  <p className="text-sm text-gray-500 mb-2">Diplomes</p>
+                  <p className="text-sm text-gray-500 mb-2">Diplômes</p>
                   <p className="text-sm text-gray-400">Non fourni</p>
                 </div>
               )}
@@ -270,9 +270,9 @@ function StatusBadge({ status }: { status: string }) {
 
   const labels: Record<string, string> = {
     en_attente: 'En attente',
-    valide: 'Valide',
-    refuse: 'Refuse',
-    a_completer: 'A completer',
+    valide: 'Validé',
+    refuse: 'Refusé',
+    a_completer: 'À compléter',
   }
 
   return (

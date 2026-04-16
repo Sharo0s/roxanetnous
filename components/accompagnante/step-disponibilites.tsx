@@ -28,9 +28,9 @@ export function StepDisponibilites({ data, onChange }: Props) {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-xl font-semibold mb-1">Disponibilites</h2>
+        <h2 className="text-xl font-semibold mb-1">Disponibilités</h2>
         <p className="text-sm text-gray-500">
-          Indiquez vos creneaux de disponibilite (facultatif).
+          Indiquez vos créneaux de disponibilité (facultatif).
         </p>
       </div>
 

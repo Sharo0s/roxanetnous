@@ -11,7 +11,7 @@ export async function traiterSignalement(
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { error: 'Non connecte.' }
+  if (!user) return { error: 'Non connecté.' }
 
   const { data: adminData } = await supabase
     .from('users')
@@ -20,7 +20,7 @@ export async function traiterSignalement(
     .single()
 
   if (!adminData || adminData.role !== 'admin') {
-    return { error: 'Acces non autorise.' }
+    return { error: 'Accès non autorisé.' }
   }
 
   const supabaseAdmin = await createClient({ serviceRole: true })

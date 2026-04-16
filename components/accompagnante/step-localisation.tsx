@@ -106,7 +106,7 @@ export function StepLocalisation({ data, onChange, onUpload, onPermisUploaded }:
             onChange={(e) => onChange({ vehicule: e.target.checked })}
             className="h-4 w-4 rounded border-gray-300 accent-black"
           />
-          <span className="text-sm">Vehicule personnel</span>
+          <span className="text-sm">Véhicule personnel</span>
         </label>
       </div>
     </div>

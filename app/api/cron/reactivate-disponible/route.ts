@@ -7,7 +7,7 @@ export async function GET(request: NextRequest) {
   const authHeader = request.headers.get('authorization')
 
   if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
-    return NextResponse.json({ error: 'Non autorise' }, { status: 401 })
+    return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
   }
 
   const supabase = await createClient({ serviceRole: true })

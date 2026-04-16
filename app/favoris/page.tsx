@@ -106,7 +106,7 @@ export default async function FavorisPage() {
                     </p>
                     {annonce.status !== 'publiee' && (
                       <span className="inline-block mt-2 px-2 py-0.5 bg-gray-200 text-gray-600 rounded-full text-xs">
-                        Archivee
+                        Archivée
                       </span>
                     )}
                   </Link>
@@ -134,7 +134,7 @@ export default async function FavorisPage() {
                     </div>
                     {annonce.status !== 'publiee' && (
                       <span className="inline-block mt-2 px-2 py-0.5 bg-gray-200 text-gray-600 rounded-full text-xs">
-                        Archivee
+                        Archivée
                       </span>
                     )}
                   </div>

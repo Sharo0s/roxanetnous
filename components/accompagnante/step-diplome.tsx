@@ -78,8 +78,8 @@ export function StepDiplome({ data, onChange, onUpload, onUploadsChange }: Props
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-xl font-semibold mb-1">Diplome et experience</h2>
-        <p className="text-sm text-gray-500">Indiquez vos qualifications et votre niveau d'experience.</p>
+        <h2 className="text-xl font-semibold mb-1">Diplôme et expérience</h2>
+        <p className="text-sm text-gray-500">Indiquez vos qualifications et votre niveau d'expérience.</p>
       </div>
 
       {/* CV upload - obligatoire */}
@@ -109,7 +109,7 @@ export function StepDiplome({ data, onChange, onUpload, onUploadsChange }: Props
               ? 'Upload en cours...'
               : cvFileName
                 ? cvFileName
-                : 'Cliquez pour selectionner un fichier'}
+                : 'Cliquez pour sélectionner un fichier'}
           </button>
           <p className="text-xs text-gray-400">PDF, JPG, PNG ou WebP (max. 10 Mo)</p>
         </div>
@@ -117,9 +117,9 @@ export function StepDiplome({ data, onChange, onUpload, onUploadsChange }: Props
 
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          Diplomes <span className="text-red-500">*</span>
+          Diplômes <span className="text-red-500">*</span>
         </label>
-        <p className="text-xs text-gray-400 mb-3">Vous pouvez en selectionner plusieurs. Un justificatif est requis pour chaque diplome.</p>
+        <p className="text-xs text-gray-400 mb-3">Vous pouvez en sélectionner plusieurs. Un justificatif est requis pour chaque diplôme.</p>
         <div className="space-y-2">
           {DIPLOMES.map((d) => {
             const isSelected = data.diplomes.includes(d.value)
@@ -177,7 +177,7 @@ export function StepDiplome({ data, onChange, onUpload, onUploadsChange }: Props
 
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          Experience <span className="text-red-500">*</span>
+          Expérience <span className="text-red-500">*</span>
         </label>
         <div className="space-y-2">
           {EXPERIENCE_LEVELS.map((exp) => (
@@ -210,7 +210,7 @@ export function StepDiplome({ data, onChange, onUpload, onUploadsChange }: Props
         <textarea
           value={data.description}
           onChange={(e) => onChange({ description: e.target.value })}
-          placeholder="Presentez-vous en quelques lignes..."
+          placeholder="Présentez-vous en quelques lignes..."
           rows={4}
           className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black resize-none"
         />

@@ -25,7 +25,7 @@ export async function updateAccompagnanteProfile(data: {
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { error: 'Non connecte.' }
+  if (!user) return { error: 'Non connecté.' }
 
   const { data: userData } = await supabase
     .from('users')
@@ -34,11 +34,11 @@ export async function updateAccompagnanteProfile(data: {
     .single()
 
   if (!userData || userData.role !== 'accompagnante') {
-    return { error: 'Acces non autorise.' }
+    return { error: 'Accès non autorisé.' }
   }
 
   if (data.diplomes.length === 0 || !data.experience || data.specialites.length === 0) {
-    return { error: 'Diplomes, experience et specialites sont requis.' }
+    return { error: 'Diplômes, expérience et spécialités sont requis.' }
   }
 
   if (!data.ville || !data.code_postal) {
@@ -79,7 +79,7 @@ export async function updateAccompagnanteProfile(data: {
     .eq('user_id', user.id)
 
   if (error) {
-    return { error: 'Erreur lors de la mise a jour du profil.' }
+    return { error: 'Erreur lors de la mise à jour du profil.' }
   }
 
   revalidatePath('/accompagnante/profil')
@@ -95,10 +95,10 @@ export async function updateUserInfo(data: {
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { error: 'Non connecte.' }
+  if (!user) return { error: 'Non connecté.' }
 
   if (!data.first_name.trim() || !data.last_name.trim()) {
-    return { error: 'Le prenom et le nom sont requis.' }
+    return { error: 'Le prénom et le nom sont requis.' }
   }
 
   const { error } = await supabase
@@ -112,7 +112,7 @@ export async function updateUserInfo(data: {
     .eq('id', user.id)
 
   if (error) {
-    return { error: 'Erreur lors de la mise a jour.' }
+    return { error: 'Erreur lors de la mise à jour.' }
   }
 
   revalidatePath('/accompagnante/profil')
@@ -134,7 +134,7 @@ export async function updateLastSeen(): Promise<void> {
 export async function toggleDisponible(indisponibleJusquAu?: string | null): Promise<ProfileResult> {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { error: 'Non connecte.' }
+  if (!user) return { error: 'Non connecté.' }
 
   const { data: profile } = await supabase
     .from('accompagnantes_profiles')
@@ -154,7 +154,7 @@ export async function toggleDisponible(indisponibleJusquAu?: string | null): Pro
     })
     .eq('user_id', user.id)
 
-  if (error) return { error: 'Erreur lors de la mise a jour.' }
+  if (error) return { error: 'Erreur lors de la mise à jour.' }
 
   // Mettre a jour badges_cache immediatement
   await supabase
@@ -181,7 +181,7 @@ export async function updateAccompagneProfile(data: {
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { error: 'Non connecte.' }
+  if (!user) return { error: 'Non connecté.' }
 
   const { data: userData } = await supabase
     .from('users')
@@ -190,7 +190,7 @@ export async function updateAccompagneProfile(data: {
     .single()
 
   if (!userData || userData.role !== 'accompagne') {
-    return { error: 'Acces non autorise.' }
+    return { error: 'Accès non autorisé.' }
   }
 
   // Verifier si le profil existe
@@ -211,7 +211,7 @@ export async function updateAccompagneProfile(data: {
       })
       .eq('user_id', user.id)
 
-    if (error) return { error: 'Erreur lors de la mise a jour.' }
+    if (error) return { error: 'Erreur lors de la mise à jour.' }
   } else {
     const { error } = await supabase
       .from('accompagnes_profiles')
@@ -222,7 +222,7 @@ export async function updateAccompagneProfile(data: {
         adresse: data.adresse.trim() || null,
       })
 
-    if (error) return { error: 'Erreur lors de la creation du profil.' }
+    if (error) return { error: 'Erreur lors de la création du profil.' }
   }
 
   revalidatePath('/accompagne/profil')
@@ -233,18 +233,18 @@ export async function uploadAvatar(formData: FormData): Promise<ProfileResult> {
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { error: 'Non connecte.' }
+  if (!user) return { error: 'Non connecté.' }
 
   const file = formData.get('file') as File
   if (!file) return { error: 'Fichier requis.' }
 
   const allowedTypes = ['image/jpeg', 'image/png', 'image/webp']
   if (!allowedTypes.includes(file.type)) {
-    return { error: 'Format non supporte. Utilisez JPG, PNG ou WebP.' }
+    return { error: 'Format non supporté. Utilisez JPG, PNG ou WebP.' }
   }
 
   if (file.size > 5 * 1024 * 1024) {
-    return { error: 'Le fichier ne doit pas depasser 5 Mo.' }
+    return { error: 'Le fichier ne doit pas dépasser 5 Mo.' }
   }
 
   const ext = file.name.split('.').pop()
@@ -271,7 +271,7 @@ export async function uploadAvatar(formData: FormData): Promise<ProfileResult> {
     .eq('id', user.id)
 
   if (updateError) {
-    return { error: 'Erreur lors de la mise a jour du profil.' }
+    return { error: 'Erreur lors de la mise à jour du profil.' }
   }
 
   revalidatePath('/accompagnante/dashboard')

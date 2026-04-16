@@ -11,7 +11,7 @@ export async function adminUpdateAnnonceStatus(
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { error: 'Non connecte.' }
+  if (!user) return { error: 'Non connecté.' }
 
   const { data: adminData } = await supabase
     .from('users')
@@ -20,7 +20,7 @@ export async function adminUpdateAnnonceStatus(
     .single()
 
   if (!adminData || adminData.role !== 'admin') {
-    return { error: 'Acces non autorise.' }
+    return { error: 'Accès non autorisé.' }
   }
 
   const supabaseAdmin = await createClient({ serviceRole: true })
@@ -33,7 +33,7 @@ export async function adminUpdateAnnonceStatus(
     .eq('id', annonceId)
 
   if (error) {
-    return { error: 'Erreur lors de la mise a jour.' }
+    return { error: 'Erreur lors de la mise à jour.' }
   }
 
   await supabaseAdmin.from('admin_actions_log').insert({

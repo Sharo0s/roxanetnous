@@ -164,7 +164,7 @@ export async function resetPassword(formData: FormData): Promise<AuthResult> {
   })
 
   if (error) {
-    return { error: 'Erreur lors de l\'envoi du lien. Verifiez votre adresse email.' }
+    return { error: 'Erreur lors de l\'envoi du lien. Vérifiez votre adresse email.' }
   }
 
   return {}
@@ -175,13 +175,13 @@ export async function updatePassword(formData: FormData): Promise<AuthResult> {
   const password = formData.get('password') as string
 
   if (!password || password.length < 8) {
-    return { error: 'Le mot de passe doit contenir au moins 8 caracteres.' }
+    return { error: 'Le mot de passe doit contenir au moins 8 caractères.' }
   }
 
   const { error } = await supabase.auth.updateUser({ password })
 
   if (error) {
-    return { error: 'Erreur lors de la mise a jour du mot de passe.' }
+    return { error: 'Erreur lors de la mise à jour du mot de passe.' }
   }
 
   return {}

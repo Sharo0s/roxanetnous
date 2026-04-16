@@ -10,10 +10,10 @@ import { StepLocalisation } from '@/components/accompagnante/step-localisation'
 import { StepDisponibilites } from '@/components/accompagnante/step-disponibilites'
 
 const STEPS = [
-  'Diplome et experience',
-  'Specialites',
+  'Diplôme et expérience',
+  'Spécialités',
   'Localisation',
-  'Disponibilites',
+  'Disponibilités',
 ]
 
 export type OnboardingData = {
@@ -104,7 +104,7 @@ export default function OnboardingPage() {
             roxanetnous
           </Link>
           <span className="text-sm text-gray-500">
-            Etape {step + 1} sur {STEPS.length}
+            Étape {step + 1} sur {STEPS.length}
           </span>
         </div>
       </header>
@@ -144,7 +144,7 @@ export default function OnboardingPage() {
             onClick={() => { setStep((s) => s - 1); setError(null) }}
             disabled={step === 0}
           >
-            Precedent
+            Précédent
           </Button>
 
           {step < STEPS.length - 1 ? (

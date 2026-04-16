@@ -19,9 +19,9 @@ export function StepSpecialites({ data, onChange }: Props) {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-xl font-semibold mb-1">Specialites</h2>
+        <h2 className="text-xl font-semibold mb-1">Spécialités</h2>
         <p className="text-sm text-gray-500">
-          Selectionnez les services que vous proposez (minimum 1).
+          Sélectionnez les services que vous proposez (minimum 1).
         </p>
       </div>
 
@@ -48,7 +48,7 @@ export function StepSpecialites({ data, onChange }: Props) {
 
       {data.specialites.length > 0 && (
         <p className="text-sm text-gray-500">
-          {data.specialites.length} specialite{data.specialites.length > 1 ? 's' : ''} selectionnee{data.specialites.length > 1 ? 's' : ''}
+          {data.specialites.length} spécialité{data.specialites.length > 1 ? 's' : ''} sélectionnée{data.specialites.length > 1 ? 's' : ''}
         </p>
       )}
     </div>
