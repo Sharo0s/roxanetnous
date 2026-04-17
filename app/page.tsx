@@ -218,7 +218,7 @@ export default async function HomePage() {
                     <path d="M12 2l2.39 7.36H22l-6.19 4.5L18.2 21 12 16.5 5.8 21l2.39-7.14L2 9.36h7.61L12 2z" />
                   </svg>
                   <p className="text-lg leading-relaxed">
-                    Roxanetnous a pour mission de créer une communauté, un endroit unique dédié à la recherche d&apos;accompagnement. Ensemble.
+                    Roxanetnous a pour mission de créer une communauté, un endroit unique dédié à la recherche d&apos;accompagnement. Ensemble&nbsp;.
                     <svg
                       aria-hidden="true"
                       viewBox="0 0 24 24"
