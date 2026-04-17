@@ -116,7 +116,7 @@ export default async function HomePage() {
           <div className="animate-marquee whitespace-nowrap py-3 text-base font-bold text-accent">
             {Array.from({ length: 6 }).map((_, i) => (
               <span key={i} className="mx-12">
-                OFFRE DE LANCEMENT — 2 MOIS OFFERTS POUR LES PREMIERS INSCRITS
+                OFFRE DE LANCEMENT — 1 MOIS OFFERT POUR LES PREMIERS INSCRITS
               </span>
             ))}
           </div>
