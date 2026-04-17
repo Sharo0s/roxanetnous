@@ -191,6 +191,44 @@ export default async function HomePage() {
           </svg>
         </section>
 
+        {/* ===== PRESENTATION ===== */}
+        <section className="px-4 py-16 md:py-24 kraft bg-kraft relative">
+          <div className="max-w-5xl mx-auto relative z-10">
+            <div className="flex flex-col md:flex-row items-center gap-10 md:gap-16">
+              <div className="flex-1 w-full">
+                <Image
+                  src="/IMG-9432645.jpg"
+                  alt="Roxane, aide médico-psychologique"
+                  width={1200}
+                  height={1600}
+                  className="h-auto w-full rounded-lg"
+                />
+              </div>
+              <div className="flex-1 text-white space-y-4">
+                <h2 className="text-2xl md:text-3xl font-bold">Ici, c&apos;est un lieu</h2>
+                <p className="text-base leading-relaxed">
+                  Roxanetnous a pour mission de créer une communauté. Un endroit unique dédié à la recherche d&apos;accompagnement. Ensemble.
+                </p>
+                <p className="text-base leading-relaxed">
+                  Je suis Roxane, aide médico-psychologique, j&apos;exerce mon métier avec passion depuis une dizaine d&apos;années.
+                </p>
+                <p className="text-base leading-relaxed">
+                  Aujourd&apos;hui, je fais un constat : celui de la difficulté en tant qu&apos;accompagné ou accompagnant à trouver son accompagnement.
+                </p>
+                <p className="text-base leading-relaxed italic">
+                  Où, quoi, qui, comment chercher ?
+                </p>
+                <p className="text-base leading-relaxed font-semibold">
+                  C&apos;est ici.
+                </p>
+                <p className="text-base leading-relaxed">
+                  Parlons de nous, pour nous faciliter l&apos;accès à demain.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* ===== COMMENT CA MARCHE ===== */}
         <section className="px-4 pt-16 pb-24 md:pb-28 kraft bg-kraft relative">
           <div className="max-w-3xl mx-auto relative z-10">
