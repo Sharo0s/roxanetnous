@@ -124,7 +124,7 @@ export default async function HomePage() {
       )}
       <main className="flex-1">
         {/* ===== HERO ===== */}
-        <section className="px-4 py-16 md:py-24 kraft bg-kraft">
+        <section className="px-4 py-16 md:py-24 kraft kraft-fade-bottom bg-kraft bg-kraft-fade-bottom">
           <div className="max-w-5xl mx-auto relative z-10">
             <div className="flex flex-col md:flex-row items-center gap-10 md:gap-16">
               <div className="flex-1 text-center md:text-left space-y-5">
@@ -172,11 +172,6 @@ export default async function HomePage() {
             </div>
           </div>
         </section>
-        <div aria-hidden className="relative h-16 md:h-24 bg-gradient-to-b from-kraft to-accent">
-          <svg viewBox="0 0 1440 60" preserveAspectRatio="none" className="absolute inset-0 w-full h-full">
-            <path d="M0,30 Q240,0 480,30 T960,30 T1440,30 L1440,60 L0,60 Z" fill="var(--color-accent)" fillOpacity="0.5" />
-          </svg>
-        </div>
 
         {/* ===== BANDE COMMUNAUTE ===== */}
         <section className="bg-accent">
@@ -190,14 +185,8 @@ export default async function HomePage() {
           </div>
         </section>
 
-        <div aria-hidden className="relative h-16 md:h-24 bg-gradient-to-b from-accent to-kraft">
-          <svg viewBox="0 0 1440 60" preserveAspectRatio="none" className="absolute inset-0 w-full h-full">
-            <path d="M0,30 Q240,0 480,30 T960,30 T1440,30 L1440,60 L0,60 Z" fill="var(--color-kraft)" fillOpacity="0.5" />
-          </svg>
-        </div>
-
         {/* ===== COMMENT CA MARCHE ===== */}
-        <section className="px-4 pt-16 pb-24 md:pb-28 kraft bg-kraft relative">
+        <section className="px-4 pt-16 pb-24 md:pb-28 kraft kraft-fade-both bg-kraft-fade-both relative">
           <div className="max-w-3xl mx-auto relative z-10">
             <h2 className="text-2xl font-bold text-center text-white mb-12">
               Comment ça marche RoxanetNous
@@ -225,11 +214,6 @@ export default async function HomePage() {
             </div>
           </div>
         </section>
-        <div aria-hidden className="relative h-16 md:h-24 bg-gradient-to-b from-kraft to-white">
-          <svg viewBox="0 0 1440 60" preserveAspectRatio="none" className="absolute inset-0 w-full h-full">
-            <path d="M0,30 Q360,60 720,30 T1440,30 L1440,60 L0,60 Z" fill="white" fillOpacity="0.5" />
-          </svg>
-        </div>
 
         {/* ===== AVIS ===== */}
         {avisWithNames.length > 0 && (
@@ -295,14 +279,8 @@ export default async function HomePage() {
           </div>
         </section>
 
-        <div aria-hidden className="relative h-16 md:h-24 bg-gradient-to-b from-white to-kraft">
-          <svg viewBox="0 0 1440 60" preserveAspectRatio="none" className="absolute inset-0 w-full h-full">
-            <path d="M0,30 Q240,0 480,30 T960,30 T1440,30 L1440,60 L0,60 Z" fill="var(--color-kraft)" fillOpacity="0.5" />
-          </svg>
-        </div>
-
         {/* ===== OFFRES ===== */}
-        <section className="px-4 pt-16 pb-24 md:pb-28 kraft bg-kraft relative">
+        <section className="px-4 pt-16 pb-24 md:pb-28 kraft kraft-fade-both bg-kraft-fade-both relative">
           <div className="max-w-4xl mx-auto relative z-10">
             {launchOfferActive && (
               <div className="bg-accent text-black text-center py-3 px-6 rounded-xl mb-6 max-w-2xl mx-auto">
@@ -348,11 +326,6 @@ export default async function HomePage() {
             </div>
           </div>
         </section>
-        <div aria-hidden className="relative h-16 md:h-24 bg-gradient-to-b from-kraft to-white">
-          <svg viewBox="0 0 1440 60" preserveAspectRatio="none" className="absolute inset-0 w-full h-full">
-            <path d="M0,30 Q360,60 720,30 T1440,30 L1440,60 L0,60 Z" fill="white" fillOpacity="0.5" />
-          </svg>
-        </div>
 
         {/* ===== FAQ ===== */}
         <section className="px-4 py-16 bg-white">
@@ -384,14 +357,8 @@ export default async function HomePage() {
           </div>
         </section>
 
-        <div aria-hidden className="relative h-16 md:h-24 bg-gradient-to-b from-white to-kraft">
-          <svg viewBox="0 0 1440 60" preserveAspectRatio="none" className="absolute inset-0 w-full h-full">
-            <path d="M0,30 Q240,0 480,30 T960,30 T1440,30 L1440,60 L0,60 Z" fill="var(--color-kraft)" fillOpacity="0.5" />
-          </svg>
-        </div>
-
         {/* ===== CONTACT ===== */}
-        <section className="px-4 py-16 kraft bg-kraft">
+        <section className="px-4 py-16 kraft kraft-fade-top bg-kraft-fade-top">
           <div className="max-w-md mx-auto relative z-10">
             <h2 className="text-2xl font-bold text-center text-white mb-2">Une question ?</h2>
             <p className="text-center text-white mb-6">
