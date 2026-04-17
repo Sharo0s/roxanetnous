@@ -172,6 +172,7 @@ export default async function HomePage() {
             </div>
           </div>
         </section>
+        <div aria-hidden className="h-16 md:h-24 bg-gradient-to-b from-kraft to-accent" />
 
         {/* ===== BANDE COMMUNAUTE ===== */}
         <section className="bg-accent">
@@ -185,11 +186,7 @@ export default async function HomePage() {
           </div>
         </section>
 
-        <svg viewBox="0 0 1440 60" preserveAspectRatio="none" className="w-full h-8 md:h-12 block -mb-px bg-accent">
-          <defs><pattern id="kraft-wave-1" patternUnits="userSpaceOnUse" width="256" height="256"><image href="/kraft-noise.png" width="256" height="256" /></pattern></defs>
-          <path d="M0,30 Q240,0 480,30 T960,30 T1440,30 L1440,60 L0,60 Z" fill="#F5E1C8" />
-          <path d="M0,30 Q240,0 480,30 T960,30 T1440,30 L1440,60 L0,60 Z" fill="url(#kraft-wave-1)" opacity="0.35" style={{ mixBlendMode: 'multiply' }} />
-        </svg>
+        <div aria-hidden className="h-16 md:h-24 bg-gradient-to-b from-accent to-kraft" />
 
         {/* ===== COMMENT CA MARCHE ===== */}
         <section className="px-4 pt-16 pb-24 md:pb-28 kraft bg-kraft relative">
@@ -219,10 +216,8 @@ export default async function HomePage() {
               ))}
             </div>
           </div>
-          <svg viewBox="0 0 1440 60" preserveAspectRatio="none" className="absolute bottom-0 left-0 w-full h-8 md:h-12 z-[2]">
-            <path d="M0,30 Q360,60 720,30 T1440,30 L1440,60 L0,60 Z" fill="white" />
-          </svg>
         </section>
+        <div aria-hidden className="h-16 md:h-24 bg-gradient-to-b from-kraft to-white" />
 
         {/* ===== AVIS ===== */}
         {avisWithNames.length > 0 && (
@@ -288,11 +283,7 @@ export default async function HomePage() {
           </div>
         </section>
 
-        <svg viewBox="0 0 1440 60" preserveAspectRatio="none" className="w-full h-8 md:h-12 block -mb-px bg-white">
-          <defs><pattern id="kraft-wave-3" patternUnits="userSpaceOnUse" width="256" height="256"><image href="/kraft-noise.png" width="256" height="256" /></pattern></defs>
-          <path d="M0,30 Q240,0 480,30 T960,30 T1440,30 L1440,60 L0,60 Z" fill="#F5E1C8" />
-          <path d="M0,30 Q240,0 480,30 T960,30 T1440,30 L1440,60 L0,60 Z" fill="url(#kraft-wave-3)" opacity="0.35" style={{ mixBlendMode: 'multiply' }} />
-        </svg>
+        <div aria-hidden className="h-16 md:h-24 bg-gradient-to-b from-white to-kraft" />
 
         {/* ===== OFFRES ===== */}
         <section className="px-4 pt-16 pb-24 md:pb-28 kraft bg-kraft relative">
@@ -340,10 +331,8 @@ export default async function HomePage() {
               </div>
             </div>
           </div>
-          <svg viewBox="0 0 1440 60" preserveAspectRatio="none" className="absolute bottom-0 left-0 w-full h-8 md:h-12 z-[2]">
-            <path d="M0,30 Q360,60 720,30 T1440,30 L1440,60 L0,60 Z" fill="white" />
-          </svg>
         </section>
+        <div aria-hidden className="h-16 md:h-24 bg-gradient-to-b from-kraft to-white" />
 
         {/* ===== FAQ ===== */}
         <section className="px-4 py-16 bg-white">
@@ -375,11 +364,7 @@ export default async function HomePage() {
           </div>
         </section>
 
-        <svg viewBox="0 0 1440 60" preserveAspectRatio="none" className="w-full h-8 md:h-12 block -mb-px bg-white">
-          <defs><pattern id="kraft-wave-5" patternUnits="userSpaceOnUse" width="256" height="256"><image href="/kraft-noise.png" width="256" height="256" /></pattern></defs>
-          <path d="M0,30 Q240,0 480,30 T960,30 T1440,30 L1440,60 L0,60 Z" fill="#F5E1C8" />
-          <path d="M0,30 Q240,0 480,30 T960,30 T1440,30 L1440,60 L0,60 Z" fill="url(#kraft-wave-5)" opacity="0.35" style={{ mixBlendMode: 'multiply' }} />
-        </svg>
+        <div aria-hidden className="h-16 md:h-24 bg-gradient-to-b from-white to-kraft" />
 
         {/* ===== CONTACT ===== */}
         <section className="px-4 py-16 kraft bg-kraft">
