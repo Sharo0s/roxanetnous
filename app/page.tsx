@@ -139,7 +139,7 @@ export default async function HomePage() {
                   className="h-auto w-64 md:w-80 mx-auto"
                 />
 
-                <p className="text-xl text-white leading-relaxed text-center">
+                <p className="text-2xl text-white leading-relaxed text-center">
                   Donne vie à ton quotidien
                 </p>
 
@@ -180,10 +180,10 @@ export default async function HomePage() {
             <path d="M0,60 Q240,20 480,50 T960,50 T1440,50 L1440,60 L0,60 Z" fill="#F4C8A3" />
           </svg>
           <Reveal className="max-w-5xl mx-auto px-4 py-8 flex flex-col items-center gap-4 text-center md:flex-row md:justify-between md:text-left">
-            <p className="text-base font-medium text-black tracking-wide">
+            <p className="text-lg font-medium text-black tracking-wide">
               Notre communauté de mise en relation entre accompagnants et accompagné(e)s
             </p>
-            <Link href="/recherche" className="rounded-full px-7 py-3 font-semibold bg-black text-white btn-hover whitespace-nowrap text-base shrink-0">
+            <Link href="/recherche" className="rounded-full px-7 py-3 font-semibold bg-black text-white btn-hover whitespace-nowrap text-lg shrink-0">
               Consulter les annonces
             </Link>
           </Reveal>
@@ -207,35 +207,35 @@ export default async function HomePage() {
               </Reveal>
               <div className="flex-1 text-white space-y-4">
                 <Reveal as="span" className="block">
-                  <h2 className="text-2xl md:text-3xl font-bold text-black">Ici, c&apos;est un lieu</h2>
+                  <h2 className="text-3xl md:text-4xl font-bold text-black">Ici, c&apos;est un lieu</h2>
                 </Reveal>
                 <Reveal as="span" delay={80} className="block">
-                  <p className="text-base leading-relaxed">
+                  <p className="text-lg leading-relaxed">
                     Roxanetnous a pour mission de créer une communauté. Un endroit unique dédié à la recherche d&apos;accompagnement. Ensemble.
                   </p>
                 </Reveal>
                 <Reveal as="span" delay={160} className="block">
-                  <p className="text-base leading-relaxed">
+                  <p className="text-lg leading-relaxed">
                     Je suis Roxane, aide médico-psychologique, j&apos;exerce mon métier avec passion depuis une dizaine d&apos;années.
                   </p>
                 </Reveal>
                 <Reveal as="span" delay={240} className="block">
-                  <p className="text-base leading-relaxed">
+                  <p className="text-lg leading-relaxed">
                     Aujourd&apos;hui, je fais un constat : celui de la difficulté en tant qu&apos;accompagné ou accompagnant à trouver son accompagnement.
                   </p>
                 </Reveal>
                 <Reveal as="span" delay={320} className="block">
-                  <p className="text-base leading-relaxed italic">
+                  <p className="text-lg leading-relaxed italic">
                     Où, quoi, qui, comment chercher ?
                   </p>
                 </Reveal>
                 <Reveal as="span" delay={400} className="block">
-                  <p className="text-base leading-relaxed font-semibold">
+                  <p className="text-lg leading-relaxed font-semibold">
                     C&apos;est ici.
                   </p>
                 </Reveal>
                 <Reveal as="span" delay={480} className="block">
-                  <p className="text-base leading-relaxed">
+                  <p className="text-lg leading-relaxed">
                     Parlons de nous, pour nous faciliter l&apos;accès à demain.
                   </p>
                 </Reveal>
@@ -247,7 +247,7 @@ export default async function HomePage() {
         {/* ===== COMMENT CA MARCHE ===== */}
         <section className="px-4 pt-16 pb-24 md:pb-28 kraft bg-kraft relative">
           <div className="max-w-3xl mx-auto relative z-10">
-            <h2 className="text-2xl font-bold text-center text-black mb-12">
+            <h2 className="text-3xl font-bold text-center text-black mb-12">
               Comment ça marche RoxanetNous
             </h2>
             <div className="space-y-0">
@@ -265,8 +265,8 @@ export default async function HomePage() {
                     {i < 3 && <div className="w-px h-16 bg-accent/40" />}
                   </div>
                   <div className="pb-10">
-                    <h3 className="font-bold text-lg text-black">{item.title}</h3>
-                    <p className="text-sm mt-1 text-white">{item.desc}</p>
+                    <h3 className="font-bold text-xl text-black">{item.title}</h3>
+                    <p className="text-base mt-1 text-white">{item.desc}</p>
                   </div>
                 </Reveal>
               ))}
@@ -296,7 +296,7 @@ export default async function HomePage() {
         {/* ===== POUR QUI ===== */}
         <section className="px-4 py-16 bg-white">
           <div className="max-w-6xl mx-auto">
-            <h2 className="text-2xl font-bold text-center text-black mb-10">
+            <h2 className="text-3xl font-bold text-center text-black mb-10">
               Pour qui ?
             </h2>
             <div className="flex flex-col md:flex-row gap-8 items-start">
@@ -311,8 +311,8 @@ export default async function HomePage() {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8 flex-1">
               <Reveal className="border-2 border-accent rounded-xl p-8">
-                <h3 className="font-bold text-xl text-black mb-6">Accompagnant(e)s</h3>
-                <ul className="space-y-4 text-sm text-black">
+                <h3 className="font-bold text-2xl text-black mb-6">Accompagnant(e)s</h3>
+                <ul className="space-y-4 text-base text-black">
                   {['Profil vérifié qui inspire confiance', 'Visibilité directe auprès des accompagné(e)s', 'Profils recommandés selon vos compétences', 'Pas de commission. Vous fixez vos conditions.'].map((text) => (
                     <li key={text} className="flex gap-3">
                       <span className="shrink-0 w-5 h-5 rounded-full flex items-center justify-center bg-accent">
@@ -330,8 +330,8 @@ export default async function HomePage() {
                 </Link>
               </Reveal>
               <Reveal delay={100} className="border-2 border-accent rounded-xl p-8">
-                <h3 className="font-bold text-xl text-black mb-6">Accompagné(e)s et proches</h3>
-                <ul className="space-y-4 text-sm text-black">
+                <h3 className="font-bold text-2xl text-black mb-6">Accompagné(e)s et proches</h3>
+                <ul className="space-y-4 text-base text-black">
                   {['Tous les profils vérifiés manuellement', 'Recherche par spécialité, localisation, expérience', 'Les profils que nous vous recommandons', 'Avis vérifiés pour vous guider'].map((text) => (
                     <li key={text} className="flex gap-3">
                       <span className="shrink-0 w-5 h-5 rounded-full flex items-center justify-center bg-accent">
@@ -364,21 +364,21 @@ export default async function HomePage() {
           <div className="max-w-4xl mx-auto relative z-10">
             {launchOfferActive && (
               <div className="bg-accent text-black text-center py-3 px-6 rounded-xl mb-6 max-w-2xl mx-auto">
-                <p className="text-lg font-bold">
+                <p className="text-xl font-bold">
                   Offre de lancement : 1 mois offert pour les premiers inscrits !
                 </p>
               </div>
             )}
-            <h2 className="text-2xl font-bold text-center text-black mb-2">Tarif unique, simple</h2>
-            <p className="text-center text-sm text-black mb-10">
+            <h2 className="text-3xl font-bold text-center text-black mb-2">Tarif unique, simple</h2>
+            <p className="text-center text-base text-black mb-10">
               Même prix pour les accompagnant(e)s et les accompagné(e)s.            </p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto">
               <Reveal className="border border-accent rounded-xl p-6 bg-white flex flex-col">
-                <h3 className="font-bold text-lg text-black mb-1">Mensuel</h3>
-                <p className="text-3xl font-bold mb-1">
-                  <span className="text-accent">4,99 EUR</span><span className="text-sm font-normal text-black"> / mois</span>
+                <h3 className="font-bold text-xl text-black mb-1">Mensuel</h3>
+                <p className="text-4xl font-bold mb-1">
+                  <span className="text-accent">4,99 EUR</span><span className="text-base font-normal text-black"> / mois</span>
                 </p>
-                <p className="text-sm text-black mb-4">Sans engagement, résiliable à tout moment.</p>
+                <p className="text-base text-black mb-4">Sans engagement, résiliable à tout moment.</p>
                 <Link
                   href="/register"
                   className="block text-center px-4 py-2 rounded-lg text-sm font-medium text-black btn-hover mt-auto bg-accent"
@@ -390,12 +390,12 @@ export default async function HomePage() {
                 <Reveal as="span" delay={400} variant="zoom" className="absolute -top-3 left-1/2 -translate-x-1/2 text-xs px-3 py-1 rounded-full font-medium text-black bg-accent">
                   Recommandé
                 </Reveal>
-                <h3 className="font-bold text-lg text-black mb-1">Annuel</h3>
-                <p className="text-3xl font-bold text-black mb-1 whitespace-nowrap">
-                  <span className="text-xl font-normal text-black line-through mr-2">59,88 EUR</span>
-                  <span className="text-accent">49,99 EUR</span><span className="text-sm font-normal text-black"> / an</span>
+                <h3 className="font-bold text-xl text-black mb-1">Annuel</h3>
+                <p className="text-4xl font-bold text-black mb-1 whitespace-nowrap">
+                  <span className="text-2xl font-normal text-black line-through mr-2">59,88 EUR</span>
+                  <span className="text-accent">49,99 EUR</span><span className="text-base font-normal text-black"> / an</span>
                 </p>
-                <p className="text-sm text-black mb-4">Soit 4,17 EUR / mois. Économisez 17%.</p>
+                <p className="text-base text-black mb-4">Soit 4,17 EUR / mois. Économisez 17%.</p>
                 <Link
                   href="/register"
                   className="block text-center px-4 py-2 rounded-lg text-sm font-medium text-black btn-hover mt-auto bg-accent"
@@ -413,7 +413,7 @@ export default async function HomePage() {
         {/* ===== FAQ ===== */}
         <section className="px-4 py-16 bg-white">
           <div className="max-w-5xl mx-auto">
-            <h2 className="text-2xl font-bold text-center text-black mb-10">Questions fréquentes</h2>
+            <h2 className="text-3xl font-bold text-center text-black mb-10">Questions fréquentes</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
               {[
                 { q: 'Comment fonctionne la vérification des profils ?', a: "Chaque accompagnant(e) doit déposer ses diplômes et sa pièce d'identité. Notre équipe vérifie manuellement ces documents avant d'activer le profil." },
@@ -429,12 +429,12 @@ export default async function HomePage() {
                     <div className="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm shrink-0 text-black bg-accent">
                       {i + 1}
                     </div>
-                    <span className="font-semibold text-black pt-1">{faq.q}</span>
+                    <span className="font-semibold text-black pt-1 text-lg">{faq.q}</span>
                     <svg className="w-5 h-5 shrink-0 ml-auto mt-1.5 transition-transform group-open:rotate-45" fill="none" viewBox="0 0 24 24" stroke="#FFB06E" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
                     </svg>
                   </summary>
-                  <p className="text-sm text-black pt-3 pl-12">{faq.a}</p>
+                  <p className="text-base text-black pt-3 pl-12">{faq.a}</p>
                 </details>
                 </Reveal>
               ))}
@@ -451,8 +451,8 @@ export default async function HomePage() {
         {/* ===== CONTACT ===== */}
         <section className="px-4 py-16 kraft bg-kraft">
           <Reveal className="max-w-md mx-auto relative z-10">
-            <h2 className="text-2xl font-bold text-center text-white mb-2">Une question ?</h2>
-            <p className="text-center text-white mb-6">
+            <h2 className="text-3xl font-bold text-center text-white mb-2">Une question ?</h2>
+            <p className="text-center text-white text-lg mb-6">
               Notre équipe est disponible pour répondre à toutes vos questions.
             </p>
             <ContactForm />
