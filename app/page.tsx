@@ -125,7 +125,7 @@ export default async function HomePage() {
       <main className="flex-1">
         {/* ===== HERO ===== */}
         <section className="px-4 py-16 md:py-24 kraft bg-kraft">
-          <div className="max-w-5xl mx-auto relative z-10">
+          <div className="max-w-7xl mx-auto relative z-10">
             <div className="flex flex-col md:flex-row items-center gap-10 md:gap-16">
               <div className="flex-1 text-center md:text-left space-y-5">
                 <h1 className="sr-only">roxanetnous</h1>
@@ -166,7 +166,7 @@ export default async function HomePage() {
                 )}
               </div>
 
-              <div className="hidden md:block flex-1 w-full max-w-sm md:max-w-md">
+              <div className="hidden md:block w-full md:basis-3/5 md:flex-[2]">
                 <HeroCarte villes={villesCoords} />
               </div>
             </div>
