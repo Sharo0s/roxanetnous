@@ -218,7 +218,25 @@ export default async function HomePage() {
                     <path d="M12 2l2.39 7.36H22l-6.19 4.5L18.2 21 12 16.5 5.8 21l2.39-7.14L2 9.36h7.61L12 2z" />
                   </svg>
                   <p className="text-lg leading-relaxed">
-                    Roxanetnous a pour mission de créer une communauté. Un endroit unique dédié à la recherche d&apos;accompagnement. Ensemble.
+                    Roxanetnous a pour mission de créer une communauté, un endroit unique dédié à la recherche d&apos;accompagnement. Ensemble
+                    <svg
+                      aria-hidden="true"
+                      viewBox="0 0 24 24"
+                      className="inline-block w-5 h-5 ml-1 -mt-1 text-accent fill-current align-middle"
+                    >
+                      <circle cx="12" cy="12" r="4" />
+                      <g stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                        <line x1="12" y1="2" x2="12" y2="5" />
+                        <line x1="12" y1="19" x2="12" y2="22" />
+                        <line x1="2" y1="12" x2="5" y2="12" />
+                        <line x1="19" y1="12" x2="22" y2="12" />
+                        <line x1="4.22" y1="4.22" x2="6.34" y2="6.34" />
+                        <line x1="17.66" y1="17.66" x2="19.78" y2="19.78" />
+                        <line x1="4.22" y1="19.78" x2="6.34" y2="17.66" />
+                        <line x1="17.66" y1="6.34" x2="19.78" y2="4.22" />
+                      </g>
+                    </svg>
+                    .
                   </p>
                 </Reveal>
                 <Reveal as="span" delay={160} className="block">
