@@ -172,7 +172,11 @@ export default async function HomePage() {
             </div>
           </div>
         </section>
-        <div aria-hidden className="h-16 md:h-24 bg-gradient-to-b from-kraft to-accent" />
+        <div aria-hidden className="relative h-16 md:h-24 bg-gradient-to-b from-kraft to-accent">
+          <svg viewBox="0 0 1440 60" preserveAspectRatio="none" className="absolute inset-0 w-full h-full">
+            <path d="M0,30 Q240,0 480,30 T960,30 T1440,30 L1440,60 L0,60 Z" fill="var(--color-accent)" fillOpacity="0.5" />
+          </svg>
+        </div>
 
         {/* ===== BANDE COMMUNAUTE ===== */}
         <section className="bg-accent">
@@ -186,7 +190,11 @@ export default async function HomePage() {
           </div>
         </section>
 
-        <div aria-hidden className="h-16 md:h-24 bg-gradient-to-b from-accent to-kraft" />
+        <div aria-hidden className="relative h-16 md:h-24 bg-gradient-to-b from-accent to-kraft">
+          <svg viewBox="0 0 1440 60" preserveAspectRatio="none" className="absolute inset-0 w-full h-full">
+            <path d="M0,30 Q240,0 480,30 T960,30 T1440,30 L1440,60 L0,60 Z" fill="var(--color-kraft)" fillOpacity="0.5" />
+          </svg>
+        </div>
 
         {/* ===== COMMENT CA MARCHE ===== */}
         <section className="px-4 pt-16 pb-24 md:pb-28 kraft bg-kraft relative">
@@ -217,7 +225,11 @@ export default async function HomePage() {
             </div>
           </div>
         </section>
-        <div aria-hidden className="h-16 md:h-24 bg-gradient-to-b from-kraft to-white" />
+        <div aria-hidden className="relative h-16 md:h-24 bg-gradient-to-b from-kraft to-white">
+          <svg viewBox="0 0 1440 60" preserveAspectRatio="none" className="absolute inset-0 w-full h-full">
+            <path d="M0,30 Q360,60 720,30 T1440,30 L1440,60 L0,60 Z" fill="white" fillOpacity="0.5" />
+          </svg>
+        </div>
 
         {/* ===== AVIS ===== */}
         {avisWithNames.length > 0 && (
@@ -283,7 +295,11 @@ export default async function HomePage() {
           </div>
         </section>
 
-        <div aria-hidden className="h-16 md:h-24 bg-gradient-to-b from-white to-kraft" />
+        <div aria-hidden className="relative h-16 md:h-24 bg-gradient-to-b from-white to-kraft">
+          <svg viewBox="0 0 1440 60" preserveAspectRatio="none" className="absolute inset-0 w-full h-full">
+            <path d="M0,30 Q240,0 480,30 T960,30 T1440,30 L1440,60 L0,60 Z" fill="var(--color-kraft)" fillOpacity="0.5" />
+          </svg>
+        </div>
 
         {/* ===== OFFRES ===== */}
         <section className="px-4 pt-16 pb-24 md:pb-28 kraft bg-kraft relative">
@@ -332,7 +348,11 @@ export default async function HomePage() {
             </div>
           </div>
         </section>
-        <div aria-hidden className="h-16 md:h-24 bg-gradient-to-b from-kraft to-white" />
+        <div aria-hidden className="relative h-16 md:h-24 bg-gradient-to-b from-kraft to-white">
+          <svg viewBox="0 0 1440 60" preserveAspectRatio="none" className="absolute inset-0 w-full h-full">
+            <path d="M0,30 Q360,60 720,30 T1440,30 L1440,60 L0,60 Z" fill="white" fillOpacity="0.5" />
+          </svg>
+        </div>
 
         {/* ===== FAQ ===== */}
         <section className="px-4 py-16 bg-white">
@@ -364,7 +384,11 @@ export default async function HomePage() {
           </div>
         </section>
 
-        <div aria-hidden className="h-16 md:h-24 bg-gradient-to-b from-white to-kraft" />
+        <div aria-hidden className="relative h-16 md:h-24 bg-gradient-to-b from-white to-kraft">
+          <svg viewBox="0 0 1440 60" preserveAspectRatio="none" className="absolute inset-0 w-full h-full">
+            <path d="M0,30 Q240,0 480,30 T960,30 T1440,30 L1440,60 L0,60 Z" fill="var(--color-kraft)" fillOpacity="0.5" />
+          </svg>
+        </div>
 
         {/* ===== CONTACT ===== */}
         <section className="px-4 py-16 kraft bg-kraft">
