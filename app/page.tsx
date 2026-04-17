@@ -205,7 +205,7 @@ export default async function HomePage() {
                 />
               </div>
               <div className="flex-1 text-white space-y-4">
-                <h2 className="text-2xl md:text-3xl font-bold">Ici, c&apos;est un lieu</h2>
+                <h2 className="text-2xl md:text-3xl font-bold text-black">Ici, c&apos;est un lieu</h2>
                 <p className="text-base leading-relaxed">
                   Roxanetnous a pour mission de créer une communauté. Un endroit unique dédié à la recherche d&apos;accompagnement. Ensemble.
                 </p>
@@ -232,7 +232,7 @@ export default async function HomePage() {
         {/* ===== COMMENT CA MARCHE ===== */}
         <section className="px-4 pt-16 pb-24 md:pb-28 kraft bg-kraft relative">
           <div className="max-w-3xl mx-auto relative z-10">
-            <h2 className="text-2xl font-bold text-center text-white mb-12">
+            <h2 className="text-2xl font-bold text-center text-black mb-12">
               Comment ça marche RoxanetNous
             </h2>
             <div className="space-y-0">
@@ -250,7 +250,7 @@ export default async function HomePage() {
                     {i < 3 && <div className="w-px h-16 bg-accent/40" />}
                   </div>
                   <div className="pb-10">
-                    <h3 className="font-bold text-lg text-white">{item.title}</h3>
+                    <h3 className="font-bold text-lg text-black">{item.title}</h3>
                     <p className="text-sm mt-1 text-white">{item.desc}</p>
                   </div>
                 </div>
@@ -342,8 +342,8 @@ export default async function HomePage() {
                 </p>
               </div>
             )}
-            <h2 className="text-2xl font-bold text-center text-white mb-2">Tarif unique, simple</h2>
-            <p className="text-center text-sm text-white mb-10">
+            <h2 className="text-2xl font-bold text-center text-black mb-2">Tarif unique, simple</h2>
+            <p className="text-center text-sm text-black mb-10">
               Même prix pour les accompagnant(e)s et les accompagné(e)s.            </p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto">
               <div className="border border-accent rounded-xl p-6 bg-white flex flex-col">
