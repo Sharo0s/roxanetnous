@@ -166,7 +166,7 @@ export default async function HomePage() {
                 )}
               </div>
 
-              <div className="hidden md:block w-full md:basis-1/2 md:flex-[1.5]">
+              <div className="hidden md:block w-full md:basis-1/2 md:flex-[1.2]">
                 <HeroCarte villes={villesCoords} />
               </div>
             </div>
