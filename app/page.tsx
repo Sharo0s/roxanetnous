@@ -290,7 +290,7 @@ export default async function HomePage() {
 
         <svg viewBox="0 0 1440 60" preserveAspectRatio="none" className="w-full h-8 md:h-12 block -mb-px bg-white">
           <defs><pattern id="kraft-wave-3" patternUnits="userSpaceOnUse" width="256" height="256"><image href="/kraft-noise.png" width="256" height="256" /></pattern></defs>
-          <path d="M0,30 Q240,0 480,30 T960,30 T1440,30 L1440,60 L0,60 Z" fill="#F5E1C8" />
+          <path d="M0,30 Q240,0 480,30 T960,30 T1440,30 L1440,60 L0,60 Z" fill="#d3a387" />
           <path d="M0,30 Q240,0 480,30 T960,30 T1440,30 L1440,60 L0,60 Z" fill="url(#kraft-wave-3)" opacity="0.35" style={{ mixBlendMode: 'multiply' }} />
         </svg>
 
@@ -377,7 +377,7 @@ export default async function HomePage() {
 
         <svg viewBox="0 0 1440 60" preserveAspectRatio="none" className="w-full h-8 md:h-12 block -mb-px bg-white">
           <defs><pattern id="kraft-wave-5" patternUnits="userSpaceOnUse" width="256" height="256"><image href="/kraft-noise.png" width="256" height="256" /></pattern></defs>
-          <path d="M0,30 Q240,0 480,30 T960,30 T1440,30 L1440,60 L0,60 Z" fill="#F5E1C8" />
+          <path d="M0,30 Q240,0 480,30 T960,30 T1440,30 L1440,60 L0,60 Z" fill="#d3a387" />
           <path d="M0,30 Q240,0 480,30 T960,30 T1440,30 L1440,60 L0,60 Z" fill="url(#kraft-wave-5)" opacity="0.35" style={{ mixBlendMode: 'multiply' }} />
         </svg>
 
