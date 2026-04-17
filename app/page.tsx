@@ -218,7 +218,7 @@ export default async function HomePage() {
                     <path d="M12 2l2.39 7.36H22l-6.19 4.5L18.2 21 12 16.5 5.8 21l2.39-7.14L2 9.36h7.61L12 2z" />
                   </svg>
                   <p className="text-lg leading-relaxed">
-                    Roxanetnous a pour mission de créer une communauté, un endroit unique dédié à la recherche d&apos;accompagnement. Ensemble
+                    Roxanetnous a pour mission de créer une communauté, un endroit unique dédié à la recherche d&apos;accompagnement. Ensemble.
                     <svg
                       aria-hidden="true"
                       viewBox="0 0 24 24"
@@ -236,7 +236,6 @@ export default async function HomePage() {
                         <line x1="17.66" y1="6.34" x2="19.78" y2="4.22" />
                       </g>
                     </svg>
-                    .
                   </p>
                 </Reveal>
                 <Reveal as="span" delay={160} className="block">
