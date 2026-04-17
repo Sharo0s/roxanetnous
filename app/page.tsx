@@ -174,12 +174,10 @@ export default async function HomePage() {
         </section>
 
         {/* ===== BANDE COMMUNAUTE ===== */}
-        <svg viewBox="0 0 1440 60" preserveAspectRatio="none" className="w-full h-8 md:h-12 block -mb-px bg-kraft">
-          <defs><pattern id="kraft-wave-bc-top" patternUnits="userSpaceOnUse" width="256" height="256"><image href="/kraft-noise.png" width="256" height="256" /></pattern></defs>
-          <path d="M0,30 Q240,0 480,30 T960,30 T1440,30 L1440,60 L0,60 Z" fill="#F4C8A3" />
-          <path d="M0,30 Q240,0 480,30 T960,30 T1440,30 L1440,60 L0,60 Z" fill="url(#kraft-wave-bc-top)" opacity="0.35" style={{ mixBlendMode: 'multiply' }} />
-        </svg>
-        <section className="bg-accent">
+        <section className="bg-accent relative">
+          <svg viewBox="0 0 1440 60" preserveAspectRatio="none" className="absolute top-0 left-0 w-full h-8 md:h-12 -translate-y-full">
+            <path d="M0,60 Q240,20 480,50 T960,50 T1440,50 L1440,60 L0,60 Z" fill="#F4C8A3" />
+          </svg>
           <div className="max-w-5xl mx-auto px-4 py-8 flex flex-col items-center gap-4 text-center md:flex-row md:justify-between md:text-left">
             <p className="text-base font-medium text-black tracking-wide">
               Notre communauté de mise en relation entre accompagnants et accompagné(e)s
@@ -188,12 +186,10 @@ export default async function HomePage() {
               Consulter les annonces
             </Link>
           </div>
+          <svg viewBox="0 0 1440 60" preserveAspectRatio="none" className="absolute bottom-0 left-0 w-full h-8 md:h-12 translate-y-full">
+            <path d="M0,0 C360,40 720,-20 1080,20 T1440,0 L1440,60 L0,60 Z" fill="#F4C8A3" />
+          </svg>
         </section>
-        <svg viewBox="0 0 1440 60" preserveAspectRatio="none" className="w-full h-8 md:h-12 block -mt-px bg-accent">
-          <defs><pattern id="kraft-wave-bc-bot" patternUnits="userSpaceOnUse" width="256" height="256"><image href="/kraft-noise.png" width="256" height="256" /></pattern></defs>
-          <path d="M0,20 C360,60 720,0 1080,40 T1440,20 L1440,60 L0,60 Z" fill="#d3a387" />
-          <path d="M0,20 C360,60 720,0 1080,40 T1440,20 L1440,60 L0,60 Z" fill="url(#kraft-wave-bc-bot)" opacity="0.35" style={{ mixBlendMode: 'multiply' }} />
-        </svg>
 
         {/* ===== COMMENT CA MARCHE ===== */}
         <section className="px-4 pt-16 pb-24 md:pb-28 kraft bg-kraft relative">
