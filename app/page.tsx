@@ -350,7 +350,7 @@ export default async function HomePage() {
             {launchOfferActive && (
               <div className="bg-accent text-black text-center py-3 px-6 rounded-xl mb-6 max-w-2xl mx-auto">
                 <p className="text-lg font-bold">
-                  Offre de lancement : 2 mois offerts pour les premiers inscrits !
+                  Offre de lancement : 1 mois offert pour les premiers inscrits !
                 </p>
               </div>
             )}

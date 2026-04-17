@@ -268,7 +268,7 @@ export function SubscriptionPageContent({
         <div className="bg-accent text-black rounded-xl p-4 text-center">
           <p className="font-semibold">Offre de lancement</p>
           <p className="text-sm text-black/70 mt-1">
-            2 mois offerts pour les premiers inscrits
+            1 mois offert pour les premiers inscrits
           </p>
         </div>
       )}
@@ -306,7 +306,7 @@ export function SubscriptionPageContent({
         {/* Annuel */}
         <div className="bg-white rounded-xl border-2 border-accent p-6 flex flex-col relative">
           <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-accent text-black text-xs px-3 py-1 rounded-full font-medium">
-            2 mois offerts
+            1 mois offert
           </div>
           <h3 className="font-semibold text-lg mb-1">Annuel</h3>
           <p className="mb-1">

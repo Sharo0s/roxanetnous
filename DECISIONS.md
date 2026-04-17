@@ -55,4 +55,4 @@ Il fait autorite sur les documents bmad en cas de contradiction.
 - Recreer le webhook Stripe avec l'URL de production
 - Configurer Resend avec un vrai domaine pour l'envoi d'emails
 - Mettre a jour NEXT_PUBLIC_BASE_URL avec le domaine final
-- Definir la date exacte de LAUNCH_OFFER_END (offre de lancement 2 mois)
+- Definir la date exacte de LAUNCH_OFFER_END (offre de lancement 1 mois)
