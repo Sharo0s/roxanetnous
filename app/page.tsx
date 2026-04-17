@@ -138,11 +138,11 @@ export default async function HomePage() {
                   className="h-auto w-64 md:w-80 mx-auto md:mx-0"
                 />
 
-                <p className="text-xl text-white leading-relaxed">
+                <p className="text-xl text-white leading-relaxed text-center">
                   Donne vie à ton quotidien
                 </p>
 
-                <div className="flex gap-4 justify-center md:justify-start pt-4">
+                <div className="flex gap-4 justify-center pt-4">
                   <Link
                     href="/login"
                     className="px-6 py-3 rounded-lg font-semibold text-sm text-black btn-hover bg-accent"
@@ -166,7 +166,7 @@ export default async function HomePage() {
                 )}
               </div>
 
-              <div className="hidden md:block w-full md:basis-3/5 md:flex-[2]">
+              <div className="hidden md:block w-full md:basis-1/2 md:flex-[1.5]">
                 <HeroCarte villes={villesCoords} />
               </div>
             </div>
