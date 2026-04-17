@@ -262,7 +262,7 @@ export default async function HomePage() {
           </svg>
         </section>
 
-        {/* ===== AVIS ===== */}
+        {/* ===== AVIS (masque) =====
         {avisWithNames.length > 0 && (
           <section className="px-4 py-16 bg-white">
             <div className="max-w-4xl mx-auto mb-8">
@@ -276,14 +276,25 @@ export default async function HomePage() {
             <AvisMarquee avis={avisWithNames} />
           </section>
         )}
+        */}
 
         {/* ===== POUR QUI ===== */}
         <section className="px-4 py-16 bg-white">
-          <div className="max-w-4xl mx-auto">
+          <div className="max-w-6xl mx-auto">
             <h2 className="text-2xl font-bold text-center text-black mb-10">
               Pour qui ?
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="flex flex-col md:flex-row gap-8 items-start">
+              <div className="w-full md:w-2/5 shrink-0">
+                <Image
+                  src="/IMG-7294675.jpg"
+                  alt="Pour qui ?"
+                  width={1200}
+                  height={1600}
+                  className="h-auto w-full rounded-lg"
+                />
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 flex-1">
               <div className="border-2 border-accent rounded-xl p-8">
                 <h3 className="font-bold text-xl text-black mb-6">Accompagnant(e)s</h3>
                 <ul className="space-y-4 text-sm text-black">
@@ -321,6 +332,7 @@ export default async function HomePage() {
                 >
                   Trouver un(e) accompagnant(e)
                 </Link>
+              </div>
               </div>
             </div>
           </div>
