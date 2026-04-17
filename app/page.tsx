@@ -127,7 +127,7 @@ export default async function HomePage() {
         <section className="px-4 py-16 md:py-24 kraft bg-kraft">
           <div className="max-w-7xl mx-auto relative z-10">
             <div className="flex flex-col md:flex-row items-center gap-10 md:gap-16">
-              <div className="flex-1 text-center md:text-left space-y-5">
+              <div className="flex-1 text-center space-y-5">
                 <h1 className="sr-only">roxanetnous</h1>
                 <Image
                   src="/logo-transparent.png"
@@ -135,7 +135,7 @@ export default async function HomePage() {
                   width={480}
                   height={160}
                   priority
-                  className="h-auto w-64 md:w-80 mx-auto md:mx-0"
+                  className="h-auto w-64 md:w-80 mx-auto"
                 />
 
                 <p className="text-xl text-white leading-relaxed text-center">
@@ -152,7 +152,7 @@ export default async function HomePage() {
                 </div>
 
                 {((accompagnantesCount || 0) > 0 || (accompagnesCount || 0) > 0 || villesUniques.size > 0) && (
-                  <div className="flex gap-8 justify-center md:justify-start pt-10">
+                  <div className="flex gap-8 justify-center pt-10">
                     {(accompagnantesCount || 0) > 0 && (
                       <AnimatedCounter end={accompagnantesCount || 0} label={`accompagnant(e)${(accompagnantesCount || 0) > 1 ? 's' : ''} vérifié(e)${(accompagnantesCount || 0) > 1 ? 's' : ''}`} />
                     )}
