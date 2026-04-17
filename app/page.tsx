@@ -5,6 +5,7 @@ import { ContactForm } from '@/components/contact-form'
 import { AvisMarquee } from '@/components/landing/avis-marquee'
 import { HeroCarte } from '@/components/landing/hero-carte'
 import { AnimatedCounter } from '@/components/landing/animated-counter'
+import { Reveal } from '@/components/landing/reveal'
 import { createClient } from '@/lib/supabase/server'
 
 export const revalidate = 120
@@ -178,14 +179,14 @@ export default async function HomePage() {
           <svg viewBox="0 0 1440 60" preserveAspectRatio="none" className="absolute top-0 left-0 w-full h-8 md:h-12 -translate-y-full">
             <path d="M0,60 Q240,20 480,50 T960,50 T1440,50 L1440,60 L0,60 Z" fill="#F4C8A3" />
           </svg>
-          <div className="max-w-5xl mx-auto px-4 py-8 flex flex-col items-center gap-4 text-center md:flex-row md:justify-between md:text-left">
+          <Reveal className="max-w-5xl mx-auto px-4 py-8 flex flex-col items-center gap-4 text-center md:flex-row md:justify-between md:text-left">
             <p className="text-base font-medium text-black tracking-wide">
               Notre communauté de mise en relation entre accompagnants et accompagné(e)s
             </p>
             <Link href="/recherche" className="rounded-full px-7 py-3 font-semibold bg-black text-white btn-hover whitespace-nowrap text-base shrink-0">
               Consulter les annonces
             </Link>
-          </div>
+          </Reveal>
           <svg viewBox="0 0 1440 60" preserveAspectRatio="none" className="absolute bottom-0 left-0 w-full h-8 md:h-12 translate-y-full">
             <path d="M0,0 C360,40 720,-20 1080,20 T1440,0 L1440,60 L0,60 Z" fill="#F4C8A3" />
           </svg>
@@ -195,7 +196,7 @@ export default async function HomePage() {
         <section className="px-4 py-16 md:py-24 kraft bg-kraft relative">
           <div className="max-w-5xl mx-auto relative z-10">
             <div className="flex flex-col md:flex-row items-center gap-10 md:gap-16">
-              <div className="flex-1 w-full">
+              <Reveal variant="zoom" className="flex-1 w-full">
                 <Image
                   src="/IMG-9432645.jpg"
                   alt="Roxane, aide médico-psychologique"
@@ -203,27 +204,41 @@ export default async function HomePage() {
                   height={1600}
                   className="h-auto w-full rounded-lg"
                 />
-              </div>
+              </Reveal>
               <div className="flex-1 text-white space-y-4">
-                <h2 className="text-2xl md:text-3xl font-bold text-black">Ici, c&apos;est un lieu</h2>
-                <p className="text-base leading-relaxed">
-                  Roxanetnous a pour mission de créer une communauté. Un endroit unique dédié à la recherche d&apos;accompagnement. Ensemble.
-                </p>
-                <p className="text-base leading-relaxed">
-                  Je suis Roxane, aide médico-psychologique, j&apos;exerce mon métier avec passion depuis une dizaine d&apos;années.
-                </p>
-                <p className="text-base leading-relaxed">
-                  Aujourd&apos;hui, je fais un constat : celui de la difficulté en tant qu&apos;accompagné ou accompagnant à trouver son accompagnement.
-                </p>
-                <p className="text-base leading-relaxed italic">
-                  Où, quoi, qui, comment chercher ?
-                </p>
-                <p className="text-base leading-relaxed font-semibold">
-                  C&apos;est ici.
-                </p>
-                <p className="text-base leading-relaxed">
-                  Parlons de nous, pour nous faciliter l&apos;accès à demain.
-                </p>
+                <Reveal as="span" className="block">
+                  <h2 className="text-2xl md:text-3xl font-bold text-black">Ici, c&apos;est un lieu</h2>
+                </Reveal>
+                <Reveal as="span" delay={80} className="block">
+                  <p className="text-base leading-relaxed">
+                    Roxanetnous a pour mission de créer une communauté. Un endroit unique dédié à la recherche d&apos;accompagnement. Ensemble.
+                  </p>
+                </Reveal>
+                <Reveal as="span" delay={160} className="block">
+                  <p className="text-base leading-relaxed">
+                    Je suis Roxane, aide médico-psychologique, j&apos;exerce mon métier avec passion depuis une dizaine d&apos;années.
+                  </p>
+                </Reveal>
+                <Reveal as="span" delay={240} className="block">
+                  <p className="text-base leading-relaxed">
+                    Aujourd&apos;hui, je fais un constat : celui de la difficulté en tant qu&apos;accompagné ou accompagnant à trouver son accompagnement.
+                  </p>
+                </Reveal>
+                <Reveal as="span" delay={320} className="block">
+                  <p className="text-base leading-relaxed italic">
+                    Où, quoi, qui, comment chercher ?
+                  </p>
+                </Reveal>
+                <Reveal as="span" delay={400} className="block">
+                  <p className="text-base leading-relaxed font-semibold">
+                    C&apos;est ici.
+                  </p>
+                </Reveal>
+                <Reveal as="span" delay={480} className="block">
+                  <p className="text-base leading-relaxed">
+                    Parlons de nous, pour nous faciliter l&apos;accès à demain.
+                  </p>
+                </Reveal>
               </div>
             </div>
           </div>
@@ -242,7 +257,7 @@ export default async function HomePage() {
                 { step: '3', title: 'Validation', desc: 'Notre équipe vérifie manuellement chaque profil accompagnant(e). Sous 48h.' },
                 { step: '4', title: 'Mise en relation', desc: 'Publiez votre annonce, nous vous recommandons les profils les plus compatibles. Premiers contacts en quelques jours.' },
               ].map((item, i) => (
-                <div key={item.step} className="flex gap-6 items-start">
+                <Reveal key={item.step} delay={i * 120} className="flex gap-6 items-start">
                   <div className="flex flex-col items-center">
                     <div className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm shrink-0 text-black bg-accent">
                       {item.step}
@@ -253,7 +268,7 @@ export default async function HomePage() {
                     <h3 className="font-bold text-lg text-black">{item.title}</h3>
                     <p className="text-sm mt-1 text-white">{item.desc}</p>
                   </div>
-                </div>
+                </Reveal>
               ))}
             </div>
           </div>
@@ -295,7 +310,7 @@ export default async function HomePage() {
                 />
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8 flex-1">
-              <div className="border-2 border-accent rounded-xl p-8">
+              <Reveal className="border-2 border-accent rounded-xl p-8">
                 <h3 className="font-bold text-xl text-black mb-6">Accompagnant(e)s</h3>
                 <ul className="space-y-4 text-sm text-black">
                   {['Profil vérifié qui inspire confiance', 'Visibilité directe auprès des accompagné(e)s', 'Profils recommandés selon vos compétences', 'Pas de commission. Vous fixez vos conditions.'].map((text) => (
@@ -313,8 +328,8 @@ export default async function HomePage() {
                 >
                   Créer mon profil accompagnant(e)
                 </Link>
-              </div>
-              <div className="border-2 border-accent rounded-xl p-8">
+              </Reveal>
+              <Reveal delay={100} className="border-2 border-accent rounded-xl p-8">
                 <h3 className="font-bold text-xl text-black mb-6">Accompagné(e)s et proches</h3>
                 <ul className="space-y-4 text-sm text-black">
                   {['Tous les profils vérifiés manuellement', 'Recherche par spécialité, localisation, expérience', 'Les profils que nous vous recommandons', 'Avis vérifiés pour vous guider'].map((text) => (
@@ -332,7 +347,7 @@ export default async function HomePage() {
                 >
                   Trouver un(e) accompagnant(e)
                 </Link>
-              </div>
+              </Reveal>
               </div>
             </div>
           </div>
@@ -358,7 +373,7 @@ export default async function HomePage() {
             <p className="text-center text-sm text-black mb-10">
               Même prix pour les accompagnant(e)s et les accompagné(e)s.            </p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto">
-              <div className="border border-accent rounded-xl p-6 bg-white flex flex-col">
+              <Reveal className="border border-accent rounded-xl p-6 bg-white flex flex-col">
                 <h3 className="font-bold text-lg text-black mb-1">Mensuel</h3>
                 <p className="text-3xl font-bold mb-1">
                   <span className="text-accent">4,99 EUR</span><span className="text-sm font-normal text-black"> / mois</span>
@@ -370,11 +385,11 @@ export default async function HomePage() {
                 >
                   Commencer
                 </Link>
-              </div>
-              <div className="border-2 border-accent rounded-xl p-6 bg-white relative flex flex-col">
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 text-xs px-3 py-1 rounded-full font-medium text-black bg-accent">
+              </Reveal>
+              <Reveal delay={100} className="border-2 border-accent rounded-xl p-6 bg-white relative flex flex-col">
+                <Reveal as="span" delay={400} variant="zoom" className="absolute -top-3 left-1/2 -translate-x-1/2 text-xs px-3 py-1 rounded-full font-medium text-black bg-accent">
                   Recommandé
-                </div>
+                </Reveal>
                 <h3 className="font-bold text-lg text-black mb-1">Annuel</h3>
                 <p className="text-3xl font-bold text-black mb-1 whitespace-nowrap">
                   <span className="text-xl font-normal text-black line-through mr-2">59,88 EUR</span>
@@ -387,7 +402,7 @@ export default async function HomePage() {
                 >
                   Commencer
                 </Link>
-              </div>
+              </Reveal>
             </div>
           </div>
           <svg viewBox="0 0 1440 60" preserveAspectRatio="none" className="absolute bottom-0 left-0 w-full h-8 md:h-12 z-[2]">
@@ -408,7 +423,8 @@ export default async function HomePage() {
                 { q: 'Comment contacter un(e) accompagnant(e) ?', a: "Une fois inscrit en tant qu'accompagné(e), vous pouvez envoyer un message via la messagerie intégrée à partir de la fiche de l'accompagnant(e)." },
                 { q: 'Comment supprimer mon compte ?', a: 'Vous pouvez supprimer votre compte depuis les paramètres de votre espace personnel. Toutes vos données seront supprimées conformément au RGPD.' },
               ].map((faq, i) => (
-                <details key={i} className="group rounded-xl bg-white p-5 border border-accent">
+                <Reveal as="span" key={i} delay={i * 60} className="block">
+                <details className="group rounded-xl bg-white p-5 border border-accent">
                   <summary className="cursor-pointer flex gap-4 items-start">
                     <div className="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm shrink-0 text-black bg-accent">
                       {i + 1}
@@ -420,6 +436,7 @@ export default async function HomePage() {
                   </summary>
                   <p className="text-sm text-black pt-3 pl-12">{faq.a}</p>
                 </details>
+                </Reveal>
               ))}
             </div>
           </div>
@@ -433,13 +450,13 @@ export default async function HomePage() {
 
         {/* ===== CONTACT ===== */}
         <section className="px-4 py-16 kraft bg-kraft">
-          <div className="max-w-md mx-auto relative z-10">
+          <Reveal className="max-w-md mx-auto relative z-10">
             <h2 className="text-2xl font-bold text-center text-white mb-2">Une question ?</h2>
             <p className="text-center text-white mb-6">
               Notre équipe est disponible pour répondre à toutes vos questions.
             </p>
             <ContactForm />
-          </div>
+          </Reveal>
         </section>
       </main>
       <Footer />
