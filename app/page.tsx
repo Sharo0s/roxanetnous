@@ -206,21 +206,21 @@ export default async function HomePage() {
                 />
               </Reveal>
               <div className="flex-1 text-white space-y-4">
-                <Reveal as="span" variant="zoom" className="block">
-                  <svg
-                    aria-hidden="true"
-                    viewBox="0 0 24 24"
-                    className="w-10 h-10 text-accent fill-current"
-                  >
-                    <path d="M12 2l2.39 7.36H22l-6.19 4.5L18.2 21 12 16.5 5.8 21l2.39-7.14L2 9.36h7.61L12 2z" />
-                  </svg>
-                </Reveal>
                 <Reveal as="span" className="block">
                   <h2 className="text-3xl md:text-4xl font-bold text-black">Ici, c&apos;est un lieu</h2>
                 </Reveal>
                 <Reveal as="span" delay={80} className="block">
-                  <p className="text-lg leading-relaxed">
-                    Roxanetnous a pour mission de créer une communauté. Un endroit unique dédié à la recherche d&apos;accompagnement. Ensemble.
+                  <p className="text-lg leading-relaxed flex items-start gap-3">
+                    <svg
+                      aria-hidden="true"
+                      viewBox="0 0 24 24"
+                      className="w-6 h-6 shrink-0 mt-1 text-accent fill-current"
+                    >
+                      <path d="M12 2l2.39 7.36H22l-6.19 4.5L18.2 21 12 16.5 5.8 21l2.39-7.14L2 9.36h7.61L12 2z" />
+                    </svg>
+                    <span>
+                      Roxanetnous a pour mission de créer une communauté. Un endroit unique dédié à la recherche d&apos;accompagnement. Ensemble.
+                    </span>
                   </p>
                 </Reveal>
                 <Reveal as="span" delay={160} className="block">
