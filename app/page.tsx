@@ -175,7 +175,9 @@ export default async function HomePage() {
 
         {/* ===== BANDE COMMUNAUTE ===== */}
         <svg viewBox="0 0 1440 60" preserveAspectRatio="none" className="w-full h-8 md:h-12 block -mb-px bg-kraft">
+          <defs><pattern id="kraft-wave-bc-top" patternUnits="userSpaceOnUse" width="256" height="256"><image href="/kraft-noise.png" width="256" height="256" /></pattern></defs>
           <path d="M0,30 Q240,0 480,30 T960,30 T1440,30 L1440,60 L0,60 Z" fill="#F4C8A3" />
+          <path d="M0,30 Q240,0 480,30 T960,30 T1440,30 L1440,60 L0,60 Z" fill="url(#kraft-wave-bc-top)" opacity="0.35" style={{ mixBlendMode: 'multiply' }} />
         </svg>
         <section className="bg-accent">
           <div className="max-w-5xl mx-auto px-4 py-8 flex flex-col items-center gap-4 text-center md:flex-row md:justify-between md:text-left">
@@ -188,7 +190,9 @@ export default async function HomePage() {
           </div>
         </section>
         <svg viewBox="0 0 1440 60" preserveAspectRatio="none" className="w-full h-8 md:h-12 block -mt-px bg-accent">
-          <path d="M0,30 Q240,60 480,30 T960,30 T1440,30 L1440,60 L0,60 Z" fill="#d3a387" />
+          <defs><pattern id="kraft-wave-bc-bot" patternUnits="userSpaceOnUse" width="256" height="256"><image href="/kraft-noise.png" width="256" height="256" /></pattern></defs>
+          <path d="M0,20 C360,60 720,0 1080,40 T1440,20 L1440,60 L0,60 Z" fill="#d3a387" />
+          <path d="M0,20 C360,60 720,0 1080,40 T1440,20 L1440,60 L0,60 Z" fill="url(#kraft-wave-bc-bot)" opacity="0.35" style={{ mixBlendMode: 'multiply' }} />
         </svg>
 
         {/* ===== COMMENT CA MARCHE ===== */}
