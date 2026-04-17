@@ -173,12 +173,6 @@ export default async function HomePage() {
           </div>
         </section>
 
-        <svg viewBox="0 0 1440 60" preserveAspectRatio="none" className="w-full h-8 md:h-12 block -mb-px bg-accent">
-          <defs><pattern id="kraft-wave-1" patternUnits="userSpaceOnUse" width="256" height="256"><image href="/kraft-noise.png" width="256" height="256" /></pattern></defs>
-          <path d="M0,30 Q240,0 480,30 T960,30 T1440,30 L1440,60 L0,60 Z" fill="#F4C8A3" />
-          <path d="M0,30 Q240,0 480,30 T960,30 T1440,30 L1440,60 L0,60 Z" fill="url(#kraft-wave-1)" opacity="0.35" style={{ mixBlendMode: 'multiply' }} />
-        </svg>
-
         {/* ===== BANDE COMMUNAUTE ===== */}
         <section className="bg-accent">
           <div className="max-w-5xl mx-auto px-4 py-8 flex flex-col items-center gap-4 text-center md:flex-row md:justify-between md:text-left">
