@@ -59,7 +59,7 @@ export function Reveal({
 
   const visibleClass = 'opacity-100 translate-y-0 scale-100 blur-0'
 
-  const duration = variant === 'blur' ? 'duration-1000' : 'duration-500'
+  const duration = variant === 'blur' ? 'duration-[1500ms]' : 'duration-500'
 
   return createElement(
     as,
