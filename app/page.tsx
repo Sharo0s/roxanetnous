@@ -174,6 +174,9 @@ export default async function HomePage() {
         </section>
 
         {/* ===== BANDE COMMUNAUTE ===== */}
+        <svg viewBox="0 0 1440 60" preserveAspectRatio="none" className="w-full h-8 md:h-12 block -mb-px bg-kraft">
+          <path d="M0,30 Q240,0 480,30 T960,30 T1440,30 L1440,60 L0,60 Z" fill="#F4C8A3" />
+        </svg>
         <section className="bg-accent">
           <div className="max-w-5xl mx-auto px-4 py-8 flex flex-col items-center gap-4 text-center md:flex-row md:justify-between md:text-left">
             <p className="text-base font-medium text-black tracking-wide">
@@ -184,6 +187,9 @@ export default async function HomePage() {
             </Link>
           </div>
         </section>
+        <svg viewBox="0 0 1440 60" preserveAspectRatio="none" className="w-full h-8 md:h-12 block -mt-px bg-accent">
+          <path d="M0,30 Q240,60 480,30 T960,30 T1440,30 L1440,60 L0,60 Z" fill="#d3a387" />
+        </svg>
 
         {/* ===== COMMENT CA MARCHE ===== */}
         <section className="px-4 pt-16 pb-24 md:pb-28 kraft bg-kraft relative">
