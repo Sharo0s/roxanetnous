@@ -118,4 +118,16 @@ h1, h2, h3, h4, h5, h6 {
   .bg-accent-fade-both {
     background-image: linear-gradient(to bottom, transparent 0%, var(--color-accent) 40%, var(--color-accent) 60%, transparent 100%);
   }
+
+  .bg-white-fade-top {
+    background-image: linear-gradient(to bottom, transparent 0%, white 15%);
+  }
+
+  .bg-white-fade-bottom {
+    background-image: linear-gradient(to bottom, white 85%, transparent 100%);
+  }
+
+  .bg-white-fade-both {
+    background-image: linear-gradient(to bottom, transparent 0%, white 15%, white 85%, transparent 100%);
+  }
 }

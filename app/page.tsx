@@ -122,7 +122,7 @@ export default async function HomePage() {
           </div>
         </div>
       )}
-      <main className="flex-1">
+      <main className="flex-1 bg-kraft">
         {/* ===== HERO ===== */}
         <section className="px-4 py-16 md:py-24 kraft kraft-fade-bottom bg-kraft bg-kraft-fade-bottom">
           <div className="max-w-5xl mx-auto relative z-10">
@@ -217,7 +217,7 @@ export default async function HomePage() {
 
         {/* ===== AVIS ===== */}
         {avisWithNames.length > 0 && (
-          <section className="px-4 py-16 bg-white">
+          <section className="px-4 py-16 bg-white-fade-top">
             <div className="max-w-4xl mx-auto mb-8">
               <h2 className="text-2xl font-bold text-center text-black mb-2">
                 Ce qu'en disent nos utilisateurs
@@ -231,7 +231,7 @@ export default async function HomePage() {
         )}
 
         {/* ===== POUR QUI ===== */}
-        <section className="px-4 py-16 bg-white">
+        <section className="px-4 py-16 bg-white-fade-bottom">
           <div className="max-w-4xl mx-auto">
             <h2 className="text-2xl font-bold text-center text-black mb-10">
               Pour qui ?
@@ -328,7 +328,7 @@ export default async function HomePage() {
         </section>
 
         {/* ===== FAQ ===== */}
-        <section className="px-4 py-16 bg-white">
+        <section className="px-4 py-16 bg-white-fade-both">
           <div className="max-w-5xl mx-auto">
             <h2 className="text-2xl font-bold text-center text-black mb-10">Questions fréquentes</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
