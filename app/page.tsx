@@ -174,7 +174,7 @@ export default async function HomePage() {
         </section>
 
         {/* ===== BANDE COMMUNAUTE ===== */}
-        <section className="bg-accent">
+        <section className="bg-accent-fade-both">
           <div className="max-w-5xl mx-auto px-4 py-8 flex flex-col items-center gap-4 text-center md:flex-row md:justify-between md:text-left">
             <p className="text-base font-medium text-black tracking-wide">
               Notre communauté de mise en relation entre accompagnants et accompagné(e)s

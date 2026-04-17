@@ -114,4 +114,8 @@ h1, h2, h3, h4, h5, h6 {
   .bg-kraft-fade-both {
     background-image: linear-gradient(to bottom, transparent 0%, var(--color-kraft) 20%, var(--color-kraft) 80%, transparent 100%);
   }
+
+  .bg-accent-fade-both {
+    background-image: linear-gradient(to bottom, transparent 0%, var(--color-accent) 40%, var(--color-accent) 60%, transparent 100%);
+  }
 }
