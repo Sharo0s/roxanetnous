@@ -182,7 +182,7 @@ export default async function HomePage() {
             <p className="text-base font-medium text-black tracking-wide">
               Notre communauté de mise en relation entre accompagnants et accompagné(e)s
             </p>
-            <Link href="/recherche" className="rounded-full px-4 py-1.5 font-medium bg-black text-white btn-hover whitespace-nowrap text-sm shrink-0">
+            <Link href="/recherche" className="rounded-full px-7 py-3 font-semibold bg-black text-white btn-hover whitespace-nowrap text-base shrink-0">
               Consulter les annonces
             </Link>
           </div>
