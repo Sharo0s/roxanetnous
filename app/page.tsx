@@ -412,9 +412,19 @@ export default async function HomePage() {
 
         {/* ===== FAQ ===== */}
         <section className="px-4 py-16 bg-white">
-          <div className="max-w-5xl mx-auto">
+          <div className="max-w-6xl mx-auto">
             <h2 className="text-3xl font-bold text-center text-black mb-10">Questions fréquentes</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
+            <div className="flex flex-col md:flex-row gap-8 items-start">
+              <div className="w-full md:w-2/5 shrink-0 md:sticky md:top-8">
+                <Image
+                  src="/IMG-6482896.jpg"
+                  alt="Questions fréquentes"
+                  width={1200}
+                  height={1600}
+                  className="h-auto w-full rounded-lg"
+                />
+              </div>
+              <div className="grid grid-cols-1 gap-4 items-start flex-1">
               {[
                 { q: 'Comment fonctionne la vérification des profils ?', a: "Chaque accompagnant(e) doit déposer ses diplômes et sa pièce d'identité. Notre équipe vérifie manuellement ces documents avant d'activer le profil." },
                 { q: "Combien coûte l'abonnement ?", a: "L'abonnement mensuel est à 4,99 EUR/mois sans engagement. L'abonnement annuel est à 49,99 EUR/an, soit une économie de 17%." },
@@ -438,6 +448,7 @@ export default async function HomePage() {
                 </details>
                 </Reveal>
               ))}
+              </div>
             </div>
           </div>
         </section>
