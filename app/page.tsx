@@ -333,7 +333,7 @@ export default async function HomePage() {
               Pour qui ?
             </h2>
             <div className="flex flex-col md:flex-row gap-8 items-start">
-              <div className="w-full md:w-2/5 shrink-0">
+              <Reveal variant="zoom" className="w-full md:w-2/5 shrink-0">
                 <Image
                   src="/IMG-9432645.png"
                   alt="Pour qui ?"
@@ -341,7 +341,7 @@ export default async function HomePage() {
                   height={1600}
                   className="h-auto w-full rounded-lg"
                 />
-              </div>
+              </Reveal>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8 flex-1">
               <Reveal className="border-2 border-accent rounded-xl p-8">
                 <h3 className="font-bold text-2xl text-black mb-6">Accompagnant(e)s</h3>
@@ -448,7 +448,7 @@ export default async function HomePage() {
           <div className="max-w-6xl mx-auto">
             <h2 className="text-3xl font-bold text-center text-black mb-10">Questions fréquentes</h2>
             <div className="flex flex-col md:flex-row gap-8 items-start">
-              <div className="w-full md:w-2/5 shrink-0 md:sticky md:top-8">
+              <Reveal variant="zoom" className="w-full md:w-2/5 shrink-0 md:sticky md:top-8">
                 <Image
                   src="/IMG-6482896.png"
                   alt="Questions fréquentes"
@@ -456,7 +456,7 @@ export default async function HomePage() {
                   height={1600}
                   className="h-auto w-full rounded-lg"
                 />
-              </div>
+              </Reveal>
               <div className="grid grid-cols-1 gap-4 items-start flex-1">
               {[
                 { q: 'Comment fonctionne la vérification des profils ?', a: "Chaque accompagnant(e) doit déposer ses diplômes et sa pièce d'identité. Notre équipe vérifie manuellement ces documents avant d'activer le profil." },
