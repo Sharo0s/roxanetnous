@@ -196,7 +196,7 @@ export default async function HomePage() {
         <section className="px-4 py-16 md:py-24 kraft bg-kraft relative">
           <div className="max-w-5xl mx-auto relative z-10">
             <div className="flex flex-col md:flex-row items-center gap-10 md:gap-16">
-              <Reveal variant="zoom" className="flex-1 w-full">
+              <Reveal variant="blur" className="flex-1 w-full">
                 <Image
                   src="/IMG-7294675.png"
                   alt="Roxane, aide médico-psychologique"
@@ -333,7 +333,7 @@ export default async function HomePage() {
               Pour qui ?
             </h2>
             <div className="flex flex-col md:flex-row gap-8 items-start">
-              <Reveal variant="zoom" className="w-full md:w-2/5 shrink-0">
+              <Reveal variant="blur" className="w-full md:w-2/5 shrink-0">
                 <Image
                   src="/IMG-9432645.png"
                   alt="Pour qui ?"
@@ -420,7 +420,7 @@ export default async function HomePage() {
                 </Link>
               </Reveal>
               <Reveal delay={100} className="border-2 border-accent rounded-xl p-6 bg-white relative flex flex-col">
-                <Reveal as="span" delay={400} variant="zoom" className="absolute -top-3 left-1/2 -translate-x-1/2 text-xs px-3 py-1 rounded-full font-medium text-black bg-accent">
+                <Reveal as="span" delay={400} variant="blur" className="absolute -top-3 left-1/2 -translate-x-1/2 text-xs px-3 py-1 rounded-full font-medium text-black bg-accent">
                   Recommandé
                 </Reveal>
                 <h3 className="font-bold text-xl text-black mb-1">Annuel</h3>
@@ -448,7 +448,7 @@ export default async function HomePage() {
           <div className="max-w-6xl mx-auto">
             <h2 className="text-3xl font-bold text-center text-black mb-10">Questions fréquentes</h2>
             <div className="flex flex-col md:flex-row gap-8 items-start">
-              <Reveal variant="zoom" className="w-full md:w-2/5 shrink-0 md:sticky md:top-8">
+              <Reveal variant="blur" className="w-full md:w-2/5 shrink-0 md:sticky md:top-8">
                 <Image
                   src="/IMG-6482896.png"
                   alt="Questions fréquentes"

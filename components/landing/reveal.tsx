@@ -7,7 +7,7 @@ type RevealProps = {
   delay?: number
   className?: string
   as?: 'div' | 'section' | 'li' | 'article' | 'span'
-  variant?: 'fade-up' | 'fade' | 'zoom'
+  variant?: 'fade-up' | 'fade' | 'zoom' | 'blur'
   threshold?: number
 }
 
@@ -53,16 +53,20 @@ export function Reveal({
       ? 'opacity-0 scale-105'
       : variant === 'fade'
         ? 'opacity-0'
-        : 'opacity-0 translate-y-4'
+        : variant === 'blur'
+          ? 'opacity-0 blur-xl'
+          : 'opacity-0 translate-y-4'
 
-  const visibleClass = 'opacity-100 translate-y-0 scale-100'
+  const visibleClass = 'opacity-100 translate-y-0 scale-100 blur-0'
+
+  const duration = variant === 'blur' ? 'duration-1000' : 'duration-500'
 
   return createElement(
     as,
     {
       ref,
       style: { transitionDelay: `${delay}ms` },
-      className: `transition-all duration-500 ease-out will-change-transform ${visible ? visibleClass : hiddenClass} ${className}`,
+      className: `transition-all ${duration} ease-out will-change-transform ${visible ? visibleClass : hiddenClass} ${className}`,
     },
     children,
   )
