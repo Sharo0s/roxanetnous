@@ -88,46 +88,4 @@ h1, h2, h3, h4, h5, h6 {
     mix-blend-mode: multiply;
   }
 
-  .kraft-fade-top::before {
-    mask-image: linear-gradient(to bottom, transparent 0%, black 20%);
-    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 20%);
-  }
-
-  .kraft-fade-bottom::before {
-    mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
-    -webkit-mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
-  }
-
-  .kraft-fade-both::before {
-    mask-image: linear-gradient(to bottom, transparent 0%, black 20%, black 80%, transparent 100%);
-    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 20%, black 80%, transparent 100%);
-  }
-
-  .bg-kraft-fade-top {
-    background-image: linear-gradient(to bottom, transparent 0%, var(--color-kraft) 20%);
-  }
-
-  .bg-kraft-fade-bottom {
-    background-image: linear-gradient(to bottom, var(--color-kraft) 80%, transparent 100%);
-  }
-
-  .bg-kraft-fade-both {
-    background-image: linear-gradient(to bottom, transparent 0%, var(--color-kraft) 20%, var(--color-kraft) 80%, transparent 100%);
-  }
-
-  .bg-accent-fade-both {
-    background-image: linear-gradient(to bottom, transparent 0%, var(--color-accent) 40%, var(--color-accent) 60%, transparent 100%);
-  }
-
-  .bg-white-fade-top {
-    background-image: linear-gradient(to bottom, transparent 0%, white 15%);
-  }
-
-  .bg-white-fade-bottom {
-    background-image: linear-gradient(to bottom, white 85%, transparent 100%);
-  }
-
-  .bg-white-fade-both {
-    background-image: linear-gradient(to bottom, transparent 0%, white 15%, white 85%, transparent 100%);
-  }
 }

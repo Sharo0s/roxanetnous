@@ -122,9 +122,9 @@ export default async function HomePage() {
           </div>
         </div>
       )}
-      <main className="flex-1 bg-kraft">
+      <main className="flex-1">
         {/* ===== HERO ===== */}
-        <section className="px-4 py-16 md:py-24 kraft kraft-fade-bottom bg-kraft bg-kraft-fade-bottom">
+        <section className="px-4 py-16 md:py-24 kraft bg-kraft">
           <div className="max-w-5xl mx-auto relative z-10">
             <div className="flex flex-col md:flex-row items-center gap-10 md:gap-16">
               <div className="flex-1 text-center md:text-left space-y-5">
@@ -173,8 +173,14 @@ export default async function HomePage() {
           </div>
         </section>
 
+        <svg viewBox="0 0 1440 60" preserveAspectRatio="none" className="w-full h-8 md:h-12 block -mb-px bg-accent">
+          <defs><pattern id="kraft-wave-1" patternUnits="userSpaceOnUse" width="256" height="256"><image href="/kraft-noise.png" width="256" height="256" /></pattern></defs>
+          <path d="M0,30 Q240,0 480,30 T960,30 T1440,30 L1440,60 L0,60 Z" fill="#F5E1C8" />
+          <path d="M0,30 Q240,0 480,30 T960,30 T1440,30 L1440,60 L0,60 Z" fill="url(#kraft-wave-1)" opacity="0.35" style={{ mixBlendMode: 'multiply' }} />
+        </svg>
+
         {/* ===== BANDE COMMUNAUTE ===== */}
-        <section className="bg-accent-fade-both">
+        <section className="bg-accent">
           <div className="max-w-5xl mx-auto px-4 py-8 flex flex-col items-center gap-4 text-center md:flex-row md:justify-between md:text-left">
             <p className="text-base font-medium text-black tracking-wide">
               Notre communauté de mise en relation entre accompagnants et accompagné(e)s
@@ -186,7 +192,7 @@ export default async function HomePage() {
         </section>
 
         {/* ===== COMMENT CA MARCHE ===== */}
-        <section className="px-4 pt-16 pb-24 md:pb-28 kraft kraft-fade-both bg-kraft-fade-both relative">
+        <section className="px-4 pt-16 pb-24 md:pb-28 kraft bg-kraft relative">
           <div className="max-w-3xl mx-auto relative z-10">
             <h2 className="text-2xl font-bold text-center text-white mb-12">
               Comment ça marche RoxanetNous
@@ -213,11 +219,14 @@ export default async function HomePage() {
               ))}
             </div>
           </div>
+          <svg viewBox="0 0 1440 60" preserveAspectRatio="none" className="absolute bottom-0 left-0 w-full h-8 md:h-12 z-[2]">
+            <path d="M0,30 Q360,60 720,30 T1440,30 L1440,60 L0,60 Z" fill="white" />
+          </svg>
         </section>
 
         {/* ===== AVIS ===== */}
         {avisWithNames.length > 0 && (
-          <section className="px-4 py-16 bg-white-fade-top">
+          <section className="px-4 py-16 bg-white">
             <div className="max-w-4xl mx-auto mb-8">
               <h2 className="text-2xl font-bold text-center text-black mb-2">
                 Ce qu'en disent nos utilisateurs
@@ -231,7 +240,7 @@ export default async function HomePage() {
         )}
 
         {/* ===== POUR QUI ===== */}
-        <section className="px-4 py-16 bg-white-fade-bottom">
+        <section className="px-4 py-16 bg-white">
           <div className="max-w-4xl mx-auto">
             <h2 className="text-2xl font-bold text-center text-black mb-10">
               Pour qui ?
@@ -279,8 +288,14 @@ export default async function HomePage() {
           </div>
         </section>
 
+        <svg viewBox="0 0 1440 60" preserveAspectRatio="none" className="w-full h-8 md:h-12 block -mb-px bg-white">
+          <defs><pattern id="kraft-wave-3" patternUnits="userSpaceOnUse" width="256" height="256"><image href="/kraft-noise.png" width="256" height="256" /></pattern></defs>
+          <path d="M0,30 Q240,0 480,30 T960,30 T1440,30 L1440,60 L0,60 Z" fill="#F5E1C8" />
+          <path d="M0,30 Q240,0 480,30 T960,30 T1440,30 L1440,60 L0,60 Z" fill="url(#kraft-wave-3)" opacity="0.35" style={{ mixBlendMode: 'multiply' }} />
+        </svg>
+
         {/* ===== OFFRES ===== */}
-        <section className="px-4 pt-16 pb-24 md:pb-28 kraft kraft-fade-both bg-kraft-fade-both relative">
+        <section className="px-4 pt-16 pb-24 md:pb-28 kraft bg-kraft relative">
           <div className="max-w-4xl mx-auto relative z-10">
             {launchOfferActive && (
               <div className="bg-accent text-black text-center py-3 px-6 rounded-xl mb-6 max-w-2xl mx-auto">
@@ -325,10 +340,13 @@ export default async function HomePage() {
               </div>
             </div>
           </div>
+          <svg viewBox="0 0 1440 60" preserveAspectRatio="none" className="absolute bottom-0 left-0 w-full h-8 md:h-12 z-[2]">
+            <path d="M0,30 Q360,60 720,30 T1440,30 L1440,60 L0,60 Z" fill="white" />
+          </svg>
         </section>
 
         {/* ===== FAQ ===== */}
-        <section className="px-4 py-16 bg-white-fade-both">
+        <section className="px-4 py-16 bg-white">
           <div className="max-w-5xl mx-auto">
             <h2 className="text-2xl font-bold text-center text-black mb-10">Questions fréquentes</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
@@ -357,8 +375,14 @@ export default async function HomePage() {
           </div>
         </section>
 
+        <svg viewBox="0 0 1440 60" preserveAspectRatio="none" className="w-full h-8 md:h-12 block -mb-px bg-white">
+          <defs><pattern id="kraft-wave-5" patternUnits="userSpaceOnUse" width="256" height="256"><image href="/kraft-noise.png" width="256" height="256" /></pattern></defs>
+          <path d="M0,30 Q240,0 480,30 T960,30 T1440,30 L1440,60 L0,60 Z" fill="#F5E1C8" />
+          <path d="M0,30 Q240,0 480,30 T960,30 T1440,30 L1440,60 L0,60 Z" fill="url(#kraft-wave-5)" opacity="0.35" style={{ mixBlendMode: 'multiply' }} />
+        </svg>
+
         {/* ===== CONTACT ===== */}
-        <section className="px-4 py-16 kraft kraft-fade-top bg-kraft-fade-top">
+        <section className="px-4 py-16 kraft bg-kraft">
           <div className="max-w-md mx-auto relative z-10">
             <h2 className="text-2xl font-bold text-center text-white mb-2">Une question ?</h2>
             <p className="text-center text-white mb-6">
