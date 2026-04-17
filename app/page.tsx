@@ -198,7 +198,7 @@ export default async function HomePage() {
             <div className="flex flex-col md:flex-row items-center gap-10 md:gap-16">
               <Reveal variant="zoom" className="flex-1 w-full">
                 <Image
-                  src="/IMG-9432645.jpg"
+                  src="/IMG-9432645.png"
                   alt="Roxane, aide médico-psychologique"
                   width={1200}
                   height={1600}
@@ -302,7 +302,7 @@ export default async function HomePage() {
             <div className="flex flex-col md:flex-row gap-8 items-start">
               <div className="w-full md:w-2/5 shrink-0">
                 <Image
-                  src="/IMG-7294675.jpg"
+                  src="/IMG-7294675.png"
                   alt="Pour qui ?"
                   width={1200}
                   height={1600}
@@ -417,7 +417,7 @@ export default async function HomePage() {
             <div className="flex flex-col md:flex-row gap-8 items-start">
               <div className="w-full md:w-2/5 shrink-0 md:sticky md:top-8">
                 <Image
-                  src="/IMG-6482896.jpg"
+                  src="/IMG-6482896.png"
                   alt="Questions fréquentes"
                   width={1200}
                   height={1600}
