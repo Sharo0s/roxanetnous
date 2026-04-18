@@ -262,7 +262,7 @@ export default async function RecherchePage({
       )}
 
       <div className="max-w-6xl mx-auto px-4 py-8 relative z-10">
-        <h2 className="text-2xl font-bold text-gray-900 mb-6">Trouver une accompagnante de vie</h2>
+        <h2 className="text-2xl font-bold text-gray-900 mb-6">Trouver un(e) accompagnant(e) de vie</h2>
 
         <SearchFilters
           currentVille={params.ville || ''}
