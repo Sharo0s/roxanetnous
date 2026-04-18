@@ -31,6 +31,8 @@ const FEEDBACK_LABELS: Record<string, string> = {
 
 const VALIDATION_LABELS: Record<string, string> = {
   en_attente: 'En attente',
+  visio_a_planifier: 'En attente de visio',
+  visio_realisee: 'Visio réalisée',
   valide: 'Validé',
   refuse: 'Refusé',
   a_completer: 'À compléter',
@@ -38,6 +40,8 @@ const VALIDATION_LABELS: Record<string, string> = {
 
 const VALIDATION_STYLES: Record<string, string> = {
   en_attente: 'bg-gray-200 text-gray-700',
+  visio_a_planifier: 'bg-blue-50 text-blue-800 border border-blue-200',
+  visio_realisee: 'bg-amber-50 text-amber-800 border border-amber-200',
   valide: 'bg-accent text-black',
   refuse: 'bg-white text-gray-900 border border-gray-400',
   a_completer: 'bg-gray-100 text-gray-700 border border-gray-300',
@@ -198,7 +202,7 @@ export function UtilisateursClient({
       {/* Filtre statut accompagnantes */}
       {tab === 'accompagnantes' && (
         <div className="flex gap-2 mb-4 flex-wrap">
-          {['tous', 'en_attente', 'valide', 'refuse', 'a_completer'].map((s) => (
+          {['tous', 'en_attente', 'visio_a_planifier', 'visio_realisee', 'valide', 'refuse', 'a_completer'].map((s) => (
             <button
               key={s}
               onClick={() => setStatusFilter(s)}

@@ -67,10 +67,19 @@ export async function updateAccompagnanteProfile(data: {
     updated_at: new Date().toISOString(),
   }
 
-  // Remettre en attente si le profil etait refuse ou a completer
-  if (currentProfile?.validation_status === 'a_completer' || currentProfile?.validation_status === 'refuse') {
+  // Remettre en attente si le profil etait refuse, a completer, ou en cycle visio
+  // (FR11bis : toute modification de dossier apres revue documentaire impose une nouvelle revue)
+  const resetFromStatuses = new Set<string>([
+    'a_completer',
+    'refuse',
+    'visio_a_planifier',
+    'visio_realisee',
+  ])
+  if (currentProfile?.validation_status && resetFromStatuses.has(currentProfile.validation_status)) {
     updateData.validation_status = 'en_attente'
     updateData.refus_motif = null
+    updateData.visio_date = null
+    updateData.visio_notes = null
   }
 
   const { error } = await supabase

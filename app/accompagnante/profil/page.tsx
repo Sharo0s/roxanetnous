@@ -48,6 +48,18 @@ export default async function AccompagnanteProfilPage() {
             Votre profil est en cours de vérification par notre équipe.
           </div>
         )}
+        {profile.validation_status === 'visio_a_planifier' && (
+          <div className="mb-6 p-4 rounded-xl border border-blue-200 bg-blue-50 text-sm">
+            <p className="font-medium text-blue-900">
+              Votre dossier a été revu. Nous vous avons envoyé un email pour convenir d&apos;un créneau visio avec l&apos;équipe.
+            </p>
+          </div>
+        )}
+        {profile.validation_status === 'visio_realisee' && (
+          <div className="mb-6 p-4 rounded-xl border border-amber-200 bg-amber-50 text-sm">
+            <p className="font-medium text-amber-900">Visio réalisée — nous finalisons votre validation.</p>
+          </div>
+        )}
         {profile.validation_status === 'a_completer' && (
           <div className="mb-6 p-4 rounded-xl border border-red-200 bg-red-50 text-sm">
             <p className="font-medium text-red-800">Des informations complémentaires sont demandées.</p>

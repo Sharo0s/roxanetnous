@@ -3,7 +3,14 @@ import { createClient } from '@/lib/supabase/server'
 export async function getUnreadCount(userId: string): Promise<number> {
   const supabase = await createClient({ serviceRole: true })
 
-  // Get conversation IDs where this user participates
+  const { data: userData } = await supabase
+    .from('users')
+    .select('role')
+    .eq('id', userId)
+    .single()
+
+  const role = userData?.role
+
   const { data: auxProfile } = await supabase
     .from('accompagnantes_profiles')
     .select('id')
@@ -16,21 +23,33 @@ export async function getUnreadCount(userId: string): Promise<number> {
     .eq('user_id', userId)
     .single()
 
-  const profileId = auxProfile?.id || benProfile?.id
-  if (!profileId) return 0
+  const conversationIds: string[] = []
 
-  // Get conversations for this user
-  let query = supabase.from('conversations').select('id')
   if (auxProfile) {
-    query = query.eq('accompagnante_id', auxProfile.id)
-  } else {
-    query = query.eq('accompagne_id', benProfile!.id)
+    const { data } = await supabase
+      .from('conversations')
+      .select('id')
+      .eq('accompagnante_id', auxProfile.id)
+    for (const c of data || []) conversationIds.push(c.id)
   }
-  const { data: conversations } = await query
 
-  if (!conversations || conversations.length === 0) return 0
+  if (benProfile) {
+    const { data } = await supabase
+      .from('conversations')
+      .select('id')
+      .eq('accompagne_id', benProfile.id)
+    for (const c of data || []) conversationIds.push(c.id)
+  }
 
-  const conversationIds = conversations.map((c) => c.id)
+  if (role === 'admin') {
+    const { data } = await supabase
+      .from('conversations')
+      .select('id')
+      .eq('admin_id', userId)
+    for (const c of data || []) conversationIds.push(c.id)
+  }
+
+  if (conversationIds.length === 0) return 0
 
   const { count } = await supabase
     .from('messages')

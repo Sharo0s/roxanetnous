@@ -133,6 +133,53 @@ export async function getOrCreateConversationAsAccompagnante(
   return { conversationId: conversation.id }
 }
 
+export async function getOrCreateAdminConversation(
+  accompagnanteProfileId: string
+): Promise<MessageResult> {
+  const supabase = await createClient()
+
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Non connecté.' }
+
+  const { data: userData } = await supabase
+    .from('users')
+    .select('role')
+    .eq('id', user.id)
+    .single()
+
+  if (!userData || userData.role !== 'admin') {
+    return { error: 'Seul un admin peut ouvrir ce type de conversation.' }
+  }
+
+  const { data: existing } = await supabase
+    .from('conversations')
+    .select('id')
+    .eq('accompagnante_id', accompagnanteProfileId)
+    .eq('admin_id', user.id)
+    .is('accompagne_id', null)
+    .maybeSingle()
+
+  if (existing) {
+    return { conversationId: existing.id }
+  }
+
+  const { data: conversation, error } = await supabase
+    .from('conversations')
+    .insert({
+      accompagnante_id: accompagnanteProfileId,
+      accompagne_id: null,
+      admin_id: user.id,
+    })
+    .select('id')
+    .single()
+
+  if (error || !conversation) {
+    return { error: 'Erreur lors de la création de la conversation admin.' }
+  }
+
+  return { conversationId: conversation.id }
+}
+
 export async function sendMessage(
   conversationId: string,
   content: string
@@ -153,6 +200,7 @@ export async function sendMessage(
       id,
       accompagnante_id,
       accompagne_id,
+      admin_id,
       accompagnantes_profiles:accompagnante_id (user_id),
       accompagnes_profiles:accompagne_id (user_id)
     `)
@@ -165,8 +213,13 @@ export async function sendMessage(
 
   const auxProfile = conversation.accompagnantes_profiles as any
   const benProfile = conversation.accompagnes_profiles as any
+  const adminUserId = (conversation as any).admin_id as string | null
 
-  if (auxProfile?.user_id !== user.id && benProfile?.user_id !== user.id) {
+  const isAux = auxProfile?.user_id === user.id
+  const isBen = benProfile?.user_id === user.id
+  const isAdmin = adminUserId === user.id
+
+  if (!isAux && !isBen && !isAdmin) {
     return { error: 'Accès non autorisé à cette conversation.' }
   }
 
@@ -188,11 +241,17 @@ export async function sendMessage(
     .update({ last_message_at: new Date().toISOString() })
     .eq('id', conversationId)
 
-  // Envoyer un email de notification au destinataire (non-bloquant)
-  const recipientUserId = auxProfile?.user_id === user.id
-    ? benProfile?.user_id
-    : auxProfile?.user_id
+  // Determiner le destinataire : l'autre partie de la conversation
+  let recipientUserId: string | null = null
+  if (isAux) {
+    recipientUserId = benProfile?.user_id || adminUserId
+  } else if (isBen) {
+    recipientUserId = auxProfile?.user_id
+  } else if (isAdmin) {
+    recipientUserId = auxProfile?.user_id
+  }
 
+  // Envoyer un email de notification au destinataire (non-bloquant)
   if (recipientUserId) {
     const { data: senderData } = await supabase
       .from('users')

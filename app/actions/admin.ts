@@ -2,9 +2,18 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { sendValidationResultEmail } from '@/lib/emails'
+import { sendValidationResultEmail, sendNewMessageEmail } from '@/lib/emails'
 import { stripe } from '@/lib/stripe'
 import { getSubscriptionStatus } from '@/lib/subscription-helpers'
+
+const VISIO_INVITATION_MESSAGE = `Bonjour,
+
+Votre dossier a été revu. Pour finaliser votre inscription, je souhaite vous rencontrer lors d'un court échange en visio (15-20 minutes).
+
+Pouvez-vous me proposer deux ou trois créneaux qui vous conviennent dans les prochains jours ? Je vous enverrai un lien visio en retour.
+
+À très bientôt,
+L'équipe roxanetnous`
 
 export type ValidationResult = {
   error?: string
@@ -35,6 +44,18 @@ export async function validateAccompagnante(
   // Verifier que le motif est fourni pour refus ou a_completer
   if ((decision === 'refuse' || decision === 'a_completer') && !motif) {
     return { error: 'Le motif est requis pour un refus ou une demande de complément.' }
+  }
+
+  // FR11ter : la validation finale n'est autorisee qu'apres la visio
+  if (decision === 'valide') {
+    const { data: current } = await supabase
+      .from('accompagnantes_profiles')
+      .select('validation_status')
+      .eq('id', profileId)
+      .single()
+    if (current?.validation_status !== 'visio_realisee') {
+      return { error: 'La visio doit être réalisée avant la validation finale.' }
+    }
   }
 
   // Mettre a jour le profil
@@ -96,6 +117,185 @@ export async function validateAccompagnante(
       })
     } catch {}
   })()
+
+  redirect('/admin')
+}
+
+export async function markVisioToPlan(profileId: string): Promise<ValidationResult> {
+  const supabase = await createClient()
+
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Non connecté.' }
+
+  const { data: adminData } = await supabase
+    .from('users')
+    .select('role')
+    .eq('id', user.id)
+    .single()
+
+  if (!adminData || adminData.role !== 'admin') {
+    return { error: 'Accès non autorisé.' }
+  }
+
+  const { data: current } = await supabase
+    .from('accompagnantes_profiles')
+    .select('validation_status, user_id')
+    .eq('id', profileId)
+    .single()
+
+  if (!current) return { error: 'Profil introuvable.' }
+  if (current.validation_status !== 'en_attente') {
+    return { error: 'Transition impossible depuis le statut actuel.' }
+  }
+
+  const { error: updateError } = await supabase
+    .from('accompagnantes_profiles')
+    .update({ validation_status: 'visio_a_planifier' })
+    .eq('id', profileId)
+
+  if (updateError) {
+    return { error: 'Erreur lors de la mise à jour du profil.' }
+  }
+
+  const supabaseAdmin = await createClient({ serviceRole: true })
+
+  await supabaseAdmin.from('admin_actions_log').insert({
+    admin_id: user.id,
+    action_type: 'visio_planifiee',
+    target_type: 'accompagnante',
+    target_id: profileId,
+    details: { planifie_le: new Date().toISOString() },
+  })
+
+  // Creer/recuperer la conversation admin <-> accompagnante et y envoyer le message
+  // de convocation visio (remplace l'email de convocation)
+  void (async () => {
+    try {
+      let { data: conv } = await supabaseAdmin
+        .from('conversations')
+        .select('id')
+        .eq('accompagnante_id', profileId)
+        .eq('admin_id', user.id)
+        .is('accompagne_id', null)
+        .maybeSingle()
+
+      if (!conv) {
+        const { data: newConv } = await supabaseAdmin
+          .from('conversations')
+          .insert({
+            accompagnante_id: profileId,
+            accompagne_id: null,
+            admin_id: user.id,
+          })
+          .select('id')
+          .single()
+        conv = newConv
+      }
+
+      if (!conv) return
+
+      await supabaseAdmin
+        .from('messages')
+        .insert({
+          conversation_id: conv.id,
+          sender_id: user.id,
+          content: VISIO_INVITATION_MESSAGE,
+        })
+
+      await supabaseAdmin
+        .from('conversations')
+        .update({ last_message_at: new Date().toISOString() })
+        .eq('id', conv.id)
+
+      // Notification email de type "nouveau message" au destinataire
+      const { data: auxUser } = await supabaseAdmin
+        .from('users')
+        .select('email, first_name')
+        .eq('id', current.user_id)
+        .single()
+
+      const { data: adminData } = await supabaseAdmin
+        .from('users')
+        .select('first_name')
+        .eq('id', user.id)
+        .single()
+
+      if (auxUser) {
+        await sendNewMessageEmail({
+          email: auxUser.email,
+          recipientFirstName: auxUser.first_name || '',
+          senderFirstName: adminData?.first_name || 'L\'équipe',
+          conversationId: conv.id,
+          userId: current.user_id,
+        })
+      }
+    } catch {}
+  })()
+
+  redirect('/admin')
+}
+
+export async function markVisioRealisee(
+  profileId: string,
+  visioDate: string,
+  notes?: string
+): Promise<ValidationResult> {
+  const supabase = await createClient()
+
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Non connecté.' }
+
+  const { data: adminData } = await supabase
+    .from('users')
+    .select('role')
+    .eq('id', user.id)
+    .single()
+
+  if (!adminData || adminData.role !== 'admin') {
+    return { error: 'Accès non autorisé.' }
+  }
+
+  if (!visioDate) {
+    return { error: 'La date de la visio est requise.' }
+  }
+
+  const { data: current } = await supabase
+    .from('accompagnantes_profiles')
+    .select('validation_status')
+    .eq('id', profileId)
+    .single()
+
+  if (!current) return { error: 'Profil introuvable.' }
+  if (current.validation_status !== 'visio_a_planifier') {
+    return { error: 'Transition impossible depuis le statut actuel.' }
+  }
+
+  const updateData: Record<string, unknown> = {
+    validation_status: 'visio_realisee',
+    visio_date: new Date(visioDate).toISOString(),
+  }
+  if (notes && notes.trim()) {
+    updateData.visio_notes = notes.trim()
+  }
+
+  const { error: updateError } = await supabase
+    .from('accompagnantes_profiles')
+    .update(updateData)
+    .eq('id', profileId)
+
+  if (updateError) {
+    return { error: 'Erreur lors de la mise à jour du profil.' }
+  }
+
+  const supabaseAdmin = await createClient({ serviceRole: true })
+
+  await supabaseAdmin.from('admin_actions_log').insert({
+    admin_id: user.id,
+    action_type: 'visio_realisee',
+    target_type: 'accompagnante',
+    target_id: profileId,
+    details: { visio_date: new Date(visioDate).toISOString(), notes: notes?.trim() || null },
+  })
 
   redirect('/admin')
 }

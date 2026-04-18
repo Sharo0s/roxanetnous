@@ -1,5 +1,7 @@
 const styles: Record<string, string> = {
   en_attente: 'bg-gray-200 text-gray-700',
+  visio_a_planifier: 'bg-blue-50 text-blue-800 border border-blue-200',
+  visio_realisee: 'bg-amber-50 text-amber-800 border border-amber-200',
   valide: 'bg-accent text-black',
   refuse: 'bg-red-50 text-red-800 border border-red-200',
   a_completer: 'bg-red-50 text-red-800 border border-red-200',
@@ -7,6 +9,8 @@ const styles: Record<string, string> = {
 
 const labels: Record<string, string> = {
   en_attente: 'En attente',
+  visio_a_planifier: 'En attente de visio',
+  visio_realisee: 'Visio réalisée',
   valide: 'Validé',
   refuse: 'Refusé',
   a_completer: 'À compléter',

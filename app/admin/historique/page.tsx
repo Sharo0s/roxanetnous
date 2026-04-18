@@ -16,6 +16,8 @@ export default async function AdminHistoriquePage() {
     valide: 'Validation profil',
     refuse: 'Refus profil',
     a_completer: 'Demande complément',
+    visio_planifiee: 'Visio planifiée',
+    visio_realisee: 'Visio réalisée',
     consultation_justificatif: 'Consultation justificatif',
     signalement_averti: 'Avertissement',
     signalement_suspendu: 'Suspension',

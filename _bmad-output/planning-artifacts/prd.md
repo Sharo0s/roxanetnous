@@ -209,7 +209,7 @@ classification:
 **Scène d'ouverture :** Sylvain lance roxanetnous. Il est seul à gérer la plateforme. Chaque matin, il ouvre le dashboard admin.
 
 **Action montante :**
-- **Validation :** Notification "3 nouvelles demandes de validation". Il ouvre la queue. Pour chaque auxiliaire : profil structuré + justificatifs + résultat OCR pré-validation. L'OCR a détecté "Diplôme d'État aide-soignante" sur le document de Sophie — cohérence avec le diplôme déclaré. Il vérifie la pièce d'identité, tout est conforme. Il clique "Valider". L'action est tracée dans le log admin.
+- **Validation :** Notification "3 nouvelles demandes de validation". Il ouvre la queue. Pour chaque auxiliaire : profil structuré + justificatifs + résultat OCR pré-validation. L'OCR a détecté "Diplôme d'État aide-soignante" sur le document de Sophie — cohérence avec le diplôme déclaré. Il vérifie la pièce d'identité, tout est conforme. Il clique "Passer en attente de visio". Sophie reçoit un email de convocation. Deux jours plus tard, Sylvain la rencontre en visio, échange 20 minutes, rentre ses notes ("Parcours cohérent, discours clair, disponible dès la semaine prochaine"), puis clique "Valider". Chaque étape est tracée dans le log admin.
 - Pour un autre profil, l'OCR n'a rien détecté (document illisible). Il clique "À compléter" avec le motif : "Diplôme illisible, merci de re-scanner en meilleure qualité."
 - **Modération :** 1 signalement en attente. Un bénéficiaire a signalé un message inapproprié. Sylvain consulte la conversation, constate le problème, suspend le compte avec avertissement.
 - **Métriques :** Il consulte le dashboard : 12 utilisateurs actifs, 3 auxiliaires vérifiés, 9 bénéficiaires. MRR : 60€. Délai moyen de validation : 31h. Taux de validation : 85%.
@@ -282,7 +282,9 @@ classification:
 - **FR9 :** Le système pré-analyse les justificatifs via OCR et vérifie la cohérence avec le profil déclaré
 - **FR10 :** Un admin peut consulter la queue de validation avec les résultats OCR
 - **FR11 :** Un admin peut valider, refuser ou demander des compléments pour un profil auxiliaire
-- **FR11bis :** Un admin rencontre physiquement chaque auxiliaire avant la validation définitive du profil (rencontre consignée dans le log admin)
+- **FR11bis :** Un admin réalise une visioconférence avec chaque auxiliaire avant la validation définitive du profil. La visio est consignée dans le log admin avec date, heure et notes optionnelles.
+- **FR11ter :** L'interface admin matérialise deux statuts intermédiaires — `visio_a_planifier` (après revue documentaire) et `visio_realisee` (après tenue de la visio). Le bouton « Valider » n'est actif que si le statut courant est `visio_realisee`.
+- **FR11quater :** L'auxiliaire reçoit un email de convocation visio lorsque son profil passe au statut `visio_a_planifier`.
 - **FR12 :** Une auxiliaire non vérifiée ne peut pas publier d'annonce ni accéder aux fonctionnalités payantes
 
 ### Abonnements & Paiement

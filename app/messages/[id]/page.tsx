@@ -33,6 +33,7 @@ export default async function ConversationPage({
       id,
       accompagnante_id,
       accompagne_id,
+      admin_id,
       accompagnantes_profiles:accompagnante_id (
         user_id,
         users:user_id (first_name, last_name)
@@ -40,7 +41,8 @@ export default async function ConversationPage({
       accompagnes_profiles:accompagne_id (
         user_id,
         users:user_id (first_name, last_name)
-      )
+      ),
+      admin:admin_id (first_name, last_name)
     `)
     .eq('id', id)
     .single()
@@ -50,18 +52,32 @@ export default async function ConversationPage({
   // Verifier que l'utilisateur fait partie de la conversation
   const auxProfile = conversation.accompagnantes_profiles as any
   const benProfile = conversation.accompagnes_profiles as any
+  const adminUserId = (conversation as any).admin_id as string | null
+  const isAdminConv = !!adminUserId
 
-  if (auxProfile?.user_id !== user.id && benProfile?.user_id !== user.id) {
+  const isAux = auxProfile?.user_id === user.id
+  const isBen = benProfile?.user_id === user.id
+  const isAdminParticipant = adminUserId === user.id
+
+  if (!isAux && !isBen && !isAdminParticipant) {
     redirect('/messages')
   }
 
-  const otherUser = auxProfile?.user_id === user.id
-    ? benProfile?.users
-    : auxProfile?.users
+  // Determiner l'interlocuteur a afficher
+  let otherUser: { first_name?: string; last_name?: string } | null = null
+  if (isAux) {
+    otherUser = isAdminConv
+      ? { first_name: 'Équipe', last_name: 'roxanetnous' }
+      : (benProfile?.users || null)
+  } else if (isBen) {
+    otherUser = auxProfile?.users || null
+  } else if (isAdminParticipant) {
+    otherUser = auxProfile?.users || null
+  }
 
-  // Recuperer le lien profil de l'interlocuteur (si accompagnante)
+  // Recuperer le lien profil de l'interlocuteur (si accompagnante) - jamais pour conv admin
   let otherProfileUrl: string | null = null
-  if (userData.role === 'accompagne' && conversation.accompagnante_id) {
+  if (!isAdminConv && userData.role === 'accompagne' && conversation.accompagnante_id) {
     const { data: auxAnnonce } = await supabase
       .from('annonces_accompagnantes')
       .select('id')
@@ -114,7 +130,14 @@ export default async function ConversationPage({
             </svg>
             Messages
           </Link>
-          {otherProfileUrl ? (
+          {isAdminConv ? (
+            <span className="inline-flex items-center gap-3 px-4 h-[52px] bg-black text-white rounded-xl text-base font-medium">
+              <span className="w-9 h-9 rounded-full bg-accent flex items-center justify-center text-xs font-bold text-black">
+                RN
+              </span>
+              Équipe roxanetnous
+            </span>
+          ) : otherProfileUrl ? (
             <Link href={otherProfileUrl} className="inline-flex items-center gap-3 px-4 h-[52px] bg-black text-white rounded-xl text-base font-medium hover:bg-gray-800 transition">
               <span className="w-9 h-9 rounded-full bg-gray-600 flex items-center justify-center text-sm font-bold text-white">
                 {otherUser?.first_name?.[0]}{otherUser?.last_name?.[0]}
@@ -136,7 +159,11 @@ export default async function ConversationPage({
         conversationId={id}
         currentUserId={user.id}
         initialMessages={messages || []}
-        otherUserName={`${otherUser?.first_name || ''} ${otherUser?.last_name || ''}`}
+        otherUserName={
+          isAdminConv && isAux
+            ? 'Équipe roxanetnous'
+            : `${otherUser?.first_name || ''} ${otherUser?.last_name || ''}`
+        }
       />
     </main>
   )

@@ -56,7 +56,7 @@ export default async function AdminDashboard() {
       user_id,
       users:user_id (first_name, last_name, email)
     `)
-    .eq('validation_status', 'en_attente')
+    .in('validation_status', ['en_attente', 'visio_a_planifier', 'visio_realisee'])
     .order('created_at', { ascending: true })
 
   const { count: signalementsCount } = await supabaseAdmin
@@ -90,14 +90,24 @@ export default async function AdminDashboard() {
       {/* Queue de validation - compact quand vide */}
       {!pending || pending.length === 0 ? (
         <div className="bg-white rounded-lg border px-4 py-3 text-sm text-gray-500 mb-6">
-          Aucune accompagnante en attente de validation.
+          Aucune accompagnante en cours de validation.
         </div>
       ) : (
         <>
-          <h3 className="text-lg font-semibold mb-4">Accompagnantes en attente de validation</h3>
+          <h3 className="text-lg font-semibold mb-4">Accompagnantes en cours de validation</h3>
           <div className="space-y-3 mb-8">
             {pending.map((profile: any) => {
               const u = profile.users as any
+              const statusLabels: Record<string, string> = {
+                en_attente: 'En attente',
+                visio_a_planifier: 'En attente de visio',
+                visio_realisee: 'Visio réalisée',
+              }
+              const statusStyles: Record<string, string> = {
+                en_attente: 'bg-gray-200 text-gray-700',
+                visio_a_planifier: 'bg-blue-50 text-blue-800 border border-blue-200',
+                visio_realisee: 'bg-amber-50 text-amber-800 border border-amber-200',
+              }
               return (
                 <Link
                   key={profile.id}
@@ -106,9 +116,14 @@ export default async function AdminDashboard() {
                 >
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="font-medium text-gray-900">
-                        {u?.first_name} {u?.last_name}
-                      </p>
+                      <div className="flex items-center gap-2">
+                        <p className="font-medium text-gray-900">
+                          {u?.first_name} {u?.last_name}
+                        </p>
+                        <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${statusStyles[profile.validation_status] || 'bg-gray-100 text-gray-600'}`}>
+                          {statusLabels[profile.validation_status] || profile.validation_status}
+                        </span>
+                      </div>
                       <p className="text-sm text-gray-500 mt-0.5">
                         {u?.email}
                       </p>

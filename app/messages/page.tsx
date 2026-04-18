@@ -40,7 +40,7 @@ export default async function MessagesPage() {
 
   if (!profileId) redirect(userData.role === 'accompagnante' ? '/accompagnante/dashboard' : '/accompagne/dashboard')
 
-  // Recuperer les conversations
+  // Recuperer les conversations (inclut les conversations admin cote accompagnante)
   const profileField = userData.role === 'accompagnante' ? 'accompagnante_id' : 'accompagne_id'
 
   const { data: conversations } = await supabase
@@ -50,6 +50,7 @@ export default async function MessagesPage() {
       last_message_at,
       accompagnante_id,
       accompagne_id,
+      admin_id,
       accompagnantes_profiles:accompagnante_id (
         user_id,
         users:user_id (first_name, last_name)
@@ -57,7 +58,8 @@ export default async function MessagesPage() {
       accompagnes_profiles:accompagne_id (
         user_id,
         users:user_id (first_name, last_name)
-      )
+      ),
+      admin:admin_id (first_name, last_name)
     `)
     .eq(profileField, profileId)
     .order('last_message_at', { ascending: false })
@@ -114,10 +116,28 @@ export default async function MessagesPage() {
         ) : (
           <div className="space-y-2">
             {conversations.map((conv: any) => {
-              const otherUser = userData.role === 'accompagnante'
-                ? (conv.accompagnes_profiles as any)?.users
-                : (conv.accompagnantes_profiles as any)?.users
+              const isAdminConv = !!conv.admin_id
               const unread = unreadCounts[conv.id] || 0
+
+              let displayName: string
+              let initials: string
+              let isTeam = false
+
+              if (isAdminConv) {
+                // Cote accompagnante : l'interlocuteur est l'equipe
+                // Cote admin (theoriquement non atteint ici car admin utilise /admin/messages)
+                isTeam = true
+                displayName = 'Équipe roxanetnous'
+                initials = 'RN'
+              } else if (userData.role === 'accompagnante') {
+                const u = (conv.accompagnes_profiles as any)?.users
+                displayName = `${u?.first_name || ''} ${u?.last_name || ''}`.trim() || 'Accompagné'
+                initials = `${u?.first_name?.[0] || ''}${u?.last_name?.[0] || ''}`
+              } else {
+                const u = (conv.accompagnantes_profiles as any)?.users
+                displayName = `${u?.first_name || ''} ${u?.last_name || ''}`.trim() || 'Accompagnante'
+                initials = `${u?.first_name?.[0] || ''}${u?.last_name?.[0] || ''}`
+              }
 
               return (
                 <Link
@@ -126,13 +146,11 @@ export default async function MessagesPage() {
                   className="flex items-center justify-between bg-white rounded-xl border p-4 hover:border-accent transition"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-sm font-bold text-gray-600">
-                      {otherUser?.first_name?.[0]}{otherUser?.last_name?.[0]}
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold ${isTeam ? 'bg-black text-white' : 'bg-gray-200 text-gray-600'}`}>
+                      {initials}
                     </div>
                     <div>
-                      <p className="font-medium text-gray-900">
-                        {otherUser?.first_name} {otherUser?.last_name}
-                      </p>
+                      <p className="font-medium text-gray-900">{displayName}</p>
                       <p className="text-xs text-gray-400">
                         {conv.last_message_at
                           ? new Date(conv.last_message_at).toLocaleDateString('fr-FR', {

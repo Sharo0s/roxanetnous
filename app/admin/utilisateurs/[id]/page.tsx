@@ -177,10 +177,41 @@ export default async function AdminUtilisateurDetailPage({
         </div>
       </div>
 
-      {/* Actions de validation (accompagnante en attente) */}
-      {auxProfile?.validation_status === 'en_attente' && (
+      {/* Actions de validation (accompagnante en cycle de validation) */}
+      {auxProfile && (
+        auxProfile.validation_status === 'en_attente' ||
+        auxProfile.validation_status === 'visio_a_planifier' ||
+        auxProfile.validation_status === 'visio_realisee'
+      ) && (
         <div className="mb-8">
-          <ValidationActions profileId={auxProfile.id} />
+          <ValidationActions profileId={auxProfile.id} status={auxProfile.validation_status} />
+        </div>
+      )}
+
+      {/* Bloc visio realisee */}
+      {auxProfile?.visio_date && (
+        <div className="mb-8 bg-white rounded-xl border p-5">
+          <h3 className="font-semibold mb-3">Visio de validation</h3>
+          <dl className="space-y-2 text-sm">
+            <div className="flex gap-2">
+              <dt className="text-gray-500">Réalisée le :</dt>
+              <dd className="font-medium">
+                {new Date(auxProfile.visio_date).toLocaleString('fr-FR', {
+                  day: 'numeric',
+                  month: 'long',
+                  year: 'numeric',
+                  hour: '2-digit',
+                  minute: '2-digit',
+                })}
+              </dd>
+            </div>
+            {auxProfile.visio_notes && (
+              <div>
+                <dt className="text-gray-500 mb-1">Notes :</dt>
+                <dd className="text-gray-700 whitespace-pre-wrap">{auxProfile.visio_notes}</dd>
+              </div>
+            )}
+          </dl>
         </div>
       )}
 
@@ -478,6 +509,8 @@ export default async function AdminUtilisateurDetailPage({
 function StatusBadge({ status }: { status: string }) {
   const styles: Record<string, string> = {
     en_attente: 'bg-gray-200 text-gray-700',
+    visio_a_planifier: 'bg-blue-50 text-blue-800 border border-blue-200',
+    visio_realisee: 'bg-amber-50 text-amber-800 border border-amber-200',
     valide: 'bg-accent text-black',
     refuse: 'bg-white text-gray-900 border border-gray-400',
     a_completer: 'bg-gray-100 text-gray-700 border border-gray-300',
@@ -485,6 +518,8 @@ function StatusBadge({ status }: { status: string }) {
 
   const labels: Record<string, string> = {
     en_attente: 'En attente',
+    visio_a_planifier: 'En attente de visio',
+    visio_realisee: 'Visio réalisée',
     valide: 'Validé',
     refuse: 'Refusé',
     a_completer: 'À compléter',

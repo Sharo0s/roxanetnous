@@ -119,7 +119,7 @@ source: product-brief-roxanetnous-2026-02-09.md
 ```sql
 -- ENUM Types
 CREATE TYPE user_role AS ENUM ('auxiliaire', 'beneficiaire', 'admin');
-CREATE TYPE validation_status AS ENUM ('en_attente', 'valide', 'refuse', 'a_completer');
+CREATE TYPE validation_status AS ENUM ('en_attente', 'visio_a_planifier', 'visio_realisee', 'valide', 'refuse', 'a_completer');
 CREATE TYPE annonce_status AS ENUM ('brouillon', 'publiee', 'archivee', 'suspendue');
 CREATE TYPE subscription_status AS ENUM ('active', 'cancelled', 'past_due', 'trialing');
 CREATE TYPE aide_sociale_type AS ENUM ('aucune', 'pch', 'apa');
@@ -177,6 +177,8 @@ CREATE TABLE public.auxiliaires_profiles (
   validation_date TIMESTAMPTZ,
   validated_by UUID REFERENCES public.users(id),
   refus_motif TEXT,
+  visio_date TIMESTAMPTZ NULL,         -- FR11bis : date de la visio de validation
+  visio_notes TEXT NULL,               -- FR11bis : notes libres après la visio
 
   -- Justificatifs (URLs Supabase Storage)
   justificatif_identite_url TEXT,
@@ -504,7 +506,7 @@ CREATE TABLE public.admin_actions_log (
   admin_id UUID REFERENCES public.users(id) ON DELETE SET NULL,
 
   -- Action
-  action_type TEXT NOT NULL, -- 'validation', 'refus', 'suspension', 'consultation_justificatif', etc.
+  action_type TEXT NOT NULL, -- 'validation', 'refus', 'suspension', 'consultation_justificatif', 'visio_planifiee', 'visio_realisee', etc.
   target_type TEXT NOT NULL, -- 'auxiliaire', 'annonce', 'user', etc.
   target_id UUID NOT NULL,
 
@@ -1230,17 +1232,40 @@ export async function publishAnnonceAuxiliaire(annonceId: string) {
                               │
                               ▼
 ┌─────────────────────────────────────────────────────────────┐
-│ 4. VALIDATION ADMIN (≤ 48h objectif)                       │
+│ 4. VALIDATION ADMIN — FLUX À 3 STATUTS (FR11bis / ter / quater)│
 │                                                             │
-│ Admin consulte :                                            │
-│ - Profil complet                                            │
-│ - Justificatifs (identité + diplôme)                        │
-│ - Cohérence diplôme déclaré vs justificatif                 │
+│ Étape 4a : REVUE DOCUMENTAIRE (statut en_attente)           │
+│ Admin consulte profil + justificatifs + OCR.                │
+│ Décision intermédiaire :                                    │
+│ ┌──────────────────────┬─────────────┬────────────┐         │
+│ │ Passer en attente    │ REFUSE      │ A COMPLETER│         │
+│ │ de visio             │             │            │         │
+│ └──────────────────────┴─────────────┴────────────┘         │
 │                                                             │
-│ Décision :                                                  │
-│ ┌──────────┬──────────────┬────────────┐                   │
-│ │ VALIDE   │ REFUSE       │ A COMPLETER│                   │
-│ └──────────┴──────────────┴────────────┘                   │
+│   │ (passer en attente de visio)                            │
+│   ▼                                                         │
+│ Statut : visio_a_planifier                                  │
+│   → Email convocation visio envoyé (FR11quater)             │
+│   → Log admin : action_type = 'visio_planifiee'             │
+│                                                             │
+│ Étape 4b : TENUE DE LA VISIO (canal externe)                │
+│ Admin rencontre l'auxiliaire en visio, puis saisit :        │
+│ - visio_date (TIMESTAMPTZ)                                  │
+│ - visio_notes (TEXT, optionnel)                             │
+│                                                             │
+│   │ (marquer visio réalisée)                                │
+│   ▼                                                         │
+│ Statut : visio_realisee                                     │
+│   → Log admin : action_type = 'visio_realisee'              │
+│                                                             │
+│ Étape 4c : VALIDATION FINALE (statut visio_realisee)        │
+│ Bouton « Valider » actif UNIQUEMENT à ce stade (FR11ter).   │
+│ ┌──────────┬──────────────┬────────────┐                    │
+│ │ VALIDE   │ REFUSE       │ A COMPLETER│                    │
+│ └──────────┴──────────────┴────────────┘                    │
+│                                                             │
+│ Branches latérales (accessibles depuis tout statut) :       │
+│ REFUSE et A COMPLETER.                                      │
 └─────────────────────────────────────────────────────────────┘
                               │
                 ┌─────────────┼─────────────┐
