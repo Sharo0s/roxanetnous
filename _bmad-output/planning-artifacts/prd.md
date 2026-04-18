@@ -282,6 +282,7 @@ classification:
 - **FR9 :** Le système pré-analyse les justificatifs via OCR et vérifie la cohérence avec le profil déclaré
 - **FR10 :** Un admin peut consulter la queue de validation avec les résultats OCR
 - **FR11 :** Un admin peut valider, refuser ou demander des compléments pour un profil auxiliaire
+- **FR11bis :** Un admin rencontre physiquement chaque auxiliaire avant la validation définitive du profil (rencontre consignée dans le log admin)
 - **FR12 :** Une auxiliaire non vérifiée ne peut pas publier d'annonce ni accéder aux fonctionnalités payantes
 
 ### Abonnements & Paiement
