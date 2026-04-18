@@ -226,10 +226,9 @@ components/messages/
 **Objectif :** Compléter les fonctionnalités
 
 **À implémenter :**
-1. Système d'avis/notes
-2. Génération PDF contrats
-3. Jobs CRON (badges, digest hebdomadaire)
-4. Dashboard stats
+1. Génération PDF contrats
+2. Jobs CRON (badges, digest hebdomadaire)
+3. Dashboard stats
 
 ---
 

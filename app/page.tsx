@@ -2,7 +2,6 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { Footer } from '@/components/footer'
 import { ContactForm } from '@/components/contact-form'
-import { AvisMarquee } from '@/components/landing/avis-marquee'
 import { HeroCarte } from '@/components/landing/hero-carte'
 import { AnimatedCounter } from '@/components/landing/animated-counter'
 import { Reveal } from '@/components/landing/reveal'
@@ -37,42 +36,6 @@ export default async function HomePage() {
   }
   const villesUniques = villesMap
   const villesCoords = Array.from(villesMap.values())
-
-  const { data: avisData } = await supabase
-    .from('avis')
-    .select('note, commentaire, auteur_id')
-    .eq('masque', false)
-    .eq('signale', false)
-    .gte('note', 4)
-    .order('created_at', { ascending: false })
-    .limit(20)
-
-  let avisWithNames: {
-    note: number
-    commentaire: string
-    auteur_prenom: string
-    auteur_nom: string
-  }[] = []
-  if (avisData && avisData.length > 0) {
-    const auteurIds = [...new Set(avisData.map((a) => a.auteur_id))]
-    const { data: auteursData } = await supabase
-      .from('users')
-      .select('id, first_name, last_name')
-      .in('id', auteurIds)
-
-    const auteursMap = new Map((auteursData || []).map((u) => [u.id, u]))
-    avisWithNames = avisData
-      .filter((a) => a.commentaire)
-      .map((a) => {
-        const auteur = auteursMap.get(a.auteur_id)
-        return {
-          note: a.note,
-          commentaire: a.commentaire!,
-          auteur_prenom: auteur?.first_name || 'Utilisateur',
-          auteur_nom: auteur?.last_name || '',
-        }
-      })
-  }
 
   const launchOfferEnd = process.env.LAUNCH_OFFER_END
   const launchOfferActive = launchOfferEnd
@@ -310,22 +273,6 @@ export default async function HomePage() {
           </svg>
         </section>
 
-        {/* ===== AVIS (masque) =====
-        {avisWithNames.length > 0 && (
-          <section className="px-4 py-16 bg-white">
-            <div className="max-w-4xl mx-auto mb-8">
-              <h2 className="text-2xl font-bold text-center text-black mb-2">
-                Ce qu'en disent nos utilisateurs
-              </h2>
-              <p className="text-center text-sm text-black">
-                Avis vérifiés laissés sur la plateforme
-              </p>
-            </div>
-            <AvisMarquee avis={avisWithNames} />
-          </section>
-        )}
-        */}
-
         {/* ===== POUR QUI ===== */}
         <section className="px-4 py-16 bg-white">
           <div className="max-w-6xl mx-auto">
@@ -365,7 +312,7 @@ export default async function HomePage() {
               <Reveal delay={100} className="border-2 border-accent rounded-xl p-8">
                 <h3 className="font-bold text-2xl text-black mb-6">Accompagné(e)s et proches</h3>
                 <ul className="space-y-4 text-base text-black">
-                  {['Tous les profils vérifiés manuellement', 'Recherche par spécialité, localisation, expérience', 'Les profils que nous vous recommandons', 'Avis vérifiés pour vous guider'].map((text) => (
+                  {['Tous les profils vérifiés manuellement', 'Recherche par spécialité, localisation, expérience', 'Les profils que nous vous recommandons', 'Chaque auxiliaire rencontrée et validée'].map((text) => (
                     <li key={text} className="flex gap-3">
                       <span className="shrink-0 w-5 h-5 rounded-full flex items-center justify-center bg-accent">
                         <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="black" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>

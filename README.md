@@ -133,7 +133,6 @@ roxanetnous/
 - `favoris` - Favoris (polymorphique)
 - `conversations` - Conversations
 - `messages` - Messages
-- `avis` - Avis/Notes
 - `contrats` - Contrats générés
 - `signalements` - Signalements
 - `notifications_log` - Log notifications email

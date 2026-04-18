@@ -36,6 +36,6 @@ Marketplace de confiance pour l'aide à domicile. Mise en relation directe entre
 
 ### Opportunités UX
 
-1. **Preuves sociales dynamiques** — Compteur "X auxiliaires vérifiés", badges visibles, avis → confiance visuelle dès la landing page.
+1. **Preuves sociales dynamiques** — Compteur "X auxiliaires vérifiés", badges visibles, témoignages éditoriaux (non publiés par les utilisateurs) → confiance visuelle dès la landing page, sans exposition au risque juridique des avis utilisateur.
 2. **Boutons d'orientation** — "Je suis aidant" / "Je recherche un aidant" → parcours personnalisé dès la première seconde.
 3. **Interface sobre et rassurante** — Couleurs chaudes, typographie lisible, espacement généreux. Design mature adapté au secteur aide à domicile.

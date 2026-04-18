@@ -27,7 +27,7 @@ export default function PolitiqueConfidentialitePage() {
               <li>Données d&apos;identification : nom, prénom, adresse email, téléphone</li>
               <li>Données de profil : ville, code postal, adresse, spécialités, diplômes, expérience</li>
               <li>Documents justificatifs : pièce d&apos;identité, diplôme (pour les accompagnantes)</li>
-              <li>Données d&apos;utilisation : annonces, messages, avis, favoris</li>
+              <li>Données d&apos;utilisation : annonces, messages, favoris</li>
               <li>Données de paiement : gérées par Stripe (nous ne stockons pas les numéros de carte)</li>
             </ul>
           </section>

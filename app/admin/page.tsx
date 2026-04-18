@@ -196,7 +196,7 @@ export default async function AdminDashboard() {
 
               {/* Activite du mois en cours */}
               {moisEnCours && (
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-2 gap-4">
                   <div className="bg-white rounded-xl border p-5">
                     <p className="text-sm text-gray-500">Messages envoyés ce mois</p>
                     <p className="text-3xl font-bold mt-1">{moisEnCours.messages}</p>
@@ -204,10 +204,6 @@ export default async function AdminDashboard() {
                   <div className="bg-white rounded-xl border p-5">
                     <p className="text-sm text-gray-500">Nouvelles conversations ce mois</p>
                     <p className="text-3xl font-bold mt-1">{moisEnCours.conversations}</p>
-                  </div>
-                  <div className="bg-white rounded-xl border p-5">
-                    <p className="text-sm text-gray-500">Avis déposés ce mois</p>
-                    <p className="text-3xl font-bold mt-1">{moisEnCours.avis}</p>
                   </div>
                 </div>
               )}

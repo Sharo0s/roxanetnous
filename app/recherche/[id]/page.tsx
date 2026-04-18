@@ -4,7 +4,6 @@ import Link from 'next/link'
 import { SPECIALITES, DIPLOMES, EXPERIENCE_LEVELS, JOURS_SEMAINE, CRENEAUX } from '@/lib/constants'
 import { ContactButton } from '@/components/messages/contact-button'
 import { FavoriButton } from '@/components/recherche/favori-button'
-import { AvisSection } from '@/components/recherche/avis-section'
 import { SignalementButton } from '@/components/signalement-button'
 import { getBadges } from '@/lib/badges'
 import { BadgesDisplay } from '@/components/badges-display'
@@ -76,31 +75,6 @@ export default async function AnnonceDetailPage({
     isFavori = !!favori
   }
 
-  // Recuperer les avis pour cette accompagnante
-  const { data: avisList } = await supabase
-    .from('avis')
-    .select(`
-      id, note, commentaire, created_at,
-      users:auteur_id (first_name, last_name)
-    `)
-    .eq('cible_id', auxUserId)
-    .eq('masque', false)
-    .order('created_at', { ascending: false })
-
-  const avisFormatted = (avisList || []).map((a: any) => ({
-    id: a.id,
-    note: a.note,
-    commentaire: a.commentaire,
-    created_at: a.created_at,
-    auteur: a.users,
-  }))
-
-  const moyenneNote = avisFormatted.length > 0
-    ? avisFormatted.reduce((sum: number, a: any) => sum + a.note, 0) / avisFormatted.length
-    : null
-
-  const canLeaveAvis = !!user && userData?.role === 'accompagne' && auxUserId !== user.id
-
   // Fetch des badges
   const badgesMap = auxUserId ? await getBadges([auxUserId]) : {}
 
@@ -160,7 +134,6 @@ export default async function AnnonceDetailPage({
               </div>
               <p className="text-black">
                 {diplomeLabel} — Expérience : {expLabel}
-                {moyenneNote !== null && ` — ${moyenneNote.toFixed(1)}/5 (${avisFormatted.length} avis)`}
               </p>
             </div>
           </div>
@@ -236,12 +209,6 @@ export default async function AnnonceDetailPage({
                 </div>
               </div>
             )}
-            <AvisSection
-              cibleUserId={auxUserId}
-              avisList={avisFormatted}
-              moyenneNote={moyenneNote}
-              canLeaveAvis={canLeaveAvis}
-            />
           </div>
 
           <div className="space-y-6">

@@ -23,7 +23,6 @@
 - [ ] S'assurer que toutes les variables d'environnement Vercel sont a jour
 
 ## Nettoyage BDD
-- [ ] Supprimer tous les avis
 - [ ] Supprimer tous les comptes utilisateurs sauf l'admin
 
 ## Contenu

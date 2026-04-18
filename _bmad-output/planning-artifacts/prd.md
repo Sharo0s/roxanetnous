@@ -96,7 +96,7 @@ classification:
 
 **Parcours utilisateurs supportés :** Les 4 parcours complets (Sophie, Marie, Jean, Sylvain).
 
-### MVP — 16 Fonctionnalités (Phase 1)
+### MVP — 15 Fonctionnalités (Phase 1)
 
 1. Authentification multi-rôles (auxiliaire / bénéficiaire / admin)
 2. Vérification manuelle obligatoire des auxiliaires (justificatifs + OCR pré-validation)
@@ -108,12 +108,11 @@ classification:
 8. Recherche avancée avec filtres multiples + favoris
 9. Messagerie temps réel (WebSocket via Supabase Realtime)
 10. Notifications email intelligentes (matching, validation, messages)
-11. Avis & évaluations mutuels
-12. Dashboards (auxiliaire, bénéficiaire, admin avec métriques)
-13. Landing page avec preuves sociales, FAQ, formulaire de contact
-14. Modération & signalements
-15. Conformité RGPD (suppression compte, export données, consentements)
-16. Couverture : toutes les villes de France
+11. Dashboards (auxiliaire, bénéficiaire, admin avec métriques)
+12. Landing page avec preuves sociales, FAQ, formulaire de contact
+13. Modération & signalements
+14. Conformité RGPD (suppression compte, export données, consentements)
+15. Couverture : toutes les villes de France
 
 ### Post-MVP (Phase 2 — Growth)
 
@@ -216,7 +215,7 @@ classification:
 - **Métriques :** Il consulte le dashboard : 12 utilisateurs actifs, 3 auxiliaires vérifiés, 9 bénéficiaires. MRR : 60€. Délai moyen de validation : 31h. Taux de validation : 85%.
 
 **Climax :**
-- Sylvain voit la première collaboration démarrée via la plateforme. Les deux parties ont laissé un avis positif.
+- Sylvain voit la première collaboration démarrée via la plateforme. Il reçoit un email de remerciement spontané du bénéficiaire et de l'auxiliaire — signal positif direct.
 
 **Résolution :**
 - La plateforme fonctionne. Les validations sont faites en moins de 48h. Les métriques progressent. Sylvain peut se concentrer sur l'acquisition.
@@ -316,12 +315,6 @@ classification:
 - **FR27 :** Deux utilisateurs abonnés peuvent échanger des messages en temps réel
 - **FR28 :** Un utilisateur reçoit une notification email lorsqu'il reçoit un nouveau message
 - **FR29 :** Un utilisateur peut consulter l'historique de ses conversations
-
-### Avis & Évaluations
-
-- **FR30 :** Un bénéficiaire peut laisser un avis sur une auxiliaire
-- **FR31 :** Une auxiliaire peut laisser un avis sur un bénéficiaire
-- **FR32 :** Les avis sont visibles sur le profil de l'utilisateur évalué
 
 ### Modération & Signalements
 

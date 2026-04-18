@@ -690,7 +690,7 @@ Le marché de l'aide à domicile souffre d'un **problème de confiance et d'acce
   - **4️⃣ Affichage tarifs** avec mention badges de modulation
 - **Tri des résultats** :
   - Par défaut : Annonces actives → puis profils sans annonce
-  - Options : Tarif croissant/décroissant, Ancienneté, Note moyenne (si avis)
+  - Options : Tarif croissant/décroissant, Ancienneté
 - Accès uniquement avec abonnement actif
 
 ---
@@ -829,16 +829,6 @@ Le marché de l'aide à domicile souffre d'un **problème de confiance et d'acce
 
 ---
 
-#### **⭐ Avis & Évaluations**
-- Système de reviews après mission/collaboration
-- Auxiliaires et bénéficiaires peuvent laisser des avis mutuels
-- Note (sur 5 étoiles) + commentaire texte
-- Affichage sur profils avec moyenne
-- Modération possible (signalements d'avis abusifs)
-- Avis visibles uniquement si collaboration confirmée
-
----
-
 #### **📄 Contrats Générés Automatiquement**
 - Génération automatique de contrat lors du démarrage d'une collaboration
 - Template personnalisable avec informations :
@@ -868,7 +858,6 @@ Le marché de l'aide à domicile souffre d'un **problème de confiance et d'acce
   - Vues du profil
   - Nombre de fois mis en favoris
   - Contacts reçus
-  - Avis et note moyenne
   - Taux de réponse
 - **Abonnement** : lien vers Customer Portal Stripe
 
@@ -886,7 +875,6 @@ Le marché de l'aide à domicile souffre d'un **problème de confiance et d'acce
 - **Favoris** : profils sauvegardés
 - **Annonces de recherche** : publication et gestion
 - **Messagerie temps réel** : conversations avec auxiliaires
-- **Avis** : avis laissés et reçus
 - **Historique** : collaborations passées avec contrats
 
 **Dashboard Admin :**
@@ -899,7 +887,6 @@ Le marché de l'aide à domicile souffre d'un **problème de confiance et d'acce
 - **Modération** :
   - Annonces signalées (queue priorisée)
   - Utilisateurs signalés
-  - Avis signalés
   - Gestion signalements avec actions : suspendre, avertir, ignorer, supprimer
   - Objectif : 100% traités < 72h
 - **Gestion utilisateurs** :
@@ -937,14 +924,13 @@ Le marché de l'aide à domicile souffre d'un **problème de confiance et d'acce
   - "X auxiliaires vérifiés dans votre zone" (basé sur géolocalisation visiteur)
   - "Y villes/départements couverts"
   - Répartition par diplômes (ex: "Z diplômés d'État aide-soignante")
-  - Avis réels/vérifiés avec notes moyennes
 
 - **Sections** :
   - **Hero** : proposition de valeur claire + CTA
   - **Prestations/avantages** : pour auxiliaires et bénéficiaires
   - **Processus de vérification** : transparence sur la validation manuelle (point différenciant)
   - **Offres d'abonnement** : lancement + standard, tarifs clairs
-  - **Témoignages** : avis réels d'auxiliaires et bénéficiaires
+  - **Témoignages** : témoignages éditoriaux d'auxiliaires et bénéficiaires (contrôlés par l'éditeur)
   - **FAQ** : réponses questions fréquentes
   - **Contact** : formulaire de contact
 
@@ -959,7 +945,6 @@ Le marché de l'aide à domicile souffre d'un **problème de confiance et d'acce
 - **Bouton "Signaler"** présent sur :
   - Profils auxiliaires/bénéficiaires
   - Annonces
-  - Avis
   - Messages (comportement inapproprié)
 
 - **Workflow admin** :
@@ -980,7 +965,7 @@ Le marché de l'aide à domicile souffre d'un **problème de confiance et d'acce
 - **Droit à l'effacement** :
   - Suppression compte via dashboard
   - Suppression toutes données personnelles
-  - Anonymisation conversations/avis
+  - Anonymisation conversations
 - **Export données personnelles** : téléchargement JSON de toutes les données
 - **Gestion consentements** : opt-in/opt-out notifications email
 

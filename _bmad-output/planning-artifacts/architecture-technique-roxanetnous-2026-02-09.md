@@ -403,28 +403,6 @@ CREATE TABLE public.messages (
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Table: avis
-CREATE TABLE public.avis (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-
-  -- Auteur et cible
-  auteur_id UUID REFERENCES public.users(id) ON DELETE SET NULL,
-  cible_id UUID REFERENCES public.users(id) ON DELETE CASCADE,
-
-  -- Contenu
-  note INTEGER NOT NULL CHECK (note >= 1 AND note <= 5),
-  commentaire TEXT,
-
-  -- Modération
-  signale BOOLEAN DEFAULT FALSE,
-  masque BOOLEAN DEFAULT FALSE,
-
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-
-  -- Unique: un user ne peut laisser qu'un seul avis par cible
-  UNIQUE(auteur_id, cible_id)
-);
-
 -- Table: contrats
 CREATE TABLE public.contrats (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -464,7 +442,7 @@ CREATE TABLE public.signalements (
   auteur_id UUID REFERENCES public.users(id) ON DELETE SET NULL,
 
   -- Cible (polymorphique — pas de FK, validé côté application)
-  cible_type TEXT NOT NULL CHECK (cible_type IN ('user', 'annonce_auxiliaire', 'annonce_beneficiaire', 'avis', 'message')),
+  cible_type TEXT NOT NULL CHECK (cible_type IN ('user', 'annonce_auxiliaire', 'annonce_beneficiaire', 'message')),
   cible_id UUID NOT NULL,
 
   -- Détails
@@ -853,23 +831,6 @@ CREATE POLICY "messages_insert_participant" ON public.messages
         OR beneficiaire_id IN (SELECT id FROM public.beneficiaires_profiles WHERE user_id = auth.uid())
     )
   );
-
--- ======================
--- TABLE: avis
--- ======================
-ALTER TABLE public.avis ENABLE ROW LEVEL SECURITY;
-
--- Policy: lecture avis publics (non masqués) sur profils
-CREATE POLICY "avis_read_public" ON public.avis
-  FOR SELECT USING (masque = FALSE AND auth.has_active_subscription());
-
--- Policy: création avis (après collaboration)
-CREATE POLICY "avis_insert_own" ON public.avis
-  FOR INSERT WITH CHECK (auteur_id = auth.uid());
-
--- Policy: admins peuvent tout voir et modifier
-CREATE POLICY "avis_admin_full" ON public.avis
-  FOR ALL USING (auth.is_admin());
 
 -- ======================
 -- TABLE: contrats
@@ -3989,19 +3950,13 @@ export async function deleteAccount() {
     }
   }
 
-  // 3. Anonymiser les avis laissés par l'utilisateur
-  await supabase
-    .from('avis')
-    .update({ commentaire: '[Supprimé - compte fermé]' })
-    .eq('auteur_id', user.id)
-
-  // 4. Supprimer les favoris
+  // 3. Supprimer les favoris
   await supabase
     .from('favoris')
     .delete()
     .eq('user_id', user.id)
 
-  // 5. Supprimer le cache de badges
+  // 4. Supprimer le cache de badges
   await supabase
     .from('badges_cache')
     .delete()

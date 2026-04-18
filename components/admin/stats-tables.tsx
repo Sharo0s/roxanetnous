@@ -186,7 +186,7 @@ export function MrrSegmentTable({ data }: { data: MrrSegmentRow[] }) {
 }
 
 export function ActiviteTable({ data }: {
-  data: { mois: string; messages: number; conversations: number; avis: number }[]
+  data: { mois: string; messages: number; conversations: number }[]
 }) {
   const { period, setPeriod, filtered } = useFiltered(data)
 
@@ -200,18 +200,16 @@ export function ActiviteTable({ data }: {
               <th className="text-left px-4 py-3 font-medium text-gray-500">Mois</th>
               <th className="text-right px-4 py-3 font-medium text-gray-500">Messages</th>
               <th className="text-right px-4 py-3 font-medium text-gray-500">Conversations</th>
-              <th className="text-right px-4 py-3 font-medium text-gray-500">Avis</th>
             </tr>
           </thead>
           <tbody>
             {filtered.map((row) => {
-              const isZero = row.messages === 0 && row.conversations === 0 && row.avis === 0
+              const isZero = row.messages === 0 && row.conversations === 0
               return (
                 <tr key={row.mois} className={`border-b last:border-0 hover:bg-accent/10 ${isZero ? 'text-gray-300' : ''}`}>
                   <td className={`px-4 py-3 ${isZero ? '' : 'font-medium'}`}>{formatMois(row.mois)}</td>
                   <td className="px-4 py-3 text-right">{row.messages}</td>
                   <td className="px-4 py-3 text-right">{row.conversations}</td>
-                  <td className="px-4 py-3 text-right">{row.avis}</td>
                 </tr>
               )
             })}

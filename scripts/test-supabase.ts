@@ -51,7 +51,6 @@ async function testConnection() {
       'favoris',
       'conversations',
       'messages',
-      'avis',
       'contrats',
       'signalements',
       'notifications_log',

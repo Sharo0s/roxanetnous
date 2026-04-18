@@ -97,7 +97,6 @@ Statut : 🟡 Fondations complètes, développement features en cours
 - ⏸️ Notifications messages
 
 ### Phase 8 : Features Avancées (5-6h)
-- ⏸️ Avis/Notes
 - ⏸️ Génération PDF contrats
 - ⏸️ Jobs CRON
 - ⏸️ Dashboard stats

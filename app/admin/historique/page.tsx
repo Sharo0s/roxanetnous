@@ -24,7 +24,6 @@ export default async function AdminHistoriquePage() {
     annonce_suspendue: 'Annonce suspendue',
     annonce_publiee: 'Annonce republiée',
     annonce_archivee: 'Annonce archivée',
-    avis_masque: 'Avis masqué',
   }
 
   return (

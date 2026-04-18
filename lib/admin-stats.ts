@@ -138,17 +138,15 @@ export async function getRepartitionRoles() {
 export async function getActiviteParMois() {
   const supabase = await getAdmin()
 
-  const [{ data: messages }, { data: conversations }, { data: avis }] = await Promise.all([
+  const [{ data: messages }, { data: conversations }] = await Promise.all([
     supabase.from('messages').select('created_at').order('created_at', { ascending: true }),
     supabase.from('conversations').select('created_at').order('created_at', { ascending: true }),
-    supabase.from('avis').select('created_at').order('created_at', { ascending: true }),
   ])
 
   // Trouver la date la plus ancienne parmi toutes les sources
   const allDates = [
     ...(messages || []),
     ...(conversations || []),
-    ...(avis || []),
   ].map(item => new Date(item.created_at))
 
   if (allDates.length === 0) return []
@@ -156,15 +154,15 @@ export async function getActiviteParMois() {
   const first = new Date(Math.min(...allDates.map(d => d.getTime())))
   const now = new Date()
 
-  const moisMap = new Map<string, { messages: number; conversations: number; avis: number }>()
+  const moisMap = new Map<string, { messages: number; conversations: number }>()
   const d = new Date(first.getFullYear(), first.getMonth(), 1)
   while (d <= now) {
     const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
-    moisMap.set(key, { messages: 0, conversations: 0, avis: 0 })
+    moisMap.set(key, { messages: 0, conversations: 0 })
     d.setMonth(d.getMonth() + 1)
   }
 
-  function addToMonth(items: { created_at: string }[] | null, field: 'messages' | 'conversations' | 'avis') {
+  function addToMonth(items: { created_at: string }[] | null, field: 'messages' | 'conversations') {
     for (const item of items || []) {
       const id = new Date(item.created_at)
       const key = `${id.getFullYear()}-${String(id.getMonth() + 1).padStart(2, '0')}`
@@ -175,7 +173,6 @@ export async function getActiviteParMois() {
 
   addToMonth(messages, 'messages')
   addToMonth(conversations, 'conversations')
-  addToMonth(avis, 'avis')
 
   return Array.from(moisMap.entries()).map(([mois, data]) => ({
     mois,
