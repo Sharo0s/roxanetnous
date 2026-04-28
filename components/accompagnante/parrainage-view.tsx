@@ -1,0 +1,213 @@
+'use client'
+
+import { useEffect, useRef, useState } from 'react'
+
+type FilleuleStatut = 'inscrite' | 'abonnee' | 'confirme' | 'fraude' | 'bloque'
+
+type Filleule = {
+  firstName: string | null
+  statut: FilleuleStatut
+  inscriteAt: string
+  abonneeAt: string | null
+}
+
+type Props = {
+  code: string
+  baseUrl: string
+  compteur: number
+  totalRecompenses: number
+  filleules: Array<Filleule>
+}
+
+const PALIER = 5
+
+const STATUT_LABELS: Record<FilleuleStatut, string> = {
+  inscrite: 'Inscrite',
+  abonnee: 'Abonnée',
+  confirme: 'Confirmée',
+  fraude: '',
+  bloque: '',
+}
+
+const STATUT_BADGE_CLASS: Record<FilleuleStatut, string> = {
+  inscrite: 'bg-gray-100 text-gray-700',
+  abonnee: 'bg-amber-50 text-amber-800 border border-amber-200',
+  confirme: 'bg-black text-white',
+  fraude: '',
+  bloque: '',
+}
+
+function joursRestantsAvantConfirmation(abonneeAt: string | null): number | null {
+  if (!abonneeAt) return null
+  const dateAbonnee = new Date(abonneeAt).getTime()
+  const cible = dateAbonnee + 30 * 24 * 60 * 60 * 1000
+  const restant = Math.ceil((cible - Date.now()) / (24 * 60 * 60 * 1000))
+  return Math.max(0, restant)
+}
+
+export function ParrainageView({ code, baseUrl, compteur, totalRecompenses, filleules }: Props) {
+  const [copied, setCopied] = useState<'code' | 'link' | null>(null)
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const inviteLink = `${baseUrl}/register?role=accompagnante&parrainage_code=${encodeURIComponent(code)}`
+
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current)
+    }
+  }, [])
+
+  const handleCopy = async (value: string, kind: 'code' | 'link') => {
+    try {
+      await navigator.clipboard.writeText(value)
+      setCopied(kind)
+      if (timeoutRef.current) clearTimeout(timeoutRef.current)
+      timeoutRef.current = setTimeout(() => setCopied(null), 2000)
+    } catch {
+      // navigator.clipboard indisponible (HTTP non-secure ou navigateur ancien)
+    }
+  }
+
+  const compteurClamped = Math.max(0, Math.min(PALIER, compteur))
+  const restant = Math.max(0, PALIER - compteurClamped)
+  const progressPercent = (compteurClamped / PALIER) * 100
+
+  let phrase: string
+  if (compteur >= PALIER) {
+    phrase = 'Palier atteint, votre récompense est en cours d’application.'
+  } else if (compteur === 0 && totalRecompenses === 0) {
+    phrase = 'Lancez votre premier cycle de parrainage'
+  } else if (compteur === 0 && totalRecompenses > 0) {
+    phrase = `Vous avez déjà reçu ${totalRecompenses} récompense${totalRecompenses > 1 ? 's' : ''}, lancez un nouveau cycle`
+  } else if (restant === 1) {
+    phrase = 'Plus qu’une filleule pour 6 mois offerts'
+  } else {
+    phrase = `Plus que ${restant} filleules pour 6 mois offerts`
+  }
+
+  const filleulesAffichables = filleules.filter((f) => f.statut !== 'fraude' && f.statut !== 'bloque')
+
+  return (
+    <div className="space-y-6">
+      {/* Bandeau code + boutons */}
+      <div className="bg-white rounded-xl border p-6">
+        <h2 className="font-semibold text-lg mb-3">Votre code de parrainage</h2>
+        <div
+          className="bg-accent/30 rounded-lg py-6 mb-4 text-center font-bold text-black select-all"
+          style={{ fontSize: '40px', letterSpacing: '6px' }}
+        >
+          {code}
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={() => handleCopy(code, 'code')}
+            className="inline-flex items-center px-4 py-2 bg-accent text-black rounded-lg btn-hover transition text-sm font-medium"
+          >
+            {copied === 'code' ? 'Copié' : 'Copier le code'}
+          </button>
+          <button
+            type="button"
+            onClick={() => handleCopy(inviteLink, 'link')}
+            className="inline-flex items-center px-4 py-2 bg-white text-black border border-black rounded-lg btn-hover transition text-sm font-medium"
+          >
+            {copied === 'link' ? 'Copié' : 'Copier le lien d’invitation'}
+          </button>
+        </div>
+        <p className="text-sm text-gray-600 mt-4">
+          Partagez ce code ou ce lien avec une accompagnante de votre réseau.
+          À son inscription, elle évite la visio et est validée automatiquement
+          dès qu&apos;elle souscrit son abonnement.
+        </p>
+      </div>
+
+      {/* Bandeau progression - option 4 */}
+      <div className="bg-white rounded-xl border p-6">
+        <div className="flex flex-col items-center text-center mb-5">
+          <p className="text-2xl font-bold text-black">{phrase}</p>
+          {compteur < PALIER && totalRecompenses > 0 && (
+            <p className="text-sm text-gray-600 mt-1">
+              {totalRecompenses} récompense{totalRecompenses > 1 ? 's' : ''} déjà obtenue{totalRecompenses > 1 ? 's' : ''}
+            </p>
+          )}
+        </div>
+
+        <div className="relative h-4 w-full bg-gray-100 rounded-full overflow-hidden mb-2">
+          <div
+            className="absolute inset-y-0 left-0 bg-black rounded-full transition-all duration-500"
+            style={{ width: `${progressPercent}%` }}
+            aria-hidden="true"
+          />
+        </div>
+        <div className="flex justify-between text-xs text-gray-600">
+          <span>{compteurClamped}/{PALIER} parrainages confirmés</span>
+          <span>6 mois offerts au palier</span>
+        </div>
+
+        <div className="mt-5 pt-5 border-t border-gray-100 grid grid-cols-3 gap-4 text-center">
+          <div>
+            <p className="text-2xl font-bold text-black">{filleulesAffichables.length}</p>
+            <p className="text-xs text-gray-600 mt-0.5">Filleules au total</p>
+          </div>
+          <div>
+            <p className="text-2xl font-bold text-black">{compteurClamped}</p>
+            <p className="text-xs text-gray-600 mt-0.5">Confirmées (cycle en cours)</p>
+          </div>
+          <div>
+            <p className="text-2xl font-bold text-black">{totalRecompenses}</p>
+            <p className="text-xs text-gray-600 mt-0.5">Récompenses obtenues</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Liste des filleules */}
+      <div className="bg-white rounded-xl border p-6">
+        <h2 className="font-semibold text-lg mb-4">Vos filleules</h2>
+        {filleulesAffichables.length === 0 ? (
+          <p className="text-sm text-gray-600">
+            Aucune filleule pour le moment. Partagez votre code pour démarrer
+            votre premier cycle.
+          </p>
+        ) : (
+          <ul className="flex flex-col divide-y divide-gray-100">
+            {filleulesAffichables.map((f, idx) => {
+              const joursRestants = f.statut === 'abonnee'
+                ? joursRestantsAvantConfirmation(f.abonneeAt)
+                : null
+              return (
+                <li
+                  key={`${f.inscriteAt}-${idx}`}
+                  className="flex items-center justify-between py-3"
+                >
+                  <div className="flex flex-col">
+                    <span className="text-sm text-gray-900 font-medium">
+                      {f.firstName ?? 'Filleule'}
+                    </span>
+                    {f.statut === 'inscrite' && (
+                      <span className="text-xs text-gray-500 mt-0.5">
+                        En attente de souscription
+                      </span>
+                    )}
+                    {f.statut === 'abonnee' && joursRestants !== null && (
+                      <span className="text-xs text-gray-500 mt-0.5">
+                        Plus que {joursRestants} jour{joursRestants > 1 ? 's' : ''} avant confirmation
+                      </span>
+                    )}
+                    {f.statut === 'confirme' && (
+                      <span className="text-xs text-gray-500 mt-0.5">
+                        Compte vers votre prochaine récompense
+                      </span>
+                    )}
+                  </div>
+                  <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${STATUT_BADGE_CLASS[f.statut]}`}>
+                    {STATUT_LABELS[f.statut]}
+                  </span>
+                </li>
+              )
+            })}
+          </ul>
+        )}
+      </div>
+    </div>
+  )
+}

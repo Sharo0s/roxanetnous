@@ -8,7 +8,6 @@ import { AccompagnanteHeader } from '@/components/layout/accompagnante-header'
 import { AvatarUpload } from '@/components/accompagnante/avatar-upload'
 import { DisponibleToggle } from '@/components/accompagnante/disponible-toggle'
 import { StatusBadge } from '@/components/accompagnante/status-badge'
-import { ParrainageCard } from '@/components/accompagnante/parrainage-card'
 
 export default async function AccompagnanteDashboard() {
   const supabase = await createClient()
@@ -34,11 +33,12 @@ export default async function AccompagnanteDashboard() {
   const subscription = await getSubscriptionStatus(user.id)
   const subscribed = subscription.active
 
+  // Le contenu detaille (code, copie, liste filleules, jauge) vit sur
+  // /accompagnante/parrainage. Sur le dashboard on n'affiche qu'un teaser
+  // tant qu'un code existe et que le compteur peut etre montre.
   let parrainageCode: string | null = null
   let parrainageCompteur = 0
   let parrainageTotalRecompenses = 0
-  type FilleuleStatut = 'inscrite' | 'abonnee' | 'confirme' | 'fraude' | 'bloque'
-  let parrainageFilleules: Array<{ firstName: string | null; statut: FilleuleStatut; inscriteAt: string }> = []
 
   if (profile?.validation_status === 'valide') {
     const { data: parrainageRow } = await supabase
@@ -49,32 +49,7 @@ export default async function AccompagnanteDashboard() {
     parrainageCode = parrainageRow?.code ?? null
     parrainageCompteur = parrainageRow?.compteur_confirmes ?? 0
     parrainageTotalRecompenses = parrainageRow?.total_recompenses ?? 0
-
-    if (parrainageCode) {
-      const { data: filleulesData } = await supabase
-        .from('parrainages')
-        .select('filleule_id, statut, filleule_inscrite_at, users!parrainages_filleule_id_fkey(first_name)')
-        .eq('marraine_id', user.id)
-        .in('statut', ['inscrite', 'abonnee', 'confirme'])
-        .order('filleule_inscrite_at', { ascending: false })
-        .limit(20)
-
-      if (filleulesData) {
-        parrainageFilleules = filleulesData.map((row) => {
-          const usersJoin = row.users as unknown as { first_name: string | null } | { first_name: string | null }[] | null
-          const firstName = Array.isArray(usersJoin)
-            ? usersJoin[0]?.first_name ?? null
-            : usersJoin?.first_name ?? null
-          return {
-            firstName,
-            statut: row.statut as FilleuleStatut,
-            inscriteAt: row.filleule_inscrite_at as string,
-          }
-        })
-      }
-    }
   }
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://roxanetnous.fr'
 
   let annoncesCount = 0
   let annoncesPubliees = 0
@@ -268,13 +243,20 @@ export default async function AccompagnanteDashboard() {
                 </div>
 
                 {parrainageCode && (
-                  <ParrainageCard
-                    code={parrainageCode}
-                    baseUrl={baseUrl}
-                    compteur={parrainageCompteur}
-                    totalRecompenses={parrainageTotalRecompenses}
-                    filleules={parrainageFilleules}
-                  />
+                  <div className="bg-white rounded-xl border p-6 md:col-span-2">
+                    <h3 className="font-semibold text-lg mb-2">Mon parrainage</h3>
+                    <p className="text-gray-600 mb-4">
+                      {parrainageCompteur > 0 || parrainageTotalRecompenses > 0
+                        ? `${parrainageCompteur}/5 parrainages confirmés`
+                        : 'Partagez votre code et obtenez 6 mois offerts tous les 5 parrainages.'}
+                    </p>
+                    <Link
+                      href="/accompagnante/parrainage"
+                      className="inline-flex items-center px-4 py-2 bg-accent text-black rounded-lg btn-hover transition text-sm font-medium"
+                    >
+                      Voir mon parrainage
+                    </Link>
+                  </div>
                 )}
 
                 <div className="bg-white rounded-xl border p-6">
