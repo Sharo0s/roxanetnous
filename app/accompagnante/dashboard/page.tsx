@@ -8,6 +8,7 @@ import { AccompagnanteHeader } from '@/components/layout/accompagnante-header'
 import { AvatarUpload } from '@/components/accompagnante/avatar-upload'
 import { DisponibleToggle } from '@/components/accompagnante/disponible-toggle'
 import { StatusBadge } from '@/components/accompagnante/status-badge'
+import { ParrainageCard } from '@/components/accompagnante/parrainage-card'
 
 export default async function AccompagnanteDashboard() {
   const supabase = await createClient()
@@ -32,6 +33,48 @@ export default async function AccompagnanteDashboard() {
   const unreadCount = await getUnreadCount(user.id)
   const subscription = await getSubscriptionStatus(user.id)
   const subscribed = subscription.active
+
+  let parrainageCode: string | null = null
+  let parrainageCompteur = 0
+  let parrainageTotalRecompenses = 0
+  type FilleuleStatut = 'inscrite' | 'abonnee' | 'confirme' | 'fraude' | 'bloque'
+  let parrainageFilleules: Array<{ firstName: string | null; statut: FilleuleStatut; inscriteAt: string }> = []
+
+  if (profile?.validation_status === 'valide') {
+    const { data: parrainageRow } = await supabase
+      .from('parrainages_codes')
+      .select('code, compteur_confirmes, total_recompenses')
+      .eq('user_id', user.id)
+      .maybeSingle()
+    parrainageCode = parrainageRow?.code ?? null
+    parrainageCompteur = parrainageRow?.compteur_confirmes ?? 0
+    parrainageTotalRecompenses = parrainageRow?.total_recompenses ?? 0
+
+    if (parrainageCode) {
+      const { data: filleulesData } = await supabase
+        .from('parrainages')
+        .select('filleule_id, statut, filleule_inscrite_at, users!parrainages_filleule_id_fkey(first_name)')
+        .eq('marraine_id', user.id)
+        .in('statut', ['inscrite', 'abonnee', 'confirme'])
+        .order('filleule_inscrite_at', { ascending: false })
+        .limit(20)
+
+      if (filleulesData) {
+        parrainageFilleules = filleulesData.map((row) => {
+          const usersJoin = row.users as unknown as { first_name: string | null } | { first_name: string | null }[] | null
+          const firstName = Array.isArray(usersJoin)
+            ? usersJoin[0]?.first_name ?? null
+            : usersJoin?.first_name ?? null
+          return {
+            firstName,
+            statut: row.statut as FilleuleStatut,
+            inscriteAt: row.filleule_inscrite_at as string,
+          }
+        })
+      }
+    }
+  }
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://roxanetnous.fr'
 
   let annoncesCount = 0
   let annoncesPubliees = 0
@@ -218,6 +261,16 @@ export default async function AccompagnanteDashboard() {
                     Voir mon profil
                   </Link>
                 </div>
+
+                {parrainageCode && (
+                  <ParrainageCard
+                    code={parrainageCode}
+                    baseUrl={baseUrl}
+                    compteur={parrainageCompteur}
+                    totalRecompenses={parrainageTotalRecompenses}
+                    filleules={parrainageFilleules}
+                  />
+                )}
 
                 <div className="bg-white rounded-xl border p-6">
                   <h3 className="font-semibold text-lg mb-2">Mon abonnement</h3>

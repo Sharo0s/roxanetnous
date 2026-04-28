@@ -28,6 +28,16 @@ export default async function AccompagnanteProfilPage() {
 
   if (!profile) redirect('/accompagnante/onboarding')
 
+  let parrainageCode: string | null = null
+  if (profile.validation_status === 'valide') {
+    const { data: parrainageRow } = await supabase
+      .from('parrainages_codes')
+      .select('code')
+      .eq('user_id', user.id)
+      .maybeSingle()
+    parrainageCode = parrainageRow?.code ?? null
+  }
+
   const unreadCount = await getUnreadCount(user.id)
 
   return (
@@ -42,6 +52,13 @@ export default async function AccompagnanteProfilPage() {
 
       <div className="max-w-3xl mx-auto px-4 py-8 relative z-10">
         <h2 className="text-2xl font-bold text-gray-900 mb-6">Mon profil</h2>
+
+        {parrainageCode && (
+          <div className="mb-6 p-4 rounded-xl border bg-white">
+            <p className="text-sm text-gray-600 mb-1">Votre code de parrainage</p>
+            <p className="font-mono font-bold text-lg tracking-widest">{parrainageCode}</p>
+          </div>
+        )}
 
         {profile.validation_status === 'en_attente' && (
           <div className="mb-6 p-4 rounded-xl border bg-gray-50 text-sm text-gray-700">

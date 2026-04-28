@@ -26,6 +26,13 @@ export default async function AdminHistoriquePage() {
     annonce_suspendue: 'Annonce suspendue',
     annonce_publiee: 'Annonce republiée',
     annonce_archivee: 'Annonce archivée',
+    validation_par_parrainage: 'Validation par parrainage',
+    parrainage_bloque: 'Parrainage bloqué',
+    parrainage_flag: 'Parrainage suspect',
+    parrainage_autorise_exception: 'Parrainage - exception autorisée',
+    parrainage_fraude_confirmee: 'Parrainage - fraude confirmée',
+    parrainage_ignore_flag: 'Parrainage - flag ignoré',
+    parrainage_recompense_appliquee: 'Parrainage - récompense 6 mois appliquée',
   }
 
   return (

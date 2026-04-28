@@ -2,9 +2,11 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+import { headers } from 'next/headers'
 import { sendWelcomeEmail } from '@/lib/emails'
 import { stripe } from '@/lib/stripe'
 import { getSubscriptionStatus } from '@/lib/subscription-helpers'
+import { createParrainageRelation } from '@/app/actions/parrainage'
 
 export type AuthResult = {
   error?: string
@@ -77,6 +79,39 @@ export async function signup(formData: FormData): Promise<AuthResult> {
       console.error('Erreur insertion public.users:', userError.message, userError.code, userError.details)
       await supabaseAdmin.auth.admin.deleteUser(authData.user.id)
       return { error: 'Erreur lors de la création du profil. Veuillez réessayer.' }
+    }
+  }
+
+  // Parrainage (accompagnante uniquement) : si un code valide est fourni,
+  // créer la relation marraine/filleule. Silencieux côté UX (l'inscription
+  // réussit même si le code ne convient pas), mais logué côté serveur pour
+  // ne pas perdre le signal opérationnel en cas d'échec.
+  if (role === 'accompagnante') {
+    const parrainageCode = (formData.get('parrainage_code') as string | null)?.trim() || ''
+    if (parrainageCode) {
+      try {
+        const h = await headers()
+        const ip =
+          h.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+          h.get('x-real-ip') ||
+          null
+        const result = await createParrainageRelation({
+          code: parrainageCode,
+          filleuleId: authData.user.id,
+          ipInscription: ip,
+          filleuleEmail: email,
+        })
+        if (!result.ok) {
+          console.error(
+            'createParrainageRelation a échoué pendant signup:',
+            result.reason,
+            'filleuleId=',
+            authData.user.id
+          )
+        }
+      } catch (e) {
+        console.error('Exception createParrainageRelation pendant signup:', e)
+      }
     }
   }
 
