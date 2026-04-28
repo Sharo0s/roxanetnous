@@ -9,9 +9,10 @@ type Props = {
   onChange: (partial: Partial<OnboardingData>) => void
   onUpload?: (file: File, type: string) => Promise<boolean>
   onUploadsChange?: (uploads: { cv: boolean; diplomes: Record<string, boolean> }) => void
+  isFilleule?: boolean
 }
 
-export function StepDiplome({ data, onChange, onUpload, onUploadsChange }: Props) {
+export function StepDiplome({ data, onChange, onUpload, onUploadsChange, isFilleule = false }: Props) {
   const cvRef = useRef<HTMLInputElement>(null)
   const diplomeRefs = useRef<Record<string, HTMLInputElement | null>>({})
   const [uploading, setUploading] = useState<string | null>(null)
@@ -82,11 +83,16 @@ export function StepDiplome({ data, onChange, onUpload, onUploadsChange }: Props
         <p className="text-sm text-gray-500">Indiquez vos qualifications et votre niveau d'expérience.</p>
       </div>
 
-      {/* CV upload - obligatoire */}
+      {/* CV upload - obligatoire sauf en flow filleule (parrainee) */}
       {onUpload && (
         <div className="space-y-2">
           <label className="block text-sm font-medium text-gray-700">
-            Curriculum vitae (CV) <span className="text-red-500">*</span>
+            Curriculum vitae (CV){' '}
+            {isFilleule ? (
+              <span className="text-gray-400 font-normal">(optionnel)</span>
+            ) : (
+              <span className="text-red-500">*</span>
+            )}
           </label>
           <input
             ref={cvRef}
@@ -117,9 +123,18 @@ export function StepDiplome({ data, onChange, onUpload, onUploadsChange }: Props
 
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          Diplômes <span className="text-red-500">*</span>
+          Diplômes{' '}
+          {isFilleule ? (
+            <span className="text-gray-400 font-normal">(optionnel)</span>
+          ) : (
+            <span className="text-red-500">*</span>
+          )}
         </label>
-        <p className="text-xs text-gray-400 mb-3">Vous pouvez en sélectionner plusieurs. Un justificatif est requis pour chaque diplôme.</p>
+        <p className="text-xs text-gray-400 mb-3">
+          {isFilleule
+            ? 'Votre marraine se porte garante : aucun justificatif n’est requis. Vous pouvez tout de même les renseigner si vous le souhaitez.'
+            : 'Vous pouvez en sélectionner plusieurs. Un justificatif est requis pour chaque diplôme.'}
+        </p>
         <div className="space-y-2">
           {DIPLOMES.map((d) => {
             const isSelected = data.diplomes.includes(d.value)
@@ -177,7 +192,12 @@ export function StepDiplome({ data, onChange, onUpload, onUploadsChange }: Props
 
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          Expérience <span className="text-red-500">*</span>
+          Expérience{' '}
+          {isFilleule ? (
+            <span className="text-gray-400 font-normal">(optionnel)</span>
+          ) : (
+            <span className="text-red-500">*</span>
+          )}
         </label>
         <div className="space-y-2">
           {EXPERIENCE_LEVELS.map((exp) => (

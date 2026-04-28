@@ -4,9 +4,10 @@ import type { OnboardingData } from '@/components/accompagnante/onboarding-clien
 type Props = {
   data: OnboardingData
   onChange: (partial: Partial<OnboardingData>) => void
+  isFilleule?: boolean
 }
 
-export function StepSpecialites({ data, onChange }: Props) {
+export function StepSpecialites({ data, onChange, isFilleule = false }: Props) {
   function toggle(value: string) {
     const current = data.specialites
     if (current.includes(value)) {
@@ -21,7 +22,9 @@ export function StepSpecialites({ data, onChange }: Props) {
       <div>
         <h2 className="text-xl font-semibold mb-1">Spécialités</h2>
         <p className="text-sm text-gray-500">
-          Sélectionnez les services que vous proposez (minimum 1).
+          {isFilleule
+            ? 'Optionnel : sélectionnez les services que vous proposez si vous le souhaitez.'
+            : 'Sélectionnez les services que vous proposez (minimum 1).'}
         </p>
       </div>
 

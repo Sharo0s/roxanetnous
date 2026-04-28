@@ -170,8 +170,8 @@ export function OnboardingClient({ parrainage }: Props) {
         )}
 
         <div className="bg-white rounded-xl border p-6">
-          {step === 0 && <StepDiplome data={data} onChange={updateData} onUpload={handleUpload} onUploadsChange={setUploads} />}
-          {step === 1 && <StepSpecialites data={data} onChange={updateData} />}
+          {step === 0 && <StepDiplome data={data} onChange={updateData} onUpload={handleUpload} onUploadsChange={setUploads} isFilleule={parrainage.isFilleule} />}
+          {step === 1 && <StepSpecialites data={data} onChange={updateData} isFilleule={parrainage.isFilleule} />}
           {step === 2 && <StepLocalisation data={data} onChange={updateData} onUpload={handleUpload} onPermisUploaded={setPermisUploaded} />}
           {step === 3 && <StepDisponibilites data={data} onChange={updateData} />}
         </div>
