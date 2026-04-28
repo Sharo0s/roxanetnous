@@ -37,36 +37,12 @@ export async function submitOnboarding(data: {
     return { error: 'Accès non autorisé.' }
   }
 
-  // Workaround flow parrainage (Story 2.1, AC7) : si la filleule a parrainee_par
-  // ET un parrainage actif (statut 'inscrite'), les uploads et le diplôme deviennent
-  // optionnels. On exige aussi que le parrainage ne soit pas bloqué/fraude pour
-  // empêcher tout bypass via un état corrompu côté users.parrainee_par.
-  // Service role : la RLS sur `users` peut ne pas exposer la colonne `parrainee_par`
-  // au client utilisateur ; cohérent avec la lecture côté `onboarding/page.tsx`.
-  const supabaseAdmin = await createClient({ serviceRole: true })
-  const { data: parrainageRow } = await supabaseAdmin
-    .from('users')
-    .select('parrainee_par')
-    .eq('id', user.id)
-    .maybeSingle()
-
-  let isFilleule = false
-  if (parrainageRow?.parrainee_par) {
-    const { data: activeParrainage } = await supabaseAdmin
-      .from('parrainages')
-      .select('id, statut')
-      .eq('filleule_id', user.id)
-      .eq('marraine_id', parrainageRow.parrainee_par)
-      .in('statut', ['inscrite', 'abonnee', 'confirme'])
-      .limit(1)
-      .maybeSingle()
-    isFilleule = !!activeParrainage
-  }
-
-  if (!isFilleule) {
-    if (data.diplomes.length === 0 || !data.experience || data.specialites.length === 0) {
-      return { error: 'Diplômes, expérience et spécialités sont requis.' }
-    }
+  // En flow filleule (parrainee), seuls les uploads (CV, justificatifs de
+  // diplôme, permis) sont remplacés par la garantie de la marraine. Les
+  // données déclarées (diplômes, expérience, spécialités) restent
+  // obligatoires comme pour la voie manuelle.
+  if (data.diplomes.length === 0 || !data.experience || data.specialites.length === 0) {
+    return { error: 'Diplômes, expérience et spécialités sont requis.' }
   }
 
   if (!data.ville || !data.code_postal) {

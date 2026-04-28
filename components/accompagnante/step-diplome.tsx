@@ -123,16 +123,11 @@ export function StepDiplome({ data, onChange, onUpload, onUploadsChange, isFille
 
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          Diplômes{' '}
-          {isFilleule ? (
-            <span className="text-gray-400 font-normal">(optionnel)</span>
-          ) : (
-            <span className="text-red-500">*</span>
-          )}
+          Diplômes <span className="text-red-500">*</span>
         </label>
         <p className="text-xs text-gray-400 mb-3">
           {isFilleule
-            ? 'Votre marraine se porte garante : aucun justificatif n’est requis. Vous pouvez tout de même les renseigner si vous le souhaitez.'
+            ? 'Sélectionnez votre ou vos diplômes. Les justificatifs ne sont pas requis grâce à votre parrainage.'
             : 'Vous pouvez en sélectionner plusieurs. Un justificatif est requis pour chaque diplôme.'}
         </p>
         <div className="space-y-2">
@@ -192,12 +187,7 @@ export function StepDiplome({ data, onChange, onUpload, onUploadsChange, isFille
 
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          Expérience{' '}
-          {isFilleule ? (
-            <span className="text-gray-400 font-normal">(optionnel)</span>
-          ) : (
-            <span className="text-red-500">*</span>
-          )}
+          Expérience <span className="text-red-500">*</span>
         </label>
         <div className="space-y-2">
           {EXPERIENCE_LEVELS.map((exp) => (

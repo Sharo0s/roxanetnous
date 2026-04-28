@@ -64,14 +64,15 @@ export function OnboardingClient({ parrainage }: Props) {
   }
 
   function canProceed(): boolean {
-    // Si filleule (parrainee), tous les uploads et le diplome obligatoire
-    // sont rendus optionnels : on accepte de proceder sans rien.
+    // Si filleule (parrainee) : meme exigences que la voie manuelle SAUF
+    // les uploads (CV, justificatifs de diplome, justificatif permis) qui
+    // sont remplaces par la garantie de la marraine.
     if (parrainage.isFilleule) {
       switch (step) {
         case 0:
-          return true
+          return data.diplomes.length > 0 && !!data.experience
         case 1:
-          return true
+          return data.specialites.length > 0
         case 2:
           return !!data.ville && /^\d{5}$/.test(data.code_postal)
         case 3:
@@ -171,7 +172,7 @@ export function OnboardingClient({ parrainage }: Props) {
 
         <div className="bg-white rounded-xl border p-6">
           {step === 0 && <StepDiplome data={data} onChange={updateData} onUpload={handleUpload} onUploadsChange={setUploads} isFilleule={parrainage.isFilleule} />}
-          {step === 1 && <StepSpecialites data={data} onChange={updateData} isFilleule={parrainage.isFilleule} />}
+          {step === 1 && <StepSpecialites data={data} onChange={updateData} />}
           {step === 2 && <StepLocalisation data={data} onChange={updateData} onUpload={handleUpload} onPermisUploaded={setPermisUploaded} />}
           {step === 3 && <StepDisponibilites data={data} onChange={updateData} />}
         </div>
