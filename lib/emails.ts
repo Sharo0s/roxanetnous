@@ -821,3 +821,62 @@ export async function sendExpirationReminderEmail(params: {
     })
   }
 }
+
+// Email envoye a la filleule quand son parrainage a ete bloque par
+// la detection anti-fraude au moment du paiement. Volontairement
+// generique : ne revele pas la regle violee (meme_carte, meme_email,
+// etc.) pour ne pas aider un fraudeur a contourner le systeme.
+export async function sendParrainageVerificationEmail(params: {
+  email: string
+  firstName: string
+  userId?: string
+}) {
+  const subject = 'Verification supplementaire requise pour votre inscription'
+  try {
+    await resend.emails.send({
+      from: FROM_EMAIL,
+      to: params.email,
+      subject,
+      html: `
+        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+          <h1 style="color: #000;">Verification supplementaire requise</h1>
+          <p>Bonjour ${escapeHtml(params.firstName)},</p>
+          <p>Votre paiement a bien ete recu et votre abonnement est actif.</p>
+          <p>
+            En revanche, notre systeme a releve un signal qui necessite une
+            verification manuelle avant que votre profil soit publie sur la
+            plateforme. Un administrateur examinera votre dossier sous 48h
+            ouvrees.
+          </p>
+          <p>
+            Si vous pensez qu'il s'agit d'une erreur, ou si vous partagez
+            votre moyen de paiement avec votre marraine, contactez-nous :
+            <a href="mailto:contact@roxanetnous.fr">contact@roxanetnous.fr</a>.
+          </p>
+          <p style="margin-top: 24px;">
+            <a href="${BASE_URL}/accompagnante/dashboard" style="background: #000; color: #fff; padding: 12px 24px; text-decoration: none; display: inline-block;">
+              Acceder a mon espace
+            </a>
+          </p>
+        </div>
+      `,
+    })
+
+    await logNotification({
+      userId: params.userId,
+      email: params.email,
+      type: 'parrainage_verification',
+      subject,
+      status: 'sent',
+    })
+  } catch (error) {
+    await logNotification({
+      userId: params.userId,
+      email: params.email,
+      type: 'parrainage_verification',
+      subject,
+      status: 'error',
+      error: error instanceof Error ? error.message : 'Erreur inconnue',
+    })
+  }
+}

@@ -7,6 +7,7 @@ import {
   sendPlanChangeEmail,
   sendRenewalReminderEmail,
   sendAdminParrainageFlag,
+  sendParrainageVerificationEmail,
 } from '@/lib/emails'
 import { revokeFilleuleValidationFromWebhook } from '@/app/actions/parrainage'
 import { normalizeAddress } from '@/lib/parrainage-detection'
@@ -522,7 +523,9 @@ export async function POST(request: NextRequest) {
         }
       }
 
-      // Send confirmation email
+      // Send confirmation email — variante "verification" si le parrainage
+      // de cette filleule a ete bloque par la detection anti-fraude juste
+      // avant. Sinon, email standard "abonnement actif".
       const { data: userData } = await supabase
         .from('users')
         .select('email, first_name, role')
@@ -530,12 +533,34 @@ export async function POST(request: NextRequest) {
         .single()
 
       if (userData) {
-        await sendSubscriptionConfirmEmail({
-          email: userData.email,
-          firstName: userData.first_name || '',
-          role: userData.role as 'accompagnante' | 'accompagne',
-          userId,
-        })
+        // On verifie l'existence d'un parrainage bloque (statut='bloque')
+        // pour cet utilisateur avec ce code, dans la fenetre courante.
+        let parrainageWasBlocked = false
+        if (parrainageCode) {
+          const { data: blockedParrainage } = await supabase
+            .from('parrainages')
+            .select('id')
+            .eq('code', parrainageCode)
+            .eq('filleule_id', userId)
+            .eq('statut', 'bloque')
+            .maybeSingle()
+          parrainageWasBlocked = !!blockedParrainage
+        }
+
+        if (parrainageWasBlocked) {
+          await sendParrainageVerificationEmail({
+            email: userData.email,
+            firstName: userData.first_name || '',
+            userId,
+          })
+        } else {
+          await sendSubscriptionConfirmEmail({
+            email: userData.email,
+            firstName: userData.first_name || '',
+            role: userData.role as 'accompagnante' | 'accompagne',
+            userId,
+          })
+        }
       }
       break
     }

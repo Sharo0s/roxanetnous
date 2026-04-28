@@ -25,6 +25,17 @@ export default async function AccompagnanteDashboard() {
 
   const isFilleule = !!userData.parrainee_par
 
+  // Detecte un parrainage bloque (anti-fraude) qui aurait reset parrainee_par
+  // mais laissé l'utilisatrice abonnée et payante. Sert a afficher un message
+  // dedie et a neutraliser le faux bandeau "Completez votre profil".
+  const { data: blockedParrainageRow } = await supabase
+    .from('parrainages')
+    .select('id')
+    .eq('filleule_id', user.id)
+    .eq('statut', 'bloque')
+    .maybeSingle()
+  const hasBlockedParrainage = !!blockedParrainageRow
+
   const { data: profile } = await supabase
     .from('accompagnantes_profiles')
     .select('id, validation_status, validation_source, diplomes, refus_motif, ville, rayon_km, specialites, disponible, indisponible_jusqu_au')
@@ -130,7 +141,30 @@ export default async function AccompagnanteDashboard() {
           </div>
         </div>
 
-        {!profile || (
+        {hasBlockedParrainage ? (
+          // Cas filleule bloquee par la detection anti-fraude (meme_carte,
+          // meme_email, etc.). parrainee_par a ete reset a null cote BDD,
+          // donc isFilleule=false. On affiche un bandeau dedie a la place
+          // du faux "Completez votre profil".
+          <div className="bg-white rounded-xl border border-amber-300 p-6">
+            <h3 className="font-semibold text-lg text-black mb-2">
+              Vérification supplémentaire en cours
+            </h3>
+            <p className="text-gray-600 mb-2">
+              Votre paiement a bien été reçu et votre abonnement est actif.
+              En revanche, notre système a relevé un signal qui nécessite
+              une vérification manuelle avant la publication de votre profil.
+            </p>
+            <p className="text-gray-600 mb-4">
+              Un administrateur examinera votre dossier sous 48h ouvrées.
+              Si vous pensez qu&apos;il s&apos;agit d&apos;une erreur, contactez-nous à{' '}
+              <a href="mailto:contact@roxanetnous.fr" className="underline">
+                contact@roxanetnous.fr
+              </a>
+              .
+            </p>
+          </div>
+        ) : !profile || (
           isFilleule
             ? !profile.ville
             : !profile.diplomes || profile.diplomes.length === 0
