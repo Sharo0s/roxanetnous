@@ -70,7 +70,7 @@ export function OnboardingClient({ parrainage }: Props) {
     if (parrainage.isFilleule) {
       switch (step) {
         case 0:
-          return data.diplomes.length > 0 && !!data.experience
+          return !!data.experience
         case 1:
           return data.specialites.length > 0
         case 2:
