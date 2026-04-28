@@ -17,11 +17,13 @@ export default async function AccompagnanteDashboard() {
 
   const { data: userData } = await supabase
     .from('users')
-    .select('first_name, last_name, role, avatar_url')
+    .select('first_name, last_name, role, avatar_url, parrainee_par')
     .eq('id', user.id)
     .single()
 
   if (!userData || userData.role !== 'accompagnante') redirect('/')
+
+  const isFilleule = !!userData.parrainee_par
 
   const { data: profile } = await supabase
     .from('accompagnantes_profiles')
@@ -128,7 +130,11 @@ export default async function AccompagnanteDashboard() {
           </div>
         </div>
 
-        {!profile || !profile.diplomes || profile.diplomes.length === 0 ? (
+        {!profile || (
+          isFilleule
+            ? !profile.ville
+            : !profile.diplomes || profile.diplomes.length === 0
+        ) ? (
           <div className="bg-white rounded-xl border p-6">
             <h3 className="font-semibold text-lg mb-2">Complétez votre profil</h3>
             <p className="text-gray-600 mb-4">
@@ -143,6 +149,23 @@ export default async function AccompagnanteDashboard() {
           </div>
         ) : (
           <div className="space-y-4">
+            {isFilleule && profile.validation_status === 'en_attente' && !subscribed && (
+              <div className="p-4 rounded-xl border border-accent bg-accent/20 text-sm">
+                <p className="font-medium text-black">
+                  Plus qu&apos;une étape : souscrivez votre abonnement pour activer votre profil.
+                </p>
+                <p className="text-gray-700 mt-1">
+                  Grâce à votre parrainage, vous serez validée automatiquement
+                  dès la souscription, sans visio ni vérification de diplôme.
+                </p>
+                <Link
+                  href="/accompagnante/abonnement"
+                  className="inline-flex items-center mt-3 px-4 py-2 bg-accent text-black rounded-lg btn-hover transition text-sm font-medium"
+                >
+                  Souscrire mon abonnement
+                </Link>
+              </div>
+            )}
             {profile.validation_status === 'visio_a_planifier' && (
               <div className="p-4 rounded-xl border border-blue-200 bg-blue-50 text-sm">
                 <p className="font-medium text-blue-900">
