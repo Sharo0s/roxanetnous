@@ -289,8 +289,15 @@ function AccompagnantesTable({
                         className={`px-2 py-0.5 rounded-full text-xs font-medium ${
                           VALIDATION_STYLES[u.validation_status] || 'bg-gray-100 text-gray-600'
                         }`}
+                        title={
+                          u.validation_status === 'valide' && u.validation_source === 'parrainage'
+                            ? 'Validée par parrainage (filière express)'
+                            : undefined
+                        }
                       >
-                        {VALIDATION_LABELS[u.validation_status] || u.validation_status}
+                        {u.validation_status === 'valide' && u.validation_source === 'parrainage'
+                          ? 'Validé · parrainage'
+                          : VALIDATION_LABELS[u.validation_status] || u.validation_status}
                       </span>
                     ) : (
                       <span className="text-gray-400">-</span>

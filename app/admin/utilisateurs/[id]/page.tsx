@@ -156,7 +156,10 @@ export default async function AdminUtilisateurDetailPage({
                 {userData.role}
               </span>
               {auxProfile && (
-                <StatusBadge status={auxProfile.validation_status} />
+                <StatusBadge
+                  status={auxProfile.validation_status}
+                  source={auxProfile.validation_source}
+                />
               )}
             </div>
           </div>
@@ -506,7 +509,7 @@ export default async function AdminUtilisateurDetailPage({
   )
 }
 
-function StatusBadge({ status }: { status: string }) {
+function StatusBadge({ status, source }: { status: string; source?: string | null }) {
   const styles: Record<string, string> = {
     en_attente: 'bg-gray-200 text-gray-700',
     visio_a_planifier: 'bg-blue-50 text-blue-800 border border-blue-200',
@@ -525,9 +528,15 @@ function StatusBadge({ status }: { status: string }) {
     a_completer: 'À compléter',
   }
 
+  const showParrainage = status === 'valide' && source === 'parrainage'
+  const label = showParrainage ? 'Validé · parrainage' : labels[status] || status
+
   return (
-    <span className={`px-3 py-1 rounded-full text-sm font-medium ${styles[status] || 'bg-gray-100 text-gray-600'}`}>
-      {labels[status] || status}
+    <span
+      className={`px-3 py-1 rounded-full text-sm font-medium ${styles[status] || 'bg-gray-100 text-gray-600'}`}
+      title={showParrainage ? 'Validée par parrainage (filière express, sans visio ni OCR)' : undefined}
+    >
+      {label}
     </span>
   )
 }

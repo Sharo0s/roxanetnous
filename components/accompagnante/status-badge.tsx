@@ -16,10 +16,22 @@ const labels: Record<string, string> = {
   a_completer: 'À compléter',
 }
 
-export function StatusBadge({ status }: { status: string }) {
+type Props = {
+  status: string
+  source?: 'manuelle' | 'parrainage' | null
+}
+
+export function StatusBadge({ status, source }: Props) {
+  // Le suffixe "parrainage" n'est affiché que si validée par parrainage,
+  // pour distinguer la filière express de la validation manuelle (OCR + visio).
+  const showParrainage = status === 'valide' && source === 'parrainage'
+  const label = showParrainage ? 'Validé · parrainage' : labels[status] || status
   return (
-    <span className={`px-2 py-1 rounded-full text-xs font-medium ${styles[status] || 'bg-gray-100 text-gray-600'}`}>
-      {labels[status] || status}
+    <span
+      className={`px-2 py-1 rounded-full text-xs font-medium ${styles[status] || 'bg-gray-100 text-gray-600'}`}
+      title={showParrainage ? 'Validée par parrainage (filière express, sans visio)' : undefined}
+    >
+      {label}
     </span>
   )
 }

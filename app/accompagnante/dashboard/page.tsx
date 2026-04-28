@@ -26,7 +26,7 @@ export default async function AccompagnanteDashboard() {
 
   const { data: profile } = await supabase
     .from('accompagnantes_profiles')
-    .select('id, validation_status, diplomes, refus_motif, ville, rayon_km, specialites, disponible, indisponible_jusqu_au')
+    .select('id, validation_status, validation_source, diplomes, refus_motif, ville, rayon_km, specialites, disponible, indisponible_jusqu_au')
     .eq('user_id', user.id)
     .single()
 
@@ -116,7 +116,12 @@ export default async function AccompagnanteDashboard() {
               <h2 className="text-xl font-bold text-gray-900">
                 {userData.first_name} {userData.last_name}
               </h2>
-              {profile && <StatusBadge status={profile.validation_status} />}
+              {profile && (
+                <StatusBadge
+                  status={profile.validation_status}
+                  source={profile.validation_source as 'manuelle' | 'parrainage' | null}
+                />
+              )}
             </div>
             {profile?.ville && (
               <p className="text-sm text-gray-500 mt-1 flex items-center gap-1">
