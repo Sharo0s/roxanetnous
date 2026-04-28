@@ -197,7 +197,7 @@ export default async function AccompagnanteDashboard() {
                   href="/accompagnante/abonnement"
                   className="inline-flex items-center px-4 py-2 bg-accent text-black rounded-lg btn-hover transition text-sm font-medium"
                 >
-                  Souscrire mon abonnement
+                  Souscrire à un abonnement
                 </Link>
               </div>
             )}
