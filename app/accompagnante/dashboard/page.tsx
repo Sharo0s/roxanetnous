@@ -155,8 +155,9 @@ export default async function AccompagnanteDashboard() {
                   Plus qu&apos;une étape : souscrivez votre abonnement
                 </h3>
                 <p className="text-gray-600 mb-4">
-                  Grâce à votre parrainage, vous serez validée automatiquement
-                  dès la souscription, sans visio ni vérification de diplôme.
+                  Votre marraine se porte garante : pas de visio, pas de
+                  vérification de documents. Souscrivez et vous publiez
+                  vos annonces dans la foulée.
                 </p>
                 <Link
                   href="/accompagnante/abonnement"
