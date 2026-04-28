@@ -152,11 +152,16 @@ export async function GET(request: NextRequest) {
       }
 
       try {
+        // Stripe limite coupon.name à 40 caractères. L'email peut faire dépasser
+        // facilement, donc on tronque proprement (préfixe lisible + email tronqué
+        // ou fallback sur le user_id si pas d'email).
+        const namePrefix = 'Parrainage 6 mois - '
+        const couponName = (namePrefix + marraineUser.email).slice(0, 40)
         const coupon = await stripe.coupons.create({
           percent_off: 100,
           duration: 'repeating',
           duration_in_months: 6,
-          name: `Récompense parrainage - ${marraineUser.email}`,
+          name: couponName,
           metadata: { user_id: row.marraine_id, type: 'parrainage_recompense' },
         })
 

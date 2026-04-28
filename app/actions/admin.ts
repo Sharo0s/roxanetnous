@@ -526,10 +526,12 @@ export async function adminGrantSubscription(
     }
 
     // Creer un coupon 100% pour abonnement offert par admin
+    // Stripe limite coupon.name à 40 caractères, donc on tronque.
+    const couponName = (`Offert par admin - ${targetUser.email}`).slice(0, 40)
     const coupon = await stripe.coupons.create({
       percent_off: 100,
       duration: 'forever',
-      name: `Offert par admin - ${targetUser.email}`,
+      name: couponName,
     })
 
     // Creer l'abonnement Stripe avec coupon 100%
