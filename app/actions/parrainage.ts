@@ -236,9 +236,13 @@ export async function validateCode(rawCode: string): Promise<ValidationCodeResul
     return { valid: false, reason: 'unknown_code' }
   }
 
+  // Désambiguïsation FK : accompagnantes_profiles a deux FK vers users
+  // (user_id et validated_by), donc PostgREST exige un hint explicite
+  // sur le nom de la contrainte. Sans cela, l'embed renvoie un tableau
+  // vide et la marraine apparaît comme non validée.
   const { data: marraine } = await supabaseAdmin
     .from('users')
-    .select('first_name, accompagnantes_profiles!inner(validation_status)')
+    .select('first_name, accompagnantes_profiles!auxiliaires_profiles_user_id_fkey(validation_status)')
     .eq('id', row.user_id)
     .maybeSingle()
 
