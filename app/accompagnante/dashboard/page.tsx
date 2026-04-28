@@ -190,8 +190,8 @@ export default async function AccompagnanteDashboard() {
                 </h3>
                 <p className="text-gray-600 mb-4">
                   Votre marraine se porte garante : pas de visio, pas de
-                  vérification de documents. Souscrivez et vous publiez
-                  vos annonces dans la foulée.
+                  vérification de documents. Souscrivez à un abonnement et
+                  vous pourrez publier votre première annonce.
                 </p>
                 <Link
                   href="/accompagnante/abonnement"
