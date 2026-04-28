@@ -1,5 +1,5 @@
 import { SPECIALITES } from '@/lib/constants'
-import type { OnboardingData } from '@/app/accompagnante/onboarding/page'
+import type { OnboardingData } from '@/components/accompagnante/onboarding-client'
 
 type Props = {
   data: OnboardingData

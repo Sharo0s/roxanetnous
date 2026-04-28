@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react'
 import { CityAutocomplete } from '@/components/ui/city-autocomplete'
 import { MapRadius } from '@/components/ui/map-radius'
-import type { OnboardingData } from '@/app/accompagnante/onboarding/page'
+import type { OnboardingData } from '@/components/accompagnante/onboarding-client'
 
 type Props = {
   data: OnboardingData
