@@ -150,17 +150,17 @@ export default async function AccompagnanteDashboard() {
         ) : (
           <div className="space-y-4">
             {isFilleule && profile.validation_status === 'en_attente' && !subscribed && (
-              <div className="p-4 rounded-xl border border-accent bg-accent/20 text-sm">
-                <p className="font-medium text-black">
-                  Plus qu&apos;une étape : souscrivez votre abonnement pour activer votre profil.
-                </p>
-                <p className="text-gray-700 mt-1">
+              <div className="bg-white rounded-xl border border-accent p-6">
+                <h3 className="font-semibold text-lg text-black mb-2">
+                  Plus qu&apos;une étape : souscrivez votre abonnement
+                </h3>
+                <p className="text-gray-600 mb-4">
                   Grâce à votre parrainage, vous serez validée automatiquement
                   dès la souscription, sans visio ni vérification de diplôme.
                 </p>
                 <Link
                   href="/accompagnante/abonnement"
-                  className="inline-flex items-center mt-3 px-4 py-2 bg-accent text-black rounded-lg btn-hover transition text-sm font-medium"
+                  className="inline-flex items-center px-4 py-2 bg-accent text-black rounded-lg btn-hover transition text-sm font-medium"
                 >
                   Souscrire mon abonnement
                 </Link>
