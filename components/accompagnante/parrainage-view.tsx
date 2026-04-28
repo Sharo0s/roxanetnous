@@ -116,8 +116,8 @@ export function ParrainageView({ code, baseUrl, compteur, totalRecompenses, fill
         </div>
         <p className="text-sm text-gray-600 mt-4">
           Partagez ce code ou ce lien avec une accompagnante de votre réseau.
-          À son inscription, elle évite la visio et est validée automatiquement
-          dès qu&apos;elle souscrit son abonnement.
+          Vous vous portez garante : elle évite la visio et la vérification
+          de documents, et publie ses annonces dès la souscription.
         </p>
       </div>
 

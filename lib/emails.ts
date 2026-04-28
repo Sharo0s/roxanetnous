@@ -554,7 +554,7 @@ export async function sendParrainageBienvenueMarraine(params: {
           <p>Comment ça marche :</p>
           <ul>
             <li>Partagez ce code avec une accompagnante de votre réseau professionnel.</li>
-            <li>À son inscription, elle saute la vérification (pas d'OCR ni de visio) et est validée automatiquement dès qu'elle souscrit son abonnement.</li>
+            <li>À son inscription, elle s'appuie sur votre garantie : pas de vérification de documents ni de visio, et son profil est activé dès la souscription.</li>
             <li>5 parrainages confirmés vous offrent <strong>6 mois d'abonnement gratuit</strong>.</li>
           </ul>
           <p style="margin-top: 24px;">

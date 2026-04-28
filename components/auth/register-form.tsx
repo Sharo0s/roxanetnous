@@ -329,7 +329,7 @@ export function RegisterForm() {
                     Code valide{parrainageState.marraineFirstName
                       ? ` (parrainage par ${parrainageState.marraineFirstName})`
                       : ''}
-                    {' '}— vous serez validée automatiquement dès votre abonnement.
+                    . Votre marraine se porte garante — vous publierez vos annonces dès la souscription.
                   </p>
                 )}
                 {parrainageState.status === 'invalid' && (
@@ -338,7 +338,7 @@ export function RegisterForm() {
                   </p>
                 )}
                 <p className="mt-2 text-xs text-gray-500">
-                  Si une accompagnante validée vous a transmis un code, saisissez-le ici. Vous éviterez la visio et serez validée automatiquement à la souscription de votre abonnement.
+                  Si une accompagnante validée vous a transmis un code, saisissez-le ici. Sa garantie remplace la visio et la vérification de documents : vous publierez vos annonces dès la souscription.
                 </p>
               </div>
 
