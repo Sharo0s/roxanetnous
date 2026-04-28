@@ -37,8 +37,36 @@ export async function submitOnboarding(data: {
     return { error: 'Accès non autorisé.' }
   }
 
-  if (data.diplomes.length === 0 || !data.experience || data.specialites.length === 0) {
-    return { error: 'Diplômes, expérience et spécialités sont requis.' }
+  // Workaround flow parrainage (Story 2.1, AC7) : si la filleule a parrainee_par
+  // ET un parrainage actif (statut 'inscrite'), les uploads et le diplôme deviennent
+  // optionnels. On exige aussi que le parrainage ne soit pas bloqué/fraude pour
+  // empêcher tout bypass via un état corrompu côté users.parrainee_par.
+  // Service role : la RLS sur `users` peut ne pas exposer la colonne `parrainee_par`
+  // au client utilisateur ; cohérent avec la lecture côté `onboarding/page.tsx`.
+  const supabaseAdmin = await createClient({ serviceRole: true })
+  const { data: parrainageRow } = await supabaseAdmin
+    .from('users')
+    .select('parrainee_par')
+    .eq('id', user.id)
+    .maybeSingle()
+
+  let isFilleule = false
+  if (parrainageRow?.parrainee_par) {
+    const { data: activeParrainage } = await supabaseAdmin
+      .from('parrainages')
+      .select('id, statut')
+      .eq('filleule_id', user.id)
+      .eq('marraine_id', parrainageRow.parrainee_par)
+      .in('statut', ['inscrite', 'abonnee', 'confirme'])
+      .limit(1)
+      .maybeSingle()
+    isFilleule = !!activeParrainage
+  }
+
+  if (!isFilleule) {
+    if (data.diplomes.length === 0 || !data.experience || data.specialites.length === 0) {
+      return { error: 'Diplômes, expérience et spécialités sont requis.' }
+    }
   }
 
   if (!data.ville || !data.code_postal) {
@@ -47,6 +75,22 @@ export async function submitOnboarding(data: {
 
   if (!/^\d{5}$/.test(data.code_postal)) {
     return { error: 'Le code postal doit contenir 5 chiffres.' }
+  }
+
+  // M2 (code review 2026-04-28) : validation des disponibilités, applicable
+  // aussi en flow filleule. Le bypass parrainage ne doit pas rendre le profil
+  // inexploitable côté recherche : il faut au minimum une plage horaire ou
+  // l'option flexible.
+  const dispo = data.disponibilites
+  const isFlexible =
+    typeof dispo === 'object' && dispo !== null && 'flexible' in dispo && dispo.flexible === true
+  const hasSlots =
+    typeof dispo === 'object' &&
+    dispo !== null &&
+    !('flexible' in dispo) &&
+    Object.values(dispo as Record<string, string[]>).some((slots) => Array.isArray(slots) && slots.length > 0)
+  if (!isFlexible && !hasSlots) {
+    return { error: 'Renseignez au moins une plage horaire ou cochez "flexible".' }
   }
 
   // Geocoder l'adresse pour obtenir les coordonnees

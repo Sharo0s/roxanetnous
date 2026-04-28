@@ -1,10 +1,16 @@
 'use server'
 
+import { after } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { sendValidationResultEmail, sendNewMessageEmail } from '@/lib/emails'
+import {
+  sendValidationResultEmail,
+  sendNewMessageEmail,
+  sendParrainageBienvenueMarraine,
+} from '@/lib/emails'
 import { stripe } from '@/lib/stripe'
 import { getSubscriptionStatus } from '@/lib/subscription-helpers'
+import { generateCodeForUserSystem } from '@/lib/parrainage-codes'
 
 const VISIO_INVITATION_MESSAGE = `Bonjour,
 
@@ -46,15 +52,22 @@ export async function validateAccompagnante(
     return { error: 'Le motif est requis pour un refus ou une demande de complément.' }
   }
 
-  // FR11ter : la validation finale n'est autorisee qu'apres la visio
+  // FR11ter : la validation finale n'est autorisée qu'à partir d'un statut
+  // qui justifie une validation manuelle. P5 (code review 2026-04-28) :
+  // élargi à 'refuse' et 'a_completer' pour permettre la re-validation
+  // post-fraude ou après complément de dossier sans recréer une visio.
   if (decision === 'valide') {
     const { data: current } = await supabase
       .from('accompagnantes_profiles')
       .select('validation_status')
       .eq('id', profileId)
       .single()
-    if (current?.validation_status !== 'visio_realisee') {
-      return { error: 'La visio doit être réalisée avant la validation finale.' }
+    const allowedFromStatuses = ['visio_realisee', 'refuse', 'a_completer']
+    if (!current || !allowedFromStatuses.includes(current.validation_status)) {
+      return {
+        error:
+          'La validation finale n\'est autorisée que depuis les statuts visio réalisée, refusée ou à compléter.',
+      }
     }
   }
 
@@ -89,14 +102,15 @@ export async function validateAccompagnante(
     details: { motif: motif || null, decision },
   })
 
-  // Envoyer l'email de resultat de validation (non-bloquant)
-  void (async () => {
+  // Email de résultat de validation : exécuté post-réponse via after() pour
+  // garantir l'achèvement même après redirect() sur Vercel serverless.
+  after(async () => {
     try {
       const { data: auxProfile } = await supabaseAdmin
         .from('accompagnantes_profiles')
         .select('user_id')
         .eq('id', profileId)
-        .single()
+        .maybeSingle()
 
       if (!auxProfile) return
 
@@ -104,9 +118,12 @@ export async function validateAccompagnante(
         .from('users')
         .select('email, first_name')
         .eq('id', auxProfile.user_id)
-        .single()
+        .maybeSingle()
 
-      if (!auxUser) return
+      if (!auxUser?.email) {
+        console.error('[validateAccompagnante][missing_email]', { user_id: auxProfile.user_id })
+        return
+      }
 
       await sendValidationResultEmail({
         email: auxUser.email,
@@ -115,8 +132,52 @@ export async function validateAccompagnante(
         motif,
         userId: auxProfile.user_id,
       })
-    } catch {}
-  })()
+    } catch (e) {
+      console.error('[validateAccompagnante][email_error]', e)
+    }
+  })
+
+  // FR11quinquies — à la validation finale, générer le code de parrainage
+  // de la nouvelle marraine et lui envoyer l'email de bienvenue.
+  // Découplé de l'envoi précédent : un échec d'email de validation ne doit pas
+  // empêcher la génération du code, et inversement.
+  if (decision === 'valide') {
+    after(async () => {
+      try {
+        const { data: auxProfile } = await supabaseAdmin
+          .from('accompagnantes_profiles')
+          .select('user_id')
+          .eq('id', profileId)
+          .maybeSingle()
+        if (!auxProfile) return
+
+        const { data: auxUser } = await supabaseAdmin
+          .from('users')
+          .select('email, first_name')
+          .eq('id', auxProfile.user_id)
+          .maybeSingle()
+        if (!auxUser?.email) {
+          console.error('[validateAccompagnante][parrainage_code][missing_email]', { user_id: auxProfile.user_id })
+          return
+        }
+
+        const codeResult = await generateCodeForUserSystem(auxProfile.user_id)
+        if (!('code' in codeResult)) {
+          console.error('[validateAccompagnante][parrainage_code][generate_failed]', codeResult.error, 'user_id=', auxProfile.user_id)
+          return
+        }
+
+        await sendParrainageBienvenueMarraine({
+          email: auxUser.email,
+          firstName: auxUser.first_name || '',
+          code: codeResult.code,
+          userId: auxProfile.user_id,
+        })
+      } catch (e) {
+        console.error('[validateAccompagnante][parrainage_code]', e)
+      }
+    })
+  }
 
   redirect('/admin')
 }
@@ -167,9 +228,9 @@ export async function markVisioToPlan(profileId: string): Promise<ValidationResu
     details: { planifie_le: new Date().toISOString() },
   })
 
-  // Creer/recuperer la conversation admin <-> accompagnante et y envoyer le message
-  // de convocation visio (remplace l'email de convocation)
-  void (async () => {
+  // Création/récupération de la conversation admin <-> accompagnante et envoi
+  // du message de convocation visio. Exécuté post-réponse via after().
+  after(async () => {
     try {
       let { data: conv } = await supabaseAdmin
         .from('conversations')
@@ -212,15 +273,15 @@ export async function markVisioToPlan(profileId: string): Promise<ValidationResu
         .from('users')
         .select('email, first_name')
         .eq('id', current.user_id)
-        .single()
+        .maybeSingle()
 
       const { data: adminData } = await supabaseAdmin
         .from('users')
         .select('first_name')
         .eq('id', user.id)
-        .single()
+        .maybeSingle()
 
-      if (auxUser) {
+      if (auxUser?.email) {
         await sendNewMessageEmail({
           email: auxUser.email,
           recipientFirstName: auxUser.first_name || '',
@@ -229,8 +290,10 @@ export async function markVisioToPlan(profileId: string): Promise<ValidationResu
           userId: current.user_id,
         })
       }
-    } catch {}
-  })()
+    } catch (e) {
+      console.error('[markVisioToPlan][message_error]', e)
+    }
+  })
 
   redirect('/admin')
 }

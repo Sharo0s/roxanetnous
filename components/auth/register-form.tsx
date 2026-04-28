@@ -3,27 +3,63 @@
 import { useState, useRef, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { signup } from '@/app/actions/auth'
+import { validateCode } from '@/app/actions/parrainage'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import Link from 'next/link'
 
-type Step = 'role' | 'name' | 'email' | 'password'
+type Step = 'role' | 'name' | 'parrainage' | 'email' | 'password'
 
-const STEPS: Step[] = ['role', 'name', 'email', 'password']
+const STEPS_ACCOMPAGNANTE: Step[] = ['role', 'name', 'parrainage', 'email', 'password']
+const STEPS_ACCOMPAGNE: Step[] = ['role', 'name', 'email', 'password']
+
+type ParrainageState =
+  | { status: 'idle' }
+  | { status: 'checking' }
+  | { status: 'valid'; marraineFirstName: string }
+  | {
+      status: 'invalid'
+      reason:
+        | 'invalid_format'
+        | 'invalid_chars'
+        | 'unknown_code'
+        | 'marraine_not_validated'
+        | 'marraine_subscription_inactive'
+    }
+
+const PARRAINAGE_ERRORS: Record<
+  Exclude<ParrainageState, { status: 'idle' | 'checking' | 'valid' }>['reason'],
+  string
+> = {
+  invalid_format: 'Format de code invalide (8 caractères attendus).',
+  invalid_chars:
+    'Caractères invalides : seuls les chiffres 2-9 et lettres A-Z (sans 0, O, 1, I, L) sont autorisés.',
+  unknown_code: 'Ce code de parrainage est inconnu.',
+  marraine_not_validated:
+    'La marraine associée à ce code n\'est pas encore validée.',
+  marraine_subscription_inactive:
+    'Ce code de parrainage n\'est plus actif. Demandez un autre code à votre marraine.',
+}
 
 export function RegisterForm() {
   const searchParams = useSearchParams()
   const initialRole = searchParams.get('role')
   const initialEmail = searchParams.get('email') || ''
+  const initialParrainageCode = (searchParams.get('parrainage_code') || '').toUpperCase()
 
-  const [step, setStep] = useState<Step>(
-    initialRole === 'accompagnante' || initialRole === 'accompagne' ? 'name' : 'role'
-  )
   const [role, setRole] = useState<'accompagnante' | 'accompagne' | null>(
     initialRole === 'accompagnante' || initialRole === 'accompagne' ? initialRole : null
   )
+  const stepsForRole = role === 'accompagnante' ? STEPS_ACCOMPAGNANTE : STEPS_ACCOMPAGNE
+  const [step, setStep] = useState<Step>(
+    initialRole === 'accompagnante' || initialRole === 'accompagne' ? 'name' : 'role'
+  )
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
+  const [parrainageCode, setParrainageCode] = useState(initialParrainageCode)
+  const [parrainageState, setParrainageState] = useState<ParrainageState>({
+    status: 'idle',
+  })
   const [email, setEmail] = useState(initialEmail)
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -33,20 +69,72 @@ export function RegisterForm() {
   const bottomRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    // Scroll vers le bas quand on passe à l'étape suivante
     setTimeout(() => {
       bottomRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' })
     }, 100)
   }, [step])
 
+  // Validation automatique du code pré-rempli depuis l'URL au mount
+  useEffect(() => {
+    if (initialParrainageCode && role === 'accompagnante') {
+      void checkParrainageCode(initialParrainageCode)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   function selectRole(r: 'accompagnante' | 'accompagne') {
     setRole(r)
     setStep('name')
+    // Reset état parrainage si changement de rôle (évite état résiduel après aller-retour)
+    if (r === 'accompagne') {
+      setParrainageCode('')
+      setParrainageState({ status: 'idle' })
+    }
   }
 
   function submitName(e: React.FormEvent) {
     e.preventDefault()
     if (!firstName.trim() || !lastName.trim()) return
+    setStep(role === 'accompagnante' ? 'parrainage' : 'email')
+  }
+
+  async function checkParrainageCode(value: string) {
+    const trimmed = value.trim()
+    if (!trimmed) {
+      setParrainageState({ status: 'idle' })
+      return
+    }
+    setParrainageState({ status: 'checking' })
+    const result = await validateCode(trimmed)
+    if (result.valid) {
+      setParrainageState({
+        status: 'valid',
+        marraineFirstName: result.marraineFirstName,
+      })
+    } else {
+      setParrainageState({ status: 'invalid', reason: result.reason })
+    }
+  }
+
+  async function continueAfterParrainage(e: React.FormEvent) {
+    e.preventDefault()
+    const trimmed = parrainageCode.trim()
+    // Si l'utilisatrice a saisi un code mais ne l'a pas blur (validation onBlur),
+    // l'état peut être 'idle' — on relance la validation avant de progresser
+    // pour éviter d'envoyer un code non-vérifié au server action signup.
+    if (trimmed && parrainageState.status === 'idle') {
+      await checkParrainageCode(trimmed)
+      return
+    }
+    if (trimmed && parrainageState.status === 'invalid') {
+      return
+    }
+    setStep('email')
+  }
+
+  function skipParrainage() {
+    setParrainageCode('')
+    setParrainageState({ status: 'idle' })
     setStep('email')
   }
 
@@ -71,6 +159,9 @@ export function RegisterForm() {
     formData.set('firstName', firstName.trim())
     formData.set('lastName', lastName.trim())
     formData.set('role', role!)
+    if (role === 'accompagnante' && parrainageCode.trim()) {
+      formData.set('parrainage_code', parrainageCode.trim())
+    }
 
     const result = await signup(formData)
     if (result?.error) {
@@ -82,8 +173,9 @@ export function RegisterForm() {
     }
   }
 
-  const stepIndex = STEPS.indexOf(step)
-  const isVisible = (s: Step) => STEPS.indexOf(s) <= stepIndex
+  const stepIndex = stepsForRole.indexOf(step)
+  const isVisible = (s: Step) =>
+    stepsForRole.includes(s) && stepsForRole.indexOf(s) <= stepIndex
   const isCurrent = (s: Step) => s === step
 
   if (emailSent) {
@@ -200,7 +292,83 @@ export function RegisterForm() {
             </form>
           )}
 
-          {/* Step 3 : Email */}
+          {/* Step 3 : Parrainage (accompagnante uniquement) */}
+          {role === 'accompagnante' && isVisible('parrainage') && (
+            <form
+              onSubmit={continueAfterParrainage}
+              className="space-y-4 animate-fade-in"
+            >
+              <div>
+                <label
+                  htmlFor="parrainage_code"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  Code de parrainage <span className="text-gray-400">(optionnel)</span>
+                </label>
+                <Input
+                  id="parrainage_code"
+                  name="parrainage_code"
+                  placeholder="Ex : K7QM2X9P"
+                  maxLength={10}
+                  value={parrainageCode}
+                  onChange={(e) => {
+                    const v = e.target.value.toUpperCase()
+                    setParrainageCode(v)
+                    setParrainageState({ status: 'idle' })
+                  }}
+                  onBlur={(e) => {
+                    void checkParrainageCode(e.target.value)
+                  }}
+                  autoFocus={isCurrent('parrainage')}
+                />
+                {parrainageState.status === 'checking' && (
+                  <p className="mt-2 text-xs text-gray-500">Vérification du code...</p>
+                )}
+                {parrainageState.status === 'valid' && (
+                  <p className="mt-2 text-xs text-gray-700">
+                    Code valide{parrainageState.marraineFirstName
+                      ? ` (parrainage par ${parrainageState.marraineFirstName})`
+                      : ''}
+                    {' '}— vous serez validée automatiquement dès votre abonnement.
+                  </p>
+                )}
+                {parrainageState.status === 'invalid' && (
+                  <p className="mt-2 text-xs text-red-600">
+                    {PARRAINAGE_ERRORS[parrainageState.reason]}
+                  </p>
+                )}
+                <p className="mt-2 text-xs text-gray-500">
+                  Si une accompagnante validée vous a transmis un code, saisissez-le ici. Vous éviterez la visio et serez validée automatiquement à la souscription de votre abonnement.
+                </p>
+              </div>
+
+              {isCurrent('parrainage') && (
+                <div className="flex flex-col sm:flex-row gap-2">
+                  <Button
+                    type="submit"
+                    className="w-full"
+                    disabled={
+                      parrainageCode.trim().length > 0 &&
+                      (parrainageState.status === 'invalid' ||
+                        parrainageState.status === 'checking')
+                    }
+                  >
+                    Continuer
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full"
+                    onClick={skipParrainage}
+                  >
+                    Continuer sans code
+                  </Button>
+                </div>
+              )}
+            </form>
+          )}
+
+          {/* Step 4 : Email */}
           {isVisible('email') && (
             <form onSubmit={submitEmail} className="space-y-4 animate-fade-in">
               <Input
@@ -221,7 +389,7 @@ export function RegisterForm() {
             </form>
           )}
 
-          {/* Step 4 : Mot de passe */}
+          {/* Step 5 : Mot de passe */}
           {isVisible('password') && (
             <form onSubmit={submitPassword} className="space-y-4 animate-fade-in">
               <Input

@@ -29,6 +29,7 @@ export default function PolitiqueConfidentialitePage() {
               <li>Documents justificatifs : pièce d&apos;identité, diplôme (pour les accompagnantes)</li>
               <li>Données d&apos;utilisation : annonces, messages, favoris</li>
               <li>Données de paiement : gérées par Stripe (nous ne stockons pas les numéros de carte)</li>
+              <li>Données de parrainage (accompagnantes) : code de parrainage, identifiant de la marraine et de la filleule, adresse IP au moment de l&apos;inscription, et empreinte technique de la carte de paiement (fingerprint Stripe, sans numéro de carte ; le paiement est limité aux cartes bancaires pour rendre cette détection effective) — conservés à des fins d&apos;audit et de prévention de la fraude. Une détection automatique compare l&apos;email, l&apos;adresse IP, l&apos;adresse postale et l&apos;empreinte de la carte entre marraine et filleule pour identifier les parrainages suspects ; aucune décision pénalisante n&apos;est prise automatiquement sur la seule base de l&apos;adresse IP, qui ne sert qu&apos;à signaler le cas à un administrateur pour revue manuelle.</li>
             </ul>
           </section>
 

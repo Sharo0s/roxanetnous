@@ -528,6 +528,251 @@ export async function sendRenewalReminderEmail(params: {
   }
 }
 
+export async function sendParrainageBienvenueMarraine(params: {
+  email: string
+  firstName: string
+  code: string
+  userId?: string
+}) {
+  const subject = 'Votre code de parrainage roxanetnous'
+  const dashboardUrl = `${BASE_URL}/accompagnante/dashboard`
+
+  try {
+    await resend.emails.send({
+      from: FROM_EMAIL,
+      to: params.email,
+      subject,
+      html: `
+        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+          <h1 style="color: #000;">Votre profil est validé, ${escapeHtml(params.firstName)}</h1>
+          <p>Félicitations, votre profil accompagnante est maintenant validé sur roxanetnous.</p>
+          <p>Pour vous remercier de votre engagement, nous vous offrons un programme de parrainage : invitez d'autres accompagnantes à rejoindre la plateforme.</p>
+          <div style="margin: 24px 0; padding: 24px; background: #f5f5f5; border-radius: 8px; text-align: center;">
+            <p style="margin: 0 0 8px 0; color: #666; font-size: 14px;">Votre code de parrainage</p>
+            <p style="margin: 0; font-size: 32px; font-weight: bold; letter-spacing: 4px; color: #000;">${escapeHtml(params.code)}</p>
+          </div>
+          <p>Comment ça marche :</p>
+          <ul>
+            <li>Partagez ce code avec une accompagnante de votre réseau professionnel.</li>
+            <li>À son inscription, elle saute la vérification (pas d'OCR ni de visio) et est validée automatiquement dès qu'elle souscrit son abonnement.</li>
+            <li>5 parrainages confirmés vous offrent <strong>6 mois d'abonnement gratuit</strong>.</li>
+          </ul>
+          <p style="margin-top: 24px;">
+            <a href="${dashboardUrl}" style="background: #000; color: #fff; padding: 12px 24px; text-decoration: none; display: inline-block;">
+              Accéder à mon espace
+            </a>
+          </p>
+        </div>
+      `,
+    })
+
+    await logNotification({
+      userId: params.userId,
+      email: params.email,
+      type: 'parrainage_bienvenue',
+      subject,
+      status: 'sent',
+    })
+  } catch (error) {
+    await logNotification({
+      userId: params.userId,
+      email: params.email,
+      type: 'parrainage_bienvenue',
+      subject,
+      status: 'error',
+      error: error instanceof Error ? error.message : 'Erreur inconnue',
+    })
+  }
+}
+
+export async function sendParrainageFilleuleConfirmation(params: {
+  email: string
+  firstName: string
+  marraineFirstName: string
+  userId?: string
+}) {
+  const subject = 'Bienvenue sur roxanetnous, votre profil est validé'
+  const dashboardUrl = `${BASE_URL}/accompagnante/dashboard`
+  const marraineLabel = params.marraineFirstName?.trim()
+    ? escapeHtml(params.marraineFirstName)
+    : 'votre marraine'
+
+  try {
+    await resend.emails.send({
+      from: FROM_EMAIL,
+      to: params.email,
+      subject,
+      html: `
+        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+          <h1 style="color: #000;">Bienvenue ${escapeHtml(params.firstName)}</h1>
+          <p>Grâce au parrainage de ${marraineLabel}, votre profil accompagnante est validé automatiquement sur roxanetnous.</p>
+          <p>Vous pouvez dès maintenant publier vos annonces, répondre aux demandes des accompagnés et gérer votre planning.</p>
+          <p style="margin-top: 24px;">
+            <a href="${dashboardUrl}" style="background: #000; color: #fff; padding: 12px 24px; text-decoration: none; display: inline-block;">
+              Accéder à mon espace
+            </a>
+          </p>
+        </div>
+      `,
+    })
+
+    await logNotification({
+      userId: params.userId,
+      email: params.email,
+      type: 'parrainage_filleule_confirm',
+      subject,
+      status: 'sent',
+    })
+  } catch (error) {
+    await logNotification({
+      userId: params.userId,
+      email: params.email,
+      type: 'parrainage_filleule_confirm',
+      subject,
+      status: 'error',
+      error: error instanceof Error ? error.message : 'Erreur inconnue',
+    })
+  }
+}
+
+export async function sendParrainageRecompense(params: {
+  email: string
+  firstName: string
+  totalRecompenses: number
+  userId?: string
+}) {
+  const subject = 'Félicitations, vous avez 6 mois offerts sur roxanetnous'
+  const abonnementUrl = `${BASE_URL}/accompagnante/abonnement`
+  const safeFirstName = params.firstName?.trim() ? escapeHtml(params.firstName) : ''
+  const greetingFirstName = safeFirstName ? `, ${safeFirstName}` : ''
+  const cumulSentence = params.totalRecompenses > 1
+    ? `<p>C'est votre ${params.totalRecompenses}e récompense — merci de continuer à faire grandir la communauté !</p>`
+    : ''
+
+  try {
+    await resend.emails.send({
+      from: FROM_EMAIL,
+      to: params.email,
+      subject,
+      html: `
+        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+          <h1 style="color: #000;">Félicitations${greetingFirstName}, 6 mois vous sont offerts</h1>
+          <p>5 accompagnantes que vous avez parrainées sont actives depuis plus de 30 jours. Comme promis, votre prochain prélèvement sera remplacé par 6 mois d'abonnement gratuit, automatiquement appliqué sur votre compte.</p>
+          ${cumulSentence}
+          <p style="margin-top: 24px;">
+            <a href="${abonnementUrl}" style="background: #000; color: #fff; padding: 12px 24px; text-decoration: none; display: inline-block;">
+              Voir mon abonnement
+            </a>
+          </p>
+          <p style="margin-top: 24px;">Continuez à parrainer pour cumuler de nouvelles récompenses (5 nouveaux parrainages confirmés = 6 mois supplémentaires).</p>
+        </div>
+      `,
+    })
+
+    await logNotification({
+      userId: params.userId,
+      email: params.email,
+      type: 'parrainage_recompense',
+      subject,
+      status: 'sent',
+    })
+  } catch (error) {
+    await logNotification({
+      userId: params.userId,
+      email: params.email,
+      type: 'parrainage_recompense',
+      subject,
+      status: 'error',
+      error: error instanceof Error ? error.message : 'Erreur inconnue',
+    })
+  }
+}
+
+// Story 2.3 AC5 : email admin déclenché à chaque blocage ou flag de suspicion sur
+// parrainages. Destinataire : ADMIN_NOTIFICATIONS_EMAIL (variable dédiée et obligatoire).
+// M5 (code review 2026-04-28) : pas de fallback sur RESEND_FROM_EMAIL. Mieux
+// vaut pas d'alerte qu'une alerte envoyée vers une boîte no-reply non monitorée
+// (auto-envoi from=to qui peut aussi déclencher SPF/DMARC).
+export async function sendAdminParrainageFlag(params: {
+  marraineName: string
+  filleuleName: string
+  type: 'meme_email' | 'meme_carte' | 'meme_ip' | 'meme_adresse'
+  parrainageId: string
+}) {
+  const adminEmail = process.env.ADMIN_NOTIFICATIONS_EMAIL || null
+  if (!adminEmail) {
+    console.error(
+      '[sendAdminParrainageFlag] ADMIN_NOTIFICATIONS_EMAIL non défini : alerte anti-fraude perdue.',
+      { type: params.type, parrainageId: params.parrainageId },
+    )
+    return
+  }
+
+  const isBlocage = params.type === 'meme_email' || params.type === 'meme_carte'
+  const subjectPrefix = isBlocage ? 'Parrainage bloqué' : 'Parrainage suspect'
+
+  const typeLabels: Record<string, string> = {
+    meme_email: 'même email entre marraine et filleule',
+    meme_carte: 'même carte de paiement entre marraine et filleule',
+    meme_ip: 'même adresse IP que d\'autres filleules de cette marraine',
+    meme_adresse: 'même adresse postale entre marraine et filleule',
+  }
+
+  const subject = `${subjectPrefix} - ${typeLabels[params.type] || params.type}`
+  const link = `${BASE_URL}/admin/parrainages/blacklist?id=${encodeURIComponent(params.parrainageId)}`
+
+  try {
+    await resend.emails.send({
+      from: FROM_EMAIL,
+      to: adminEmail,
+      subject,
+      html: `
+        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+          <h1 style="color: #000;">${subjectPrefix}</h1>
+          <p>Un parrainage déclenche une alerte de détection automatique sur roxanetnous.</p>
+          <table style="border-collapse: collapse; margin: 16px 0;">
+            <tr>
+              <td style="padding: 8px 16px 8px 0; color: #666;">Marraine :</td>
+              <td style="padding: 8px 0; color: #000; font-weight: 600;">${escapeHtml(params.marraineName)}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 16px 8px 0; color: #666;">Filleule :</td>
+              <td style="padding: 8px 0; color: #000; font-weight: 600;">${escapeHtml(params.filleuleName)}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 16px 8px 0; color: #666;">Raison :</td>
+              <td style="padding: 8px 0; color: #000;">${escapeHtml(typeLabels[params.type] || params.type)}</td>
+            </tr>
+          </table>
+          <p style="margin-top: 24px;">
+            <a href="${link}" style="background: #000; color: #fff; padding: 12px 24px; text-decoration: none; display: inline-block;">
+              Examiner le parrainage
+            </a>
+          </p>
+          <p style="color: #999; font-size: 12px; margin-top: 32px;">
+            Cet email est envoyé automatiquement par le système de détection anti-fraude parrainage.
+          </p>
+        </div>
+      `,
+    })
+
+    await logNotification({
+      email: adminEmail,
+      type: 'admin_parrainage_flag',
+      subject,
+      status: 'sent',
+    })
+  } catch (error) {
+    await logNotification({
+      email: adminEmail,
+      type: 'admin_parrainage_flag',
+      subject,
+      status: 'error',
+      error: error instanceof Error ? error.message : 'Erreur inconnue',
+    })
+  }
+}
+
 export async function sendExpirationReminderEmail(params: {
   email: string
   firstName: string

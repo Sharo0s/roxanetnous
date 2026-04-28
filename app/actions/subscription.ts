@@ -15,7 +15,7 @@ export async function createCheckoutSession(formData: FormData): Promise<void> {
 
   const { data: userData } = await supabase
     .from('users')
-    .select('role, email, first_name, last_name')
+    .select('role, email, first_name, last_name, parrainee_par')
     .eq('id', user.id)
     .single()
 
@@ -43,20 +43,54 @@ export async function createCheckoutSession(formData: FormData): Promise<void> {
   const trialDays = getTrialDays(plan)
   const dashboardPath = role === 'accompagnante' ? '/accompagnante' : '/accompagne'
 
+  const metadata: Record<string, string> = { user_id: user.id, role, plan }
+
+  // FR45/AC8 : si la filleule a été parrainée, on injecte le code dans la metadata
+  // de la session Stripe pour que la success page puisse déclencher la validation
+  // automatique au retour (cf. confirmParrainageOnSuccess).
+  // RLS sur `parrainages` autorise uniquement la marraine à lire ses lignes ; la
+  // filleule ne peut donc pas lire la sienne via le client utilisateur. On passe
+  // par le service role pour cette lecture serveur-side.
+  if (role === 'accompagnante' && userData.parrainee_par) {
+    const supabaseAdmin = await createClient({ serviceRole: true })
+    const { data: parrainageRow } = await supabaseAdmin
+      .from('parrainages')
+      .select('code')
+      .eq('filleule_id', user.id)
+      .eq('statut', 'inscrite')
+      .order('filleule_inscrite_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+    if (parrainageRow?.code) {
+      metadata.parrainage_code = parrainageRow.code
+    }
+  }
+
   const sessionParams: Record<string, unknown> = {
     customer: customerId,
     mode: 'subscription',
     line_items: [{ price: priceId, quantity: 1 }],
     success_url: `${process.env.NEXT_PUBLIC_BASE_URL}${dashboardPath}/abonnement/success?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}${dashboardPath}/abonnement`,
-    metadata: { user_id: user.id, role, plan },
+    metadata,
     billing_address_collection: 'required',
     customer_update: { name: 'auto', address: 'auto' },
+    // M6/M7 (code review 2026-04-28) : restriction à 'card' pour garantir que
+    // pm.card.fingerprint sera disponible côté webhook et permettre la
+    // détection anti-fraude par carte partagée. Apple Pay / Google Pay /
+    // Link / SEPA n'exposent pas tous le fingerprint et casseraient la promesse
+    // affichée dans la politique de confidentialité.
+    payment_method_types: ['card'],
   }
 
+  // Propager la metadata sur la subscription pour qu'elle reste accessible aux
+  // handlers webhook ultérieurs (customer.subscription.updated, etc.) — utile
+  // notamment pour le rattrapage du fingerprint parrainage en mode trial.
+  const subscriptionData: Record<string, unknown> = { metadata }
   if (trialDays) {
-    sessionParams.subscription_data = { trial_period_days: trialDays }
+    subscriptionData.trial_period_days = trialDays
   }
+  sessionParams.subscription_data = subscriptionData
 
   const session = await stripe.checkout.sessions.create(sessionParams as any)
 
