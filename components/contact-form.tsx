@@ -33,16 +33,29 @@ export function ContactForm() {
       {error && (
         <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg p-3">{error}</p>
       )}
-      <div>
-        <label htmlFor="contact-name" className="block text-sm font-medium text-black mb-1">Nom</label>
-        <input
-          id="contact-name"
-          name="name"
-          type="text"
-          required
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#FFB06E]"
-          placeholder="Votre nom"
-        />
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label htmlFor="contact-firstname" className="block text-sm font-medium text-black mb-1">Prénom</label>
+          <input
+            id="contact-firstname"
+            name="firstname"
+            type="text"
+            required
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#FFB06E]"
+            placeholder="Votre prénom"
+          />
+        </div>
+        <div>
+          <label htmlFor="contact-lastname" className="block text-sm font-medium text-black mb-1">Nom</label>
+          <input
+            id="contact-lastname"
+            name="lastname"
+            type="text"
+            required
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#FFB06E]"
+            placeholder="Votre nom"
+          />
+        </div>
       </div>
       <div>
         <label htmlFor="contact-email" className="block text-sm font-medium text-black mb-1">Email</label>
@@ -53,6 +66,18 @@ export function ContactForm() {
           required
           className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#FFB06E]"
           placeholder="vous@exemple.com"
+        />
+      </div>
+      <div>
+        <label htmlFor="contact-subject" className="block text-sm font-medium text-black mb-1">Sujet</label>
+        <input
+          id="contact-subject"
+          name="subject"
+          type="text"
+          required
+          maxLength={150}
+          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#FFB06E]"
+          placeholder="Sujet de votre message"
         />
       </div>
       <div>

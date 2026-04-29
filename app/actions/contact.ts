@@ -8,12 +8,18 @@ const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || 'roxanetnous <onboarding@res
 const CONTACT_EMAIL = 'roxanetnous@outlook.com'
 
 export async function sendContactMessage(formData: FormData): Promise<{ error?: string; success?: boolean }> {
-  const name = formData.get('name') as string
+  const firstname = formData.get('firstname') as string
+  const lastname = formData.get('lastname') as string
   const email = formData.get('email') as string
+  const subject = formData.get('subject') as string
   const message = formData.get('message') as string
 
-  if (!name || !email || !message) {
+  if (!firstname || !lastname || !email || !subject || !message) {
     return { error: 'Tous les champs sont obligatoires.' }
+  }
+
+  if (subject.length > 150) {
+    return { error: 'Le sujet ne doit pas depasser 150 caracteres.' }
   }
 
   if (message.length > 2000) {
@@ -25,17 +31,22 @@ export async function sendContactMessage(formData: FormData): Promise<{ error?: 
     return { error: 'Adresse email invalide.' }
   }
 
+  const fullName = `${firstname} ${lastname}`
+  const emailSubject = `Contact roxanetnous : ${subject}`
+
   try {
     await resend.emails.send({
       from: FROM_EMAIL,
       to: CONTACT_EMAIL,
       replyTo: email,
-      subject: `Contact roxanetnous : ${name}`,
+      subject: emailSubject,
       html: `
         <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
           <h2 style="color: #000;">Nouveau message de contact</h2>
-          <p><strong>Nom :</strong> ${name}</p>
+          <p><strong>Prénom :</strong> ${firstname}</p>
+          <p><strong>Nom :</strong> ${lastname}</p>
           <p><strong>Email :</strong> ${email}</p>
+          <p><strong>Sujet :</strong> ${subject}</p>
           <p><strong>Message :</strong></p>
           <p style="white-space: pre-wrap; background: #f5f5f5; padding: 12px; border-radius: 8px;">${message}</p>
         </div>
@@ -46,7 +57,7 @@ export async function sendContactMessage(formData: FormData): Promise<{ error?: 
     await supabase.from('notifications_log').insert({
       email: CONTACT_EMAIL,
       type: 'contact_form',
-      subject: `Contact roxanetnous : ${name}`,
+      subject: emailSubject,
       status: 'sent',
       sent_at: new Date().toISOString(),
     })
@@ -57,7 +68,7 @@ export async function sendContactMessage(formData: FormData): Promise<{ error?: 
     await supabase.from('notifications_log').insert({
       email: CONTACT_EMAIL,
       type: 'contact_form',
-      subject: `Contact roxanetnous : ${name}`,
+      subject: emailSubject,
       status: 'error',
       error: error instanceof Error ? error.message : 'Erreur inconnue',
     })
