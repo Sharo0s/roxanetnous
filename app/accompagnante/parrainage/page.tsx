@@ -43,19 +43,26 @@ export default async function AccompagnanteParrainagePage() {
 
   const { data: filleulesData } = await supabase
     .from('parrainages')
-    .select('filleule_id, statut, filleule_inscrite_at, filleule_abonnee_at, users!parrainages_filleule_id_fkey(first_name)')
+    .select('filleule_id, statut, filleule_inscrite_at, filleule_abonnee_at, users!parrainages_filleule_id_fkey(first_name, last_name)')
     .eq('marraine_id', user.id)
     .in('statut', ['inscrite', 'abonnee', 'confirme'])
     .order('filleule_inscrite_at', { ascending: false })
     .limit(50)
 
   const filleules = (filleulesData || []).map((row) => {
-    const usersJoin = row.users as unknown as { first_name: string | null } | { first_name: string | null }[] | null
+    const usersJoin = row.users as unknown as
+      | { first_name: string | null; last_name: string | null }
+      | { first_name: string | null; last_name: string | null }[]
+      | null
     const firstName = Array.isArray(usersJoin)
       ? usersJoin[0]?.first_name ?? null
       : usersJoin?.first_name ?? null
+    const lastName = Array.isArray(usersJoin)
+      ? usersJoin[0]?.last_name ?? null
+      : usersJoin?.last_name ?? null
     return {
       firstName,
+      lastName,
       statut: row.statut as FilleuleStatut,
       inscriteAt: row.filleule_inscrite_at as string,
       abonneeAt: row.filleule_abonnee_at as string | null,

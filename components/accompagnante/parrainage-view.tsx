@@ -6,9 +6,26 @@ type FilleuleStatut = 'inscrite' | 'abonnee' | 'confirme' | 'fraude' | 'bloque'
 
 type Filleule = {
   firstName: string | null
+  lastName: string | null
   statut: FilleuleStatut
   inscriteAt: string
   abonneeAt: string | null
+}
+
+function capitalize(s: string): string {
+  if (!s) return s
+  return s.charAt(0).toUpperCase() + s.slice(1).toLowerCase()
+}
+
+// Format compact pour preserver la confidentialite : "Marie.D" au lieu
+// du nom complet, en respectant la capitalisation (Marie, pas MARIE).
+function formatFilleuleName(firstName: string | null, lastName: string | null): string {
+  const first = (firstName || '').trim()
+  const last = (lastName || '').trim()
+  if (!first && !last) return 'Filleule'
+  const formattedFirst = first ? capitalize(first) : ''
+  const initialLast = last ? `.${last.charAt(0).toUpperCase()}` : ''
+  return `${formattedFirst}${initialLast}`
 }
 
 type Props = {
@@ -182,7 +199,7 @@ export function ParrainageView({ code, baseUrl, compteur, totalRecompenses, fill
                 label =
                   joursRestants === 0
                     ? 'Validée aujourd’hui'
-                    : `J+${joursEcoules} · validée dans ${joursRestants} jour${joursRestants > 1 ? 's' : ''}`
+                    : `Validée dans ${joursRestants} jour${joursRestants > 1 ? 's' : ''}`
                 percent = (joursEcoules / 30) * 100
                 barClass = 'bg-accent'
               } else {
@@ -197,7 +214,7 @@ export function ParrainageView({ code, baseUrl, compteur, totalRecompenses, fill
                 <li key={`${f.inscriteAt}-${idx}`} className="space-y-1.5">
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-gray-900 font-medium">
-                      {f.firstName ?? 'Filleule'}
+                      {formatFilleuleName(f.firstName, f.lastName)}
                     </span>
                     <span className={`text-xs ${labelClass}`}>{label}</span>
                   </div>
