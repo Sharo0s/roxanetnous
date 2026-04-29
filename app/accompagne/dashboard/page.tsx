@@ -44,6 +44,14 @@ export default async function AccompagneDashboard() {
     annoncesCount = count || 0
   }
 
+  const { count: favorisCountRaw } = await supabase
+    .from('favoris')
+    .select('id', { count: 'exact', head: true })
+    .eq('user_id', user.id)
+  const favorisCount = favorisCountRaw || 0
+
+  const profilIncomplet = !profile?.ville
+
   return (
     <main className="min-h-screen kraft bg-kraft">
       <AccompagneHeader
@@ -74,6 +82,33 @@ export default async function AccompagneDashboard() {
                 </svg>
                 {profile.ville}
               </p>
+            )}
+            {profilIncomplet ? (
+              <div className="mt-3">
+                <Link
+                  href="/accompagne/profil"
+                  className="inline-flex items-center gap-1.5 text-sm font-medium text-gray-700 hover:text-black transition"
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M5.07 19h13.86c1.54 0 2.5-1.67 1.73-3L13.73 4a2 2 0 00-3.46 0L3.34 16c-.77 1.33.19 3 1.73 3z" />
+                  </svg>
+                  Renseignez votre ville pour des recommandations locales
+                </Link>
+              </div>
+            ) : (
+              <div className="flex flex-wrap gap-1.5 mt-3">
+                <span className="px-2 py-0.5 rounded-full bg-accent/20 text-xs font-medium text-gray-700">
+                  {annoncesCount} annonce{annoncesCount > 1 ? 's' : ''}
+                </span>
+                <span className="px-2 py-0.5 rounded-full bg-accent/20 text-xs font-medium text-gray-700">
+                  {favorisCount} favori{favorisCount > 1 ? 's' : ''}
+                </span>
+                {unreadCount > 0 && (
+                  <span className="px-2 py-0.5 rounded-full bg-accent/20 text-xs font-medium text-gray-700">
+                    {unreadCount} message{unreadCount > 1 ? 's' : ''} non lu{unreadCount > 1 ? 's' : ''}
+                  </span>
+                )}
+              </div>
             )}
           </div>
         </div>
