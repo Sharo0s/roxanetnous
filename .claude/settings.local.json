@@ -12,9 +12,11 @@
       "Task(*)",
       "WebFetch(*)",
       "WebSearch(*)",
-      "mcp__supabase__*"
+      "mcp__supabase__*",
+      "mcp__plugin_vercel_vercel__get_deployment"
     ]
   },
+  "enableAllProjectMcpServers": true,
   "enabledMcpjsonServers": [
     "supabase"
   ],
@@ -24,6 +26,5 @@
     "commit-commands@claude-plugins-official": true
   },
   "alwaysThinkingEnabled": false,
-  "effortLevel": "high",
-  "enableAllProjectMcpServers": true
+  "effortLevel": "high"
 }

@@ -1,28 +1,42 @@
 installation:
-  version: 6.0.0-Beta.7
+  version: 6.3.0
   installDate: 2026-02-09T15:43:20.264Z
-  lastUpdated: 2026-02-09T15:43:20.264Z
+  lastUpdated: 2026-04-23T21:17:26.613Z
 modules:
   - name: core
-    version: 6.0.0-Beta.7
+    version: 6.3.0
     installDate: 2026-02-09T15:43:19.987Z
-    lastUpdated: 2026-02-09T15:43:19.987Z
+    lastUpdated: 2026-04-23T21:17:26.563Z
     source: built-in
     npmPackage: null
     repoUrl: null
   - name: bmm
-    version: 6.0.0-Beta.7
+    version: 6.3.0
     installDate: 2026-02-09T15:43:18.606Z
-    lastUpdated: 2026-02-09T15:43:19.987Z
+    lastUpdated: 2026-04-23T21:17:26.563Z
     source: built-in
     npmPackage: null
     repoUrl: null
   - name: tea
-    version: 1.0.0
+    version: 1.14.0
     installDate: 2026-02-09T15:43:19.946Z
-    lastUpdated: 2026-02-09T15:43:20.264Z
+    lastUpdated: 2026-04-23T21:17:26.581Z
     source: external
     npmPackage: bmad-method-test-architecture-enterprise
     repoUrl: https://github.com/bmad-code-org/bmad-method-test-architecture-enterprise
+  - name: bmb
+    version: 1.6.0
+    installDate: 2026-04-23T21:17:20.337Z
+    lastUpdated: 2026-04-23T21:17:26.597Z
+    source: external
+    npmPackage: bmad-builder
+    repoUrl: https://github.com/bmad-code-org/bmad-builder
+  - name: cis
+    version: 0.2.0
+    installDate: 2026-04-23T21:17:22.552Z
+    lastUpdated: 2026-04-23T21:17:26.613Z
+    source: external
+    npmPackage: bmad-creative-intelligence-suite
+    repoUrl: https://github.com/bmad-code-org/bmad-module-creative-intelligence-suite
 ides:
   - claude-code

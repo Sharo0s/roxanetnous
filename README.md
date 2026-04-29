@@ -122,7 +122,7 @@ roxanetnous/
 └── tsconfig.json                 # Configuration TypeScript
 ```
 
-### Base de données (18 tables)
+### Base de données
 
 - `users` - Utilisateurs (extends auth.users)
 - `accompagnantes_profiles` - Profils accompagnantes
@@ -133,11 +133,12 @@ roxanetnous/
 - `favoris` - Favoris (polymorphique)
 - `conversations` - Conversations
 - `messages` - Messages
-- `contrats` - Contrats générés
 - `signalements` - Signalements
 - `notifications_log` - Log notifications email
 - `badges_cache` - Cache badges
 - `admin_actions_log` - Log actions admin
+- `parrainages_codes` - Codes de parrainage uniques (1 par accompagnante validée)
+- `parrainages` - Historique des relations marraine/filleule + audit anti-fraude
 
 ### Fonctionnalités principales
 
