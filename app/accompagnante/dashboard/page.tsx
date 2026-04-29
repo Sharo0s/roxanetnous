@@ -25,17 +25,6 @@ export default async function AccompagnanteDashboard() {
 
   const isFilleule = !!userData.parrainee_par
 
-  // Detecte un parrainage bloque (anti-fraude) qui aurait reset parrainee_par
-  // mais laissé l'utilisatrice abonnée et payante. Sert a afficher un message
-  // dedie et a neutraliser le faux bandeau "Completez votre profil".
-  const { data: blockedParrainageRow } = await supabase
-    .from('parrainages')
-    .select('id')
-    .eq('filleule_id', user.id)
-    .eq('statut', 'bloque')
-    .maybeSingle()
-  const hasBlockedParrainage = !!blockedParrainageRow
-
   const { data: profile } = await supabase
     .from('accompagnantes_profiles')
     .select('id, validation_status, validation_source, diplomes, refus_motif, ville, rayon_km, specialites, disponible, indisponible_jusqu_au')
@@ -45,6 +34,22 @@ export default async function AccompagnanteDashboard() {
   const unreadCount = await getUnreadCount(user.id)
   const subscription = await getSubscriptionStatus(user.id)
   const subscribed = subscription.active
+
+  // Detecte un parrainage bloque (anti-fraude) MAIS uniquement si la filleule
+  // n'a pas encore ete validee par un admin. Si l'admin a tranche en faveur
+  // de la filleule (validation_status='valide'), sa decision prime sur la
+  // detection automatique : on ne lui affiche pas le bandeau "Verification
+  // supplementaire en cours" car c'est resolu de son point de vue.
+  let hasBlockedParrainage = false
+  if (profile?.validation_status !== 'valide') {
+    const { data: blockedParrainageRow } = await supabase
+      .from('parrainages')
+      .select('id')
+      .eq('filleule_id', user.id)
+      .eq('statut', 'bloque')
+      .maybeSingle()
+    hasBlockedParrainage = !!blockedParrainageRow
+  }
 
   // Le contenu detaille (code, copie, liste filleules, jauge) vit sur
   // /accompagnante/parrainage. Sur le dashboard on n'affiche qu'un teaser
