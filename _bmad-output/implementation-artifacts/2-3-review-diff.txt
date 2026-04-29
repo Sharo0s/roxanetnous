@@ -1,0 +1,2099 @@
+diff --git a/app/actions/parrainage.ts b/app/actions/parrainage.ts
+new file mode 100644
+--- /dev/null
++++ b/app/actions/parrainage.ts
+
++   1 'use server'
++   2 
++   3 import { randomInt } from 'node:crypto'
++   4 import { after } from 'next/server'
++   5 import { revalidatePath } from 'next/cache'
++   6 import { createClient } from '@/lib/supabase/server'
++   7 import {
++   8   sendParrainageBienvenueMarraine,
++   9   sendParrainageFilleuleConfirmation,
++  10   sendAdminParrainageFlag,
++  11 } from '@/lib/emails'
++  12 import { stripe } from '@/lib/stripe'
++  13 import { normalizeEmail } from '@/lib/parrainage-detection'
++  14 
++  15 // Alphabet 31 chars sans 0/O/1/I/L (lisibilité)
++  16 const CODE_ALPHABET = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'
++  17 const CODE_LENGTH = 8
++  18 const CODE_REGEX = new RegExp(`^[${CODE_ALPHABET}]{${CODE_LENGTH}}$`)
++  19 
++  20 function generateCode(): string {
++  21   let out = ''
++  22   for (let i = 0; i < CODE_LENGTH; i++) {
++  23     out += CODE_ALPHABET.charAt(randomInt(0, CODE_ALPHABET.length))
++  24   }
++  25   return out
++  26 }
++  27 
++  28 function normalizeCode(input: string): string {
++  29   return (input || '').toUpperCase().replace(/[\s-]/g, '')
++  30 }
++  31 
++  32 // Story 2.3 AC1 : helper interne (non export) appelé depuis createParrainageRelation
++  33 // après l'INSERT initial. Détecte les signaux disponibles AU SIGNUP : email marraine =
++  34 // email filleule (BLOCAGE), IP filleule = IP d'une autre filleule de la même marraine
++  35 // (FLAG). Les autres signaux (téléphone/adresse/carte) sont évalués au webhook (AC3).
++  36 async function detectBlacklist(params: {
++  37   marraineId: string
++  38   filleuleId: string
++  39   filleuleEmail: string | null | undefined
++  40   ipInscription: string | null | undefined
++  41   parrainageId: string
++  42 }): Promise<{ blocage?: 'meme_email'; flag?: 'meme_ip' }> {
++  43   const supabaseAdmin = await createClient({ serviceRole: true })
++  44 
++  45   // Lookup email marraine + comparaison case-insensitive (index idx_users_email_lower).
++  46   const filleuleEmailNorm = normalizeEmail(params.filleuleEmail || '')
++  47   if (filleuleEmailNorm) {
++  48     const { data: marraineUser } = await supabaseAdmin
++  49       .from('users')
++  50       .select('email')
++  51       .eq('id', params.marraineId)
++  52       .maybeSingle()
++  53 
++  54     const marraineEmailNorm = normalizeEmail((marraineUser?.email as string) || '')
++  55     if (marraineEmailNorm && marraineEmailNorm === filleuleEmailNorm) {
++  56       return { blocage: 'meme_email' }
++  57     }
++  58   }
++  59 
++  60   // Lookup IP : une autre row parrainages de la même marraine avec la même IP.
++  61   if (params.ipInscription && params.ipInscription.trim()) {
++  62     const { data: ipMatches } = await supabaseAdmin
++  63       .from('parrainages')
++  64       .select('id')
++  65       .eq('marraine_id', params.marraineId)
++  66       .neq('id', params.parrainageId)
++  67       .eq('ip_inscription', params.ipInscription)
++  68       .limit(1)
++  69     if (ipMatches && ipMatches.length > 0) {
++  70       return { flag: 'meme_ip' }
++  71     }
++  72   }
++  73 
++  74   return {}
++  75 }
++  76 
++  77 // Story 2.3 AC4 : helper interne pour révoquer la validation parrainage en cas de
++  78 // fraude détectée APRÈS qu'elle ait été appliquée (ex: meme_carte au webhook).
++  79 // Ne révoque PAS l'abonnement Stripe : la filleule a payé, elle peut continuer à
++  80 // l'utiliser. Révoque uniquement le bypass de validation (la filleule devra repasser
++  81 // par OCR + visio si elle veut être validée).
++  82 async function revokeFilleuleValidation(
++  83   filleuleId: string,
++  84   raison: string,
++  85   context: { adminId?: string | null; parrainageId?: string; marraineId?: string } = {},
++  86 ): Promise<void> {
++  87   const supabaseAdmin = await createClient({ serviceRole: true })
++  88 
++  89   const { data: profile } = await supabaseAdmin
++  90     .from('accompagnantes_profiles')
++  91     .select('id, validation_status, validation_source')
++  92     .eq('user_id', filleuleId)
++  93     .maybeSingle()
++  94 
++  95   // Si la filleule était validée par parrainage, on remet en attente.
++  96   if (profile?.validation_source === 'parrainage' && profile?.validation_status === 'valide') {
++  97     await supabaseAdmin
++  98       .from('accompagnantes_profiles')
++  99       .update({
++ 100         validation_status: 'en_attente',
++ 101         validation_source: 'manuelle',
++ 102         validation_date: null,
++ 103       })
++ 104       .eq('id', profile.id)
++ 105   }
++ 106 
++ 107   // Toujours retirer le lien parrainee_par.
++ 108   await supabaseAdmin
++ 109     .from('users')
++ 110     .update({ parrainee_par: null })
++ 111     .eq('id', filleuleId)
++ 112 
++ 113   await supabaseAdmin.from('admin_actions_log').insert({
++ 114     admin_id: context.adminId ?? null,
++ 115     action_type: 'parrainage_fraude_confirmee',
++ 116     target_type: 'parrainage',
++ 117     target_id: context.parrainageId ?? null,
++ 118     details: {
++ 119       via: raison,
++ 120       filleule_id: filleuleId,
++ 121       marraine_id: context.marraineId ?? null,
++ 122     },
++ 123   })
++ 124 }
++ 125 
++ 126 // Re-export interne pour le webhook (qui ne peut pas importer depuis un fichier
++ 127 // 'use server' avec usage non-action). Utilisable comme server action depuis le webhook.
++ 128 export async function revokeFilleuleValidationFromWebhook(
++ 129   filleuleId: string,
++ 130   raison: string,
++ 131   context: { parrainageId?: string; marraineId?: string } = {},
++ 132 ): Promise<void> {
++ 133   return revokeFilleuleValidation(filleuleId, raison, context)
++ 134 }
++ 135 
++ 136 export type GenerateCodeResult = { code: string } | { error: string }
++ 137 
++ 138 export async function generateCodeForUser(userId: string): Promise<GenerateCodeResult> {
++ 139   if (!userId) return { error: 'userId manquant.' }
++ 140 
++ 141   // Authz : seul l'utilisateur lui-même ou un admin peut générer un code pour cet userId.
++ 142   const supabase = await createClient()
++ 143   const {
++ 144     data: { user },
++ 145   } = await supabase.auth.getUser()
++ 146   if (!user) return { error: 'Non authentifié.' }
++ 147 
++ 148   if (user.id !== userId) {
++ 149     const { data: caller } = await supabase
++ 150       .from('users')
++ 151       .select('role')
++ 152       .eq('id', user.id)
++ 153       .single()
++ 154     if (caller?.role !== 'admin') {
++ 155       return { error: 'Accès refusé.' }
++ 156     }
++ 157   }
++ 158 
++ 159   const supabaseAdmin = await createClient({ serviceRole: true })
++ 160 
++ 161   // Idempotence : si une ligne existe déjà, retourner le code existant
++ 162   const { data: existing } = await supabaseAdmin
++ 163     .from('parrainages_codes')
++ 164     .select('code')
++ 165     .eq('user_id', userId)
++ 166     .maybeSingle()
++ 167 
++ 168   if (existing?.code) {
++ 169     return { code: existing.code }
++ 170   }
++ 171 
++ 172   // Retry max 3 fois en cas de collision UNIQUE (probabilité quasi nulle, ceinture+bretelles)
++ 173   for (let attempt = 0; attempt < 3; attempt++) {
++ 174     const code = generateCode()
++ 175     const { error } = await supabaseAdmin
++ 176       .from('parrainages_codes')
++ 177       .insert({
++ 178         user_id: userId,
++ 179         code,
++ 180         compteur_confirmes: 0,
++ 181         total_recompenses: 0,
++ 182       })
++ 183 
++ 184     if (!error) {
++ 185       return { code }
++ 186     }
++ 187 
++ 188     // 23505 = unique_violation. Si la collision est sur user_id (PK), retourner le code existant.
++ 189     if ((error as { code?: string }).code !== '23505') {
++ 190       return { error: 'Erreur lors de la création du code de parrainage.' }
++ 191     }
++ 192 
++ 193     const { data: nowExisting } = await supabaseAdmin
++ 194       .from('parrainages_codes')
++ 195       .select('code')
++ 196       .eq('user_id', userId)
++ 197       .maybeSingle()
++ 198     if (nowExisting?.code) {
++ 199       return { code: nowExisting.code }
++ 200     }
++ 201   }
++ 202 
++ 203   return { error: 'Impossible de générer un code unique après plusieurs tentatives.' }
++ 204 }
++ 205 
++ 206 // Variante interne : appelée depuis confirmParrainageOnSuccess pour la filleule qui devient
++ 207 // marraine. Bypass le check d'authz (le système agit pour le compte de l'utilisateur courant
++ 208 // après vérification Stripe). Réservé à un usage server-only.
++ 209 async function generateCodeForUserSystem(userId: string): Promise<GenerateCodeResult> {
++ 210   if (!userId) return { error: 'userId manquant.' }
++ 211   const supabaseAdmin = await createClient({ serviceRole: true })
++ 212 
++ 213   const { data: existing } = await supabaseAdmin
++ 214     .from('parrainages_codes')
++ 215     .select('code')
++ 216     .eq('user_id', userId)
++ 217     .maybeSingle()
++ 218   if (existing?.code) return { code: existing.code }
++ 219 
++ 220   for (let attempt = 0; attempt < 3; attempt++) {
++ 221     const code = generateCode()
++ 222     const { error } = await supabaseAdmin
++ 223       .from('parrainages_codes')
++ 224       .insert({
++ 225         user_id: userId,
++ 226         code,
++ 227         compteur_confirmes: 0,
++ 228         total_recompenses: 0,
++ 229       })
++ 230     if (!error) return { code }
++ 231     if ((error as { code?: string }).code !== '23505') {
++ 232       return { error: 'Erreur lors de la création du code de parrainage.' }
++ 233     }
++ 234     const { data: nowExisting } = await supabaseAdmin
++ 235       .from('parrainages_codes')
++ 236       .select('code')
++ 237       .eq('user_id', userId)
++ 238       .maybeSingle()
++ 239     if (nowExisting?.code) return { code: nowExisting.code }
++ 240   }
++ 241   return { error: 'Impossible de générer un code unique après plusieurs tentatives.' }
++ 242 }
++ 243 
++ 244 export type ValidationCodeResult =
++ 245   | { valid: true; marraineId: string; marraineFirstName: string }
++ 246   | {
++ 247       valid: false
++ 248       reason:
++ 249         | 'invalid_format'
++ 250         | 'invalid_chars'
++ 251         | 'unknown_code'
++ 252         | 'marraine_not_validated'
++ 253     }
++ 254 
++ 255 export async function validateCode(rawCode: string): Promise<ValidationCodeResult> {
++ 256   const code = normalizeCode(rawCode)
++ 257   if (!code) {
++ 258     return { valid: false, reason: 'invalid_format' }
++ 259   }
++ 260   if (code.length !== CODE_LENGTH) {
++ 261     return { valid: false, reason: 'invalid_format' }
++ 262   }
++ 263   if (!CODE_REGEX.test(code)) {
++ 264     return { valid: false, reason: 'invalid_chars' }
++ 265   }
++ 266 
++ 267   // RLS bloque la lecture anon de parrainages_codes (auth.uid() = user_id requis).
++ 268   // La fonction étant appelée depuis le formulaire d'inscription non authentifié,
++ 269   // on utilise le service role pour cette lecture publique de validation.
++ 270   const supabaseAdmin = await createClient({ serviceRole: true })
++ 271 
++ 272   const { data: row } = await supabaseAdmin
++ 273     .from('parrainages_codes')
++ 274     .select('user_id')
++ 275     .eq('code', code)
++ 276     .maybeSingle()
++ 277 
++ 278   if (!row?.user_id) {
++ 279     return { valid: false, reason: 'unknown_code' }
++ 280   }
++ 281 
++ 282   const { data: marraine } = await supabaseAdmin
++ 283     .from('users')
++ 284     .select('first_name, accompagnantes_profiles!inner(validation_status)')
++ 285     .eq('id', row.user_id)
++ 286     .maybeSingle()
++ 287 
++ 288   const profileRow = marraine?.accompagnantes_profiles as
++ 289     | { validation_status?: string }
++ 290     | { validation_status?: string }[]
++ 291     | undefined
++ 292   const validationStatus = Array.isArray(profileRow)
++ 293     ? profileRow[0]?.validation_status
++ 294     : profileRow?.validation_status
++ 295 
++ 296   if (validationStatus !== 'valide') {
++ 297     return { valid: false, reason: 'marraine_not_validated' }
++ 298   }
++ 299 
++ 300   return {
++ 301     valid: true,
++ 302     marraineId: row.user_id,
++ 303     marraineFirstName: (marraine?.first_name as string) || '',
++ 304   }
++ 305 }
++ 306 
++ 307 export type CreateParrainageRelationResult =
++ 308   | { ok: true; parrainageId: string; marraineId: string }
++ 309   | { ok: false; reason: string }
++ 310 
++ 311 export async function createParrainageRelation(params: {
++ 312   code: string
++ 313   filleuleId: string
++ 314   ipInscription: string | null
++ 315   // SCP §4.6.a : champs capturés dès Story 2.1 pour préparer la détection
++ 316   // blacklist (Story 2.3). Optionnels actuellement, pas encore persistés.
++ 317   filleuleEmail?: string | null
++ 318   filleuleTelephone?: string | null
++ 319   filleuleAdresse?: string | null
++ 320 }): Promise<CreateParrainageRelationResult> {
++ 321   const code = normalizeCode(params.code)
++ 322   if (!code) return { ok: false, reason: 'invalid_format' }
++ 323   if (!params.filleuleId) return { ok: false, reason: 'invalid_filleule' }
++ 324 
++ 325   const validation = await validateCode(code)
++ 326   if (!validation.valid) {
++ 327     return { ok: false, reason: validation.reason }
++ 328   }
++ 329 
++ 330   // Anti auto-parrainage : la marraine ne peut pas se parrainer elle-même.
++ 331   if (validation.marraineId === params.filleuleId) {
++ 332     return { ok: false, reason: 'self_referral' }
++ 333   }
++ 334 
++ 335   const supabaseAdmin = await createClient({ serviceRole: true })
++ 336 
++ 337   // Idempotence : si déjà une ligne pour ce filleule + code, la renvoyer (sans relancer
++ 338   // la détection blacklist pour éviter doubles logs/emails).
++ 339   const { data: existing } = await supabaseAdmin
++ 340     .from('parrainages')
++ 341     .select('id, marraine_id, statut, blocage_raison')
++ 342     .eq('filleule_id', params.filleuleId)
++ 343     .eq('code', code)
++ 344     .in('statut', ['inscrite', 'bloque'])
++ 345     .maybeSingle()
++ 346 
++ 347   if (existing?.id) {
++ 348     if (existing.statut === 'bloque' && existing.blocage_raison === 'meme_email') {
++ 349       return { ok: false, reason: 'blacklist_meme_email' }
++ 350     }
++ 351     if (existing.statut === 'inscrite') {
++ 352       return {
++ 353         ok: true,
++ 354         parrainageId: existing.id,
++ 355         marraineId: existing.marraine_id,
++ 356       }
++ 357     }
++ 358     // Statut bloqué pour une autre raison : on ne relance rien.
++ 359     return { ok: false, reason: 'blacklist_other' }
++ 360   }
++ 361 
++ 362   const nowIso = new Date().toISOString()
++ 363 
++ 364   const { data: inserted, error: insertError } = await supabaseAdmin
++ 365     .from('parrainages')
++ 366     .insert({
++ 367       code,
++ 368       marraine_id: validation.marraineId,
++ 369       filleule_id: params.filleuleId,
++ 370       statut: 'inscrite',
++ 371       filleule_inscrite_at: nowIso,
++ 372       ip_inscription: params.ipInscription,
++ 373     })
++ 374     .select('id')
++ 375     .single()
++ 376 
++ 377   if (insertError || !inserted?.id) {
++ 378     return { ok: false, reason: 'insert_failed' }
++ 379   }
++ 380 
++ 381   // Mise à jour users.parrainee_par (non bloquant si erreur)
++ 382   await supabaseAdmin
++ 383     .from('users')
++ 384     .update({ parrainee_par: validation.marraineId })
++ 385     .eq('id', params.filleuleId)
++ 386 
++ 387   // Story 2.3 AC2 : détection blacklist post-INSERT.
++ 388   const marraineId = validation.marraineId
++ 389   let blacklistResult: { blocage?: 'meme_email'; flag?: 'meme_ip' } = {}
++ 390   try {
++ 391     blacklistResult = await detectBlacklist({
++ 392       marraineId,
++ 393       filleuleId: params.filleuleId,
++ 394       filleuleEmail: params.filleuleEmail ?? null,
++ 395       ipInscription: params.ipInscription,
++ 396       parrainageId: inserted.id,
++ 397     })
++ 398   } catch (err) {
++ 399     console.error('[parrainage_blacklist][signup]', err)
++ 400   }
++ 401 
++ 402   // Charger les infos pour les emails admin (best-effort).
++ 403   async function loadNamesForAdminEmail() {
++ 404     const { data: marraine } = await supabaseAdmin
++ 405       .from('users')
++ 406       .select('first_name, last_name')
++ 407       .eq('id', marraineId)
++ 408       .maybeSingle()
++ 409     const { data: filleule } = await supabaseAdmin
++ 410       .from('users')
++ 411       .select('first_name, last_name')
++ 412       .eq('id', params.filleuleId)
++ 413       .maybeSingle()
++ 414     const marraineName = `${marraine?.first_name || ''} ${marraine?.last_name || ''}`.trim() || 'Marraine'
++ 415     const filleuleName = `${filleule?.first_name || ''} ${filleule?.last_name || ''}`.trim() || 'Filleule'
++ 416     return { marraineName, filleuleName }
++ 417   }
++ 418 
++ 419   if (blacklistResult.blocage === 'meme_email') {
++ 420     await supabaseAdmin
++ 421       .from('parrainages')
++ 422       .update({ statut: 'bloque', blocage_raison: 'meme_email' })
++ 423       .eq('id', inserted.id)
++ 424 
++ 425     await supabaseAdmin
++ 426       .from('users')
++ 427       .update({ parrainee_par: null })
++ 428       .eq('id', params.filleuleId)
++ 429 
++ 430     await supabaseAdmin.from('admin_actions_log').insert({
++ 431       admin_id: null,
++ 432       action_type: 'parrainage_bloque',
++ 433       target_type: 'parrainage',
++ 434       target_id: inserted.id,
++ 435       details: {
++ 436         marraine_id: marraineId,
++ 437         filleule_id: params.filleuleId,
++ 438         raison: 'meme_email',
++ 439       },
++ 440     })
++ 441 
++ 442     try {
++ 443       const { marraineName, filleuleName } = await loadNamesForAdminEmail()
++ 444       await sendAdminParrainageFlag({
++ 445         marraineName,
++ 446         filleuleName,
++ 447         type: 'meme_email',
++ 448         parrainageId: inserted.id,
++ 449       })
++ 450     } catch (err) {
++ 451       console.error('[parrainage_blacklist][signup][email]', err)
++ 452     }
++ 453 
++ 454     return { ok: false, reason: 'blacklist_meme_email' }
++ 455   }
++ 456 
++ 457   if (blacklistResult.flag === 'meme_ip') {
++ 458     await supabaseAdmin
++ 459       .from('parrainages')
++ 460       .update({ flag_suspicion: 'meme_ip' })
++ 461       .eq('id', inserted.id)
++ 462 
++ 463     await supabaseAdmin.from('admin_actions_log').insert({
++ 464       admin_id: null,
++ 465       action_type: 'parrainage_flag',
++ 466       target_type: 'parrainage',
++ 467       target_id: inserted.id,
++ 468       details: {
++ 469         marraine_id: marraineId,
++ 470         filleule_id: params.filleuleId,
++ 471         flag: 'meme_ip',
++ 472       },
++ 473     })
++ 474 
++ 475     try {
++ 476       const { marraineName, filleuleName } = await loadNamesForAdminEmail()
++ 477       await sendAdminParrainageFlag({
++ 478         marraineName,
++ 479         filleuleName,
++ 480         type: 'meme_ip',
++ 481         parrainageId: inserted.id,
++ 482       })
++ 483     } catch (err) {
++ 484       console.error('[parrainage_blacklist][signup][email]', err)
++ 485     }
++ 486   }
++ 487 
++ 488   return {
++ 489     ok: true,
++ 490     parrainageId: inserted.id,
++ 491     marraineId,
++ 492   }
++ 493 }
++ 494 
++ 495 export type ConfirmParrainageOnSuccessResult =
++ 496   | { ok: true; alreadyDone?: boolean }
++ 497   | { ok: false; reason: string }
++ 498 
++ 499 export async function confirmParrainageOnSuccess(
++ 500   sessionId: string
++ 501 ): Promise<ConfirmParrainageOnSuccessResult> {
++ 502   if (!sessionId) return { ok: false, reason: 'missing_session_id' }
++ 503 
++ 504   const supabase = await createClient()
++ 505   const {
++ 506     data: { user },
++ 507   } = await supabase.auth.getUser()
++ 508   if (!user) return { ok: false, reason: 'not_authenticated' }
++ 509 
++ 510   let session
++ 511   try {
++ 512     session = await stripe.checkout.sessions.retrieve(sessionId)
++ 513   } catch {
++ 514     return { ok: false, reason: 'stripe_session_not_found' }
++ 515   }
++ 516 
++ 517   const parrainageCode = (session.metadata?.parrainage_code || '').toString()
++ 518   if (!parrainageCode) {
++ 519     return { ok: false, reason: 'no_parrainage_metadata' }
++ 520   }
++ 521 
++ 522   const isComplete = session.status === 'complete' || session.payment_status === 'paid'
++ 523   if (!isComplete) {
++ 524     return { ok: false, reason: 'session_not_complete' }
++ 525   }
++ 526   // Sécurité : la metadata user_id doit être présente ET correspondre à l'utilisateur courant.
++ 527   const sessionUserId = (session.metadata?.user_id || '').toString()
++ 528   if (sessionUserId !== user.id) {
++ 529     return { ok: false, reason: 'user_mismatch' }
++ 530   }
++ 531 
++ 532   const code = normalizeCode(parrainageCode)
++ 533   const supabaseAdmin = await createClient({ serviceRole: true })
++ 534 
++ 535   const { data: parrainage } = await supabaseAdmin
++ 536     .from('parrainages')
++ 537     .select('id, statut, marraine_id, filleule_id')
++ 538     .eq('code', code)
++ 539     .eq('filleule_id', user.id)
++ 540     .order('filleule_inscrite_at', { ascending: false })
++ 541     .limit(1)
++ 542     .maybeSingle()
++ 543 
++ 544   if (!parrainage) {
++ 545     return { ok: false, reason: 'parrainage_not_found' }
++ 546   }
++ 547 
++ 548   if (parrainage.statut !== 'inscrite') {
++ 549     return { ok: true, alreadyDone: true }
++ 550   }
++ 551 
++ 552   // Vérification que la marraine est toujours validée au moment du paiement.
++ 553   // Si elle a été déchue entre l'inscription de la filleule et le paiement, on
++ 554   // refuse la validation automatique par parrainage.
++ 555   const { data: marraineProfile } = await supabaseAdmin
++ 556     .from('accompagnantes_profiles')
++ 557     .select('validation_status')
++ 558     .eq('user_id', parrainage.marraine_id)
++ 559     .maybeSingle()
++ 560   if (marraineProfile?.validation_status !== 'valide') {
++ 561     return { ok: false, reason: 'marraine_no_longer_validated' }
++ 562   }
++ 563 
++ 564   // Décision 3a : refuser la validation et le log si le profil filleule est absent.
++ 565   const { data: filleuleProfile } = await supabaseAdmin
++ 566     .from('accompagnantes_profiles')
++ 567     .select('id')
++ 568     .eq('user_id', user.id)
++ 569     .single()
++ 570 
++ 571   if (!filleuleProfile?.id) {
++ 572     return { ok: false, reason: 'profile_not_found' }
++ 573   }
++ 574 
++ 575   const nowIso = new Date().toISOString()
++ 576 
++ 577   // Idempotence transactionnelle (optimistic locking) : on tente le passage à 'abonnee'
++ 578   // EN PREMIER avec un filtre statut='inscrite'. Si 0 ligne affectée, c'est qu'un autre
++ 579   // appel concurrent a déjà fait la transition — on abandonne pour éviter doubles emails/logs.
++ 580   const { data: lockedRows } = await supabaseAdmin
++ 581     .from('parrainages')
++ 582     .update({
++ 583       statut: 'abonnee',
++ 584       filleule_abonnee_at: nowIso,
++ 585     })
++ 586     .eq('id', parrainage.id)
++ 587     .eq('statut', 'inscrite')
++ 588     .select('id')
++ 589 
++ 590   if (!lockedRows || lockedRows.length !== 1) {
++ 591     return { ok: true, alreadyDone: true }
++ 592   }
++ 593 
++ 594   // Profil filleule -> valide via parrainage
++ 595   await supabaseAdmin
++ 596     .from('accompagnantes_profiles')
++ 597     .update({
++ 598       validation_status: 'valide',
++ 599       validation_source: 'parrainage',
++ 600       validation_date: nowIso,
++ 601       validated_by: null,
++ 602     })
++ 603     .eq('id', filleuleProfile.id)
++ 604 
++ 605   // Générer le code de la filleule (elle devient marraine à son tour) — bypass authz.
++ 606   const codeResult = await generateCodeForUserSystem(user.id)
++ 607 
++ 608   // Charger marraine + filleule pour les emails
++ 609   const { data: marraineUser } = await supabaseAdmin
++ 610     .from('users')
++ 611     .select('email, first_name')
++ 612     .eq('id', parrainage.marraine_id)
++ 613     .single()
++ 614 
++ 615   const { data: filleuleUser } = await supabaseAdmin
++ 616     .from('users')
++ 617     .select('email, first_name')
++ 618     .eq('id', user.id)
++ 619     .single()
++ 620 
++ 621   // Emails non-bloquants via after() (Next 16) : garantit l'exécution post-réponse
++ 622   // sur Vercel sans risque que la fonction termine prématurément.
++ 623   if (filleuleUser?.email) {
++ 624     after(async () => {
++ 625       try {
++ 626         await sendParrainageFilleuleConfirmation({
++ 627           email: filleuleUser.email,
++ 628           firstName: filleuleUser.first_name || '',
++ 629           marraineFirstName: marraineUser?.first_name || '',
++ 630           userId: user.id,
++ 631         })
++ 632       } catch {}
++ 633     })
++ 634   }
++ 635 
++ 636   if (filleuleUser?.email && 'code' in codeResult) {
++ 637     after(async () => {
++ 638       try {
++ 639         await sendParrainageBienvenueMarraine({
++ 640           email: filleuleUser.email,
++ 641           firstName: filleuleUser.first_name || '',
++ 642           code: codeResult.code,
++ 643           userId: user.id,
++ 644         })
++ 645       } catch {}
++ 646     })
++ 647   }
++ 648 
++ 649   // Log admin (action système : admin_id null)
++ 650   await supabaseAdmin.from('admin_actions_log').insert({
++ 651     admin_id: null,
++ 652     action_type: 'validation_par_parrainage',
++ 653     target_type: 'accompagnante',
++ 654     target_id: filleuleProfile.id,
++ 655     details: {
++ 656       parrainage_id: parrainage.id,
++ 657       marraine_id: parrainage.marraine_id,
++ 658     },
++ 659   })
++ 660 
++ 661   // Invalide le cache du dashboard pour que la ParrainageCard apparaisse
++ 662   // sans nécessiter un reload manuel après validation par parrainage.
++ 663   revalidatePath('/accompagnante/dashboard')
++ 664 
++ 665   return { ok: true }
++ 666 }
++ 667 
++ 668 // Export interne pour réutilisation depuis admin.ts (génération marraine après validation finale).
++ 669 export { generateCodeForUserSystem as generateCodeForUserInternal }
+diff --git a/app/actions/admin-parrainages.ts b/app/actions/admin-parrainages.ts
+new file mode 100644
+--- /dev/null
++++ b/app/actions/admin-parrainages.ts
+
++   1 'use server'
++   2 
++   3 import { createClient } from '@/lib/supabase/server'
++   4 import { revalidatePath } from 'next/cache'
++   5 
++   6 // Story 2.3 AC8 : trois actions admin pour gérer les rows parrainages bloquées,
++   7 // flaggées ou frauduleuses. Auth check role admin obligatoire (pattern admin-signalements.ts).
++   8 
++   9 async function requireAdmin() {
++  10   const supabase = await createClient()
++  11   const {
++  12     data: { user },
++  13   } = await supabase.auth.getUser()
++  14   if (!user) return { error: 'Non connecté.', user: null }
++  15 
++  16   const { data: adminData } = await supabase
++  17     .from('users')
++  18     .select('role')
++  19     .eq('id', user.id)
++  20     .single()
++  21   if (!adminData || adminData.role !== 'admin') {
++  22     return { error: 'Accès non autorisé.', user: null }
++  23   }
++  24   return { error: null, user }
++  25 }
++  26 
++  27 // Story 2.3 AC8 : autoriserException remet le parrainage en flow normal.
++  28 export async function autoriserException(
++  29   parrainageId: string,
++  30   notes: string,
++  31 ): Promise<{ error?: string }> {
++  32   const { error: authErr, user } = await requireAdmin()
++  33   if (authErr || !user) return { error: authErr || 'Accès non autorisé.' }
++  34 
++  35   const supabaseAdmin = await createClient({ serviceRole: true })
++  36 
++  37   const { data: parrainage } = await supabaseAdmin
++  38     .from('parrainages')
++  39     .select('id, marraine_id, filleule_id, statut')
++  40     .eq('id', parrainageId)
++  41     .maybeSingle()
++  42   if (!parrainage) return { error: 'Parrainage introuvable.' }
++  43 
++  44   // Reset statut + flags (le flow normal pourra reprendre).
++  45   // Si déjà 'fraude', on remet 'inscrite' aussi (l'admin assume la décision).
++  46   const newStatut = parrainage.statut === 'abonnee' || parrainage.statut === 'confirme'
++  47     ? parrainage.statut
++  48     : 'inscrite'
++  49   const { error: updateErr } = await supabaseAdmin
++  50     .from('parrainages')
++  51     .update({
++  52       statut: newStatut,
++  53       blocage_raison: null,
++  54       flag_suspicion: null,
++  55     })
++  56     .eq('id', parrainageId)
++  57   if (updateErr) return { error: 'Erreur lors de la mise à jour.' }
++  58 
++  59   // Restaurer le lien parrainee_par si la filleule existe encore.
++  60   if (parrainage.filleule_id) {
++  61     await supabaseAdmin
++  62       .from('users')
++  63       .update({ parrainee_par: parrainage.marraine_id })
++  64       .eq('id', parrainage.filleule_id)
++  65   }
++  66 
++  67   await supabaseAdmin.from('admin_actions_log').insert({
++  68     admin_id: user.id,
++  69     action_type: 'parrainage_autorise_exception',
++  70     target_type: 'parrainage',
++  71     target_id: parrainageId,
++  72     details: {
++  73       notes: notes?.trim() || null,
++  74       marraine_id: parrainage.marraine_id,
++  75       filleule_id: parrainage.filleule_id,
++  76     },
++  77   })
++  78 
++  79   revalidatePath('/admin/parrainages')
++  80   revalidatePath('/admin/parrainages/blacklist')
++  81   return {}
++  82 }
++  83 
++  84 // Story 2.3 AC8 : confirmerFraude valide définitivement la suspicion. Suspend la
++  85 // filleule (validation_status='refuse'). NE suspend PAS automatiquement la marraine
++  86 // (décision MVP : éviter faux positifs côté marraine, l'admin tranche manuellement).
++  87 export async function confirmerFraude(
++  88   parrainageId: string,
++  89   notes: string,
++  90 ): Promise<{ error?: string }> {
++  91   const { error: authErr, user } = await requireAdmin()
++  92   if (authErr || !user) return { error: authErr || 'Accès non autorisé.' }
++  93 
++  94   const supabaseAdmin = await createClient({ serviceRole: true })
++  95 
++  96   const { data: parrainage } = await supabaseAdmin
++  97     .from('parrainages')
++  98     .select('id, marraine_id, filleule_id, statut')
++  99     .eq('id', parrainageId)
++ 100     .maybeSingle()
++ 101   if (!parrainage) return { error: 'Parrainage introuvable.' }
++ 102 
++ 103   const { error: updateErr } = await supabaseAdmin
++ 104     .from('parrainages')
++ 105     .update({ statut: 'fraude' })
++ 106     .eq('id', parrainageId)
++ 107   if (updateErr) return { error: 'Erreur lors de la mise à jour.' }
++ 108 
++ 109   // Si la filleule était validée par parrainage, révoquer + suspendre.
++ 110   if (parrainage.filleule_id) {
++ 111     const { data: profile } = await supabaseAdmin
++ 112       .from('accompagnantes_profiles')
++ 113       .select('id, validation_status, validation_source')
++ 114       .eq('user_id', parrainage.filleule_id)
++ 115       .maybeSingle()
++ 116 
++ 117     if (profile) {
++ 118       // Suspension : validation_status = 'refuse'
++ 119       await supabaseAdmin
++ 120         .from('accompagnantes_profiles')
++ 121         .update({
++ 122           validation_status: 'refuse',
++ 123           validation_source:
++ 124             profile.validation_source === 'parrainage' ? 'manuelle' : profile.validation_source,
++ 125           validation_date: null,
++ 126           refus_motif: 'Suspicion fraude parrainage - confirmé par admin',
++ 127         })
++ 128         .eq('id', profile.id)
++ 129     }
++ 130 
++ 131     // Toujours retirer le lien parrainee_par.
++ 132     await supabaseAdmin
++ 133       .from('users')
++ 134       .update({ parrainee_par: null })
++ 135       .eq('id', parrainage.filleule_id)
++ 136   }
++ 137 
++ 138   await supabaseAdmin.from('admin_actions_log').insert({
++ 139     admin_id: user.id,
++ 140     action_type: 'parrainage_fraude_confirmee',
++ 141     target_type: 'parrainage',
++ 142     target_id: parrainageId,
++ 143     details: {
++ 144       notes: notes?.trim() || null,
++ 145       marraine_id: parrainage.marraine_id,
++ 146       filleule_id: parrainage.filleule_id,
++ 147     },
++ 148   })
++ 149 
++ 150   revalidatePath('/admin/parrainages')
++ 151   revalidatePath('/admin/parrainages/blacklist')
++ 152   return {}
++ 153 }
++ 154 
++ 155 // Story 2.3 AC8 : ignorerFlag retire le flag de suspicion sans toucher au statut.
++ 156 export async function ignorerFlag(
++ 157   parrainageId: string,
++ 158 ): Promise<{ error?: string }> {
++ 159   const { error: authErr, user } = await requireAdmin()
++ 160   if (authErr || !user) return { error: authErr || 'Accès non autorisé.' }
++ 161 
++ 162   const supabaseAdmin = await createClient({ serviceRole: true })
++ 163 
++ 164   const { error: updateErr } = await supabaseAdmin
++ 165     .from('parrainages')
++ 166     .update({ flag_suspicion: null })
++ 167     .eq('id', parrainageId)
++ 168   if (updateErr) return { error: 'Erreur lors de la mise à jour.' }
++ 169 
++ 170   await supabaseAdmin.from('admin_actions_log').insert({
++ 171     admin_id: user.id,
++ 172     action_type: 'parrainage_ignore_flag',
++ 173     target_type: 'parrainage',
++ 174     target_id: parrainageId,
++ 175     details: { parrainage_id: parrainageId },
++ 176   })
++ 177 
++ 178   revalidatePath('/admin/parrainages')
++ 179   revalidatePath('/admin/parrainages/blacklist')
++ 180   return {}
++ 181 }
+diff --git a/app/admin/parrainages/page.tsx b/app/admin/parrainages/page.tsx
+new file mode 100644
+--- /dev/null
++++ b/app/admin/parrainages/page.tsx
+
++   1 import { createClient } from '@/lib/supabase/server'
++   2 import Link from 'next/link'
++   3 
++   4 const STATUT_LABELS: Record<string, string> = {
++   5   inscrite: 'Inscrite',
++   6   abonnee: 'Abonnée',
++   7   confirme: 'Confirmé',
++   8   bloque: 'Bloqué',
++   9   fraude: 'Fraude',
++  10   en_attente: 'En attente',
++  11 }
++  12 
++  13 const FLAG_LABELS: Record<string, string> = {
++  14   meme_ip: 'Même IP',
++  15   meme_adresse: 'Même adresse',
++  16   meme_carte: 'Même carte',
++  17 }
++  18 
++  19 const RAISON_LABELS: Record<string, string> = {
++  20   meme_email: 'Même email',
++  21   meme_carte: 'Même carte',
++  22 }
++  23 
++  24 const PAGE_SIZE = 50
++  25 
++  26 function formatFlag(flag: string | null): string {
++  27   if (!flag) return '-'
++  28   return flag
++  29     .split(',')
++  30     .map((f) => FLAG_LABELS[f.trim()] || f.trim())
++  31     .filter(Boolean)
++  32     .join(', ') || '-'
++  33 }
++  34 
++  35 type SearchParams = {
++  36   statut?: string
++  37   flag?: string
++  38   page?: string
++  39 }
++  40 
++  41 export default async function AdminParrainagesPage({
++  42   searchParams,
++  43 }: {
++  44   searchParams: Promise<SearchParams>
++  45 }) {
++  46   const params = await searchParams
++  47   const statutFilter = params.statut?.toString() || ''
++  48   const flagOnly = params.flag === '1'
++  49   const page = Math.max(1, parseInt(params.page || '1', 10) || 1)
++  50 
++  51   const supabaseAdmin = await createClient({ serviceRole: true })
++  52 
++  53   // Counters par statut + flag (agrégés en parallèle).
++  54   const counterStatuts = ['en_attente', 'inscrite', 'abonnee', 'confirme', 'bloque']
++  55   const counterPromises = counterStatuts.map((s) =>
++  56     supabaseAdmin
++  57       .from('parrainages')
++  58       .select('id', { count: 'exact', head: true })
++  59       .eq('statut', s),
++  60   )
++  61   const flagCounterPromise = supabaseAdmin
++  62     .from('parrainages')
++  63     .select('id', { count: 'exact', head: true })
++  64     .not('flag_suspicion', 'is', null)
++  65 
++  66   const counterResults = await Promise.all([...counterPromises, flagCounterPromise])
++  67   const counters: Record<string, number> = {}
++  68   counterStatuts.forEach((s, i) => {
++  69     counters[s] = counterResults[i].count || 0
++  70   })
++  71   counters.flag_suspicion = counterResults[counterResults.length - 1].count || 0
++  72 
++  73   // Tableau paginé.
++  74   let query = supabaseAdmin
++  75     .from('parrainages')
++  76     .select(
++  77       `id, code, statut, blocage_raison, flag_suspicion, created_at,
++  78        marraine:marraine_id (first_name, last_name, email),
++  79        filleule:filleule_id (first_name, last_name, email)`,
++  80       { count: 'exact' },
++  81     )
++  82     .order('created_at', { ascending: false })
++  83 
++  84   if (statutFilter && counterStatuts.includes(statutFilter)) {
++  85     query = query.eq('statut', statutFilter)
++  86   } else if (statutFilter === 'fraude') {
++  87     query = query.eq('statut', 'fraude')
++  88   }
++  89   if (flagOnly) {
++  90     query = query.not('flag_suspicion', 'is', null)
++  91   }
++  92 
++  93   const from = (page - 1) * PAGE_SIZE
++  94   const to = from + PAGE_SIZE - 1
++  95   const { data: rows, count } = await query.range(from, to)
++  96   const totalPages = Math.max(1, Math.ceil((count || 0) / PAGE_SIZE))
++  97 
++  98   function buildHref(overrides: Partial<SearchParams>): string {
++  99     const merged = {
++ 100       statut: statutFilter,
++ 101       flag: flagOnly ? '1' : '',
++ 102       page: String(page),
++ 103       ...overrides,
++ 104     }
++ 105     const qs = new URLSearchParams()
++ 106     if (merged.statut) qs.set('statut', merged.statut)
++ 107     if (merged.flag) qs.set('flag', merged.flag)
++ 108     if (merged.page && merged.page !== '1') qs.set('page', merged.page)
++ 109     const s = qs.toString()
++ 110     return `/admin/parrainages${s ? `?${s}` : ''}`
++ 111   }
++ 112 
++ 113   return (
++ 114     <div className="max-w-6xl mx-auto px-4 py-8">
++ 115       <div className="flex items-center justify-between mb-6">
++ 116         <h2 className="text-2xl font-bold text-gray-900">Parrainages</h2>
++ 117         <Link
++ 118           href="/admin/parrainages/blacklist"
++ 119           className="text-sm font-medium text-black hover:underline"
++ 120         >
++ 121           Blacklist et flags
++ 122         </Link>
++ 123       </div>
++ 124 
++ 125       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-6">
++ 126         {(
++ 127           [
++ 128             ['en_attente', 'En attente'],
++ 129             ['inscrite', 'Inscrites'],
++ 130             ['abonnee', 'Abonnées'],
++ 131             ['confirme', 'Confirmés'],
++ 132             ['bloque', 'Bloqués'],
++ 133             ['flag_suspicion', 'Flags'],
++ 134           ] as const
++ 135         ).map(([key, label]) => (
++ 136           <div key={key} className="bg-white rounded-xl border p-4">
++ 137             <p className="text-xs text-gray-500">{label}</p>
++ 138             <p className="text-2xl font-bold text-black mt-1">{counters[key] ?? 0}</p>
++ 139           </div>
++ 140         ))}
++ 141       </div>
++ 142 
++ 143       <div className="flex items-center gap-2 mb-4 flex-wrap">
++ 144         <Link
++ 145           href={buildHref({ statut: '', page: '1' })}
++ 146           className={`px-3 py-1.5 text-xs rounded-full border ${!statutFilter ? 'bg-black text-white border-black' : 'bg-white text-gray-700 border-gray-300 hover:border-black'}`}
++ 147         >
++ 148           Tous
++ 149         </Link>
++ 150         {[...counterStatuts, 'fraude'].map((s) => (
++ 151           <Link
++ 152             key={s}
++ 153             href={buildHref({ statut: s, page: '1' })}
++ 154             className={`px-3 py-1.5 text-xs rounded-full border ${statutFilter === s ? 'bg-black text-white border-black' : 'bg-white text-gray-700 border-gray-300 hover:border-black'}`}
++ 155           >
++ 156             {STATUT_LABELS[s] || s}
++ 157           </Link>
++ 158         ))}
++ 159         <Link
++ 160           href={buildHref({ flag: flagOnly ? '' : '1', page: '1' })}
++ 161           className={`px-3 py-1.5 text-xs rounded-full border ${flagOnly ? 'bg-black text-white border-black' : 'bg-white text-gray-700 border-gray-300 hover:border-black'}`}
++ 162         >
++ 163           Avec flag
++ 164         </Link>
++ 165       </div>
++ 166 
++ 167       {!rows || rows.length === 0 ? (
++ 168         <div className="bg-white rounded-xl border p-8 text-center text-gray-500">
++ 169           Aucun parrainage à afficher.
++ 170         </div>
++ 171       ) : (
++ 172         <div className="bg-white rounded-xl border overflow-hidden">
++ 173           <table className="w-full text-sm">
++ 174             <thead className="bg-accent/20 border-b">
++ 175               <tr>
++ 176                 <th className="text-left px-4 py-3 font-medium text-gray-500">Date</th>
++ 177                 <th className="text-left px-4 py-3 font-medium text-gray-500">Marraine</th>
++ 178                 <th className="text-left px-4 py-3 font-medium text-gray-500">Filleule</th>
++ 179                 <th className="text-left px-4 py-3 font-medium text-gray-500">Statut</th>
++ 180                 <th className="text-left px-4 py-3 font-medium text-gray-500">Flag</th>
++ 181                 <th className="text-left px-4 py-3 font-medium text-gray-500">Actions</th>
++ 182               </tr>
++ 183             </thead>
++ 184             <tbody>
++ 185               {rows.map((row: any) => {
++ 186                 const marraine = row.marraine as
++ 187                   | { first_name?: string; last_name?: string; email?: string }
++ 188                   | null
++ 189                 const filleule = row.filleule as
++ 190                   | { first_name?: string; last_name?: string; email?: string }
++ 191                   | null
++ 192                 return (
++ 193                   <tr key={row.id} className="border-b last:border-0 hover:bg-accent/10">
++ 194                     <td className="px-4 py-3 text-gray-400 whitespace-nowrap">
++ 195                       {new Date(row.created_at).toLocaleDateString('fr-FR', {
++ 196                         day: 'numeric',
++ 197                         month: 'short',
++ 198                         hour: '2-digit',
++ 199                         minute: '2-digit',
++ 200                       })}
++ 201                     </td>
++ 202                     <td className="px-4 py-3 text-gray-700">
++ 203                       {marraine
++ 204                         ? `${marraine.first_name || ''} ${marraine.last_name || ''}`.trim() ||
++ 205                           marraine.email ||
++ 206                           '-'
++ 207                         : '-'}
++ 208                       {marraine?.email && (
++ 209                         <div className="text-xs text-gray-400">{marraine.email}</div>
++ 210                       )}
++ 211                     </td>
++ 212                     <td className="px-4 py-3 text-gray-700">
++ 213                       {filleule
++ 214                         ? `${filleule.first_name || ''} ${filleule.last_name || ''}`.trim() ||
++ 215                           filleule.email ||
++ 216                           'N/A'
++ 217                         : 'N/A'}
++ 218                       {filleule?.email && (
++ 219                         <div className="text-xs text-gray-400">{filleule.email}</div>
++ 220                       )}
++ 221                     </td>
++ 222                     <td className="px-4 py-3">
++ 223                       <span
++ 224                         className={`px-2 py-0.5 rounded-full text-xs font-medium ${
++ 225                           row.statut === 'bloque' || row.statut === 'fraude'
++ 226                             ? 'bg-black text-white'
++ 227                             : 'bg-gray-100 text-gray-700'
++ 228                         }`}
++ 229                       >
++ 230                         {STATUT_LABELS[row.statut] || row.statut}
++ 231                       </span>
++ 232                       {row.blocage_raison && (
++ 233                         <div className="text-xs text-gray-400 mt-1">
++ 234                           {RAISON_LABELS[row.blocage_raison] || row.blocage_raison}
++ 235                         </div>
++ 236                       )}
++ 237                     </td>
++ 238                     <td className="px-4 py-3 text-gray-500 text-xs">
++ 239                       {formatFlag(row.flag_suspicion)}
++ 240                     </td>
++ 241                     <td className="px-4 py-3">
++ 242                       <Link
++ 243                         href={`/admin/parrainages/blacklist?id=${row.id}`}
++ 244                         className="text-xs font-medium text-black hover:underline"
++ 245                       >
++ 246                         Voir
++ 247                       </Link>
++ 248                     </td>
++ 249                   </tr>
++ 250                 )
++ 251               })}
++ 252             </tbody>
++ 253           </table>
++ 254         </div>
++ 255       )}
++ 256 
++ 257       {totalPages > 1 && (
++ 258         <div className="flex items-center justify-between mt-4">
++ 259           <p className="text-xs text-gray-500">
++ 260             Page {page} / {totalPages} ({count || 0} résultats)
++ 261           </p>
++ 262           <div className="flex gap-2">
++ 263             {page > 1 && (
++ 264               <Link
++ 265                 href={buildHref({ page: String(page - 1) })}
++ 266                 className="px-3 py-1.5 text-xs rounded border border-gray-300 bg-white hover:border-black"
++ 267               >
++ 268                 Précédent
++ 269               </Link>
++ 270             )}
++ 271             {page < totalPages && (
++ 272               <Link
++ 273                 href={buildHref({ page: String(page + 1) })}
++ 274                 className="px-3 py-1.5 text-xs rounded border border-gray-300 bg-white hover:border-black"
++ 275               >
++ 276                 Suivant
++ 277               </Link>
++ 278             )}
++ 279           </div>
++ 280         </div>
++ 281       )}
++ 282     </div>
++ 283   )
++ 284 }
+diff --git a/app/admin/parrainages/blacklist/page.tsx b/app/admin/parrainages/blacklist/page.tsx
+new file mode 100644
+--- /dev/null
++++ b/app/admin/parrainages/blacklist/page.tsx
+
++   1 import { createClient } from '@/lib/supabase/server'
++   2 import Link from 'next/link'
++   3 import { ParrainageBlacklistActions } from '@/components/admin/parrainage-blacklist-actions'
++   4 
++   5 const STATUT_LABELS: Record<string, string> = {
++   6   inscrite: 'Inscrite',
++   7   abonnee: 'Abonnée',
++   8   confirme: 'Confirmé',
++   9   bloque: 'Bloqué',
++  10   fraude: 'Fraude',
++  11 }
++  12 
++  13 const FLAG_LABELS: Record<string, string> = {
++  14   meme_ip: 'Même IP',
++  15   meme_adresse: 'Même adresse',
++  16   meme_carte: 'Même carte',
++  17 }
++  18 
++  19 const RAISON_LABELS: Record<string, string> = {
++  20   meme_email: 'Même email',
++  21   meme_carte: 'Même carte',
++  22 }
++  23 
++  24 function formatFlag(flag: string | null): string {
++  25   if (!flag) return '-'
++  26   return flag
++  27     .split(',')
++  28     .map((f) => FLAG_LABELS[f.trim()] || f.trim())
++  29     .filter(Boolean)
++  30     .join(', ') || '-'
++  31 }
++  32 
++  33 type SearchParams = {
++  34   id?: string
++  35 }
++  36 
++  37 export default async function AdminParrainagesBlacklistPage({
++  38   searchParams,
++  39 }: {
++  40   searchParams: Promise<SearchParams>
++  41 }) {
++  42   const params = await searchParams
++  43   const highlightId = params.id?.toString() || ''
++  44 
++  45   const supabaseAdmin = await createClient({ serviceRole: true })
++  46 
++  47   // Lecture des rows bloquées, frauduleuses ou flaggées.
++  48   // PostgREST ne permet pas un OR avec IS NOT NULL trivialement ; on fait deux passes
++  49   // puis on déduplique côté JS (le volume reste petit, c'est admin only).
++  50   const [{ data: blockedRows }, { data: flaggedRows }] = await Promise.all([
++  51     supabaseAdmin
++  52       .from('parrainages')
++  53       .select(
++  54         `id, code, statut, blocage_raison, flag_suspicion, created_at, filleule_id,
++  55          marraine:marraine_id (first_name, last_name, email, phone),
++  56          filleule:filleule_id (first_name, last_name, email, phone)`,
++  57       )
++  58       .in('statut', ['bloque', 'fraude'])
++  59       .order('created_at', { ascending: false }),
++  60     supabaseAdmin
++  61       .from('parrainages')
++  62       .select(
++  63         `id, code, statut, blocage_raison, flag_suspicion, created_at, filleule_id,
++  64          marraine:marraine_id (first_name, last_name, email, phone),
++  65          filleule:filleule_id (first_name, last_name, email, phone)`,
++  66       )
++  67       .not('flag_suspicion', 'is', null)
++  68       .order('created_at', { ascending: false }),
++  69   ])
++  70 
++  71   const seen = new Set<string>()
++  72   const rows: any[] = []
++  73   for (const r of [...(blockedRows || []), ...(flaggedRows || [])]) {
++  74     if (seen.has(r.id)) continue
++  75     seen.add(r.id)
++  76     rows.push(r)
++  77   }
++  78   rows.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
++  79 
++  80   // Charger en une passe les adresses des filleules pour l'affichage.
++  81   const allFilleuleIds = [
++  82     ...new Set(rows.map((r) => r.filleule_id).filter(Boolean) as string[]),
++  83   ]
++  84 
++  85   const adressesByUserId: Record<string, string> = {}
++  86   if (allFilleuleIds.length > 0) {
++  87     const { data: profiles } = await supabaseAdmin
++  88       .from('accompagnantes_profiles')
++  89       .select('user_id, adresse, ville, code_postal')
++  90       .in('user_id', allFilleuleIds)
++  91     if (profiles) {
++  92       for (const p of profiles) {
++  93         const parts = [p.adresse, p.code_postal, p.ville].filter(Boolean)
++  94         adressesByUserId[p.user_id as string] = parts.join(', ')
++  95       }
++  96     }
++  97   }
++  98 
++  99   return (
++ 100     <div className="max-w-6xl mx-auto px-4 py-8">
++ 101       <div className="flex items-center justify-between mb-6">
++ 102         <div>
++ 103           <h2 className="text-2xl font-bold text-gray-900">Blacklist et flags</h2>
++ 104           <p className="text-sm text-gray-500 mt-1">
++ 105             Parrainages bloqués, frauduleux ou avec une suspicion à examiner.
++ 106           </p>
++ 107         </div>
++ 108         <Link
++ 109           href="/admin/parrainages"
++ 110           className="text-sm font-medium text-black hover:underline"
++ 111         >
++ 112           Vue d&apos;ensemble
++ 113         </Link>
++ 114       </div>
++ 115 
++ 116       {rows.length === 0 ? (
++ 117         <div className="bg-white rounded-xl border p-8 text-center text-gray-500">
++ 118           Aucun parrainage suspect ou bloqué.
++ 119         </div>
++ 120       ) : (
++ 121         <div className="bg-white rounded-xl border overflow-hidden">
++ 122           <table className="w-full text-sm">
++ 123             <thead className="bg-accent/20 border-b">
++ 124               <tr>
++ 125                 <th className="text-left px-4 py-3 font-medium text-gray-500">Date</th>
++ 126                 <th className="text-left px-4 py-3 font-medium text-gray-500">Marraine</th>
++ 127                 <th className="text-left px-4 py-3 font-medium text-gray-500">Filleule</th>
++ 128                 <th className="text-left px-4 py-3 font-medium text-gray-500">Raison / Flag</th>
++ 129                 <th className="text-left px-4 py-3 font-medium text-gray-500">Statut</th>
++ 130                 <th className="text-left px-4 py-3 font-medium text-gray-500">Actions</th>
++ 131               </tr>
++ 132             </thead>
++ 133             <tbody>
++ 134               {rows.map((row: any) => {
++ 135                 const marraine = row.marraine as
++ 136                   | { first_name?: string; last_name?: string; email?: string; phone?: string }
++ 137                   | null
++ 138                 const filleule = row.filleule as
++ 139                   | { first_name?: string; last_name?: string; email?: string; phone?: string }
++ 140                   | null
++ 141                 const isHighlighted = highlightId && row.id === highlightId
++ 142                 const filleuleAdresse = row.filleule_id
++ 143                   ? adressesByUserId[row.filleule_id] || ''
++ 144                   : ''
++ 145                 const isBlocked = row.statut === 'bloque' || row.statut === 'fraude'
++ 146                 const hasFlag = !!row.flag_suspicion
++ 147                 return (
++ 148                   <tr
++ 149                     key={row.id}
++ 150                     id={`row-${row.id}`}
++ 151                     aria-current={isHighlighted ? 'true' : undefined}
++ 152                     className={`border-b last:border-0 align-top ${
++ 153                       isHighlighted ? 'bg-accent/30' : 'hover:bg-accent/10'
++ 154                     }`}
++ 155                   >
++ 156                     <td className="px-4 py-3 text-gray-400 whitespace-nowrap">
++ 157                       {new Date(row.created_at).toLocaleDateString('fr-FR', {
++ 158                         day: 'numeric',
++ 159                         month: 'short',
++ 160                         hour: '2-digit',
++ 161                         minute: '2-digit',
++ 162                       })}
++ 163                     </td>
++ 164                     <td className="px-4 py-3 text-gray-700">
++ 165                       <div className="font-medium">
++ 166                         {marraine
++ 167                           ? `${marraine.first_name || ''} ${marraine.last_name || ''}`.trim() || '-'
++ 168                           : '-'}
++ 169                       </div>
++ 170                       {marraine?.email && (
++ 171                         <div className="text-xs text-gray-400">{marraine.email}</div>
++ 172                       )}
++ 173                       {marraine?.phone && (
++ 174                         <div className="text-xs text-gray-400">{marraine.phone}</div>
++ 175                       )}
++ 176                     </td>
++ 177                     <td className="px-4 py-3 text-gray-700">
++ 178                       <div className="font-medium">
++ 179                         {filleule
++ 180                           ? `${filleule.first_name || ''} ${filleule.last_name || ''}`.trim() ||
++ 181                             'N/A'
++ 182                           : 'N/A'}
++ 183                       </div>
++ 184                       {filleule?.email && (
++ 185                         <div className="text-xs text-gray-400">{filleule.email}</div>
++ 186                       )}
++ 187                       {filleule?.phone && (
++ 188                         <div className="text-xs text-gray-400">{filleule.phone}</div>
++ 189                       )}
++ 190                       {filleuleAdresse && (
++ 191                         <div className="text-xs text-gray-400">{filleuleAdresse}</div>
++ 192                       )}
++ 193                     </td>
++ 194                     <td className="px-4 py-3 text-xs text-gray-500">
++ 195                       {row.blocage_raison && (
++ 196                         <div>
++ 197                           <span className="font-medium text-black">Blocage :</span>{' '}
++ 198                           {RAISON_LABELS[row.blocage_raison] || row.blocage_raison}
++ 199                         </div>
++ 200                       )}
++ 201                       {row.flag_suspicion && (
++ 202                         <div>
++ 203                           <span className="font-medium text-black">Flag :</span>{' '}
++ 204                           {formatFlag(row.flag_suspicion)}
++ 205                         </div>
++ 206                       )}
++ 207                     </td>
++ 208                     <td className="px-4 py-3">
++ 209                       <span
++ 210                         className={`px-2 py-0.5 rounded-full text-xs font-medium ${
++ 211                           isBlocked ? 'bg-black text-white' : 'bg-gray-100 text-gray-700'
++ 212                         }`}
++ 213                       >
++ 214                         {STATUT_LABELS[row.statut] || row.statut}
++ 215                       </span>
++ 216                     </td>
++ 217                     <td className="px-4 py-3">
++ 218                       {row.statut === 'fraude' ? (
++ 219                         <span className="text-xs text-gray-400">Fraude confirmée</span>
++ 220                       ) : (
++ 221                         <ParrainageBlacklistActions
++ 222                           parrainageId={row.id}
++ 223                           hasFlag={hasFlag}
++ 224                           isBlocked={isBlocked}
++ 225                         />
++ 226                       )}
++ 227                     </td>
++ 228                   </tr>
++ 229                 )
++ 230               })}
++ 231             </tbody>
++ 232           </table>
++ 233         </div>
++ 234       )}
++ 235     </div>
++ 236   )
++ 237 }
+diff --git a/components/admin/parrainage-blacklist-actions.tsx b/components/admin/parrainage-blacklist-actions.tsx
+new file mode 100644
+--- /dev/null
++++ b/components/admin/parrainage-blacklist-actions.tsx
+
++   1 'use client'
++   2 
++   3 import { useState } from 'react'
++   4 import {
++   5   autoriserException,
++   6   confirmerFraude,
++   7   ignorerFlag,
++   8 } from '@/app/actions/admin-parrainages'
++   9 import { Button } from '@/components/ui/button'
++  10 
++  11 type Mode = 'idle' | 'autoriser' | 'fraude'
++  12 
++  13 type Props = {
++  14   parrainageId: string
++  15   hasFlag: boolean
++  16   isBlocked: boolean
++  17 }
++  18 
++  19 export function ParrainageBlacklistActions({ parrainageId, hasFlag, isBlocked }: Props) {
++  20   const [mode, setMode] = useState<Mode>('idle')
++  21   const [notes, setNotes] = useState('')
++  22   const [loading, setLoading] = useState(false)
++  23   const [error, setError] = useState<string | null>(null)
++  24 
++  25   async function handleSubmit() {
++  26     setLoading(true)
++  27     setError(null)
++  28     const result =
++  29       mode === 'autoriser'
++  30         ? await autoriserException(parrainageId, notes)
++  31         : await confirmerFraude(parrainageId, notes)
++  32     if (result.error) {
++  33       setError(result.error)
++  34       setLoading(false)
++  35     }
++  36   }
++  37 
++  38   async function handleIgnore() {
++  39     setLoading(true)
++  40     setError(null)
++  41     const result = await ignorerFlag(parrainageId)
++  42     if (result.error) {
++  43       setError(result.error)
++  44       setLoading(false)
++  45     }
++  46   }
++  47 
++  48   if (mode !== 'idle') {
++  49     return (
++  50       <div className="min-w-[240px]">
++  51         {error && <p className="text-xs text-red-600 mb-2">{error}</p>}
++  52         <p className="text-xs font-medium text-gray-700 mb-1">
++  53           {mode === 'autoriser' ? 'Notes (exception autorisée)' : 'Notes (fraude confirmée)'}
++  54         </p>
++  55         <textarea
++  56           value={notes}
++  57           onChange={(e) => setNotes(e.target.value)}
++  58           rows={2}
++  59           className="w-full rounded-lg border border-gray-300 bg-white px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-black resize-none mb-2"
++  60         />
++  61         <div className="flex gap-2">
++  62           <Button size="sm" onClick={handleSubmit} disabled={loading}>
++  63             {loading ? '...' : 'Confirmer'}
++  64           </Button>
++  65           <Button size="sm" variant="ghost" onClick={() => setMode('idle')} disabled={loading}>
++  66             Annuler
++  67           </Button>
++  68         </div>
++  69       </div>
++  70     )
++  71   }
++  72 
++  73   return (
++  74     <div className="flex flex-col gap-2 min-w-[160px]">
++  75       {error && <p className="text-xs text-red-600">{error}</p>}
++  76       {(isBlocked || hasFlag) && (
++  77         <Button size="sm" variant="outline" onClick={() => setMode('autoriser')}>
++  78           Autoriser exception
++  79         </Button>
++  80       )}
++  81       {(isBlocked || hasFlag) && (
++  82         <Button size="sm" variant="outline" onClick={() => setMode('fraude')}>
++  83           Confirmer fraude
++  84         </Button>
++  85       )}
++  86       {hasFlag && !isBlocked && (
++  87         <Button size="sm" variant="ghost" onClick={handleIgnore} disabled={loading}>
++  88           {loading ? '...' : 'Ignorer flag'}
++  89         </Button>
++  90       )}
++  91     </div>
++  92   )
++  93 }
+diff --git a/lib/parrainage-detection.ts b/lib/parrainage-detection.ts
+new file mode 100644
+--- /dev/null
++++ b/lib/parrainage-detection.ts
+
++   1 // Story 2.3 : utilitaires purs pour la détection blacklist parrainage.
++   2 // Importable depuis server actions, route handlers et tests sans 'use server'.
++   3 
++   4 export function normalizeEmail(input: string): string {
++   5   return (input || '').trim().toLowerCase()
++   6 }
++   7 
++   8 // Normalisation MVP : pas de gestion accents/géocodage/abréviations.
++   9 // Faux positifs/négatifs assumés (revue admin via flag de suspicion).
++  10 export function normalizeAddress(input: string): string {
++  11   return (input || '').trim().toLowerCase().replace(/\s+/g, ' ')
++  12 }
++  13 
++  14 export function mergeFlagSuspicion(existing: string | null, addition: string): string {
++  15   const flags = (existing || '')
++  16     .split(',')
++  17     .map((f) => f.trim())
++  18     .filter(Boolean)
++  19   if (!flags.includes(addition)) flags.push(addition)
++  20   return flags.join(',')
++  21 }
+diff --git a/supabase/migrations/20260428144601_parrainage_blacklist_constraints.sql b/supabase/migrations/20260428144601_parrainage_blacklist_constraints.sql
+new file mode 100644
+--- /dev/null
++++ b/supabase/migrations/20260428144601_parrainage_blacklist_constraints.sql
+
++   1 -- Story 2.3 : index pour accélérer la page admin blacklist et le lookup email lower
++   2 -- Migration additive idempotente, aucune nouvelle colonne (les colonnes blocage_raison,
++   3 -- flag_suspicion, stripe_fingerprint, ip_inscription existent déjà depuis
++   4 -- 20260428130104_add_parrainage_feature.sql).
++   5 
++   6 -- Index partiel pour la page admin /admin/parrainages/blacklist :
++   7 -- liste les parrainages bloqués, fraudes et flags de suspicion par created_at DESC.
++   8 CREATE INDEX IF NOT EXISTS idx_parrainages_blacklist
++   9   ON public.parrainages (created_at DESC)
++  10   WHERE statut = 'bloque' OR flag_suspicion IS NOT NULL OR statut = 'fraude';
++  11 
++  12 -- Index fonctionnel sur LOWER(email) pour la détection meme_email
++  13 -- (l'index UNIQUE existant users_email_key sur email est case-sensitive et inutile pour LOWER()).
++  14 CREATE INDEX IF NOT EXISTS idx_users_email_lower
++  15   ON public.users (LOWER(email));
+diff --git a/app/api/webhooks/stripe/route.ts b/app/api/webhooks/stripe/route.ts
+index 20b6fa8..507ec80 100644
+--- a/app/api/webhooks/stripe/route.ts
++++ b/app/api/webhooks/stripe/route.ts
+@@ -1,7 +1,15 @@
+ import { NextRequest, NextResponse } from 'next/server'
+ import { stripe } from '@/lib/stripe'
+ import { createServerClient } from '@supabase/ssr'
+-import { sendSubscriptionConfirmEmail, sendSubscriptionCancelEmail, sendPlanChangeEmail, sendRenewalReminderEmail } from '@/lib/emails'
++import {
++  sendSubscriptionConfirmEmail,
++  sendSubscriptionCancelEmail,
++  sendPlanChangeEmail,
++  sendRenewalReminderEmail,
++  sendAdminParrainageFlag,
++} from '@/lib/emails'
++import { revokeFilleuleValidationFromWebhook } from '@/app/actions/parrainage'
++import { normalizeAddress, mergeFlagSuspicion } from '@/lib/parrainage-detection'
+ import type Stripe from 'stripe'
+ 
+ function getSupabaseAdmin() {
+@@ -17,6 +25,245 @@ function getSupabaseAdmin() {
+   )
+ }
+ 
++// Aligné sur normalizeCode dans app/actions/parrainage.ts : la metadata Stripe
++// peut contenir des espaces/casse différentes si elle a été éditée à la main.
++function normalizeParrainageCode(input: string): string {
++  return (input || '').toUpperCase().replace(/[\s-]/g, '')
++}
++
++// Story 2.3 AC3 : second passage de détection après capture du fingerprint.
++// Recherche `meme_carte` (BLOCAGE) et `meme_adresse` (FLAG). Concaténation CSV
++// avec un éventuel flag `meme_ip` déjà posé au signup.
++async function detectBlacklistAtWebhook(
++  supabase: ReturnType<typeof getSupabaseAdmin>,
++  parrainage: {
++    id: string
++    marraine_id: string
++    filleule_id: string | null
++    stripe_fingerprint: string | null
++    flag_suspicion: string | null
++  },
++): Promise<void> {
++  try {
++    if (!parrainage.filleule_id) return
++
++    // 1) Détection meme_adresse (FLAG) via accompagnantes_profiles
++    const [{ data: marraineProfile }, { data: filleuleProfile }] = await Promise.all([
++      supabase
++        .from('accompagnantes_profiles')
++        .select('adresse')
++        .eq('user_id', parrainage.marraine_id)
++        .maybeSingle(),
++      supabase
++        .from('accompagnantes_profiles')
++        .select('adresse')
++        .eq('user_id', parrainage.filleule_id)
++        .maybeSingle(),
++    ])
++
++    const marraineAddr = normalizeAddress((marraineProfile?.adresse as string) || '')
++    const filleuleAddr = normalizeAddress((filleuleProfile?.adresse as string) || '')
++    const adresseMatch =
++      marraineAddr.length > 0 && filleuleAddr.length > 0 && marraineAddr === filleuleAddr
++
++    // 2) Détection meme_carte (BLOCAGE) via stripe_fingerprint
++    let carteMatch = false
++    if (parrainage.stripe_fingerprint) {
++      // Recherche dans parrainages : la marraine a-t-elle ce fingerprint
++      // (en tant que filleule d'une ancienne row, ou via une autre filleule à elle).
++      const { data: fingerprintMatches } = await supabase
++        .from('parrainages')
++        .select('id')
++        .eq('stripe_fingerprint', parrainage.stripe_fingerprint)
++        .neq('id', parrainage.id)
++        .or(`marraine_id.eq.${parrainage.marraine_id},filleule_id.eq.${parrainage.marraine_id}`)
++        .limit(1)
++
++      if (fingerprintMatches && fingerprintMatches.length > 0) {
++        carteMatch = true
++      }
++
++      // Fallback : si pas de match en BDD, on consulte l'API Stripe pour les
++      // cartes attachées au customer de la marraine.
++      if (!carteMatch) {
++        const { data: marraineSub } = await supabase
++          .from('subscriptions')
++          .select('stripe_customer_id')
++          .eq('user_id', parrainage.marraine_id)
++          .maybeSingle()
++        const customerId = (marraineSub?.stripe_customer_id as string) || null
++        if (customerId) {
++          try {
++            const pms = await stripe.paymentMethods.list({ customer: customerId, type: 'card' })
++            for (const pm of pms.data) {
++              if (pm.card?.fingerprint === parrainage.stripe_fingerprint) {
++                carteMatch = true
++                break
++              }
++            }
++          } catch (err) {
++            console.error('[parrainage_blacklist][webhook][stripe_lookup]', err)
++          }
++        }
++      }
++    }
++
++    if (!carteMatch && !adresseMatch) return
++
++    // Charger les noms pour l'email admin
++    const [{ data: marraineUser }, { data: filleuleUser }] = await Promise.all([
++      supabase
++        .from('users')
++        .select('first_name, last_name')
++        .eq('id', parrainage.marraine_id)
++        .maybeSingle(),
++      supabase
++        .from('users')
++        .select('first_name, last_name')
++        .eq('id', parrainage.filleule_id)
++        .maybeSingle(),
++    ])
++    const marraineName =
++      `${marraineUser?.first_name || ''} ${marraineUser?.last_name || ''}`.trim() || 'Marraine'
++    const filleuleName =
++      `${filleuleUser?.first_name || ''} ${filleuleUser?.last_name || ''}`.trim() || 'Filleule'
++
++    if (carteMatch) {
++      await supabase
++        .from('parrainages')
++        .update({ statut: 'bloque', blocage_raison: 'meme_carte' })
++        .eq('id', parrainage.id)
++
++      await revokeFilleuleValidationFromWebhook(parrainage.filleule_id, 'webhook_meme_carte', {
++        parrainageId: parrainage.id,
++        marraineId: parrainage.marraine_id,
++      })
++
++      await supabase.from('admin_actions_log').insert({
++        admin_id: null,
++        action_type: 'parrainage_bloque',
++        target_type: 'parrainage',
++        target_id: parrainage.id,
++        details: {
++          marraine_id: parrainage.marraine_id,
++          filleule_id: parrainage.filleule_id,
++          raison: 'meme_carte',
++        },
++      })
++
++      try {
++        await sendAdminParrainageFlag({
++          marraineName,
++          filleuleName,
++          type: 'meme_carte',
++          parrainageId: parrainage.id,
++        })
++      } catch (err) {
++        console.error('[parrainage_blacklist][webhook][email]', err)
++      }
++      return
++    }
++
++    if (adresseMatch) {
++      const newFlag = mergeFlagSuspicion(parrainage.flag_suspicion, 'meme_adresse')
++
++      await supabase
++        .from('parrainages')
++        .update({ flag_suspicion: newFlag })
++        .eq('id', parrainage.id)
++
++      await supabase.from('admin_actions_log').insert({
++        admin_id: null,
++        action_type: 'parrainage_flag',
++        target_type: 'parrainage',
++        target_id: parrainage.id,
++        details: {
++          marraine_id: parrainage.marraine_id,
++          filleule_id: parrainage.filleule_id,
++          flag: 'meme_adresse',
++        },
++      })
++
++      try {
++        await sendAdminParrainageFlag({
++          marraineName,
++          filleuleName,
++          type: 'meme_adresse',
++          parrainageId: parrainage.id,
++        })
++      } catch (err) {
++        console.error('[parrainage_blacklist][webhook][email]', err)
++      }
++    }
++  } catch (err) {
++    console.error('[parrainage_blacklist][webhook]', err)
++  }
++}
++
++async function captureParrainageFingerprint(
++  supabase: ReturnType<typeof getSupabaseAdmin>,
++  subscription: Stripe.Subscription,
++): Promise<void> {
++  try {
++    const rawCode = subscription.metadata?.parrainage_code
++    const userId = subscription.metadata?.user_id
++    if (!rawCode || !userId) return
++
++    const parrainageCode = normalizeParrainageCode(rawCode)
++    if (!parrainageCode) return
++
++    const { data: existingParrainage } = await supabase
++      .from('parrainages')
++      .select('id, stripe_fingerprint')
++      .eq('code', parrainageCode)
++      .eq('filleule_id', userId)
++      .eq('statut', 'inscrite')
++      .maybeSingle()
++
++    if (!existingParrainage || existingParrainage.stripe_fingerprint != null) return
++
++    const defaultPm = subscription.default_payment_method
++    const pmId = typeof defaultPm === 'string' ? defaultPm : defaultPm?.id ?? null
++    if (!pmId) return
++
++    const pm = await stripe.paymentMethods.retrieve(pmId)
++    const fingerprint = pm.card?.fingerprint ?? null
++    if (!fingerprint) return
++
++    await supabase
++      .from('parrainages')
++      .update({ stripe_fingerprint: fingerprint })
++      .eq('code', parrainageCode)
++      .eq('filleule_id', userId)
++      .eq('statut', 'inscrite')
++      .is('stripe_fingerprint', null)
++
++    // Story 2.3 AC3 : déclencher le second passage de détection si le parrainage
++    // est encore inscrit et sans blocage.
++    const { data: refreshedParrainage } = await supabase
++      .from('parrainages')
++      .select('id, marraine_id, filleule_id, stripe_fingerprint, flag_suspicion, statut, blocage_raison')
++      .eq('id', existingParrainage.id)
++      .maybeSingle()
++    if (
++      refreshedParrainage &&
++      refreshedParrainage.statut === 'inscrite' &&
++      !refreshedParrainage.blocage_raison
++    ) {
++      await detectBlacklistAtWebhook(supabase, {
++        id: refreshedParrainage.id,
++        marraine_id: refreshedParrainage.marraine_id,
++        filleule_id: refreshedParrainage.filleule_id,
++        stripe_fingerprint: refreshedParrainage.stripe_fingerprint,
++        flag_suspicion: refreshedParrainage.flag_suspicion,
++      })
++    }
++  } catch (err) {
++    // best-effort, ne doit jamais bloquer le flow webhook
++    console.error('[parrainage_fingerprint][subscription_updated]', err)
++  }
++}
++
+ function getSubscriptionPeriod(subscription: Stripe.Subscription) {
+   const item = subscription.items.data[0]
+   return {
+@@ -112,6 +359,83 @@ export async function POST(request: NextRequest) {
+         { onConflict: 'user_id' }
+       )
+ 
++      const rawParrainageCode = session.metadata?.parrainage_code
++      const parrainageCode = rawParrainageCode ? normalizeParrainageCode(rawParrainageCode) : null
++      if (parrainageCode && userId) {
++        try {
++          // Court-circuit : si le fingerprint est déjà capturé pour ce parrainage,
++          // ne pas refaire d'appel Stripe (économise les appels API en cas de redelivery).
++          const { data: existingParrainage } = await supabase
++            .from('parrainages')
++            .select('id, stripe_fingerprint')
++            .eq('code', parrainageCode)
++            .eq('filleule_id', userId)
++            .eq('statut', 'inscrite')
++            .maybeSingle()
++
++          if (existingParrainage && existingParrainage.stripe_fingerprint == null) {
++            // Trial 30j : default_payment_method peut être null au moment du webhook.
++            // Fallback sur session.setup_intent.payment_method (présent en mode trial via SetupIntent).
++            const defaultPm = subscriptionResponse.default_payment_method
++            let pmId: string | null =
++              typeof defaultPm === 'string' ? defaultPm : defaultPm?.id ?? null
++
++            if (!pmId && session.setup_intent) {
++              const setupIntentId =
++                typeof session.setup_intent === 'string'
++                  ? session.setup_intent
++                  : session.setup_intent.id
++              const setupIntent = await stripe.setupIntents.retrieve(setupIntentId)
++              const siPm = setupIntent.payment_method
++              pmId = typeof siPm === 'string' ? siPm : siPm?.id ?? null
++            }
++
++            let fingerprint: string | null = null
++            if (pmId) {
++              const pm = await stripe.paymentMethods.retrieve(pmId)
++              fingerprint = pm.card?.fingerprint ?? null
++            }
++
++            // WHERE stripe_fingerprint IS NULL : préserve le fingerprint d'inscription
++            // contre tout rejeu/changement de carte ultérieur (sémantique anti-fraude).
++            if (fingerprint) {
++              await supabase
++                .from('parrainages')
++                .update({ stripe_fingerprint: fingerprint })
++                .eq('code', parrainageCode)
++                .eq('filleule_id', userId)
++                .eq('statut', 'inscrite')
++                .is('stripe_fingerprint', null)
++            }
++
++            // Story 2.3 AC3 : second passage de détection après capture du fingerprint.
++            const { data: refreshedParrainage } = await supabase
++              .from('parrainages')
++              .select(
++                'id, marraine_id, filleule_id, stripe_fingerprint, flag_suspicion, statut, blocage_raison',
++              )
++              .eq('id', existingParrainage.id)
++              .maybeSingle()
++            if (
++              refreshedParrainage &&
++              refreshedParrainage.statut === 'inscrite' &&
++              !refreshedParrainage.blocage_raison
++            ) {
++              await detectBlacklistAtWebhook(supabase, {
++                id: refreshedParrainage.id,
++                marraine_id: refreshedParrainage.marraine_id,
++                filleule_id: refreshedParrainage.filleule_id,
++                stripe_fingerprint: refreshedParrainage.stripe_fingerprint,
++                flag_suspicion: refreshedParrainage.flag_suspicion,
++              })
++            }
++          }
++        } catch (err) {
++          // capture fingerprint best-effort, ne doit jamais bloquer le flow webhook principal
++          console.error('[parrainage_fingerprint][checkout]', err)
++        }
++      }
++
+       // Send confirmation email
+       const { data: userData } = await supabase
+         .from('users')
+@@ -164,6 +488,11 @@ export async function POST(request: NextRequest) {
+         .update(updateData)
+         .eq('stripe_subscription_id', subscription.id)
+ 
++      // Rattrapage capture fingerprint parrainage : en mode trial, le PM peut
++      // n'être attaché qu'après checkout.session.completed (via SetupIntent).
++      // On retente la capture à chaque update tant que stripe_fingerprint est NULL.
++      await captureParrainageFingerprint(supabase, subscription)
++
+       // Detect plan change and send email
+       if (newPriceId && existing.stripe_price_id && newPriceId !== existing.stripe_price_id) {
+         const oldPlanType = existing.plan_type || 'mensuel'
+diff --git a/lib/emails.ts b/lib/emails.ts
+index 87c7a84..6fecf8e 100644
+--- a/lib/emails.ts
++++ b/lib/emails.ts
+@@ -528,6 +528,196 @@ export async function sendRenewalReminderEmail(params: {
+   }
+ }
+ 
++export async function sendParrainageBienvenueMarraine(params: {
++  email: string
++  firstName: string
++  code: string
++  userId?: string
++}) {
++  const subject = 'Votre code de parrainage roxanetnous'
++  const dashboardUrl = `${BASE_URL}/accompagnante/dashboard`
++
++  try {
++    await resend.emails.send({
++      from: FROM_EMAIL,
++      to: params.email,
++      subject,
++      html: `
++        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
++          <h1 style="color: #000;">Votre profil est validé, ${escapeHtml(params.firstName)}</h1>
++          <p>Félicitations, votre profil accompagnante est maintenant validé sur roxanetnous.</p>
++          <p>Pour vous remercier de votre engagement, nous vous offrons un programme de parrainage : invitez d'autres accompagnantes à rejoindre la plateforme.</p>
++          <div style="margin: 24px 0; padding: 24px; background: #f5f5f5; border-radius: 8px; text-align: center;">
++            <p style="margin: 0 0 8px 0; color: #666; font-size: 14px;">Votre code de parrainage</p>
++            <p style="margin: 0; font-size: 32px; font-weight: bold; letter-spacing: 4px; color: #000;">${escapeHtml(params.code)}</p>
++          </div>
++          <p>Comment ça marche :</p>
++          <ul>
++            <li>Partagez ce code avec une accompagnante de votre réseau professionnel.</li>
++            <li>À son inscription, elle saute la vérification (pas d'OCR ni de visio) et est validée automatiquement dès qu'elle souscrit son abonnement.</li>
++            <li>5 parrainages confirmés vous offrent <strong>6 mois d'abonnement gratuit</strong>.</li>
++          </ul>
++          <p style="margin-top: 24px;">
++            <a href="${dashboardUrl}" style="background: #000; color: #fff; padding: 12px 24px; text-decoration: none; display: inline-block;">
++              Accéder à mon espace
++            </a>
++          </p>
++        </div>
++      `,
++    })
++
++    await logNotification({
++      userId: params.userId,
++      email: params.email,
++      type: 'parrainage_bienvenue',
++      subject,
++      status: 'sent',
++    })
++  } catch (error) {
++    await logNotification({
++      userId: params.userId,
++      email: params.email,
++      type: 'parrainage_bienvenue',
++      subject,
++      status: 'error',
++      error: error instanceof Error ? error.message : 'Erreur inconnue',
++    })
++  }
++}
++
++export async function sendParrainageFilleuleConfirmation(params: {
++  email: string
++  firstName: string
++  marraineFirstName: string
++  userId?: string
++}) {
++  const subject = 'Bienvenue sur roxanetnous, votre profil est validé'
++  const dashboardUrl = `${BASE_URL}/accompagnante/dashboard`
++  const marraineLabel = params.marraineFirstName?.trim()
++    ? escapeHtml(params.marraineFirstName)
++    : 'votre marraine'
++
++  try {
++    await resend.emails.send({
++      from: FROM_EMAIL,
++      to: params.email,
++      subject,
++      html: `
++        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
++          <h1 style="color: #000;">Bienvenue ${escapeHtml(params.firstName)}</h1>
++          <p>Grâce au parrainage de ${marraineLabel}, votre profil accompagnante est validé automatiquement sur roxanetnous.</p>
++          <p>Vous pouvez dès maintenant publier vos annonces, répondre aux demandes des accompagnés et gérer votre planning.</p>
++          <p style="margin-top: 24px;">
++            <a href="${dashboardUrl}" style="background: #000; color: #fff; padding: 12px 24px; text-decoration: none; display: inline-block;">
++              Accéder à mon espace
++            </a>
++          </p>
++        </div>
++      `,
++    })
++
++    await logNotification({
++      userId: params.userId,
++      email: params.email,
++      type: 'parrainage_filleule_confirm',
++      subject,
++      status: 'sent',
++    })
++  } catch (error) {
++    await logNotification({
++      userId: params.userId,
++      email: params.email,
++      type: 'parrainage_filleule_confirm',
++      subject,
++      status: 'error',
++      error: error instanceof Error ? error.message : 'Erreur inconnue',
++    })
++  }
++}
++
++// Story 2.3 AC5 : email admin déclenché à chaque blocage ou flag de suspicion sur
++// parrainages. Destinataire : ADMIN_NOTIFICATIONS_EMAIL (variable dédiée).
++// Si la variable n'est pas définie, fallback sur RESEND_FROM_EMAIL puis abandon silencieux.
++export async function sendAdminParrainageFlag(params: {
++  marraineName: string
++  filleuleName: string
++  type: 'meme_email' | 'meme_carte' | 'meme_ip' | 'meme_adresse'
++  parrainageId: string
++}) {
++  const adminEmail =
++    process.env.ADMIN_NOTIFICATIONS_EMAIL ||
++    process.env.RESEND_FROM_EMAIL ||
++    null
++  if (!adminEmail) {
++    console.warn('[sendAdminParrainageFlag] ADMIN_NOTIFICATIONS_EMAIL non défini, abandon')
++    return
++  }
++
++  const isBlocage = params.type === 'meme_email' || params.type === 'meme_carte'
++  const subjectPrefix = isBlocage ? 'Parrainage bloqué' : 'Parrainage suspect'
++
++  const typeLabels: Record<string, string> = {
++    meme_email: 'même email entre marraine et filleule',
++    meme_carte: 'même carte de paiement entre marraine et filleule',
++    meme_ip: 'même adresse IP que d\'autres filleules de cette marraine',
++    meme_adresse: 'même adresse postale entre marraine et filleule',
++  }
++
++  const subject = `${subjectPrefix} - ${typeLabels[params.type] || params.type}`
++  const link = `${BASE_URL}/admin/parrainages/blacklist?id=${encodeURIComponent(params.parrainageId)}`
++
++  try {
++    await resend.emails.send({
++      from: FROM_EMAIL,
++      to: adminEmail,
++      subject,
++      html: `
++        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
++          <h1 style="color: #000;">${subjectPrefix}</h1>
++          <p>Un parrainage déclenche une alerte de détection automatique sur roxanetnous.</p>
++          <table style="border-collapse: collapse; margin: 16px 0;">
++            <tr>
++              <td style="padding: 8px 16px 8px 0; color: #666;">Marraine :</td>
++              <td style="padding: 8px 0; color: #000; font-weight: 600;">${escapeHtml(params.marraineName)}</td>
++            </tr>
++            <tr>
++              <td style="padding: 8px 16px 8px 0; color: #666;">Filleule :</td>
++              <td style="padding: 8px 0; color: #000; font-weight: 600;">${escapeHtml(params.filleuleName)}</td>
++            </tr>
++            <tr>
++              <td style="padding: 8px 16px 8px 0; color: #666;">Raison :</td>
++              <td style="padding: 8px 0; color: #000;">${escapeHtml(typeLabels[params.type] || params.type)}</td>
++            </tr>
++          </table>
++          <p style="margin-top: 24px;">
++            <a href="${link}" style="background: #000; color: #fff; padding: 12px 24px; text-decoration: none; display: inline-block;">
++              Examiner le parrainage
++            </a>
++          </p>
++          <p style="color: #999; font-size: 12px; margin-top: 32px;">
++            Cet email est envoyé automatiquement par le système de détection anti-fraude parrainage.
++          </p>
++        </div>
++      `,
++    })
++
++    await logNotification({
++      email: adminEmail,
++      type: 'admin_parrainage_flag',
++      subject,
++      status: 'sent',
++    })
++  } catch (error) {
++    await logNotification({
++      email: adminEmail,
++      type: 'admin_parrainage_flag',
++      subject,
++      status: 'error',
++      error: error instanceof Error ? error.message : 'Erreur inconnue',
++    })
++  }
++}
++
+ export async function sendExpirationReminderEmail(params: {
+   email: string
+   firstName: string

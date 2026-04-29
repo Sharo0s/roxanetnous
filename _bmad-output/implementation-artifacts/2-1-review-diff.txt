@@ -1,0 +1,1432 @@
+diff --git a/app/accompagnante/abonnement/success/page.tsx b/app/accompagnante/abonnement/success/page.tsx
+index 2300433..9e7bdd0 100644
+--- a/app/accompagnante/abonnement/success/page.tsx
++++ b/app/accompagnante/abonnement/success/page.tsx
+@@ -1,8 +1,13 @@
+ import Link from 'next/link'
+ import { createClient } from '@/lib/supabase/server'
+ import { redirect } from 'next/navigation'
++import { confirmParrainageOnSuccess } from '@/app/actions/parrainage'
+ 
+-export default async function AbonnementSuccessPage() {
++type Props = {
++  searchParams: Promise<{ session_id?: string | string[] }>
++}
++
++export default async function AbonnementSuccessPage({ searchParams }: Props) {
+   const supabase = await createClient()
+ 
+   const { data: { user } } = await supabase.auth.getUser()
+@@ -16,14 +21,35 @@ export default async function AbonnementSuccessPage() {
+ 
+   if (!userData || userData.role !== 'accompagnante') redirect('/')
+ 
++  // FR45/AC9 : si l'utilisatrice a ete parrainee, on declenche la validation
++  // automatique a l'arrivee sur la page de succes Stripe.
++  const sp = await searchParams
++  const rawSessionId = Array.isArray(sp?.session_id) ? sp.session_id[0] : sp?.session_id
++  let parrainageValidated = false
++  if (rawSessionId) {
++    try {
++      const result = await confirmParrainageOnSuccess(rawSessionId)
++      parrainageValidated = result.ok && !result.alreadyDone
++    } catch {
++      // Erreurs silencieuses : le webhook Stripe (Story B) prendra le relais
++      // si necessaire.
++    }
++  }
++
+   return (
+     <main className="min-h-screen kraft bg-kraft flex items-center justify-center">
+       <div className="relative z-10 max-w-md mx-auto px-4 text-center">
+         <div className="bg-white rounded-xl border p-8">
+           <h1 className="text-2xl font-bold text-gray-900 mb-4">Abonnement activé</h1>
+-          <p className="text-gray-600 mb-6">
+-            Votre abonnement a été activé avec succès. Vous pouvez désormais publier des annonces.
+-          </p>
++          {parrainageValidated ? (
++            <p className="text-gray-600 mb-6">
++              Votre abonnement est actif et votre profil vient d&apos;être validé automatiquement grâce au parrainage. Vous pouvez désormais publier des annonces.
++            </p>
++          ) : (
++            <p className="text-gray-600 mb-6">
++              Votre abonnement a été activé avec succès. Vous pouvez désormais publier des annonces.
++            </p>
++          )}
+           <div className="flex flex-col gap-3">
+             <Link
+               href="/accompagnante/annonces"
+diff --git a/app/accompagnante/onboarding/page.tsx b/app/accompagnante/onboarding/page.tsx
+index 5250af4..d930d1c 100644
+--- a/app/accompagnante/onboarding/page.tsx
++++ b/app/accompagnante/onboarding/page.tsx
+@@ -1,166 +1,40 @@
+-'use client'
+-
+-import { useState } from 'react'
+-import { submitOnboarding, uploadJustificatif } from '@/app/actions/accompagnante'
+-import { Button } from '@/components/ui/button'
+-import Link from 'next/link'
+-import { StepDiplome } from '@/components/accompagnante/step-diplome'
+-import { StepSpecialites } from '@/components/accompagnante/step-specialites'
+-import { StepLocalisation } from '@/components/accompagnante/step-localisation'
+-import { StepDisponibilites } from '@/components/accompagnante/step-disponibilites'
+-
+-const STEPS = [
+-  'Diplôme et expérience',
+-  'Spécialités',
+-  'Localisation',
+-  'Disponibilités',
+-]
+-
+-export type OnboardingData = {
+-  diplomes: string[]
+-  experience: string
+-  specialites: string[]
+-  ville: string
+-  code_postal: string
+-  rayon_km: number
+-  disponibilites: Record<string, string[]>
+-  langues: string[]
+-  permis_conduire: boolean
+-  vehicule: boolean
+-  description: string
+-}
+-
+-const initialData: OnboardingData = {
+-  diplomes: [],
+-  experience: '',
+-  specialites: [],
+-  ville: '',
+-  code_postal: '',
+-  rayon_km: 10,
+-  disponibilites: {},
+-  langues: [],
+-  permis_conduire: false,
+-  vehicule: false,
+-  description: '',
+-}
+-
+-export default function OnboardingPage() {
+-  const [step, setStep] = useState(0)
+-  const [data, setData] = useState<OnboardingData>(initialData)
+-  const [error, setError] = useState<string | null>(null)
+-  const [loading, setLoading] = useState(false)
+-  const [uploads, setUploads] = useState<{ cv: boolean; diplomes: Record<string, boolean> }>({ cv: false, diplomes: {} })
+-  const [permisUploaded, setPermisUploaded] = useState(false)
+-
+-  function updateData(partial: Partial<OnboardingData>) {
+-    setData((prev) => ({ ...prev, ...partial }))
+-  }
+-
+-  function canProceed(): boolean {
+-    switch (step) {
+-      case 0: {
+-        const isSansDiplome = data.diplomes.includes('sans_diplome')
+-        const hasAllDiplomeUploads = isSansDiplome || (data.diplomes.length > 0 && data.diplomes.every((d) => uploads.diplomes[d]))
+-        return data.diplomes.length > 0 && !!data.experience && uploads.cv && hasAllDiplomeUploads
+-      }
+-      case 1:
+-        return data.specialites.length > 0
+-      case 2:
+-        return !!data.ville && /^\d{5}$/.test(data.code_postal) && (!data.permis_conduire || permisUploaded)
+-      case 3:
+-        return true
+-      default:
+-        return false
+-    }
+-  }
+-
+-  async function handleSubmit() {
+-    setError(null)
+-    setLoading(true)
+-    const result = await submitOnboarding(data)
+-    if (result?.error) {
+-      setError(result.error)
+-      setLoading(false)
+-    }
+-  }
+-
+-  async function handleUpload(file: File, type: string) {
+-    const formData = new FormData()
+-    formData.set('file', file)
+-    formData.set('type', type)
+-    const result = await uploadJustificatif(formData)
+-    if (result?.error) {
+-      setError(result.error)
+-      return false
+-    }
+-    return true
++import { redirect } from 'next/navigation'
++import { createClient } from '@/lib/supabase/server'
++import { OnboardingClient } from '@/components/accompagnante/onboarding-client'
++
++export default async function OnboardingPage() {
++  const supabase = await createClient()
++  const {
++    data: { user },
++  } = await supabase.auth.getUser()
++  if (!user) redirect('/login')
++
++  const supabaseAdmin = await createClient({ serviceRole: true })
++
++  const { data: filleuleRow } = await supabaseAdmin
++    .from('users')
++    .select('parrainee_par')
++    .eq('id', user.id)
++    .single()
++
++  const marraineId = filleuleRow?.parrainee_par || null
++
++  let marraineFirstName: string | null = null
++  if (marraineId) {
++    const { data: marraine } = await supabaseAdmin
++      .from('users')
++      .select('first_name')
++      .eq('id', marraineId)
++      .single()
++    marraineFirstName = marraine?.first_name || null
+   }
+ 
+   return (
+-    <main className="min-h-screen kraft bg-kraft">
+-      <header className="bg-white border-b relative z-10">
+-        <div className="max-w-3xl mx-auto px-4 py-4 flex items-center justify-between">
+-          <Link href="/accompagnante/dashboard" className="text-xl font-bold text-black">
+-            roxanetnous
+-          </Link>
+-          <span className="text-sm text-gray-500">
+-            Étape {step + 1} sur {STEPS.length}
+-          </span>
+-        </div>
+-      </header>
+-
+-      {/* Progress bar */}
+-      <div className="max-w-3xl mx-auto px-4 pt-6 relative z-10">
+-        <div className="flex gap-1">
+-          {STEPS.map((_, i) => (
+-            <div
+-              key={i}
+-              className={`h-1 flex-1 rounded-full ${
+-                i <= step ? 'bg-accent' : 'bg-gray-200'
+-              }`}
+-            />
+-          ))}
+-        </div>
+-        <p className="mt-3 text-sm text-gray-500">{STEPS[step]}</p>
+-      </div>
+-
+-      <div className="max-w-3xl mx-auto px-4 py-6 relative z-10">
+-        {error && (
+-          <div className="mb-4 p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
+-            {error}
+-          </div>
+-        )}
+-
+-        <div className="bg-white rounded-xl border p-6">
+-          {step === 0 && <StepDiplome data={data} onChange={updateData} onUpload={handleUpload} onUploadsChange={setUploads} />}
+-          {step === 1 && <StepSpecialites data={data} onChange={updateData} />}
+-          {step === 2 && <StepLocalisation data={data} onChange={updateData} onUpload={handleUpload} onPermisUploaded={setPermisUploaded} />}
+-          {step === 3 && <StepDisponibilites data={data} onChange={updateData} />}
+-        </div>
+-
+-        <div className="flex justify-between mt-6">
+-          <Button
+-            variant="outline"
+-            onClick={() => { setStep((s) => s - 1); setError(null) }}
+-            disabled={step === 0}
+-          >
+-            Précédent
+-          </Button>
+-
+-          {step < STEPS.length - 1 ? (
+-            <Button
+-              onClick={() => { setStep((s) => s + 1); setError(null) }}
+-              disabled={!canProceed()}
+-            >
+-              Suivant
+-            </Button>
+-          ) : (
+-            <Button onClick={handleSubmit} disabled={loading}>
+-              {loading ? 'Envoi en cours...' : 'Valider mon profil'}
+-            </Button>
+-          )}
+-        </div>
+-      </div>
+-    </main>
++    <OnboardingClient
++      parrainage={{
++        isFilleule: !!marraineId,
++        marraineFirstName,
++      }}
++    />
+   )
+ }
+diff --git a/app/actions/accompagnante.ts b/app/actions/accompagnante.ts
+index 48e37e8..51b8f3f 100644
+--- a/app/actions/accompagnante.ts
++++ b/app/actions/accompagnante.ts
+@@ -37,8 +37,20 @@ export async function submitOnboarding(data: {
+     return { error: 'Accès non autorisé.' }
+   }
+ 
+-  if (data.diplomes.length === 0 || !data.experience || data.specialites.length === 0) {
+-    return { error: 'Diplômes, expérience et spécialités sont requis.' }
++  // Workaround flow parrainage (Story 2.1, AC7) : si la filleule a parrainee_par,
++  // les uploads et le diplome obligatoire deviennent optionnels. La validation
++  // finale vers `valide` est faite a la souscription Stripe (AC9), pas ici.
++  const { data: parrainageRow } = await supabase
++    .from('users')
++    .select('parrainee_par')
++    .eq('id', user.id)
++    .single()
++  const isFilleule = !!parrainageRow?.parrainee_par
++
++  if (!isFilleule) {
++    if (data.diplomes.length === 0 || !data.experience || data.specialites.length === 0) {
++      return { error: 'Diplômes, expérience et spécialités sont requis.' }
++    }
+   }
+ 
+   if (!data.ville || !data.code_postal) {
+diff --git a/app/actions/admin.ts b/app/actions/admin.ts
+index 5656f89..33936e2 100644
+--- a/app/actions/admin.ts
++++ b/app/actions/admin.ts
+@@ -2,9 +2,14 @@
+ 
+ import { createClient } from '@/lib/supabase/server'
+ import { redirect } from 'next/navigation'
+-import { sendValidationResultEmail, sendNewMessageEmail } from '@/lib/emails'
++import {
++  sendValidationResultEmail,
++  sendNewMessageEmail,
++  sendParrainageBienvenueMarraine,
++} from '@/lib/emails'
+ import { stripe } from '@/lib/stripe'
+ import { getSubscriptionStatus } from '@/lib/subscription-helpers'
++import { generateCodeForUser } from '@/app/actions/parrainage'
+ 
+ const VISIO_INVITATION_MESSAGE = `Bonjour,
+ 
+@@ -115,6 +120,20 @@ export async function validateAccompagnante(
+         motif,
+         userId: auxProfile.user_id,
+       })
++
++      // FR11quinquies : a la validation finale, generer le code de parrainage
++      // de la nouvelle marraine et lui envoyer l'email de bienvenue programme.
++      if (decision === 'valide') {
++        const codeResult = await generateCodeForUser(auxProfile.user_id)
++        if ('code' in codeResult) {
++          await sendParrainageBienvenueMarraine({
++            email: auxUser.email,
++            firstName: auxUser.first_name || '',
++            code: codeResult.code,
++            userId: auxProfile.user_id,
++          })
++        }
++      }
+     } catch {}
+   })()
+ 
+diff --git a/app/actions/auth.ts b/app/actions/auth.ts
+index 8cebb94..c51abb4 100644
+--- a/app/actions/auth.ts
++++ b/app/actions/auth.ts
+@@ -2,9 +2,11 @@
+ 
+ import { createClient } from '@/lib/supabase/server'
+ import { redirect } from 'next/navigation'
++import { headers } from 'next/headers'
+ import { sendWelcomeEmail } from '@/lib/emails'
+ import { stripe } from '@/lib/stripe'
+ import { getSubscriptionStatus } from '@/lib/subscription-helpers'
++import { createParrainageRelation } from '@/app/actions/parrainage'
+ 
+ export type AuthResult = {
+   error?: string
+@@ -80,6 +82,29 @@ export async function signup(formData: FormData): Promise<AuthResult> {
+     }
+   }
+ 
++  // Parrainage (accompagnante uniquement) : si un code valide est fourni,
++  // creer la relation marraine/filleule. Silencieux en cas d'invalidite (UX
++  // non bloquante : l'inscription reussit meme si le code ne convient pas).
++  if (role === 'accompagnante') {
++    const parrainageCode = (formData.get('parrainage_code') as string | null)?.trim() || ''
++    if (parrainageCode) {
++      try {
++        const h = await headers()
++        const ip =
++          h.get('x-forwarded-for')?.split(',')[0]?.trim() ||
++          h.get('x-real-ip') ||
++          null
++        await createParrainageRelation({
++          code: parrainageCode,
++          filleuleId: authData.user.id,
++          ipInscription: ip,
++        })
++      } catch {
++        // Silencieux : ne bloque pas l'inscription si la relation echoue.
++      }
++    }
++  }
++
+   // Envoyer l'email de bienvenue (non-bloquant)
+   sendWelcomeEmail({
+     email,
+diff --git a/app/actions/subscription.ts b/app/actions/subscription.ts
+index 805ae07..58b8cc2 100644
+--- a/app/actions/subscription.ts
++++ b/app/actions/subscription.ts
+@@ -15,7 +15,7 @@ export async function createCheckoutSession(formData: FormData): Promise<void> {
+ 
+   const { data: userData } = await supabase
+     .from('users')
+-    .select('role, email, first_name, last_name')
++    .select('role, email, first_name, last_name, parrainee_par')
+     .eq('id', user.id)
+     .single()
+ 
+@@ -43,13 +43,32 @@ export async function createCheckoutSession(formData: FormData): Promise<void> {
+   const trialDays = getTrialDays(plan)
+   const dashboardPath = role === 'accompagnante' ? '/accompagnante' : '/accompagne'
+ 
++  const metadata: Record<string, string> = { user_id: user.id, role, plan }
++
++  // FR45/AC8 : si la filleule a ete parrainee, on injecte le code dans la metadata
++  // de la session Stripe pour que la success page puisse declencher la validation
++  // automatique au retour (cf. confirmParrainageOnSuccess).
++  if (role === 'accompagnante' && userData.parrainee_par) {
++    const { data: parrainageRow } = await supabase
++      .from('parrainages')
++      .select('code')
++      .eq('filleule_id', user.id)
++      .eq('statut', 'inscrite')
++      .order('filleule_inscrite_at', { ascending: false })
++      .limit(1)
++      .maybeSingle()
++    if (parrainageRow?.code) {
++      metadata.parrainage_code = parrainageRow.code
++    }
++  }
++
+   const sessionParams: Record<string, unknown> = {
+     customer: customerId,
+     mode: 'subscription',
+     line_items: [{ price: priceId, quantity: 1 }],
+     success_url: `${process.env.NEXT_PUBLIC_BASE_URL}${dashboardPath}/abonnement/success?session_id={CHECKOUT_SESSION_ID}`,
+     cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}${dashboardPath}/abonnement`,
+-    metadata: { user_id: user.id, role, plan },
++    metadata,
+     billing_address_collection: 'required',
+     customer_update: { name: 'auto', address: 'auto' },
+   }
+diff --git a/components/auth/register-form.tsx b/components/auth/register-form.tsx
+index ad4b001..2fbc78e 100644
+--- a/components/auth/register-form.tsx
++++ b/components/auth/register-form.tsx
+@@ -3,27 +3,54 @@
+ import { useState, useRef, useEffect } from 'react'
+ import { useSearchParams } from 'next/navigation'
+ import { signup } from '@/app/actions/auth'
++import { validateCode } from '@/app/actions/parrainage'
+ import { Button } from '@/components/ui/button'
+ import { Input } from '@/components/ui/input'
+ import Link from 'next/link'
+ 
+-type Step = 'role' | 'name' | 'email' | 'password'
++type Step = 'role' | 'name' | 'parrainage' | 'email' | 'password'
+ 
+-const STEPS: Step[] = ['role', 'name', 'email', 'password']
++const STEPS_ACCOMPAGNANTE: Step[] = ['role', 'name', 'parrainage', 'email', 'password']
++const STEPS_ACCOMPAGNE: Step[] = ['role', 'name', 'email', 'password']
++
++type ParrainageState =
++  | { status: 'idle' }
++  | { status: 'checking' }
++  | { status: 'valid'; marraineFirstName: string }
++  | {
++      status: 'invalid'
++      reason: 'invalid_format' | 'unknown_code' | 'marraine_not_validated'
++    }
++
++const PARRAINAGE_ERRORS: Record<
++  Exclude<ParrainageState, { status: 'idle' | 'checking' | 'valid' }>['reason'],
++  string
++> = {
++  invalid_format: 'Format de code invalide.',
++  unknown_code: 'Ce code de parrainage est inconnu.',
++  marraine_not_validated:
++    'La marraine associee a ce code n\'est pas encore validee.',
++}
+ 
+ export function RegisterForm() {
+   const searchParams = useSearchParams()
+   const initialRole = searchParams.get('role')
+   const initialEmail = searchParams.get('email') || ''
++  const initialParrainageCode = (searchParams.get('parrainage_code') || '').toUpperCase()
+ 
+-  const [step, setStep] = useState<Step>(
+-    initialRole === 'accompagnante' || initialRole === 'accompagne' ? 'name' : 'role'
+-  )
+   const [role, setRole] = useState<'accompagnante' | 'accompagne' | null>(
+     initialRole === 'accompagnante' || initialRole === 'accompagne' ? initialRole : null
+   )
++  const stepsForRole = role === 'accompagnante' ? STEPS_ACCOMPAGNANTE : STEPS_ACCOMPAGNE
++  const [step, setStep] = useState<Step>(
++    initialRole === 'accompagnante' || initialRole === 'accompagne' ? 'name' : 'role'
++  )
+   const [firstName, setFirstName] = useState('')
+   const [lastName, setLastName] = useState('')
++  const [parrainageCode, setParrainageCode] = useState(initialParrainageCode)
++  const [parrainageState, setParrainageState] = useState<ParrainageState>({
++    status: 'idle',
++  })
+   const [email, setEmail] = useState(initialEmail)
+   const [password, setPassword] = useState('')
+   const [error, setError] = useState<string | null>(null)
+@@ -33,7 +60,6 @@ export function RegisterForm() {
+   const bottomRef = useRef<HTMLDivElement>(null)
+ 
+   useEffect(() => {
+-    // Scroll vers le bas quand on passe à l'étape suivante
+     setTimeout(() => {
+       bottomRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' })
+     }, 100)
+@@ -47,6 +73,35 @@ export function RegisterForm() {
+   function submitName(e: React.FormEvent) {
+     e.preventDefault()
+     if (!firstName.trim() || !lastName.trim()) return
++    setStep(role === 'accompagnante' ? 'parrainage' : 'email')
++  }
++
++  async function checkParrainageCode(value: string) {
++    const trimmed = value.trim()
++    if (!trimmed) {
++      setParrainageState({ status: 'idle' })
++      return
++    }
++    setParrainageState({ status: 'checking' })
++    const result = await validateCode(trimmed)
++    if (result.valid) {
++      setParrainageState({
++        status: 'valid',
++        marraineFirstName: result.marraineFirstName,
++      })
++    } else {
++      setParrainageState({ status: 'invalid', reason: result.reason })
++    }
++  }
++
++  function continueAfterParrainage(e: React.FormEvent) {
++    e.preventDefault()
++    setStep('email')
++  }
++
++  function skipParrainage() {
++    setParrainageCode('')
++    setParrainageState({ status: 'idle' })
+     setStep('email')
+   }
+ 
+@@ -71,6 +126,9 @@ export function RegisterForm() {
+     formData.set('firstName', firstName.trim())
+     formData.set('lastName', lastName.trim())
+     formData.set('role', role!)
++    if (role === 'accompagnante' && parrainageCode.trim()) {
++      formData.set('parrainage_code', parrainageCode.trim())
++    }
+ 
+     const result = await signup(formData)
+     if (result?.error) {
+@@ -82,8 +140,9 @@ export function RegisterForm() {
+     }
+   }
+ 
+-  const stepIndex = STEPS.indexOf(step)
+-  const isVisible = (s: Step) => STEPS.indexOf(s) <= stepIndex
++  const stepIndex = stepsForRole.indexOf(step)
++  const isVisible = (s: Step) =>
++    stepsForRole.includes(s) && stepsForRole.indexOf(s) <= stepIndex
+   const isCurrent = (s: Step) => s === step
+ 
+   if (emailSent) {
+@@ -200,7 +259,82 @@ export function RegisterForm() {
+             </form>
+           )}
+ 
+-          {/* Step 3 : Email */}
++          {/* Step 3 : Parrainage (accompagnante uniquement) */}
++          {role === 'accompagnante' && isVisible('parrainage') && (
++            <form
++              onSubmit={continueAfterParrainage}
++              className="space-y-4 animate-fade-in"
++            >
++              <div>
++                <label
++                  htmlFor="parrainage_code"
++                  className="block text-sm font-medium text-gray-700 mb-1"
++                >
++                  Code de parrainage <span className="text-gray-400">(optionnel)</span>
++                </label>
++                <Input
++                  id="parrainage_code"
++                  name="parrainage_code"
++                  placeholder="Ex : K7QM2X9P"
++                  maxLength={10}
++                  value={parrainageCode}
++                  onChange={(e) => {
++                    const v = e.target.value.toUpperCase()
++                    setParrainageCode(v)
++                    setParrainageState({ status: 'idle' })
++                  }}
++                  onBlur={(e) => {
++                    void checkParrainageCode(e.target.value)
++                  }}
++                  autoFocus={isCurrent('parrainage')}
++                />
++                {parrainageState.status === 'checking' && (
++                  <p className="mt-2 text-xs text-gray-500">Vérification du code...</p>
++                )}
++                {parrainageState.status === 'valid' && (
++                  <p className="mt-2 text-xs text-gray-700">
++                    Code valide{parrainageState.marraineFirstName
++                      ? ` (parrainage par ${parrainageState.marraineFirstName})`
++                      : ''}
++                    {' '}— vous serez validée automatiquement dès votre abonnement.
++                  </p>
++                )}
++                {parrainageState.status === 'invalid' && (
++                  <p className="mt-2 text-xs text-red-600">
++                    {PARRAINAGE_ERRORS[parrainageState.reason]}
++                  </p>
++                )}
++                <p className="mt-2 text-xs text-gray-500">
++                  Si une accompagnante validée vous a transmis un code, saisissez-le ici. Vous éviterez la visio et serez validée automatiquement à la souscription de votre abonnement.
++                </p>
++              </div>
++
++              {isCurrent('parrainage') && (
++                <div className="flex flex-col sm:flex-row gap-2">
++                  <Button
++                    type="submit"
++                    className="w-full"
++                    disabled={
++                      parrainageCode.trim().length > 0 &&
++                      parrainageState.status === 'invalid'
++                    }
++                  >
++                    Continuer
++                  </Button>
++                  <Button
++                    type="button"
++                    variant="outline"
++                    className="w-full"
++                    onClick={skipParrainage}
++                  >
++                    Continuer sans code
++                  </Button>
++                </div>
++              )}
++            </form>
++          )}
++
++          {/* Step 4 : Email */}
+           {isVisible('email') && (
+             <form onSubmit={submitEmail} className="space-y-4 animate-fade-in">
+               <Input
+@@ -221,7 +355,7 @@ export function RegisterForm() {
+             </form>
+           )}
+ 
+-          {/* Step 4 : Mot de passe */}
++          {/* Step 5 : Mot de passe */}
+           {isVisible('password') && (
+             <form onSubmit={submitPassword} className="space-y-4 animate-fade-in">
+               <Input
+diff --git a/lib/emails.ts b/lib/emails.ts
+index 87c7a84..248e0f2 100644
+--- a/lib/emails.ts
++++ b/lib/emails.ts
+@@ -528,6 +528,110 @@ export async function sendRenewalReminderEmail(params: {
+   }
+ }
+ 
++export async function sendParrainageBienvenueMarraine(params: {
++  email: string
++  firstName: string
++  code: string
++  userId?: string
++}) {
++  const subject = 'Votre code de parrainage roxanetnous'
++  const dashboardUrl = `${BASE_URL}/accompagnante/dashboard`
++
++  try {
++    await resend.emails.send({
++      from: FROM_EMAIL,
++      to: params.email,
++      subject,
++      html: `
++        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
++          <h1 style="color: #000;">Votre profil est valide, ${escapeHtml(params.firstName)}</h1>
++          <p>Felicitations, votre profil accompagnante est maintenant valide sur roxanetnous.</p>
++          <p>Pour vous remercier de votre engagement, nous vous offrons un programme de parrainage : invitez d'autres accompagnantes a rejoindre la plateforme.</p>
++          <div style="margin: 24px 0; padding: 24px; background: #f5f5f5; border-radius: 8px; text-align: center;">
++            <p style="margin: 0 0 8px 0; color: #666; font-size: 14px;">Votre code de parrainage</p>
++            <p style="margin: 0; font-size: 32px; font-weight: bold; letter-spacing: 4px; color: #000;">${escapeHtml(params.code)}</p>
++          </div>
++          <p>Comment ca marche :</p>
++          <ul>
++            <li>Partagez ce code avec une accompagnante de votre reseau professionnel.</li>
++            <li>A son inscription, elle saute la verification (pas d'OCR ni de visio) et est validee automatiquement des qu'elle souscrit son abonnement.</li>
++            <li>5 parrainages confirmes vous offrent <strong>6 mois d'abonnement gratuit</strong>.</li>
++          </ul>
++          <p style="margin-top: 24px;">
++            <a href="${dashboardUrl}" style="background: #000; color: #fff; padding: 12px 24px; text-decoration: none; display: inline-block;">
++              Acceder a mon espace
++            </a>
++          </p>
++        </div>
++      `,
++    })
++
++    await logNotification({
++      userId: params.userId,
++      email: params.email,
++      type: 'parrainage_bienvenue',
++      subject,
++      status: 'sent',
++    })
++  } catch (error) {
++    await logNotification({
++      userId: params.userId,
++      email: params.email,
++      type: 'parrainage_bienvenue',
++      subject,
++      status: 'error',
++      error: error instanceof Error ? error.message : 'Erreur inconnue',
++    })
++  }
++}
++
++export async function sendParrainageFilleuleConfirmation(params: {
++  email: string
++  firstName: string
++  marraineFirstName: string
++  userId?: string
++}) {
++  const subject = 'Bienvenue sur roxanetnous, votre profil est valide'
++  const dashboardUrl = `${BASE_URL}/accompagnante/dashboard`
++
++  try {
++    await resend.emails.send({
++      from: FROM_EMAIL,
++      to: params.email,
++      subject,
++      html: `
++        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
++          <h1 style="color: #000;">Bienvenue ${escapeHtml(params.firstName)}</h1>
++          <p>Grace au parrainage de ${escapeHtml(params.marraineFirstName)}, votre profil accompagnante est valide automatiquement sur roxanetnous.</p>
++          <p>Vous pouvez des maintenant publier vos annonces, repondre aux demandes des accompagnes et gerer votre planning.</p>
++          <p style="margin-top: 24px;">
++            <a href="${dashboardUrl}" style="background: #000; color: #fff; padding: 12px 24px; text-decoration: none; display: inline-block;">
++              Acceder a mon espace
++            </a>
++          </p>
++        </div>
++      `,
++    })
++
++    await logNotification({
++      userId: params.userId,
++      email: params.email,
++      type: 'parrainage_filleule_confirm',
++      subject,
++      status: 'sent',
++    })
++  } catch (error) {
++    await logNotification({
++      userId: params.userId,
++      email: params.email,
++      type: 'parrainage_filleule_confirm',
++      subject,
++      status: 'error',
++      error: error instanceof Error ? error.message : 'Erreur inconnue',
++    })
++  }
++}
++
+ export async function sendExpirationReminderEmail(params: {
+   email: string
+   firstName: string
+diff --git a/app/actions/parrainage.ts b/app/actions/parrainage.ts
+new file mode 100644
+index 0000000..280ae28
+--- /dev/null
++++ b/app/actions/parrainage.ts
+@@ -0,0 +1,346 @@
++'use server'
++
++import { createClient } from '@/lib/supabase/server'
++import {
++  sendParrainageBienvenueMarraine,
++  sendParrainageFilleuleConfirmation,
++} from '@/lib/emails'
++import { stripe } from '@/lib/stripe'
++
++// Alphabet 32 chars sans 0/O/1/I/L (lisibilite)
++const CODE_ALPHABET = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'
++const CODE_LENGTH = 8
++
++function generateCode(): string {
++  let out = ''
++  for (let i = 0; i < CODE_LENGTH; i++) {
++    out += CODE_ALPHABET.charAt(Math.floor(Math.random() * CODE_ALPHABET.length))
++  }
++  return out
++}
++
++function normalizeCode(input: string): string {
++  return (input || '')
++    .toUpperCase()
++    .replace(/[\s-]/g, '')
++    .slice(0, CODE_LENGTH)
++}
++
++export type GenerateCodeResult = { code: string } | { error: string }
++
++export async function generateCodeForUser(userId: string): Promise<GenerateCodeResult> {
++  if (!userId) return { error: 'userId manquant.' }
++
++  const supabaseAdmin = await createClient({ serviceRole: true })
++
++  // Idempotence : si une ligne existe deja, retourner le code existant
++  const { data: existing } = await supabaseAdmin
++    .from('parrainages_codes')
++    .select('code')
++    .eq('user_id', userId)
++    .maybeSingle()
++
++  if (existing?.code) {
++    return { code: existing.code }
++  }
++
++  // Retry max 3 fois en cas de collision UNIQUE (probabilite quasi nulle, ceinture+bretelles)
++  for (let attempt = 0; attempt < 3; attempt++) {
++    const code = generateCode()
++    const { error } = await supabaseAdmin
++      .from('parrainages_codes')
++      .insert({
++        user_id: userId,
++        code,
++        compteur_confirmes: 0,
++        total_recompenses: 0,
++      })
++
++    if (!error) {
++      return { code }
++    }
++
++    // 23505 = unique_violation
++    if ((error as { code?: string }).code !== '23505') {
++      return { error: 'Erreur lors de la creation du code de parrainage.' }
++    }
++  }
++
++  return { error: 'Impossible de generer un code unique apres plusieurs tentatives.' }
++}
++
++export type ValidationCodeResult =
++  | { valid: true; marraineId: string; marraineFirstName: string }
++  | {
++      valid: false
++      reason: 'invalid_format' | 'unknown_code' | 'marraine_not_validated'
++    }
++
++export async function validateCode(rawCode: string): Promise<ValidationCodeResult> {
++  const code = normalizeCode(rawCode)
++  if (!code || code.length === 0) {
++    return { valid: false, reason: 'invalid_format' }
++  }
++
++  // Client public (anon) car appele depuis le formulaire d'inscription non authentifie.
++  const supabase = await createClient()
++
++  const { data: row } = await supabase
++    .from('parrainages_codes')
++    .select('user_id')
++    .eq('code', code)
++    .maybeSingle()
++
++  if (!row?.user_id) {
++    return { valid: false, reason: 'unknown_code' }
++  }
++
++  // Verifier que la marraine est bien validee + recuperer son prenom.
++  // Acces necessaire au prenom + au validation_status : on passe par service role
++  // (les RLS lecture publique sur accompagnantes_profiles n'exposent pas tous les champs
++  // necessaires aux non-authentifies).
++  const supabaseAdmin = await createClient({ serviceRole: true })
++
++  const { data: marraine } = await supabaseAdmin
++    .from('users')
++    .select(
++      'first_name, accompagnantes_profiles!inner(validation_status)'
++    )
++    .eq('id', row.user_id)
++    .maybeSingle()
++
++  const profileRow = marraine?.accompagnantes_profiles as
++    | { validation_status?: string }
++    | { validation_status?: string }[]
++    | undefined
++  const validationStatus = Array.isArray(profileRow)
++    ? profileRow[0]?.validation_status
++    : profileRow?.validation_status
++
++  if (validationStatus !== 'valide') {
++    return { valid: false, reason: 'marraine_not_validated' }
++  }
++
++  return {
++    valid: true,
++    marraineId: row.user_id,
++    marraineFirstName: (marraine?.first_name as string) || '',
++  }
++}
++
++export type CreateParrainageRelationResult =
++  | { ok: true; parrainageId: string; marraineId: string }
++  | { ok: false; reason: string }
++
++export async function createParrainageRelation(params: {
++  code: string
++  filleuleId: string
++  ipInscription: string | null
++}): Promise<CreateParrainageRelationResult> {
++  const code = normalizeCode(params.code)
++  if (!code) return { ok: false, reason: 'invalid_format' }
++  if (!params.filleuleId) return { ok: false, reason: 'invalid_filleule' }
++
++  const validation = await validateCode(code)
++  if (!validation.valid) {
++    return { ok: false, reason: validation.reason }
++  }
++
++  const supabaseAdmin = await createClient({ serviceRole: true })
++
++  // Idempotence : si deja une ligne 'inscrite' pour ce filleule + code, la renvoyer.
++  const { data: existing } = await supabaseAdmin
++    .from('parrainages')
++    .select('id, marraine_id')
++    .eq('filleule_id', params.filleuleId)
++    .eq('code', code)
++    .eq('statut', 'inscrite')
++    .maybeSingle()
++
++  if (existing?.id) {
++    return {
++      ok: true,
++      parrainageId: existing.id,
++      marraineId: existing.marraine_id,
++    }
++  }
++
++  const nowIso = new Date().toISOString()
++
++  const { data: inserted, error: insertError } = await supabaseAdmin
++    .from('parrainages')
++    .insert({
++      code,
++      marraine_id: validation.marraineId,
++      filleule_id: params.filleuleId,
++      statut: 'inscrite',
++      filleule_inscrite_at: nowIso,
++      ip_inscription: params.ipInscription,
++    })
++    .select('id')
++    .single()
++
++  if (insertError || !inserted?.id) {
++    return { ok: false, reason: 'insert_failed' }
++  }
++
++  // Mise a jour users.parrainee_par (non bloquant si erreur)
++  await supabaseAdmin
++    .from('users')
++    .update({ parrainee_par: validation.marraineId })
++    .eq('id', params.filleuleId)
++
++  return {
++    ok: true,
++    parrainageId: inserted.id,
++    marraineId: validation.marraineId,
++  }
++}
++
++export type ConfirmParrainageOnSuccessResult =
++  | { ok: true; alreadyDone?: boolean }
++  | { ok: false; reason: string }
++
++export async function confirmParrainageOnSuccess(
++  sessionId: string
++): Promise<ConfirmParrainageOnSuccessResult> {
++  if (!sessionId) return { ok: false, reason: 'missing_session_id' }
++
++  const supabase = await createClient()
++  const {
++    data: { user },
++  } = await supabase.auth.getUser()
++  if (!user) return { ok: false, reason: 'not_authenticated' }
++
++  // Charger la session Stripe et verifier sa coherence
++  let session
++  try {
++    session = await stripe.checkout.sessions.retrieve(sessionId)
++  } catch {
++    return { ok: false, reason: 'stripe_session_not_found' }
++  }
++
++  const parrainageCode = (session.metadata?.parrainage_code || '').toString()
++  if (!parrainageCode) {
++    return { ok: false, reason: 'no_parrainage_metadata' }
++  }
++
++  // Securite : la session doit etre payee/complete et appartenir a l'utilisateur courant.
++  const isComplete = session.status === 'complete' || session.payment_status === 'paid'
++  if (!isComplete) {
++    return { ok: false, reason: 'session_not_complete' }
++  }
++  const sessionUserId = (session.metadata?.user_id || '').toString()
++  if (sessionUserId && sessionUserId !== user.id) {
++    return { ok: false, reason: 'user_mismatch' }
++  }
++
++  const code = normalizeCode(parrainageCode)
++  const supabaseAdmin = await createClient({ serviceRole: true })
++
++  const { data: parrainage } = await supabaseAdmin
++    .from('parrainages')
++    .select('id, statut, marraine_id, filleule_id')
++    .eq('code', code)
++    .eq('filleule_id', user.id)
++    .order('filleule_inscrite_at', { ascending: false })
++    .limit(1)
++    .maybeSingle()
++
++  if (!parrainage) {
++    return { ok: false, reason: 'parrainage_not_found' }
++  }
++
++  // Idempotence : si deja avancee, ne rien refaire.
++  if (parrainage.statut !== 'inscrite') {
++    return { ok: true, alreadyDone: true }
++  }
++
++  const nowIso = new Date().toISOString()
++
++  // 1. Profil filleule -> valide via parrainage
++  const { data: filleuleProfile } = await supabaseAdmin
++    .from('accompagnantes_profiles')
++    .select('id')
++    .eq('user_id', user.id)
++    .single()
++
++  if (filleuleProfile?.id) {
++    await supabaseAdmin
++      .from('accompagnantes_profiles')
++      .update({
++        validation_status: 'valide',
++        validation_source: 'parrainage',
++        validation_date: nowIso,
++        validated_by: null,
++      })
++      .eq('id', filleuleProfile.id)
++  }
++
++  // 2. parrainages -> abonnee
++  await supabaseAdmin
++    .from('parrainages')
++    .update({
++      statut: 'abonnee',
++      filleule_abonnee_at: nowIso,
++    })
++    .eq('id', parrainage.id)
++
++  // 3. Generer le code de la filleule (elle devient marraine a son tour)
++  const codeResult = await generateCodeForUser(user.id)
++
++  // 4. Charger marraine + filleule pour les emails
++  const { data: marraineUser } = await supabaseAdmin
++    .from('users')
++    .select('email, first_name')
++    .eq('id', parrainage.marraine_id)
++    .single()
++
++  const { data: filleuleUser } = await supabaseAdmin
++    .from('users')
++    .select('email, first_name')
++    .eq('id', user.id)
++    .single()
++
++  // 5. Email de confirmation a la filleule (non-bloquant)
++  if (filleuleUser?.email) {
++    void (async () => {
++      try {
++        await sendParrainageFilleuleConfirmation({
++          email: filleuleUser.email,
++          firstName: filleuleUser.first_name || '',
++          marraineFirstName: marraineUser?.first_name || '',
++          userId: user.id,
++        })
++      } catch {}
++    })()
++  }
++
++  // 6. Email de bienvenue marraine pour la filleule (qui devient marraine a son tour)
++  if (filleuleUser?.email && 'code' in codeResult) {
++    void (async () => {
++      try {
++        await sendParrainageBienvenueMarraine({
++          email: filleuleUser.email,
++          firstName: filleuleUser.first_name || '',
++          code: codeResult.code,
++          userId: user.id,
++        })
++      } catch {}
++    })()
++  }
++
++  // 7. Log admin (action systeme : admin_id null)
++  await supabaseAdmin.from('admin_actions_log').insert({
++    admin_id: null,
++    action_type: 'validation_par_parrainage',
++    target_type: 'accompagnante',
++    target_id: filleuleProfile?.id || user.id,
++    details: {
++      parrainage_id: parrainage.id,
++      marraine_id: parrainage.marraine_id,
++    },
++  })
++
++  return { ok: true }
++}
+diff --git a/components/accompagnante/onboarding-client.tsx b/components/accompagnante/onboarding-client.tsx
+new file mode 100644
+index 0000000..fdb41e2
+--- /dev/null
++++ b/components/accompagnante/onboarding-client.tsx
+@@ -0,0 +1,204 @@
++'use client'
++
++import { useState } from 'react'
++import { submitOnboarding, uploadJustificatif } from '@/app/actions/accompagnante'
++import { Button } from '@/components/ui/button'
++import Link from 'next/link'
++import { StepDiplome } from '@/components/accompagnante/step-diplome'
++import { StepSpecialites } from '@/components/accompagnante/step-specialites'
++import { StepLocalisation } from '@/components/accompagnante/step-localisation'
++import { StepDisponibilites } from '@/components/accompagnante/step-disponibilites'
++
++const STEPS = [
++  'Diplôme et expérience',
++  'Spécialités',
++  'Localisation',
++  'Disponibilités',
++]
++
++export type OnboardingData = {
++  diplomes: string[]
++  experience: string
++  specialites: string[]
++  ville: string
++  code_postal: string
++  rayon_km: number
++  disponibilites: Record<string, string[]>
++  langues: string[]
++  permis_conduire: boolean
++  vehicule: boolean
++  description: string
++}
++
++const initialData: OnboardingData = {
++  diplomes: [],
++  experience: '',
++  specialites: [],
++  ville: '',
++  code_postal: '',
++  rayon_km: 10,
++  disponibilites: {},
++  langues: [],
++  permis_conduire: false,
++  vehicule: false,
++  description: '',
++}
++
++type Props = {
++  parrainage: {
++    isFilleule: boolean
++    marraineFirstName: string | null
++  }
++}
++
++export function OnboardingClient({ parrainage }: Props) {
++  const [step, setStep] = useState(0)
++  const [data, setData] = useState<OnboardingData>(initialData)
++  const [error, setError] = useState<string | null>(null)
++  const [loading, setLoading] = useState(false)
++  const [uploads, setUploads] = useState<{ cv: boolean; diplomes: Record<string, boolean> }>({ cv: false, diplomes: {} })
++  const [permisUploaded, setPermisUploaded] = useState(false)
++
++  function updateData(partial: Partial<OnboardingData>) {
++    setData((prev) => ({ ...prev, ...partial }))
++  }
++
++  function canProceed(): boolean {
++    // Si filleule (parrainee), tous les uploads et le diplome obligatoire
++    // sont rendus optionnels : on accepte de proceder sans rien.
++    if (parrainage.isFilleule) {
++      switch (step) {
++        case 0:
++          return true
++        case 1:
++          return true
++        case 2:
++          return !data.ville || /^\d{5}$/.test(data.code_postal)
++        case 3:
++          return true
++        default:
++          return false
++      }
++    }
++
++    switch (step) {
++      case 0: {
++        const isSansDiplome = data.diplomes.includes('sans_diplome')
++        const hasAllDiplomeUploads = isSansDiplome || (data.diplomes.length > 0 && data.diplomes.every((d) => uploads.diplomes[d]))
++        return data.diplomes.length > 0 && !!data.experience && uploads.cv && hasAllDiplomeUploads
++      }
++      case 1:
++        return data.specialites.length > 0
++      case 2:
++        return !!data.ville && /^\d{5}$/.test(data.code_postal) && (!data.permis_conduire || permisUploaded)
++      case 3:
++        return true
++      default:
++        return false
++    }
++  }
++
++  async function handleSubmit() {
++    setError(null)
++    setLoading(true)
++    const result = await submitOnboarding(data)
++    if (result?.error) {
++      setError(result.error)
++      setLoading(false)
++    }
++  }
++
++  async function handleUpload(file: File, type: string) {
++    const formData = new FormData()
++    formData.set('file', file)
++    formData.set('type', type)
++    const result = await uploadJustificatif(formData)
++    if (result?.error) {
++      setError(result.error)
++      return false
++    }
++    return true
++  }
++
++  return (
++    <main className="min-h-screen kraft bg-kraft">
++      <header className="bg-white border-b relative z-10">
++        <div className="max-w-3xl mx-auto px-4 py-4 flex items-center justify-between">
++          <Link href="/accompagnante/dashboard" className="text-xl font-bold text-black">
++            roxanetnous
++          </Link>
++          <span className="text-sm text-gray-500">
++            Étape {step + 1} sur {STEPS.length}
++          </span>
++        </div>
++      </header>
++
++      {parrainage.isFilleule && (
++        <div className="max-w-3xl mx-auto px-4 pt-6 relative z-10">
++          <div className="rounded-xl border bg-white p-4 text-sm text-gray-700">
++            <p className="font-medium text-black mb-1">
++              Vous avez été parrainée
++              {parrainage.marraineFirstName ? ` par ${parrainage.marraineFirstName}` : ''}.
++            </p>
++            <p>
++              Pour finaliser votre inscription, complétez vos disponibilités et souscrivez votre abonnement — pas de pièces justificatives ni de visio à fournir.
++            </p>
++          </div>
++        </div>
++      )}
++
++      {/* Progress bar */}
++      <div className="max-w-3xl mx-auto px-4 pt-6 relative z-10">
++        <div className="flex gap-1">
++          {STEPS.map((_, i) => (
++            <div
++              key={i}
++              className={`h-1 flex-1 rounded-full ${
++                i <= step ? 'bg-accent' : 'bg-gray-200'
++              }`}
++            />
++          ))}
++        </div>
++        <p className="mt-3 text-sm text-gray-500">{STEPS[step]}</p>
++      </div>
++
++      <div className="max-w-3xl mx-auto px-4 py-6 relative z-10">
++        {error && (
++          <div className="mb-4 p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
++            {error}
++          </div>
++        )}
++
++        <div className="bg-white rounded-xl border p-6">
++          {step === 0 && <StepDiplome data={data} onChange={updateData} onUpload={handleUpload} onUploadsChange={setUploads} />}
++          {step === 1 && <StepSpecialites data={data} onChange={updateData} />}
++          {step === 2 && <StepLocalisation data={data} onChange={updateData} onUpload={handleUpload} onPermisUploaded={setPermisUploaded} />}
++          {step === 3 && <StepDisponibilites data={data} onChange={updateData} />}
++        </div>
++
++        <div className="flex justify-between mt-6">
++          <Button
++            variant="outline"
++            onClick={() => { setStep((s) => s - 1); setError(null) }}
++            disabled={step === 0}
++          >
++            Précédent
++          </Button>
++
++          {step < STEPS.length - 1 ? (
++            <Button
++              onClick={() => { setStep((s) => s + 1); setError(null) }}
++              disabled={!canProceed()}
++            >
++              Suivant
++            </Button>
++          ) : (
++            <Button onClick={handleSubmit} disabled={loading}>
++              {loading ? 'Envoi en cours...' : 'Valider mon profil'}
++            </Button>
++          )}
++        </div>
++      </div>
++    </main>
++  )
++}
+diff --git a/supabase/migrations/20260428130104_add_parrainage_feature.sql b/supabase/migrations/20260428130104_add_parrainage_feature.sql
+new file mode 100644
+index 0000000..3308f52
+--- /dev/null
++++ b/supabase/migrations/20260428130104_add_parrainage_feature.sql
+@@ -0,0 +1,83 @@
++-- Programme de parrainage entre accompagnantes
++-- FR11quinquies / FR45 / FR46 / FR47 / FR48 (PRD 2026-04-18, SCP 2026-04-18)
++-- Strictement additive : aucune table existante modifiee, seulement des AJOUTS.
++-- Story 2.1 - validation automatique filleule (server-side)
++
++BEGIN;
++
++-- 1. Table parrainages_codes (1 ligne par accompagnante validee)
++CREATE TABLE IF NOT EXISTS public.parrainages_codes (
++  user_id UUID PRIMARY KEY REFERENCES public.users(id) ON DELETE CASCADE,
++  code TEXT NOT NULL UNIQUE,
++  compteur_confirmes INTEGER NOT NULL DEFAULT 0,
++  total_recompenses INTEGER NOT NULL DEFAULT 0,
++  derniere_recompense_at TIMESTAMPTZ NULL,
++  created_at TIMESTAMPTZ DEFAULT NOW()
++);
++
++CREATE INDEX IF NOT EXISTS idx_parrainages_codes_code ON public.parrainages_codes(code);
++
++-- 2. Table parrainages (historique relation marraine/filleule)
++CREATE TABLE IF NOT EXISTS public.parrainages (
++  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
++  code TEXT NOT NULL,
++  marraine_id UUID NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
++  filleule_id UUID NULL REFERENCES public.users(id) ON DELETE SET NULL,
++  statut TEXT NOT NULL DEFAULT 'en_attente'
++    CHECK (statut IN ('en_attente', 'inscrite', 'abonnee', 'confirme', 'fraude', 'bloque')),
++  filleule_inscrite_at TIMESTAMPTZ NULL,
++  filleule_abonnee_at TIMESTAMPTZ NULL,
++  confirme_at TIMESTAMPTZ NULL,
++  ip_inscription TEXT NULL,
++  stripe_fingerprint TEXT NULL,
++  blocage_raison TEXT NULL,
++  flag_suspicion TEXT NULL,
++  created_at TIMESTAMPTZ DEFAULT NOW()
++);
++
++CREATE INDEX IF NOT EXISTS idx_parrainages_code ON public.parrainages(code);
++CREATE INDEX IF NOT EXISTS idx_parrainages_marraine ON public.parrainages(marraine_id);
++CREATE INDEX IF NOT EXISTS idx_parrainages_filleule ON public.parrainages(filleule_id);
++CREATE INDEX IF NOT EXISTS idx_parrainages_statut ON public.parrainages(statut);
++
++-- 3. Colonne parrainee_par sur users
++ALTER TABLE public.users
++  ADD COLUMN IF NOT EXISTS parrainee_par UUID NULL REFERENCES public.users(id);
++
++-- 4. Colonne validation_source sur accompagnantes_profiles
++ALTER TABLE public.accompagnantes_profiles
++  ADD COLUMN IF NOT EXISTS validation_source TEXT NOT NULL DEFAULT 'manuelle'
++    CHECK (validation_source IN ('manuelle', 'parrainage'));
++
++-- 5. RLS policies
++ALTER TABLE public.parrainages_codes ENABLE ROW LEVEL SECURITY;
++
++DROP POLICY IF EXISTS "parrainages_codes_owner_read" ON public.parrainages_codes;
++CREATE POLICY "parrainages_codes_owner_read" ON public.parrainages_codes
++  FOR SELECT USING (auth.uid() = user_id);
++
++DROP POLICY IF EXISTS "parrainages_codes_admin_full" ON public.parrainages_codes;
++CREATE POLICY "parrainages_codes_admin_full" ON public.parrainages_codes
++  FOR ALL USING (
++    EXISTS (SELECT 1 FROM public.users WHERE id = auth.uid() AND role = 'admin')
++  );
++
++ALTER TABLE public.parrainages ENABLE ROW LEVEL SECURITY;
++
++DROP POLICY IF EXISTS "parrainages_marraine_read" ON public.parrainages;
++CREATE POLICY "parrainages_marraine_read" ON public.parrainages
++  FOR SELECT USING (auth.uid() = marraine_id);
++
++DROP POLICY IF EXISTS "parrainages_admin_full" ON public.parrainages;
++CREATE POLICY "parrainages_admin_full" ON public.parrainages
++  FOR ALL USING (
++    EXISTS (SELECT 1 FROM public.users WHERE id = auth.uid() AND role = 'admin')
++  );
++
++-- 6. Commentaires de documentation
++COMMENT ON TABLE public.parrainages_codes IS 'Code de parrainage unique par accompagnante validee (FR11quinquies)';
++COMMENT ON TABLE public.parrainages IS 'Historique des relations marraine/filleule et audit anti-fraude (FR45-FR48)';
++COMMENT ON COLUMN public.accompagnantes_profiles.validation_source IS 'Source de la validation : manuelle (OCR+visio) ou parrainage (bypass)';
++COMMENT ON COLUMN public.users.parrainee_par IS 'Marraine ayant parraine cet utilisateur, null si inscription normale';
++
++COMMIT;
+diff --git a/supabase/migrations/20260428130322_admin_actions_log_allow_null_admin.sql b/supabase/migrations/20260428130322_admin_actions_log_allow_null_admin.sql
+new file mode 100644
+index 0000000..b9e78c4
+--- /dev/null
++++ b/supabase/migrations/20260428130322_admin_actions_log_allow_null_admin.sql
+@@ -0,0 +1,12 @@
++-- Permet admin_id NULL pour les actions automatiques systeme
++-- (ex : validation_par_parrainage declenchee par retour Stripe sans admin humain).
++-- Story 2.1 - parrainage AC9.
++
++BEGIN;
++
++ALTER TABLE public.admin_actions_log
++  ALTER COLUMN admin_id DROP NOT NULL;
++
++COMMENT ON COLUMN public.admin_actions_log.admin_id IS 'UUID admin auteur de l''action. NULL si action automatique systeme (cron, webhook, validation parrainage).';
++
++COMMIT;
