@@ -285,5 +285,7 @@ export async function uploadAvatar(formData: FormData): Promise<ProfileResult> {
 
   revalidatePath('/accompagnante/dashboard')
   revalidatePath('/accompagnante/profil')
+  revalidatePath('/accompagne/dashboard')
+  revalidatePath('/accompagne/profil')
   return { success: true }
 }

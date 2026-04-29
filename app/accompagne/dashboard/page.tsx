@@ -5,6 +5,7 @@ import { getUnreadCount } from '@/lib/unread-count'
 import { getSubscriptionStatus } from '@/lib/subscription-helpers'
 import { AccompagneSubscriptionBanner } from '@/components/accompagne/subscription-banner'
 import { AccompagneHeader } from '@/components/layout/accompagne-header'
+import { AvatarUpload } from '@/components/accompagnante/avatar-upload'
 
 export default async function AccompagneDashboard() {
   const supabase = await createClient()
@@ -14,7 +15,7 @@ export default async function AccompagneDashboard() {
 
   const { data: userData } = await supabase
     .from('users')
-    .select('first_name, last_name, role')
+    .select('first_name, last_name, role, avatar_url')
     .eq('id', user.id)
     .single()
 
@@ -29,7 +30,7 @@ export default async function AccompagneDashboard() {
   // Recuperer les annonces du accompagne
   const { data: profile } = await supabase
     .from('accompagnes_profiles')
-    .select('id')
+    .select('id, ville')
     .eq('user_id', user.id)
     .single()
 
@@ -54,9 +55,28 @@ export default async function AccompagneDashboard() {
       />
 
       <div className="max-w-5xl mx-auto px-4 py-8 relative z-10">
-        <h2 className="text-2xl font-bold text-gray-900 mb-6">
-          Bonjour {userData.first_name}
-        </h2>
+        <div className="flex items-start gap-5 mb-8 bg-white rounded-xl border p-5">
+          <AvatarUpload
+            currentUrl={userData.avatar_url}
+            firstName={userData.first_name || ''}
+            lastName={userData.last_name || ''}
+            size="lg"
+          />
+          <div className="flex-1 min-w-0">
+            <h2 className="text-xl font-bold text-gray-900">
+              {userData.first_name} {userData.last_name}
+            </h2>
+            {profile?.ville && (
+              <p className="text-sm text-gray-500 mt-1 flex items-center gap-1">
+                <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
+                </svg>
+                {profile.ville}
+              </p>
+            )}
+          </div>
+        </div>
 
         {!subscribed && (
           <div className="mb-4">
