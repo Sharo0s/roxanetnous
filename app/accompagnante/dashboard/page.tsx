@@ -144,25 +144,73 @@ export default async function AccompagnanteDashboard() {
         {hasBlockedParrainage ? (
           // Cas filleule bloquee par la detection anti-fraude (meme_carte,
           // meme_email, etc.). parrainee_par a ete reset a null cote BDD,
-          // donc isFilleule=false. On affiche un bandeau dedie a la place
-          // du faux "Completez votre profil".
-          <div className="bg-white rounded-xl border border-amber-300 p-6">
-            <h3 className="font-semibold text-lg text-black mb-2">
-              Vérification supplémentaire en cours
-            </h3>
-            <p className="text-gray-600 mb-2">
-              Votre paiement a bien été reçu et votre abonnement est actif.
-              En revanche, notre système a relevé un signal qui nécessite
-              une vérification manuelle avant la publication de votre profil.
-            </p>
-            <p className="text-gray-600 mb-4">
-              Un administrateur examinera votre dossier sous 48h ouvrées.
-              Si vous pensez qu&apos;il s&apos;agit d&apos;une erreur, contactez-nous à{' '}
-              <a href="mailto:roxanetnous@outlook.com" className="underline">
-                roxanetnous@outlook.com
-              </a>
-              .
-            </p>
+          // donc isFilleule=false. La filleule garde acces aux messages
+          // (pour echanger avec l'admin), a son profil et a son abonnement
+          // (pour pouvoir l'annuler si elle ne souhaite pas attendre).
+          // Pas d'acces a la publication d'annonces ou aux demandes tant
+          // que pas validee.
+          <div className="space-y-4">
+            <div className="bg-white rounded-xl border border-amber-300 p-6">
+              <h3 className="font-semibold text-lg text-black mb-2">
+                Vérification supplémentaire en cours
+              </h3>
+              <p className="text-gray-600 mb-2">
+                Votre paiement a bien été reçu et votre abonnement est actif.
+                En revanche, notre système a relevé un signal qui nécessite
+                une vérification manuelle avant la publication de votre profil.
+              </p>
+              <p className="text-gray-600 mb-0">
+                Un administrateur examinera votre dossier sous 48h ouvrées.
+                Si vous pensez qu&apos;il s&apos;agit d&apos;une erreur, contactez-nous à{' '}
+                <a href="mailto:roxanetnous@outlook.com" className="underline">
+                  roxanetnous@outlook.com
+                </a>
+                .
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="bg-white rounded-xl border p-6">
+                <h3 className="font-semibold text-lg mb-2">Messages</h3>
+                <p className="text-gray-600 mb-4">
+                  Échangez avec l&apos;équipe pour résoudre la vérification.
+                </p>
+                <Link
+                  href="/messages"
+                  className="inline-flex items-center px-4 py-2 bg-accent text-black rounded-lg btn-hover transition text-sm font-medium"
+                >
+                  Voir mes messages
+                </Link>
+              </div>
+              <div className="bg-white rounded-xl border p-6">
+                <h3 className="font-semibold text-lg mb-2">Mon profil</h3>
+                <p className="text-gray-600 mb-4">
+                  Consultez et modifiez vos informations professionnelles.
+                </p>
+                <Link
+                  href="/accompagnante/profil"
+                  className="inline-flex items-center px-4 py-2 bg-accent text-black rounded-lg btn-hover transition text-sm font-medium"
+                >
+                  Voir mon profil
+                </Link>
+              </div>
+              <div className="bg-white rounded-xl border p-6 md:col-span-2">
+                <h3 className="font-semibold text-lg mb-2">Mon abonnement</h3>
+                <p className="text-gray-600 mb-4">
+                  {subscription.cancelAt
+                    ? `Expire le ${new Date(subscription.cancelAt).toLocaleDateString('fr-FR')}`
+                    : subscribed
+                      ? `${subscription.planType === 'annuel' ? 'Annuel' : 'Mensuel'} - Prochaine échéance : ${subscription.currentPeriodEnd ? new Date(subscription.currentPeriodEnd).toLocaleDateString('fr-FR') : '-'}`
+                      : 'Aucun abonnement actif'}
+                </p>
+                <Link
+                  href="/accompagnante/abonnement"
+                  className="inline-flex items-center px-4 py-2 bg-accent text-black rounded-lg btn-hover transition text-sm font-medium"
+                >
+                  Gérer mon abonnement
+                </Link>
+              </div>
+            </div>
           </div>
         ) : !profile || (
           isFilleule
