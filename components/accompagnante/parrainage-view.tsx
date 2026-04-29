@@ -121,7 +121,7 @@ export function ParrainageView({ code, baseUrl, compteur, totalRecompenses, fill
         </p>
       </div>
 
-      {/* Bandeau progression - option 4 */}
+      {/* Bandeau progression vers le palier */}
       <div className="bg-white rounded-xl border p-6">
         <div className="flex flex-col items-center text-center mb-5">
           <p className="text-2xl font-bold text-black">{phrase}</p>
@@ -139,74 +139,98 @@ export function ParrainageView({ code, baseUrl, compteur, totalRecompenses, fill
             aria-hidden="true"
           />
         </div>
-        <div className="flex justify-between text-xs text-gray-600">
-          <span>{compteurClamped}/{PALIER} parrainages confirmés</span>
-          <span>6 mois offerts au palier</span>
-        </div>
-
-        <div className="mt-5 pt-5 border-t border-gray-100 grid grid-cols-3 gap-4 text-center">
-          <div>
-            <p className="text-2xl font-bold text-black">{filleulesAffichables.length}</p>
-            <p className="text-xs text-gray-600 mt-0.5">Filleules au total</p>
-          </div>
-          <div>
-            <p className="text-2xl font-bold text-black">{compteurClamped}</p>
-            <p className="text-xs text-gray-600 mt-0.5">Confirmées (cycle en cours)</p>
-          </div>
-          <div>
-            <p className="text-2xl font-bold text-black">{totalRecompenses}</p>
-            <p className="text-xs text-gray-600 mt-0.5">Récompenses obtenues</p>
-          </div>
+        <div className="text-xs text-gray-600 text-center">
+          {compteurClamped} sur {PALIER} filleules validées
         </div>
       </div>
 
-      {/* Liste des filleules */}
+      {/* Liste des filleules avec mini-progression individuelle */}
       <div className="bg-white rounded-xl border p-6">
-        <h2 className="font-semibold text-lg mb-4">Vos filleules</h2>
+        <h2 className="font-semibold text-lg mb-1">Vos filleules en cours</h2>
+        <p className="text-sm text-gray-500 mb-5">
+          Une filleule est validée après 30 jours d&apos;abonnement actif.
+        </p>
+
         {filleulesAffichables.length === 0 ? (
           <p className="text-sm text-gray-600">
             Aucune filleule pour le moment. Partagez votre code pour démarrer
             votre premier cycle.
           </p>
         ) : (
-          <ul className="flex flex-col divide-y divide-gray-100">
+          <ul className="flex flex-col gap-5">
             {filleulesAffichables.map((f, idx) => {
-              const joursRestants = f.statut === 'abonnee'
-                ? joursRestantsAvantConfirmation(f.abonneeAt)
-                : null
+              const joursRestants =
+                f.statut === 'abonnee'
+                  ? joursRestantsAvantConfirmation(f.abonneeAt)
+                  : null
+              const joursEcoules =
+                f.statut === 'abonnee' && joursRestants !== null
+                  ? Math.max(0, 30 - joursRestants)
+                  : null
+
+              let label: string
+              let percent: number
+              let barClass: string
+              let labelClass = 'text-gray-600'
+
+              if (f.statut === 'confirme') {
+                label = 'Validée — comptée dans votre cycle'
+                percent = 100
+                barClass = 'bg-black'
+                labelClass = 'text-black font-medium'
+              } else if (f.statut === 'abonnee' && joursEcoules !== null && joursRestants !== null) {
+                label =
+                  joursRestants === 0
+                    ? 'Validée aujourd’hui'
+                    : `J+${joursEcoules} · validée dans ${joursRestants} jour${joursRestants > 1 ? 's' : ''}`
+                percent = (joursEcoules / 30) * 100
+                barClass = 'bg-accent'
+              } else {
+                // statut === 'inscrite'
+                label = 'En attente de souscription'
+                percent = 0
+                barClass = 'bg-gray-300'
+                labelClass = 'text-gray-400'
+              }
+
               return (
-                <li
-                  key={`${f.inscriteAt}-${idx}`}
-                  className="flex items-center justify-between py-3"
-                >
-                  <div className="flex flex-col">
-                    <span className="text-sm text-gray-900 font-medium">
+                <li key={`${f.inscriteAt}-${idx}`} className="space-y-1.5">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-gray-900 font-medium">
                       {f.firstName ?? 'Filleule'}
                     </span>
-                    {f.statut === 'inscrite' && (
-                      <span className="text-xs text-gray-500 mt-0.5">
-                        En attente de souscription
-                      </span>
-                    )}
-                    {f.statut === 'abonnee' && joursRestants !== null && (
-                      <span className="text-xs text-gray-500 mt-0.5">
-                        Plus que {joursRestants} jour{joursRestants > 1 ? 's' : ''} avant confirmation
-                      </span>
-                    )}
-                    {f.statut === 'confirme' && (
-                      <span className="text-xs text-gray-500 mt-0.5">
-                        Compte vers votre prochaine récompense
-                      </span>
-                    )}
+                    <span className={`text-xs ${labelClass}`}>{label}</span>
                   </div>
-                  <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${STATUT_BADGE_CLASS[f.statut]}`}>
-                    {STATUT_LABELS[f.statut]}
-                  </span>
+                  <div
+                    className="relative h-2 w-full bg-gray-100 rounded-full overflow-hidden"
+                    aria-hidden="true"
+                  >
+                    <div
+                      className={`absolute inset-y-0 left-0 ${barClass} rounded-full transition-all duration-500`}
+                      style={{ width: `${percent}%` }}
+                    />
+                  </div>
                 </li>
               )
             })}
           </ul>
         )}
+      </div>
+
+      {/* Compteurs synthétiques */}
+      <div className="bg-white rounded-xl border p-6 grid grid-cols-3 gap-4 text-center">
+        <div>
+          <p className="text-2xl font-bold text-black">{filleulesAffichables.length}</p>
+          <p className="text-xs text-gray-600 mt-0.5">Filleules invitées</p>
+        </div>
+        <div>
+          <p className="text-2xl font-bold text-black">{compteurClamped}</p>
+          <p className="text-xs text-gray-600 mt-0.5">Validées dans ce cycle</p>
+        </div>
+        <div>
+          <p className="text-2xl font-bold text-black">{totalRecompenses}</p>
+          <p className="text-xs text-gray-600 mt-0.5">Récompenses gagnées</p>
+        </div>
       </div>
     </div>
   )
