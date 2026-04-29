@@ -102,7 +102,7 @@ export default async function HomePage() {
                   className="h-auto w-64 md:w-80 mx-auto"
                 />
 
-                <p className="text-2xl text-white leading-relaxed text-center">
+                <p className="text-2xl text-white leading-relaxed text-center font-heading italic">
                   Donne vie à ton quotidien
                 </p>
 
@@ -143,7 +143,7 @@ export default async function HomePage() {
             <path d="M0,60 Q240,20 480,50 T960,50 T1440,50 L1440,60 L0,60 Z" fill="#F4C8A3" />
           </svg>
           <Reveal className="max-w-5xl mx-auto px-4 py-8 flex flex-col items-center gap-4 text-center md:flex-row md:justify-between md:text-left">
-            <p className="text-lg font-medium text-black tracking-wide">
+            <p className="text-lg font-medium text-black tracking-wide font-heading italic">
               Notre communauté de mise en relation entre accompagnants et accompagné(e)s
             </p>
             <Link href="/recherche" className="rounded-full px-7 py-3 font-semibold bg-black text-white btn-hover whitespace-nowrap text-lg shrink-0">
