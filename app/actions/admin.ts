@@ -102,6 +102,58 @@ export async function validateAccompagnante(
     details: { motif: motif || null, decision },
   })
 
+  // Si l'admin valide une filleule dont le parrainage etait bloque par
+  // l'anti-fraude (meme_carte, meme_email...), on debloque automatiquement :
+  // l'admin a tranche en faveur de la filleule, donc la marraine doit aussi
+  // pouvoir beneficier de la confirmation a 30 jours.
+  if (decision === 'valide') {
+    const { data: profileForUser } = await supabaseAdmin
+      .from('accompagnantes_profiles')
+      .select('user_id')
+      .eq('id', profileId)
+      .maybeSingle()
+
+    if (profileForUser?.user_id) {
+      const { data: blockedParrainage } = await supabaseAdmin
+        .from('parrainages')
+        .select('id, marraine_id, code')
+        .eq('filleule_id', profileForUser.user_id)
+        .eq('statut', 'bloque')
+        .maybeSingle()
+
+      if (blockedParrainage?.id) {
+        // Restaure la relation parrainee_par et fait passer le parrainage
+        // a 'abonnee' (la filleule a deja paye, sinon le webhook ne serait
+        // jamais passe par detectBlacklistAtWebhook).
+        await supabaseAdmin
+          .from('users')
+          .update({ parrainee_par: blockedParrainage.marraine_id })
+          .eq('id', profileForUser.user_id)
+
+        await supabaseAdmin
+          .from('parrainages')
+          .update({
+            statut: 'abonnee',
+            blocage_raison: null,
+            filleule_abonnee_at: new Date().toISOString(),
+          })
+          .eq('id', blockedParrainage.id)
+
+        await supabaseAdmin.from('admin_actions_log').insert({
+          admin_id: user.id,
+          action_type: 'parrainage_debloque_par_validation',
+          target_type: 'parrainage',
+          target_id: blockedParrainage.id,
+          details: {
+            marraine_id: blockedParrainage.marraine_id,
+            filleule_id: profileForUser.user_id,
+            via: 'validation_manuelle_admin',
+          },
+        })
+      }
+    }
+  }
+
   // Email de résultat de validation : exécuté post-réponse via after() pour
   // garantir l'achèvement même après redirect() sur Vercel serverless.
   after(async () => {
