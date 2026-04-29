@@ -1,19 +1,20 @@
 import type { Metadata } from 'next'
-import { Satisfy, The_Girl_Next_Door } from 'next/font/google'
+import { Inter, Playfair_Display } from 'next/font/google'
 import './globals.css'
 import { CookieBanner } from '@/components/cookie-banner'
 import { LastSeenTracker } from '@/components/last-seen-tracker'
 
-const satisfy = Satisfy({
+const playfair = Playfair_Display({
   subsets: ['latin'],
-  weight: '400',
+  weight: ['400', '500', '600', '700'],
+  style: 'italic',
   variable: '--font-heading',
   display: 'swap',
 })
 
-const girlNextDoor = The_Girl_Next_Door({
+const inter = Inter({
   subsets: ['latin'],
-  weight: '400',
+  weight: ['300', '400', '500'],
   variable: '--font-body',
   display: 'swap',
 })
@@ -55,8 +56,8 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="fr" className={`${satisfy.variable} ${girlNextDoor.variable}`}>
-      <body className={girlNextDoor.className}>
+    <html lang="fr" className={`${playfair.variable} ${inter.variable}`}>
+      <body className={inter.className}>
         {children}
         <LastSeenTracker />
         <CookieBanner />
