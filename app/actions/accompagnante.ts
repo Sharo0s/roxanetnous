@@ -63,11 +63,11 @@ export async function submitOnboarding(data: {
     isFilleule = !!activeParrainage
   }
 
-  if (isFilleule) {
-    if (!data.experience || data.specialites.length === 0) {
-      return { error: 'Expérience et spécialités sont requises.' }
-    }
-  } else {
+  // L2 (code review 2026-04-29) : pour la filleule (validée par parrainage),
+  // experience et specialites deviennent optionnels — alignement avec
+  // l'esprit AC7 spec 2.1 (le bypass parrainage retire toutes les exigences
+  // de step 0). Une filleule peut compléter son profil progressivement.
+  if (!isFilleule) {
     if (data.diplomes.length === 0 || !data.experience || data.specialites.length === 0) {
       return { error: 'Diplômes, expérience et spécialités sont requis.' }
     }

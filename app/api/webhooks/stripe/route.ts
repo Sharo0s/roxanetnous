@@ -118,6 +118,26 @@ async function detectBlacklistAtWebhook(
           } catch (err) {
             console.error('[parrainage_blacklist][webhook][stripe_lookup]', err)
           }
+
+          // M10 (code review 2026-04-29) : fallback supplémentaire sur les
+          // charges historiques. paymentMethods.list ne retourne que les PM
+          // ATTACHES au customer ; une fraudeuse peut avoir détaché sa carte
+          // entre son inscription et celle de la filleule. Les charges
+          // gardent une trace immuable.
+          if (!carteMatch) {
+            try {
+              const charges = await stripe.charges.list({ customer: customerId, limit: 100 })
+              for (const charge of charges.data) {
+                const pmDetails = (charge.payment_method_details as { card?: { fingerprint?: string } } | null)
+                if (pmDetails?.card?.fingerprint === parrainage.stripe_fingerprint) {
+                  carteMatch = true
+                  break
+                }
+              }
+            } catch (err) {
+              console.error('[parrainage_blacklist][webhook][charges_lookup]', err)
+            }
+          }
         }
       }
     }

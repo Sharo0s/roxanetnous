@@ -260,6 +260,7 @@ export async function GET(request: NextRequest) {
           firstName: marraineUser.first_name || '',
           totalRecompenses: newTotalRecompenses,
           userId: row.marraine_id,
+          planType: marraineSub.planType,
         })
 
         rewards++

@@ -640,6 +640,7 @@ export async function sendParrainageRecompense(params: {
   firstName: string
   totalRecompenses: number
   userId?: string
+  planType?: 'mensuel' | 'annuel' | null
 }) {
   const subject = 'Félicitations, vous avez 6 mois offerts sur roxanetnous'
   const abonnementUrl = `${BASE_URL}/accompagnante/abonnement`
@@ -649,6 +650,16 @@ export async function sendParrainageRecompense(params: {
     ? `<p>C'est votre ${params.totalRecompenses}e récompense — merci de continuer à faire grandir la communauté !</p>`
     : ''
 
+  // M12 (code review 2026-04-29) : sur un plan annuel, le coupon
+  // duration='repeating' duration_in_months=6 ne s'applique qu'aux
+  // 6 prochaines factures mensuelles. Sur un sub annuel (1 invoice / 12 mois),
+  // le coupon est partiellement consommé sur la prochaine facture annuelle
+  // (6/12 = 50% off au lieu de 6 mois free). On adapte le texte pour ne pas
+  // mentir à la marraine.
+  const recompenseText = params.planType === 'annuel'
+    ? `5 accompagnantes que vous avez parrainées sont actives depuis plus de 30 jours. Comme promis, votre prochaine facturation annuelle bénéficiera d'une réduction équivalente à 6 mois d'abonnement (50 %), automatiquement appliquée sur votre compte.`
+    : `5 accompagnantes que vous avez parrainées sont actives depuis plus de 30 jours. Comme promis, vos 6 prochains prélèvements mensuels seront offerts, automatiquement appliqués sur votre compte.`
+
   try {
     await resend.emails.send({
       from: FROM_EMAIL,
@@ -657,7 +668,7 @@ export async function sendParrainageRecompense(params: {
       html: `
         <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
           <h1 style="color: #000;">Félicitations${greetingFirstName}, 6 mois vous sont offerts</h1>
-          <p>5 accompagnantes que vous avez parrainées sont actives depuis plus de 30 jours. Comme promis, votre prochain prélèvement sera remplacé par 6 mois d'abonnement gratuit, automatiquement appliqué sur votre compte.</p>
+          <p>${recompenseText}</p>
           ${cumulSentence}
           <p style="margin-top: 24px;">
             <a href="${abonnementUrl}" style="background: #000; color: #fff; padding: 12px 24px; text-decoration: none; display: inline-block;">

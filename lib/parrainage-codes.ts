@@ -14,11 +14,18 @@ export function generateCode(): string {
   return out
 }
 
-export type GenerateCodeResult = { code: string } | { error: string }
+export type GenerateCodeResult =
+  | { code: string; created: boolean }
+  | { error: string }
 
 // Variante système : bypass le check d'authz, le système agit pour le compte
 // de l'utilisateur courant après vérification (ex: webhook Stripe, validation admin).
 // Module non-'use server' pour éviter d'exposer une Server Action publique sans authz.
+//
+// L1 (code review 2026-04-29) : retourne `created: true` si un nouveau code
+// a été généré, `created: false` si un code existait déjà. L'appelant peut
+// ainsi conditionner l'envoi de l'email "bienvenue marraine" pour ne pas
+// spammer un utilisateur revalidé.
 export async function generateCodeForUserSystem(userId: string): Promise<GenerateCodeResult> {
   if (!userId) return { error: 'userId manquant.' }
   const supabaseAdmin = await createClient({ serviceRole: true })
@@ -28,7 +35,7 @@ export async function generateCodeForUserSystem(userId: string): Promise<Generat
     .select('code')
     .eq('user_id', userId)
     .maybeSingle()
-  if (existing?.code) return { code: existing.code }
+  if (existing?.code) return { code: existing.code, created: false }
 
   for (let attempt = 0; attempt < 3; attempt++) {
     const code = generateCode()
@@ -40,7 +47,7 @@ export async function generateCodeForUserSystem(userId: string): Promise<Generat
         compteur_confirmes: 0,
         total_recompenses: 0,
       })
-    if (!error) return { code }
+    if (!error) return { code, created: true }
     if ((error as { code?: string }).code !== '23505') {
       return { error: 'Erreur lors de la création du code de parrainage.' }
     }
@@ -49,7 +56,7 @@ export async function generateCodeForUserSystem(userId: string): Promise<Generat
       .select('code')
       .eq('user_id', userId)
       .maybeSingle()
-    if (nowExisting?.code) return { code: nowExisting.code }
+    if (nowExisting?.code) return { code: nowExisting.code, created: false }
   }
   return { error: 'Impossible de générer un code unique après plusieurs tentatives.' }
 }

@@ -25,6 +25,7 @@ type ParrainageState =
         | 'unknown_code'
         | 'marraine_not_validated'
         | 'marraine_subscription_inactive'
+        | 'rate_limited'
     }
 
 const PARRAINAGE_ERRORS: Record<
@@ -39,6 +40,8 @@ const PARRAINAGE_ERRORS: Record<
     'La marraine associée à ce code n\'est pas encore validée.',
   marraine_subscription_inactive:
     'Le compte de votre marraine est inactif (abonnement suspendu ou en attente de paiement). Demandez-lui de régulariser sa situation, puis réessayez avec son code.',
+  rate_limited:
+    'Trop de tentatives de validation depuis votre adresse. Patientez quelques minutes avant de réessayer.',
 }
 
 export function RegisterForm() {

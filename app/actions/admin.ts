@@ -219,12 +219,17 @@ export async function validateAccompagnante(
           return
         }
 
-        await sendParrainageBienvenueMarraine({
-          email: auxUser.email,
-          firstName: auxUser.first_name || '',
-          code: codeResult.code,
-          userId: auxProfile.user_id,
-        })
+        // L1 (code review 2026-04-29) : ne déclencher l'email "bienvenue
+        // marraine" que sur création réelle. Pour une re-validation
+        // (refuse -> valide), le code existait déjà, l'email serait spam.
+        if (codeResult.created) {
+          await sendParrainageBienvenueMarraine({
+            email: auxUser.email,
+            firstName: auxUser.first_name || '',
+            code: codeResult.code,
+            userId: auxProfile.user_id,
+          })
+        }
       } catch (e) {
         console.error('[validateAccompagnante][parrainage_code]', e)
       }

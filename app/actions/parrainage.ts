@@ -2,6 +2,7 @@
 
 import { after } from 'next/server'
 import { revalidatePath } from 'next/cache'
+import { headers } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
 import {
   sendParrainageBienvenueMarraine,
@@ -183,7 +184,7 @@ export async function generateCodeForUser(userId: string): Promise<GenerateCodeR
     .maybeSingle()
 
   if (existing?.code) {
-    return { code: existing.code }
+    return { code: existing.code, created: false }
   }
 
   // Retry max 3 fois en cas de collision UNIQUE (probabilité quasi nulle, ceinture+bretelles)
@@ -199,7 +200,7 @@ export async function generateCodeForUser(userId: string): Promise<GenerateCodeR
       })
 
     if (!error) {
-      return { code }
+      return { code, created: true }
     }
 
     // 23505 = unique_violation. Si la collision est sur user_id (PK), retourner le code existant.
@@ -213,7 +214,7 @@ export async function generateCodeForUser(userId: string): Promise<GenerateCodeR
       .eq('user_id', userId)
       .maybeSingle()
     if (nowExisting?.code) {
-      return { code: nowExisting.code }
+      return { code: nowExisting.code, created: false }
     }
   }
 
@@ -230,7 +231,16 @@ export type ValidationCodeResult =
         | 'unknown_code'
         | 'marraine_not_validated'
         | 'marraine_subscription_inactive'
+        | 'rate_limited'
     }
+
+// H12 (code review 2026-04-29) : rate-limit fenêtre glissante par IP pour
+// empêcher l'énumération du keyspace 31^8 codes. Limite : 30 tentatives par
+// 5 minutes (suffisant pour saisir/corriger un code, infaisable pour brute-force
+// même si parallélisé sur 100 IPs : 3000/5min = 100k codes / 6 jours pour
+// 1 hit espéré, alors qu'une vraie marraine partage son code via canal direct).
+const VALIDATE_CODE_MAX_REQUESTS = 30
+const VALIDATE_CODE_WINDOW_SECONDS = 300
 
 export async function validateCode(rawCode: string): Promise<ValidationCodeResult> {
   const code = normalizeCode(rawCode)
@@ -248,6 +258,32 @@ export async function validateCode(rawCode: string): Promise<ValidationCodeResul
   // La fonction étant appelée depuis le formulaire d'inscription non authentifié,
   // on utilise le service role pour cette lecture publique de validation.
   const supabaseAdmin = await createClient({ serviceRole: true })
+
+  // H12 : check rate-limit avant toute lecture BDD. Key = IP du client ;
+  // si IP indisponible (cas rare en preview/dev), fallback global avec
+  // limite plus stricte pour éviter qu'un attaquant masque son IP.
+  try {
+    const h = await headers()
+    const ip =
+      h.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+      h.get('x-real-ip') ||
+      'unknown'
+    const rateLimitKey = `validate_code:${ip}`
+    const { data: allowed } = await supabaseAdmin.rpc('try_consume_rate_limit', {
+      p_key: rateLimitKey,
+      p_max_requests: VALIDATE_CODE_MAX_REQUESTS,
+      p_window_seconds: VALIDATE_CODE_WINDOW_SECONDS,
+    })
+    if (allowed === false) {
+      console.warn('[validateCode][rate_limited]', { ip })
+      return { valid: false, reason: 'rate_limited' }
+    }
+  } catch (rateLimitErr) {
+    // Best-effort : si le RPC échoue (DB down), on n'empêche pas la
+    // validation pour ne pas casser le flow signup. L'erreur est logguée
+    // pour observabilité.
+    console.error('[validateCode][rate_limit_error]', rateLimitErr)
+  }
 
   const { data: row } = await supabaseAdmin
     .from('parrainages_codes')
@@ -429,11 +465,17 @@ export async function createParrainageRelation(params: {
   // parrainee_par n'est posé que si pas de blocage : la branche meme_email plus
   // bas le laisse intentionnellement à null. meme_ip est seulement un flag, le
   // parrainage reste actif donc parrainee_par doit être posé.
+  //
+  // M9 (code review 2026-04-29) : guard `IS NULL` pour ne jamais écraser un
+  // parrainee_par déjà posé. Sinon, si une filleule a un parrainage actif et
+  // tente un autre code, l'historique d'attribution serait silencieusement
+  // perdu (premier marraine remplacée par seconde).
   if (blacklistResult.blocage !== 'meme_email') {
     const { error: parraineeErr } = await supabaseAdmin
       .from('users')
       .update({ parrainee_par: validation.marraineId })
       .eq('id', params.filleuleId)
+      .is('parrainee_par', null)
     if (parraineeErr) console.error('[parrainage][signup][parrainee_par]', parraineeErr)
   }
 
@@ -725,7 +767,9 @@ export async function confirmParrainageOnSuccess(
     })
   }
 
-  if (filleuleUser?.email && 'code' in codeResult) {
+  // L1 (code review 2026-04-29) : n'envoyer l'email "bienvenue marraine"
+  // qu'à la création réelle du code, pas sur retour idempotent.
+  if (filleuleUser?.email && 'code' in codeResult && codeResult.created) {
     after(async () => {
       try {
         await sendParrainageBienvenueMarraine({
