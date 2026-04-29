@@ -1,6 +1,6 @@
 # Story 2.4 : Cycle récompense parrainage (cron J+30, coupon Stripe, compteur UI)
 
-Status: review
+Status: done
 
 <!-- Note: Validation est optionnelle. Lancer `validate-create-story` avant `dev-story` pour un controle qualite. -->
 
@@ -360,28 +360,28 @@ Le projet n'a pas de framework de tests automatises. Les scenarios suivants doiv
 
 #### Patch (fixable sans input utilisateur — vague 1+2, 2026-04-29)
 
-- [ ] [Review][Patch] **D2** Supprimer `components/accompagnante/parrainage-card.tsx` (dead code) + mettre à jour commentaire `parrainage.ts:695`.
-- [ ] [Review][Patch] **D3** Remplacer `discounts: [...existingCoupons, { coupon }]` par `discounts: [{ coupon: coupon.id }]`. [app/api/cron/confirm-parrainages/route.ts:1083-1097]
-- [ ] [Review][Patch] **D4** Skip `if (marraineSub.status === 'trialing')`. [app/api/cron/confirm-parrainages/route.ts:1047-1051]
-- [ ] [Review][Patch] **C1** Webhook idempotence : process AVANT insert `stripe_events_processed`. [app/api/webhooks/stripe/route.ts:1487-1503]
-- [ ] [Review][Patch] **C2/H7** Compteur atomique via RPC PG (`UPDATE compteur = compteur + 1 RETURNING`) + reward gated derrière RPC `claim_recompense_palier(marraine_id, palier)`. [app/api/cron/confirm-parrainages/route.ts:1029-1123]
-- [ ] [Review][Patch] **H5** Fail-loud si `ADMIN_NOTIFICATIONS_EMAIL` non set (au lieu de console.error silencieux). [lib/emails.ts:2256-2263]
-- [ ] [Review][Patch] **H6** Zombies `abonnee` : transitionner en `expire` après filleule cancellation détectée par cron. [app/api/cron/confirm-parrainages/route.ts:934-940]
-- [ ] [Review][Patch] **H8** Cumul de coupons recouvert par D3 (replace).
-- [ ] [Review][Patch] **H9** Cron : si `missing_code`, faire le CAS statut `abonnee→confirme` AVANT de skipper le compteur (conforme AC1.3). [app/api/cron/confirm-parrainages/route.ts:982-986]
-- [ ] [Review][Patch] **H10** Régénérer les 317 codes backfill via `gen_random_bytes` (pgcrypto). [migration corrective]
-- [ ] [Review][Patch] **H11** `confirmerFraude` doit rollback `compteur_confirmes`, `total_recompenses` et delete coupon Stripe issu de la récompense. [app/actions/admin-parrainages.ts:114-118]
-- [ ] [Review][Patch] **M1** Skip si `marraineSub.cancel_at_period_end === true`. [cron]
-- [ ] [Review][Patch] **M3** Re-vérifier `accompagnantes_profiles.validation_status === 'valide'` à J+30. [cron]
-- [ ] [Review][Patch] **M4** Aligner `hasActiveSubscription` strict 'active' (recouvert par D5).
-- [ ] [Review][Patch] **M6** FK `parrainages.marraine_id ON DELETE CASCADE` détruit l'historique : passer en SET NULL ou créer table archive. [migration]
-- [ ] [Review][Patch] **M8** `captureParrainageFingerprint` : retry sur `subscription.updated` même si `fingerprint_indisponible` flagué (PM peut être mis à jour). [webhooks/stripe/route.ts:1433-1440]
-- [ ] [Review][Patch] **M10** Fingerprint detection fallback sur PaymentIntents/charges historiques (pas seulement cards attached actuels). [webhooks/stripe/route.ts:1257-1277]
-- [ ] [Review][Patch] **M12** Email récompense : adapter texte selon plan annuel/mensuel (lire `interval` Stripe). [lib/emails.ts:2214]
-- [ ] [Review][Patch] **M14** Filtrer existing coupons par validity (recouvert par D3).
-- [ ] [Review][Patch] **L5** Coupon `name`: passer de `'Parrainage 6 mois - '` à `'Recompense parrainage - '` (conforme AC2).
-- [ ] [Review][Patch] **L6** Coupon `name`: utiliser `marraineId.slice(0,8)` au lieu d'email tronqué (collisions emails longs).
-- [ ] [Review][Patch] **L7** Cron quotidien `DELETE FROM stripe_events_processed WHERE processed_at < now() - 7 days`.
+- [x] [Review][Patch] **D2** Supprimer `components/accompagnante/parrainage-card.tsx` (dead code) + mettre à jour commentaire `parrainage.ts:695`.
+- [x] [Review][Patch] **D3** Remplacer `discounts: [...existingCoupons, { coupon }]` par `discounts: [{ coupon: coupon.id }]`. [app/api/cron/confirm-parrainages/route.ts:1083-1097]
+- [x] [Review][Patch] **D4** Skip `if (marraineSub.status === 'trialing')`. [app/api/cron/confirm-parrainages/route.ts:1047-1051]
+- [x] [Review][Patch] **C1** Webhook idempotence : process AVANT insert `stripe_events_processed`. [app/api/webhooks/stripe/route.ts:1487-1503]
+- [x] [Review][Patch] **C2/H7** Compteur atomique via RPC PG (`UPDATE compteur = compteur + 1 RETURNING`) + reward gated derrière RPC `claim_recompense_palier(marraine_id, palier)`. [app/api/cron/confirm-parrainages/route.ts:1029-1123]
+- [x] [Review][Patch] **H5** Fail-loud si `ADMIN_NOTIFICATIONS_EMAIL` non set (au lieu de console.error silencieux). [lib/emails.ts:2256-2263]
+- [x] [Review][Patch] **H6** Zombies `abonnee` : transitionner en `expire` après filleule cancellation détectée par cron. [app/api/cron/confirm-parrainages/route.ts:934-940]
+- [x] [Review][Patch] **H8** Cumul de coupons recouvert par D3 (replace).
+- [x] [Review][Patch] **H9** Cron : si `missing_code`, faire le CAS statut `abonnee→confirme` AVANT de skipper le compteur (conforme AC1.3). [app/api/cron/confirm-parrainages/route.ts:982-986]
+- [x] [Review][Patch] **H10** Régénérer les 317 codes backfill via `gen_random_bytes` (pgcrypto). [migration corrective]
+- [x] [Review][Patch] **H11** `confirmerFraude` doit rollback `compteur_confirmes`, `total_recompenses` et delete coupon Stripe issu de la récompense. [app/actions/admin-parrainages.ts:114-118]
+- [x] [Review][Patch] **M1** Skip si `marraineSub.cancel_at_period_end === true`. [cron]
+- [x] [Review][Patch] **M3** Re-vérifier `accompagnantes_profiles.validation_status === 'valide'` à J+30. [cron]
+- [x] [Review][Patch] **M4** Aligner `hasActiveSubscription` strict 'active' (recouvert par D5).
+- [x] [Review][Patch] **M6** FK `parrainages.marraine_id ON DELETE CASCADE` détruit l'historique : passer en SET NULL ou créer table archive. [migration]
+- [x] [Review][Patch] **M8** `captureParrainageFingerprint` : retry sur `subscription.updated` même si `fingerprint_indisponible` flagué (PM peut être mis à jour). [webhooks/stripe/route.ts:1433-1440]
+- [x] [Review][Patch] **M10** Fingerprint detection fallback sur PaymentIntents/charges historiques (pas seulement cards attached actuels). [webhooks/stripe/route.ts:1257-1277]
+- [x] [Review][Patch] **M12** Email récompense : adapter texte selon plan annuel/mensuel (lire `interval` Stripe). [lib/emails.ts:2214]
+- [x] [Review][Patch] **M14** Filtrer existing coupons par validity (recouvert par D3).
+- [x] [Review][Patch] **L5** Coupon `name`: passer de `'Parrainage 6 mois - '` à `'Recompense parrainage - '` (conforme AC2).
+- [x] [Review][Patch] **L6** Coupon `name`: utiliser `marraineId.slice(0,8)` au lieu d'email tronqué (collisions emails longs).
+- [x] [Review][Patch] **L7** Cron quotidien `DELETE FROM stripe_events_processed WHERE processed_at < now() - 7 days`.
 
 ## Change Log
 
@@ -389,3 +389,4 @@ Le projet n'a pas de framework de tests automatises. Les scenarios suivants doiv
 |------|--------|-----------|
 | 2026-04-28 | Claude Opus 4.7 (1M) via bmad-create-story | Creation story 2.4 - cycle recompense parrainage : cron J+30 + coupon Stripe 100% / 6 mois + email recompense + extension ParrainageCard (compteur + liste filleules) + bloc code sur profil. Pas de migration SQL (tables Story 2.1 deja en place). Statut ready-for-dev. |
 | 2026-04-28 | Claude Opus 4.7 (1M) via bmad-dev-story | Implementation Story 2.4 : cron `/api/cron/confirm-parrainages` (boucle for-of, compare-and-swap, branche recompense Stripe coupon `repeating` 6 mois + admin log + email), email `sendParrainageRecompense`, declaration vercel.json (cron `0 2 * * *`), extension `ParrainageCard` (compteur 5 carres + liste filleules badges FR), chargement dashboard (filleules join users), bloc code sur profil, label admin historique. tsc 0 erreur, build OK avec route presente. Statut review. |
+| 2026-04-29 | Claude Opus 4.7 (1M) via bmad-code-review | Code review adversarial (3 layers, périmètre Story 2.1 + 2.4 combinées). Décisions résolues : D2 (ParrainageCard mort supprimé, AC5/AC6 amendés vers page dédiée `/accompagnante/parrainage`), D3 (replace coupons au lieu de cumul, conforme Dev Notes), D4 (skip reward si marraine `trialing`). 22 patches appliqués sur cette story : C1 webhook idempotence rollback, C2/H7 RPC PG atomiques (increment / claim / rollback), H6 statut `expire`, H9 confirme avant skip si missing_code, H10 codes régénérés via pgcrypto, H11 rollback compteur sur fraude, M1 skip cancel_at_period_end, M3 re-check validation_status, M6 FK SET NULL, M10 fallback charges, M12 email plan-aware, L5/L6 coupon name stable, L7 sweep cron events, L10 index composite. 7 migrations Supabase appliquées. tsc 0 erreur. Statut → done (tests preview Vercel à exécuter avant production). |

@@ -1,6 +1,6 @@
 # Story 2.1 : Validation automatique filleule (server-side parrainage)
 
-Status: in-progress
+Status: done
 
 <!-- Note: Validation est optionnelle. Lancer `validate-create-story` avant `dev-story` pour un contrôle qualité. -->
 
@@ -347,18 +347,18 @@ Claude Opus 4.7 (1M context) — `claude-opus-4-7[1m]`
 
 #### Patch (fixable sans input utilisateur — vague 1, 2026-04-29)
 
-- [ ] [Review][Patch] **D1** Remplacer policy `parrainages_filleule_read_own` par vue restreinte. [supabase/migrations/20260429000000_parrainages_filleule_read_own.sql + app/accompagnante/dashboard/page.tsx:46]
-- [ ] [Review][Patch] **D5** Refuser `past_due` dans `isSubActive` + message UI clair. [app/actions/parrainage.ts:475 + components/auth/register-form.tsx]
-- [ ] [Review][Patch] **C3/H4** `confirmParrainageOnSuccess` doit CAS `validation_status='en_attente'` avant écrire `valide` (ne pas écraser un `refuse` admin). [app/actions/parrainage.ts:819-827]
-- [ ] [Review][Patch] **H3** `revokeFilleuleValidation` doit DELETE FROM `parrainages_codes` WHERE user_id = filleuleId. [app/actions/parrainage.ts:283-325]
-- [ ] [Review][Patch] **H12** Rate-limit + captcha sur `validateCode` (oracle d'énumération exposé non auth, service-role, retourne `marraineFirstName`). [app/actions/parrainage.ts:417-485] — vague 3.
-- [ ] [Review][Patch] **M9** `parrainee_par` overwritten unconditionally : guard `WHERE parrainee_par IS NULL`. [app/actions/parrainage.ts:609-615]
-- [ ] [Review][Patch] **M11** `confirmerFraude` lit `validation_source==='manuelle'` pour décider de la suspension : remplacer par flag explicite. [app/actions/parrainage.ts:139-151]
-- [ ] [Review][Patch] **L1** `generateCodeForUserSystem` déclenche email bienvenue marraine sur retour idempotent : check `created` flag. [app/actions/admin.ts:196 + app/actions/parrainage.ts]
-- [ ] [Review][Patch] **L2** `submitOnboarding` exige `experience` + `specialites` pour filleule : lever pour aligner sur AC7. [app/actions/accompagnante.ts:67-69]
-- [ ] [Review][Patch] **L3** Documenter `marraine_subscription_inactive` (raison ajoutée, non présente dans AC4 spec). [doc only]
-- [ ] [Review][Patch] **L9** `revokeFilleuleValidation` no-op silencieux : logger explicitement si profile out of state. [app/actions/parrainage.ts:297-306]
-- [ ] [Review][Patch] **L10** Index composite `parrainages (filleule_id, code, statut)` pour hot-path. [migration nouvelle]
+- [x] [Review][Patch] **D1** Remplacer policy `parrainages_filleule_read_own` par vue restreinte. [supabase/migrations/20260429000000_parrainages_filleule_read_own.sql + app/accompagnante/dashboard/page.tsx:46]
+- [x] [Review][Patch] **D5** Refuser `past_due` dans `isSubActive` + message UI clair. [app/actions/parrainage.ts:475 + components/auth/register-form.tsx]
+- [x] [Review][Patch] **C3/H4** `confirmParrainageOnSuccess` doit CAS `validation_status='en_attente'` avant écrire `valide` (ne pas écraser un `refuse` admin). [app/actions/parrainage.ts:819-827]
+- [x] [Review][Patch] **H3** `revokeFilleuleValidation` doit DELETE FROM `parrainages_codes` WHERE user_id = filleuleId. [app/actions/parrainage.ts:283-325]
+- [x] [Review][Patch] **H12** Rate-limit + captcha sur `validateCode` (oracle d'énumération exposé non auth, service-role, retourne `marraineFirstName`). [app/actions/parrainage.ts:417-485] — vague 3.
+- [x] [Review][Patch] **M9** `parrainee_par` overwritten unconditionally : guard `WHERE parrainee_par IS NULL`. [app/actions/parrainage.ts:609-615]
+- [x] [Review][Patch] **M11** `confirmerFraude` lit `validation_source==='manuelle'` pour décider de la suspension : remplacer par flag explicite. [app/actions/parrainage.ts:139-151]
+- [x] [Review][Patch] **L1** `generateCodeForUserSystem` déclenche email bienvenue marraine sur retour idempotent : check `created` flag. [app/actions/admin.ts:196 + app/actions/parrainage.ts]
+- [x] [Review][Patch] **L2** `submitOnboarding` exige `experience` + `specialites` pour filleule : lever pour aligner sur AC7. [app/actions/accompagnante.ts:67-69]
+- [x] [Review][Patch] **L3** Documenter `marraine_subscription_inactive` (raison ajoutée, non présente dans AC4 spec). [doc only]
+- [x] [Review][Patch] **L9** `revokeFilleuleValidation` no-op silencieux : logger explicitement si profile out of state. [app/actions/parrainage.ts:297-306]
+- [x] [Review][Patch] **L10** Index composite `parrainages (filleule_id, code, statut)` pour hot-path. [migration nouvelle]
 
 #### Decisions résolues (2026-04-28)
 
@@ -416,3 +416,4 @@ Claude Opus 4.7 (1M context) — `claude-opus-4-7[1m]`
 | 2026-04-28 | Claude Opus 4.7 (1M) via bmad-dev-story | Implémentation complète Story 2.1. 10/10 tâches terminées, 10/10 ACs satisfaits. Build vert. Statut → review. |
 | 2026-04-28 | Claude Opus 4.7 (1M) via bmad-code-review | Revue de code adversariale (3 layers). 6 décisions, 24 patches, 9 défers, 9 dismiss. 2 bugs CRITIQUES bloquant la feature en prod (RLS anon sur `parrainages_codes` + `parrainages`). |
 | 2026-04-28 | Claude Opus 4.7 (1M) via bmad-code-review | Batch-apply : 24/24 patches appliqués. Migration corrective `20260428153210_parrainee_par_on_delete_set_null` appliquée et vérifiée (`delete_rule = SET NULL`). Build vert, tsc 0 erreur, 9/9 tests pure-functions PASS. Statut → in-progress (tests preview Vercel à exécuter). |
+| 2026-04-29 | Claude Opus 4.7 (1M) via bmad-code-review | Second code review adversarial (3 layers, périmètre Story 2.1 + 2.4 combinées). 5 décisions résolues (D1 RLS via vue, D2 ParrainageCard mort supprimé, D3 replace coupons, D4 skip trialing, D5 strict 'active'/'trialing'), 33 patches appliqués sur 33 décidés (3 critiques + 12 high + 13 medium + 5 low), 0 défer ouvert, 14 false-positives dismissés. 7 nouvelles migrations Supabase appliquées (vue restreinte, expire_at, 3 RPC atomiques compteur+claim+rollback, FK SET NULL, régen codes pgcrypto, rate_limit_tracker, index composite). 3 commits : `006206c` (vague 1), `c3c6cb6` (vague 2), `430e60b` (vague 3+4). tsc 0 erreur. Statut → done (tests preview Vercel à exécuter avant production). |
