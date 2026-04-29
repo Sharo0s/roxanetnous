@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server'
-import type Stripe from 'stripe'
 import { createClient } from '@/lib/supabase/server'
 import { stripe } from '@/lib/stripe'
 import { getSubscriptionStatus, hasActiveSubscription } from '@/lib/subscription-helpers'
@@ -138,6 +137,38 @@ export async function GET(request: NextRequest) {
         continue
       }
 
+      // D4 (code review 2026-04-29) : skipper si la marraine est en trial ;
+      // sinon le coupon 6 mois s'applique en plus du trial gratuit (over-spec).
+      // Le cron repasse chaque jour, la récompense sera traitée au premier
+      // passage en 'active'.
+      if (marraineSub.status === 'trialing') {
+        console.info('[cron_confirm_parrainages][skip_trialing]', { marraine_id: row.marraine_id })
+        continue
+      }
+
+      // M1 : skipper si la marraine a déjà demandé l'annulation à la fin de
+      // période. Un coupon attaché à un sub qui se ferme dans N jours est
+      // gaspillé, et l'email "6 mois offerts" mentirait.
+      if (marraineSub.cancelAt) {
+        console.info('[cron_confirm_parrainages][skip_cancel_at_period_end]', { marraine_id: row.marraine_id })
+        continue
+      }
+
+      // M3 : re-vérifier que le statut de validation de la marraine est
+      // toujours 'valide' (peut avoir été révoqué par l'admin entre J+0 et J+30).
+      const { data: marraineProfile } = await supabase
+        .from('accompagnantes_profiles')
+        .select('validation_status')
+        .eq('user_id', row.marraine_id)
+        .single()
+      if (marraineProfile?.validation_status !== 'valide') {
+        console.warn('[cron_confirm_parrainages][marraine_not_valid]', {
+          marraine_id: row.marraine_id,
+          validation_status: marraineProfile?.validation_status ?? null,
+        })
+        continue
+      }
+
       // Charger l'email de la marraine pour le coupon name + l'email
       const { data: marraineUser } = await supabase
         .from('users')
@@ -152,11 +183,10 @@ export async function GET(request: NextRequest) {
       }
 
       try {
-        // Stripe limite coupon.name à 40 caractères. L'email peut faire dépasser
-        // facilement, donc on tronque proprement (préfixe lisible + email tronqué
-        // ou fallback sur le user_id si pas d'email).
-        const namePrefix = 'Parrainage 6 mois - '
-        const couponName = (namePrefix + marraineUser.email).slice(0, 40)
+        // L5 : libellé conforme spec 2.4 AC2.
+        // L6 : marraine.id.slice(0,8) au lieu d'email tronqué pour éviter les
+        // collisions (deux emails longs partageant le même préfixe).
+        const couponName = `Recompense parrainage - ${row.marraine_id.slice(0, 8)}`
         const coupon = await stripe.coupons.create({
           percent_off: 100,
           duration: 'repeating',
@@ -165,23 +195,14 @@ export async function GET(request: NextRequest) {
           metadata: { user_id: row.marraine_id, type: 'parrainage_recompense' },
         })
 
-        // Préserver les discounts existants : Stripe remplace l'array entier
-        // sur subscriptions.update, donc une récompense précédente non encore
-        // épuisée serait écrasée si on n'inclut pas ses coupons ici.
-        const currentSub = await stripe.subscriptions.retrieve(marraineSub.stripeSubscriptionId, {
-          expand: ['discounts'],
-        })
-        const existingCoupons = (currentSub.discounts || [])
-          .map((d) => {
-            if (typeof d === 'string') return d
-            const coupon = (d as { coupon?: Stripe.Coupon | string | null }).coupon
-            if (!coupon) return null
-            return typeof coupon === 'string' ? coupon : coupon.id
-          })
-          .filter((c): c is string => !!c)
-
+        // D3 (code review 2026-04-29) : Dev Notes 2.4 ratifient le remplacement
+        // (Stripe écrase l'array discounts complet sur subscriptions.update).
+        // Cumul abandonné car il permettait d'empiler plusieurs coupons 100%
+        // (ex. 5+5 parrainages = 12 mois free) et de re-envoyer des coupons
+        // expirés. Un coupon admin pré-existant sera écrasé : l'admin peut
+        // le ré-attribuer manuellement si nécessaire.
         await stripe.subscriptions.update(marraineSub.stripeSubscriptionId, {
-          discounts: [...existingCoupons.map((id) => ({ coupon: id })), { coupon: coupon.id }],
+          discounts: [{ coupon: coupon.id }],
         })
 
         const oldTotalRecompenses = codeRow.total_recompenses ?? 0

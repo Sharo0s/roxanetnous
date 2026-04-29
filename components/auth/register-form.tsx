@@ -38,7 +38,7 @@ const PARRAINAGE_ERRORS: Record<
   marraine_not_validated:
     'La marraine associée à ce code n\'est pas encore validée.',
   marraine_subscription_inactive:
-    'Ce code de parrainage n\'est plus actif. Demandez un autre code à votre marraine.',
+    'Le compte de votre marraine est inactif (abonnement suspendu ou en attente de paiement). Demandez-lui de régulariser sa situation, puis réessayez avec son code.',
 }
 
 export function RegisterForm() {

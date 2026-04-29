@@ -262,12 +262,17 @@ export async function validateCode(rawCode: string): Promise<ValidationCodeResul
   // pour partager son code. Une marraine désabonnée garde sa validation pour
   // l'historique mais ne peut plus parrainer (sinon, elle propage le bypass
   // d'onboarding à des sous-filleules sans contrepartie économique).
+  //
+  // D5 (code review 2026-04-29) : 'past_due' n'est plus accepté.
+  // Asymétrie corrigée avec hasActiveSubscription (cron récompense), qui
+  // n'accepte que 'active' / 'trialing'. Une marraine en échec de paiement
+  // (carte refusée) ne peut pas onboarder pendant que Stripe retry.
   const { data: marraineSub } = await supabaseAdmin
     .from('subscriptions')
     .select('status')
     .eq('user_id', row.user_id)
     .maybeSingle()
-  const isSubActive = marraineSub?.status === 'active' || marraineSub?.status === 'past_due'
+  const isSubActive = marraineSub?.status === 'active' || marraineSub?.status === 'trialing'
   if (!isSubActive) {
     return { valid: false, reason: 'marraine_subscription_inactive' }
   }
@@ -692,9 +697,10 @@ export async function confirmParrainageOnSuccess(
     },
   })
 
-  // Invalide le cache du dashboard pour que la ParrainageCard apparaisse
+  // Invalide le cache du dashboard pour que le teaser parrainage apparaisse
   // sans nécessiter un reload manuel après validation par parrainage.
   revalidatePath('/accompagnante/dashboard')
+  revalidatePath('/accompagnante/parrainage')
 
   return { ok: true }
 }

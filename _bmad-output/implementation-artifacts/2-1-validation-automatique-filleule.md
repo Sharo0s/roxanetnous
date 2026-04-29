@@ -340,6 +340,26 @@ Claude Opus 4.7 (1M context) — `claude-opus-4-7[1m]`
 
 ### Review Findings
 
+#### Decisions résolues (2026-04-29 — second code review)
+
+- [x] [Review][Decision] **D1 — RLS filleule lit ses propres rows `parrainages`** : **résolu (b)** — la migration `20260429000000_parrainages_filleule_read_own.sql` ouvre le SELECT à la filleule (motivé par le bandeau "Vérification supplémentaire en cours" du dashboard), mais expose `flag_suspicion`, `blocage_raison`, `marraine_id`, `stripe_fingerprint`. Décision : remplacer la policy par une vue `parrainages_filleule_view` n'exposant que `(id, statut, filleule_id)`. Devient patch ci-dessous.
+- [x] [Review][Decision] **D5 — `validateCode` accepte `past_due`** : **résolu (a)** — refuser `past_due` dans `validateCode` pour cohérence avec le cron (`hasActiveSubscription`). Risque : marraine en échec de paiement temporaire ne peut plus onboarder pendant retry Stripe ~24-72h. UI doit afficher message clair.
+
+#### Patch (fixable sans input utilisateur — vague 1, 2026-04-29)
+
+- [ ] [Review][Patch] **D1** Remplacer policy `parrainages_filleule_read_own` par vue restreinte. [supabase/migrations/20260429000000_parrainages_filleule_read_own.sql + app/accompagnante/dashboard/page.tsx:46]
+- [ ] [Review][Patch] **D5** Refuser `past_due` dans `isSubActive` + message UI clair. [app/actions/parrainage.ts:475 + components/auth/register-form.tsx]
+- [ ] [Review][Patch] **C3/H4** `confirmParrainageOnSuccess` doit CAS `validation_status='en_attente'` avant écrire `valide` (ne pas écraser un `refuse` admin). [app/actions/parrainage.ts:819-827]
+- [ ] [Review][Patch] **H3** `revokeFilleuleValidation` doit DELETE FROM `parrainages_codes` WHERE user_id = filleuleId. [app/actions/parrainage.ts:283-325]
+- [ ] [Review][Patch] **H12** Rate-limit + captcha sur `validateCode` (oracle d'énumération exposé non auth, service-role, retourne `marraineFirstName`). [app/actions/parrainage.ts:417-485] — vague 3.
+- [ ] [Review][Patch] **M9** `parrainee_par` overwritten unconditionally : guard `WHERE parrainee_par IS NULL`. [app/actions/parrainage.ts:609-615]
+- [ ] [Review][Patch] **M11** `confirmerFraude` lit `validation_source==='manuelle'` pour décider de la suspension : remplacer par flag explicite. [app/actions/parrainage.ts:139-151]
+- [ ] [Review][Patch] **L1** `generateCodeForUserSystem` déclenche email bienvenue marraine sur retour idempotent : check `created` flag. [app/actions/admin.ts:196 + app/actions/parrainage.ts]
+- [ ] [Review][Patch] **L2** `submitOnboarding` exige `experience` + `specialites` pour filleule : lever pour aligner sur AC7. [app/actions/accompagnante.ts:67-69]
+- [ ] [Review][Patch] **L3** Documenter `marraine_subscription_inactive` (raison ajoutée, non présente dans AC4 spec). [doc only]
+- [ ] [Review][Patch] **L9** `revokeFilleuleValidation` no-op silencieux : logger explicitement si profile out of state. [app/actions/parrainage.ts:297-306]
+- [ ] [Review][Patch] **L10** Index composite `parrainages (filleule_id, code, statut)` pour hot-path. [migration nouvelle]
+
 #### Decisions résolues (2026-04-28)
 
 - [x] [Review][Decision] Trial Stripe : **résolu (a)** — valider à la souscription, trial OK. Statu quo du code actuel.

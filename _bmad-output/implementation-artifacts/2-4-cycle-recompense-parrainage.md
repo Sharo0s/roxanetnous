@@ -350,6 +350,39 @@ Le projet n'a pas de framework de tests automatises. Les scenarios suivants doiv
 - `app/accompagnante/profil/page.tsx` (modifie) : chargement code parrainage et bloc inline d'affichage.
 - `app/admin/historique/page.tsx` (modifie) : nouveau label `parrainage_recompense_appliquee`.
 
+### Review Findings
+
+#### Decisions résolues (2026-04-29 — code review)
+
+- [x] [Review][Decision] **D2 — `<ParrainageCard />` jamais utilisé** : **résolu (a)** — la spec demandait d'enrichir le composant existant et de l'afficher inline sur le dashboard (AC5/AC6). L'implémentation a recréé le composant from-scratch puis déplacé toute la feature sur `/accompagnante/parrainage` (page dédiée via `<ParrainageView />`). Décision : supprimer le composant mort + amender la spec pour entériner la page dédiée. AC5 et AC6 sont explicitement remplacés par "page dédiée /accompagnante/parrainage avec barre de progression + liste filleules + dashboard teaser inline".
+- [x] [Review][Decision] **D3 — Cumul vs remplacement de `discounts`** : **résolu (a)** — Dev Notes 2.4 disent "on accepte le remplacement", l'implémentation cumule. Décision : revert au remplacement (`discounts: [{ coupon: coupon.id }]`), conforme à la décision ratifiée. Coupons admin antérieurs seront écrasés (cas rare, l'admin peut les ré-attribuer).
+- [x] [Review][Decision] **D4 — Reward sur marraine en `trialing`** : **résolu (a)** — skipper la reward tant que `marraineSub.status === 'trialing'` ; le cron repasse chaque jour, la reward s'applique au premier passage en `active`. Évite l'over-spec "trial + 6 mois = 7 mois free".
+
+#### Patch (fixable sans input utilisateur — vague 1+2, 2026-04-29)
+
+- [ ] [Review][Patch] **D2** Supprimer `components/accompagnante/parrainage-card.tsx` (dead code) + mettre à jour commentaire `parrainage.ts:695`.
+- [ ] [Review][Patch] **D3** Remplacer `discounts: [...existingCoupons, { coupon }]` par `discounts: [{ coupon: coupon.id }]`. [app/api/cron/confirm-parrainages/route.ts:1083-1097]
+- [ ] [Review][Patch] **D4** Skip `if (marraineSub.status === 'trialing')`. [app/api/cron/confirm-parrainages/route.ts:1047-1051]
+- [ ] [Review][Patch] **C1** Webhook idempotence : process AVANT insert `stripe_events_processed`. [app/api/webhooks/stripe/route.ts:1487-1503]
+- [ ] [Review][Patch] **C2/H7** Compteur atomique via RPC PG (`UPDATE compteur = compteur + 1 RETURNING`) + reward gated derrière RPC `claim_recompense_palier(marraine_id, palier)`. [app/api/cron/confirm-parrainages/route.ts:1029-1123]
+- [ ] [Review][Patch] **H5** Fail-loud si `ADMIN_NOTIFICATIONS_EMAIL` non set (au lieu de console.error silencieux). [lib/emails.ts:2256-2263]
+- [ ] [Review][Patch] **H6** Zombies `abonnee` : transitionner en `expire` après filleule cancellation détectée par cron. [app/api/cron/confirm-parrainages/route.ts:934-940]
+- [ ] [Review][Patch] **H8** Cumul de coupons recouvert par D3 (replace).
+- [ ] [Review][Patch] **H9** Cron : si `missing_code`, faire le CAS statut `abonnee→confirme` AVANT de skipper le compteur (conforme AC1.3). [app/api/cron/confirm-parrainages/route.ts:982-986]
+- [ ] [Review][Patch] **H10** Régénérer les 317 codes backfill via `gen_random_bytes` (pgcrypto). [migration corrective]
+- [ ] [Review][Patch] **H11** `confirmerFraude` doit rollback `compteur_confirmes`, `total_recompenses` et delete coupon Stripe issu de la récompense. [app/actions/admin-parrainages.ts:114-118]
+- [ ] [Review][Patch] **M1** Skip si `marraineSub.cancel_at_period_end === true`. [cron]
+- [ ] [Review][Patch] **M3** Re-vérifier `accompagnantes_profiles.validation_status === 'valide'` à J+30. [cron]
+- [ ] [Review][Patch] **M4** Aligner `hasActiveSubscription` strict 'active' (recouvert par D5).
+- [ ] [Review][Patch] **M6** FK `parrainages.marraine_id ON DELETE CASCADE` détruit l'historique : passer en SET NULL ou créer table archive. [migration]
+- [ ] [Review][Patch] **M8** `captureParrainageFingerprint` : retry sur `subscription.updated` même si `fingerprint_indisponible` flagué (PM peut être mis à jour). [webhooks/stripe/route.ts:1433-1440]
+- [ ] [Review][Patch] **M10** Fingerprint detection fallback sur PaymentIntents/charges historiques (pas seulement cards attached actuels). [webhooks/stripe/route.ts:1257-1277]
+- [ ] [Review][Patch] **M12** Email récompense : adapter texte selon plan annuel/mensuel (lire `interval` Stripe). [lib/emails.ts:2214]
+- [ ] [Review][Patch] **M14** Filtrer existing coupons par validity (recouvert par D3).
+- [ ] [Review][Patch] **L5** Coupon `name`: passer de `'Parrainage 6 mois - '` à `'Recompense parrainage - '` (conforme AC2).
+- [ ] [Review][Patch] **L6** Coupon `name`: utiliser `marraineId.slice(0,8)` au lieu d'email tronqué (collisions emails longs).
+- [ ] [Review][Patch] **L7** Cron quotidien `DELETE FROM stripe_events_processed WHERE processed_at < now() - 7 days`.
+
 ## Change Log
 
 | Date | Auteur | Changement |

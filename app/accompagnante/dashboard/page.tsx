@@ -43,9 +43,8 @@ export default async function AccompagnanteDashboard() {
   let hasBlockedParrainage = false
   if (profile?.validation_status !== 'valide') {
     const { data: blockedParrainageRow } = await supabase
-      .from('parrainages')
+      .from('parrainages_filleule_view')
       .select('id')
-      .eq('filleule_id', user.id)
       .eq('statut', 'bloque')
       .maybeSingle()
     hasBlockedParrainage = !!blockedParrainageRow
