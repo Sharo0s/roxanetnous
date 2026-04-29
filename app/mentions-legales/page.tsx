@@ -19,7 +19,7 @@ export default function MentionsLegalesPage() {
             <p>[Adresse du siège social]</p>
             <p>[Numéro SIRET]</p>
             <p>[Numéro de TVA intracommunautaire]</p>
-            <p>Email : [contact@roxanetnous.fr]</p>
+            <p>Email : roxanetnous@outlook.com</p>
             <p>Téléphone : [numéro]</p>
             <p>Directeur de la publication : [Nom du responsable]</p>
           </section>

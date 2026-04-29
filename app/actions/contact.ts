@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/server'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || 'roxanetnous <onboarding@resend.dev>'
-const CONTACT_EMAIL = 'contact@roxanetnous.fr'
+const CONTACT_EMAIL = 'roxanetnous@outlook.com'
 
 export async function sendContactMessage(formData: FormData): Promise<{ error?: string; success?: boolean }> {
   const name = formData.get('name') as string

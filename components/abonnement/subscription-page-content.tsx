@@ -3,7 +3,7 @@ import { isLaunchOffer } from '@/lib/stripe'
 import type { SubscriptionInfo, PaymentMethod, Invoice, SubscriptionAmount } from '@/lib/subscription-helpers'
 import { CancelModal } from './cancel-modal'
 
-const CONTACT_EMAIL = 'contact@roxanetnous.fr'
+const CONTACT_EMAIL = 'roxanetnous@outlook.com'
 
 export function SubscriptionPageContent({
   subscription,

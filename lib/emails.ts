@@ -851,7 +851,7 @@ export async function sendParrainageVerificationEmail(params: {
           <p>
             Si vous pensez qu'il s'agit d'une erreur, ou si vous partagez
             votre moyen de paiement avec votre marraine, contactez-nous :
-            <a href="mailto:contact@roxanetnous.fr">contact@roxanetnous.fr</a>.
+            <a href="mailto:roxanetnous@outlook.com">roxanetnous@outlook.com</a>.
           </p>
           <p style="margin-top: 24px;">
             <a href="${BASE_URL}/accompagnante/dashboard" style="background: #000; color: #fff; padding: 12px 24px; text-decoration: none; display: inline-block;">

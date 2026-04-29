@@ -16,7 +16,7 @@ export default function PolitiqueConfidentialitePage() {
             <h2 className="text-lg font-semibold text-black mb-2">Responsable du traitement</h2>
             <p>
               Le responsable du traitement des données personnelles est [Nom de la société],
-              joignable à l&apos;adresse [contact@roxanetnous.fr].
+              joignable à l&apos;adresse [roxanetnous@outlook.com].
             </p>
           </section>
 
@@ -72,11 +72,11 @@ export default function PolitiqueConfidentialitePage() {
               <li>Droit de rectification : modifier vos informations dans votre profil</li>
               <li>Droit à l&apos;effacement : supprimer votre compte et toutes vos données depuis votre profil</li>
               <li>Droit à la portabilité : exporter vos données au format JSON depuis votre profil</li>
-              <li>Droit d&apos;opposition : contacter [contact@roxanetnous.fr]</li>
+              <li>Droit d&apos;opposition : contacter [roxanetnous@outlook.com]</li>
             </ul>
             <p className="mt-2">
               Pour exercer vos droits, utilisez les fonctionnalités de votre profil ou contactez-nous
-              à [contact@roxanetnous.fr]. Vous pouvez également adresser une réclamation à la CNIL
+              à [roxanetnous@outlook.com]. Vous pouvez également adresser une réclamation à la CNIL
               (www.cnil.fr).
             </p>
           </section>

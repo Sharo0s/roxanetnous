@@ -158,8 +158,8 @@ export default async function AccompagnanteDashboard() {
             <p className="text-gray-600 mb-4">
               Un administrateur examinera votre dossier sous 48h ouvrées.
               Si vous pensez qu&apos;il s&apos;agit d&apos;une erreur, contactez-nous à{' '}
-              <a href="mailto:contact@roxanetnous.fr" className="underline">
-                contact@roxanetnous.fr
+              <a href="mailto:roxanetnous@outlook.com" className="underline">
+                roxanetnous@outlook.com
               </a>
               .
             </p>
