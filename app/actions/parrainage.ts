@@ -98,6 +98,17 @@ async function revokeFilleuleValidation(
         validation_date: null,
       })
       .eq('id', profile.id)
+  } else {
+    // L9 (code review 2026-04-29) : log explicite quand la révocation est
+    // un no-op (profil déjà migré ou validation_source autre que 'parrainage').
+    // Permet à l'admin de voir qu'une fraude a été détectée mais la suspension
+    // n'a pas eu d'effet (la filleule était déjà refuse/manuelle/etc.).
+    console.warn('[revokeFilleuleValidation][noop]', {
+      filleule_id: filleuleId,
+      raison,
+      current_status: profile?.validation_status ?? null,
+      current_source: profile?.validation_source ?? null,
+    })
   }
 
   // Toujours retirer le lien parrainee_par.
@@ -105,6 +116,18 @@ async function revokeFilleuleValidation(
     .from('users')
     .update({ parrainee_par: null })
     .eq('id', filleuleId)
+
+  // H3 (code review 2026-04-29) : supprimer le code parrainage de la
+  // filleule frauduleuse. Sans ce DELETE, elle conserve un code permettant
+  // de sponsoriser des sous-filleules même après révocation de sa validation,
+  // contournant entièrement l'anti-fraude. Le code est généré dans
+  // confirmParrainageOnSuccess (ligne ~660), donc nous savons qu'il existe.
+  // Suppression best-effort : si la filleule n'avait pas encore de code
+  // (race confirmParrainageOnSuccess vs webhook), le DELETE est no-op.
+  await supabaseAdmin
+    .from('parrainages_codes')
+    .delete()
+    .eq('user_id', filleuleId)
 
   await supabaseAdmin.from('admin_actions_log').insert({
     admin_id: context.adminId ?? null,
@@ -615,8 +638,12 @@ export async function confirmParrainageOnSuccess(
     return { ok: true, alreadyDone: true }
   }
 
-  // Profil filleule -> valide via parrainage
-  await supabaseAdmin
+  // C3/H4 (code review 2026-04-29) : CAS sur validation_status pour ne pas
+  // écraser une décision admin antérieure (ex. 'refuse', 'a_completer').
+  // La transition légitime est en_attente -> valide via parrainage. Si la
+  // filleule est déjà 'valide' (idempotence), on saute. Si elle est dans
+  // un autre statut, on log et on n'écrase pas.
+  const { data: validationUpdated } = await supabaseAdmin
     .from('accompagnantes_profiles')
     .update({
       validation_status: 'valide',
@@ -625,6 +652,32 @@ export async function confirmParrainageOnSuccess(
       validated_by: null,
     })
     .eq('id', filleuleProfile.id)
+    .eq('validation_status', 'en_attente')
+    .select('id')
+
+  if (!validationUpdated || validationUpdated.length === 0) {
+    // Statut courant n'est pas 'en_attente' : peut être 'valide' (idempotence,
+    // OK) ou 'refuse' / 'a_completer' (décision admin à préserver).
+    const { data: currentProfile } = await supabaseAdmin
+      .from('accompagnantes_profiles')
+      .select('validation_status')
+      .eq('id', filleuleProfile.id)
+      .single()
+
+    if (currentProfile?.validation_status !== 'valide') {
+      console.warn('[confirmParrainageOnSuccess][validation_status_skipped]', {
+        user_id: user.id,
+        current_status: currentProfile?.validation_status ?? null,
+      })
+      await supabaseAdmin.from('admin_actions_log').insert({
+        admin_id: null,
+        action_type: 'parrainage_validation_skipped',
+        target_type: 'user',
+        target_id: user.id,
+        details: { current_status: currentProfile?.validation_status ?? null },
+      })
+    }
+  }
 
   // Générer le code de la filleule (elle devient marraine à son tour) — bypass authz.
   const codeResult = await generateCodeForUserSystem(user.id)

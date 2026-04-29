@@ -47,13 +47,27 @@ export async function GET(request: NextRequest) {
       // 1. Vérifier que la filleule a toujours un abonnement Stripe actif
       const filleuleActive = await hasActiveSubscription(row.filleule_id)
       if (!filleuleActive) {
+        // H6 (code review 2026-04-29) : la filleule a annulé entre J+0 et J+30.
+        // On transitionne le parrainage vers 'expire' au lieu de juste skip,
+        // sinon la row reste éternellement en 'abonnee' et sature le batch
+        // chaque jour. 'expire' n'est pas dans l'index unique partiel, donc
+        // libère l'unicité (la filleule pourrait re-souscrire avec un autre
+        // code plus tard).
+        const { error: expireErr } = await supabase
+          .from('parrainages')
+          .update({ statut: 'expire', expire_at: new Date().toISOString() })
+          .eq('id', row.id)
+          .eq('statut', 'abonnee')
+        if (expireErr) {
+          console.error('[cron_confirm_parrainages][expire_error]', { id: row.id, err: expireErr })
+          errors++
+          continue
+        }
         skipped++
         continue
       }
 
       // 2. Pré-check : la marraine doit avoir un code parrainages_codes existant.
-      // On vérifie AVANT la transition statut pour éviter de figer 'confirme'
-      // sur un parrainage qui ne pourra jamais incrémenter le compteur.
       const { data: codeRow, error: codeReadErr } = await supabase
         .from('parrainages_codes')
         .select('compteur_confirmes, total_recompenses, code')
@@ -66,8 +80,24 @@ export async function GET(request: NextRequest) {
         continue
       }
 
+      // H9 (code review 2026-04-29) : conformer à la spec 2.4 AC1.3 — si pas
+      // de code parrainages_codes pour la marraine (cas atypique, marraine
+      // pré-feature non backfillée ou supprimée), on confirme quand même le
+      // parrainage et on skip seulement le compteur. Sinon, le parrainage
+      // reste en 'abonnee' indéfiniment et est re-traité chaque jour.
       if (!codeRow) {
         console.error('[cron_confirm_parrainages][missing_code]', { marraine_id: row.marraine_id, parrainage_id: row.id })
+        const { data: confirmedNoCount, error: noCountErr } = await supabase
+          .from('parrainages')
+          .update({ statut: 'confirme', confirme_at: new Date().toISOString() })
+          .eq('id', row.id)
+          .eq('statut', 'abonnee')
+          .select('id')
+        if (noCountErr) {
+          console.error('[cron_confirm_parrainages][confirm_no_count_error]', { id: row.id, err: noCountErr })
+        } else if (confirmedNoCount && confirmedNoCount.length === 1) {
+          confirmed++
+        }
         errors++
         continue
       }
@@ -94,40 +124,23 @@ export async function GET(request: NextRequest) {
 
       confirmed++
 
-      // 4. Increment compteur via compare-and-swap sur la valeur lue : protège
-      // contre les overlaps cron (relance Vercel pendant que le précédent run
-      // tourne encore) qui pourraient produire un lost-update.
-      const oldCompteur = codeRow.compteur_confirmes ?? 0
-      const newCompteur = oldCompteur + 1
+      // 4. Increment compteur via RPC atomique Postgres (C2/H7 code review
+      // 2026-04-29). Remplace l'ancien CAS read-then-write qui pouvait
+      // perdre des incréments en cas d'overlap cron : UPDATE x = x + 1
+      // RETURNING est garanti atomique par Postgres.
+      const { data: newCompteur, error: incErr } = await supabase
+        .rpc('parrainage_increment_compteur', { p_marraine_id: row.marraine_id })
 
-      const { data: incRows, error: incErr } = await supabase
-        .from('parrainages_codes')
-        .update({ compteur_confirmes: newCompteur })
-        .eq('user_id', row.marraine_id)
-        .eq('compteur_confirmes', oldCompteur)
-        .select('user_id')
-
-      if (incErr) {
-        console.error('[cron_confirm_parrainages][increment_error]', { marraine_id: row.marraine_id, err: incErr })
-        errors++
-        continue
-      }
-
-      if (!incRows || incRows.length === 0) {
-        // CAS échoué : le compteur a bougé entre la lecture et l'update.
-        // On ne ré-essaie pas dans cette itération pour éviter une boucle ;
-        // la transition 'confirme' du parrainage est déjà figée, le compteur
-        // sera rattrapé manuellement ou par une procédure dédiée.
-        console.warn('[cron_confirm_parrainages][counter_cas_miss]', {
+      if (incErr || newCompteur == null) {
+        console.error('[cron_confirm_parrainages][increment_error]', {
           marraine_id: row.marraine_id,
-          expected: oldCompteur,
-          parrainage_id: row.id,
+          err: incErr,
         })
         errors++
         continue
       }
 
-      // 4. Trigger récompense si palier atteint
+      // 5. Trigger récompense si palier atteint
       if (newCompteur < RECOMPENSE_PALIER) continue
 
       // Pré-check abonnement marraine
@@ -182,6 +195,35 @@ export async function GET(request: NextRequest) {
         continue
       }
 
+      // C2/H7 (code review 2026-04-29) : claim atomique du palier AVANT
+      // toute interaction Stripe. Si deux runs cron concurrents passent
+      // ici avec compteur >= 5, un seul réussira le claim ; l'autre se
+      // verra retourner claimed=false et passera son tour. Plus de risque
+      // de coupon créé sans tracking BDD ou de double-application.
+      const { data: claimRows, error: claimErr } = await supabase
+        .rpc('parrainage_claim_recompense', {
+          p_marraine_id: row.marraine_id,
+          p_palier: RECOMPENSE_PALIER,
+        })
+
+      if (claimErr) {
+        console.error('[cron_confirm_parrainages][claim_error]', { marraine_id: row.marraine_id, err: claimErr })
+        errors++
+        continue
+      }
+
+      const claimResult = Array.isArray(claimRows) ? claimRows[0] : claimRows
+      if (!claimResult?.claimed) {
+        // Un autre run a déjà claim ce palier (overlap cron rare). Le
+        // compteur est dans un état cohérent (decrémenté de RECOMPENSE_PALIER
+        // par l'autre run). On skip cette itération sans error pour ne pas
+        // alerter à tort.
+        console.info('[cron_confirm_parrainages][claim_already_consumed]', { marraine_id: row.marraine_id })
+        continue
+      }
+
+      const newTotalRecompenses = claimResult.total_recompenses
+
       try {
         // L5 : libellé conforme spec 2.4 AC2.
         // L6 : marraine.id.slice(0,8) au lieu d'email tronqué pour éviter les
@@ -197,39 +239,9 @@ export async function GET(request: NextRequest) {
 
         // D3 (code review 2026-04-29) : Dev Notes 2.4 ratifient le remplacement
         // (Stripe écrase l'array discounts complet sur subscriptions.update).
-        // Cumul abandonné car il permettait d'empiler plusieurs coupons 100%
-        // (ex. 5+5 parrainages = 12 mois free) et de re-envoyer des coupons
-        // expirés. Un coupon admin pré-existant sera écrasé : l'admin peut
-        // le ré-attribuer manuellement si nécessaire.
         await stripe.subscriptions.update(marraineSub.stripeSubscriptionId, {
           discounts: [{ coupon: coupon.id }],
         })
-
-        const oldTotalRecompenses = codeRow.total_recompenses ?? 0
-        const newTotalRecompenses = oldTotalRecompenses + 1
-
-        // CAS sur compteur+total_recompenses pour la même raison qu'au step 4 :
-        // protège contre une autre instance ayant déjà appliqué la récompense.
-        const { data: rewardRows, error: rewardUpdErr } = await supabase
-          .from('parrainages_codes')
-          .update({
-            compteur_confirmes: newCompteur - RECOMPENSE_PALIER,
-            total_recompenses: newTotalRecompenses,
-            derniere_recompense_at: new Date().toISOString(),
-          })
-          .eq('user_id', row.marraine_id)
-          .eq('compteur_confirmes', newCompteur)
-          .eq('total_recompenses', oldTotalRecompenses)
-          .select('user_id')
-
-        if (rewardUpdErr || !rewardRows || rewardRows.length === 0) {
-          console.error('[cron_confirm_parrainages][reward_cas_miss]', {
-            marraine_id: row.marraine_id,
-            err: rewardUpdErr,
-          })
-          // Le coupon Stripe a été créé et appliqué : on log l'action
-          // pour que l'incohérence soit visible côté admin.
-        }
 
         await supabase.from('admin_actions_log').insert({
           admin_id: null,
@@ -252,8 +264,22 @@ export async function GET(request: NextRequest) {
 
         rewards++
       } catch (stripeErr) {
+        // C2/H7 : Stripe a échoué APRÈS le claim BDD. On rollback le claim
+        // via une RPC inverse : compteur += palier, total -= 1. Le palier
+        // sera re-tenté au prochain cron une fois Stripe dispo.
         console.error('[cron_confirm_parrainages][stripe_apply]', stripeErr)
-        // On ne décrémente pas le compteur : la prochaine exécution retentera
+        const { error: rollbackErr } = await supabase
+          .rpc('parrainage_rollback_recompense', {
+            p_marraine_id: row.marraine_id,
+            p_palier: RECOMPENSE_PALIER,
+            p_expected_total: newTotalRecompenses,
+          })
+        if (rollbackErr) {
+          console.error('[cron_confirm_parrainages][rollback_failed]', {
+            marraine_id: row.marraine_id,
+            err: rollbackErr,
+          })
+        }
         errors++
       }
     } catch (loopErr) {

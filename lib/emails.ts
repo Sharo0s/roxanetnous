@@ -701,10 +701,31 @@ export async function sendAdminParrainageFlag(params: {
 }) {
   const adminEmail = process.env.ADMIN_NOTIFICATIONS_EMAIL || null
   if (!adminEmail) {
+    // H5 (code review 2026-04-29) : fail-loud. Sans cette variable, toutes
+    // les alertes anti-fraude étaient silencieusement perdues (preview/staging).
+    // On persiste maintenant la "missed alert" dans admin_actions_log pour
+    // qu'elle apparaisse dans l'UI admin (historique) ET on la log explicitement.
     console.error(
       '[sendAdminParrainageFlag] ADMIN_NOTIFICATIONS_EMAIL non défini : alerte anti-fraude perdue.',
       { type: params.type, parrainageId: params.parrainageId },
     )
+    try {
+      const supabase = await createClient({ serviceRole: true })
+      await supabase.from('admin_actions_log').insert({
+        admin_id: null,
+        action_type: 'parrainage_admin_alert_lost',
+        target_type: 'parrainage',
+        target_id: params.parrainageId,
+        details: {
+          reason: 'ADMIN_NOTIFICATIONS_EMAIL non défini',
+          flag_type: params.type,
+          marraine_name: params.marraineName,
+          filleule_name: params.filleuleName,
+        },
+      })
+    } catch (logErr) {
+      console.error('[sendAdminParrainageFlag][admin_log_failed]', logErr)
+    }
     return
   }
 

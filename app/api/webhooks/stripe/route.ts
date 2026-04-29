@@ -407,7 +407,13 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ received: true, duplicate: true })
   }
 
-  switch (event.type) {
+  // C1 (code review 2026-04-29) : la row stripe_events_processed marque
+  // notre claim sur l'event. Si le handler crash après l'insert, on
+  // compense en supprimant le row pour que Stripe puisse rejouer (sinon
+  // l'event est définitivement perdu : Stripe verra un "duplicate" et
+  // n'appellera plus jamais).
+  try {
+    switch (event.type) {
     case 'checkout.session.completed': {
       const session = event.data.object as Stripe.Checkout.Session
 
@@ -737,6 +743,28 @@ export async function POST(request: NextRequest) {
 
       break
     }
+  }
+  } catch (handlerErr) {
+    // C1 : un handler a crash après le claim idempotence. On supprime le
+    // row pour que Stripe puisse rejouer (sinon l'event est consommé sans
+    // jamais avoir été traité — perte définitive).
+    console.error('[stripe_webhook][handler_crashed]', {
+      event_id: event.id,
+      event_type: event.type,
+      error: handlerErr instanceof Error ? handlerErr.message : String(handlerErr),
+    })
+    const { error: rollbackErr } = await supabase
+      .from('stripe_events_processed')
+      .delete()
+      .eq('event_id', event.id)
+    if (rollbackErr) {
+      // Si le rollback du claim échoue, on log et on retourne 500 pour que
+      // Stripe rejoue. Risque de double-traitement seulement si le handler
+      // s'est partiellement exécuté ET que le rollback échoue : acceptable
+      // (les handlers individuels sont déjà idempotents : upsert, RPC, CAS).
+      console.error('[stripe_webhook][rollback_failed]', rollbackErr)
+    }
+    return NextResponse.json({ error: 'handler_failed' }, { status: 500 })
   }
 
   return NextResponse.json({ received: true })
