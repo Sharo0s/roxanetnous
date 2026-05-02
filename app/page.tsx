@@ -181,7 +181,7 @@ export default async function HomePage() {
                     <path d="M12 2l2.39 7.36H22l-6.19 4.5L18.2 21 12 16.5 5.8 21l2.39-7.14L2 9.36h7.61L12 2z" />
                   </svg>
                   <p className="text-lg leading-relaxed">
-                    Roxanetnous a pour mission de créer une communauté, un endroit unique dédié à la recherche d&apos;accompagnement. Ensemble&nbsp;.
+                    Roxanetnous a pour mission de créer une communauté, un endroit unique dédié à la recherche d&apos;accompagnement entre particuliers. Ensemble&nbsp;.
                     <svg
                       aria-hidden="true"
                       viewBox="0 0 24 24"
@@ -224,6 +224,18 @@ export default async function HomePage() {
                 <Reveal as="span" delay={480} className="block">
                   <p className="text-lg leading-relaxed">
                     Parlons de nous, pour nous faciliter l&apos;accès à demain.
+                  </p>
+                </Reveal>
+                <Reveal as="span" delay={560} className="block">
+                  <p className="text-lg leading-relaxed italic mt-8">
+                    &laquo;&nbsp;Notre avenir de l&apos;accompagnement à domicile et à la vie sociale. Nous sommes âgés, nous sommes en situation de handicap. Créons, nous, ensemble l&apos;avenir que nous souhaitons.&nbsp;&raquo;
+                    <svg
+                      aria-hidden="true"
+                      viewBox="0 0 24 24"
+                      className="inline-block w-5 h-5 ml-2 -mt-1 text-accent fill-current align-middle"
+                    >
+                      <path d="M12 21s-7-4.534-9.5-9.034C1.04 9.04 2.5 5 6.5 5c2 0 3.5 1.5 4.5 3 1-1.5 2.5-3 4.5-3 4 0 5.46 4.04 4 6.966C19 16.466 12 21 12 21z" />
+                    </svg>
                   </p>
                 </Reveal>
               </div>
