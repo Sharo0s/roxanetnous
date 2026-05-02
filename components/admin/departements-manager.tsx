@@ -27,11 +27,28 @@ export function DepartementsManager({ regions }: Props) {
   const [erreur, setErreur] = useState<string | null>(null)
   const [pending, startTransition] = useTransition()
   const [enCours, setEnCours] = useState<Set<string>>(new Set())
+  const [depliees, setDepliees] = useState<Set<string>>(() => {
+    // Deplier par defaut les regions qui ont au moins un departement ouvert
+    const init = new Set<string>()
+    for (const r of regions) {
+      if (r.departements.some((d) => d.ouvert)) init.add(r.nom)
+    }
+    return init
+  })
 
   const totalOuverts = useMemo(
     () => etat.reduce((acc, r) => acc + r.departements.filter((d) => d.ouvert).length, 0),
     [etat]
   )
+
+  function toggleReplier(regionNom: string) {
+    setDepliees((prev) => {
+      const next = new Set(prev)
+      if (next.has(regionNom)) next.delete(regionNom)
+      else next.add(regionNom)
+      return next
+    })
+  }
 
   function setEnCoursActif(cle: string, actif: boolean) {
     setEnCours((prev) => {
@@ -123,11 +140,37 @@ export function DepartementsManager({ regions }: Props) {
         const e = etatDeRegion(region.departements)
         const ouvertsCount = region.departements.filter((d) => d.ouvert).length
         const total = region.departements.length
+        const estDepliee = depliees.has(region.nom)
 
         return (
           <div key={region.nom} className="bg-white border rounded-xl overflow-hidden">
-            <div className="flex items-center justify-between px-4 py-3 bg-gray-50 border-b">
-              <div className="flex items-center gap-3">
+            <div
+              className={`flex items-center justify-between px-4 py-3 bg-gray-50 ${
+                estDepliee ? 'border-b' : ''
+              }`}
+            >
+              <button
+                type="button"
+                onClick={() => toggleReplier(region.nom)}
+                aria-expanded={estDepliee}
+                className="flex items-center gap-3 flex-1 text-left hover:opacity-70 transition-opacity"
+              >
+                <svg
+                  className={`w-4 h-4 text-gray-500 transition-transform ${
+                    estDepliee ? 'rotate-90' : ''
+                  }`}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 5l7 7-7 7"
+                  />
+                </svg>
                 <h3 className="font-semibold text-gray-900">{region.nom}</h3>
                 <span className="text-xs text-gray-500">
                   {ouvertsCount}/{total}
@@ -137,12 +180,17 @@ export function DepartementsManager({ regions }: Props) {
                     Partiel
                   </span>
                 )}
-              </div>
+                {e === 'tous' && (
+                  <span className="text-xs px-2 py-0.5 rounded-full bg-green-100 text-green-800">
+                    Ouverte
+                  </span>
+                )}
+              </button>
               <button
                 type="button"
                 onClick={() => handleToggleRegion(region.nom, e !== 'tous')}
                 disabled={enCours.has(`r:${region.nom}`)}
-                className={`text-xs px-3 py-1.5 rounded-lg border font-medium transition-colors ${
+                className={`text-xs px-3 py-1.5 rounded-lg border font-medium transition-colors ml-3 ${
                   e === 'tous'
                     ? 'border-gray-300 text-gray-700 hover:bg-gray-100'
                     : 'border-black bg-black text-white hover:bg-gray-800'
@@ -152,6 +200,7 @@ export function DepartementsManager({ regions }: Props) {
               </button>
             </div>
 
+            {estDepliee && (
             <ul className="divide-y">
               {region.departements.map((d) => {
                 const cleEnCours = enCours.has(`d:${d.code}`)
@@ -189,6 +238,7 @@ export function DepartementsManager({ regions }: Props) {
                 )
               })}
             </ul>
+            )}
           </div>
         )
       })}
