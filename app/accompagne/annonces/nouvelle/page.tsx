@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import { AccompagneHeader } from '@/components/layout/accompagne-header'
 import { getUnreadCount } from '@/lib/unread-count'
 import { NouvelleAnnonceAccompagneForm } from '@/components/accompagne/nouvelle-annonce-form'
+import { getCodesDepartementsOuverts } from '@/lib/departements'
 
 export default async function NouvelleAnnonceAccompagne() {
   const supabase = await createClient()
@@ -19,6 +20,7 @@ export default async function NouvelleAnnonceAccompagne() {
   if (!userData || userData.role !== 'accompagne') redirect('/')
 
   const unreadCount = await getUnreadCount(user.id)
+  const departementsOuverts = await getCodesDepartementsOuverts()
 
   return (
     <main className="min-h-screen kraft bg-kraft">
@@ -31,7 +33,7 @@ export default async function NouvelleAnnonceAccompagne() {
       />
 
       <div className="max-w-3xl mx-auto px-4 py-8 relative z-10">
-        <NouvelleAnnonceAccompagneForm />
+        <NouvelleAnnonceAccompagneForm departementsOuverts={departementsOuverts} />
       </div>
     </main>
   )

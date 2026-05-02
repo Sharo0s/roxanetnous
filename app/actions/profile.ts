@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { notifyFavoriAccompagnes } from '@/lib/notify-favori-disponible'
+import { isDepartementOuvert, getMessageRestriction } from '@/lib/departements'
 import { revalidatePath } from 'next/cache'
 
 export type ProfileResult = {
@@ -43,6 +44,10 @@ export async function updateAccompagnanteProfile(data: {
 
   if (!data.ville || !data.code_postal) {
     return { error: 'Ville et code postal sont requis.' }
+  }
+
+  if (!(await isDepartementOuvert(data.code_postal))) {
+    return { error: await getMessageRestriction() }
   }
 
   // Verifier le statut actuel pour remettre en attente si necessaire
@@ -200,6 +205,11 @@ export async function updateAccompagneProfile(data: {
 
   if (!userData || userData.role !== 'accompagne') {
     return { error: 'Accès non autorisé.' }
+  }
+
+  const codePostalNouveau = data.code_postal.trim()
+  if (codePostalNouveau && !(await isDepartementOuvert(codePostalNouveau))) {
+    return { error: await getMessageRestriction() }
   }
 
   // Verifier si le profil existe

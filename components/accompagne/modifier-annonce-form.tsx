@@ -25,7 +25,7 @@ type Annonce = {
   message_accompagnantes: string | null
 }
 
-export function ModifierAnnonceAccompagneForm({ annonce }: { annonce: Annonce }) {
+export function ModifierAnnonceAccompagneForm({ annonce, departementsOuverts }: { annonce: Annonce; departementsOuverts: string[] }) {
   const [titre, setTitre] = useState(annonce.titre)
   const [description, setDescription] = useState(annonce.description)
   const [besoinsSpecifiques, setBesoinsSpecifiques] = useState(annonce.besoins_specifiques || '')
@@ -249,6 +249,7 @@ export function ModifierAnnonceAccompagneForm({ annonce }: { annonce: Annonce })
               codePostal={codePostal}
               onVilleChange={setVille}
               onCodePostalChange={setCodePostal}
+              departementsOuverts={departementsOuverts}
               required
             />
           </div>

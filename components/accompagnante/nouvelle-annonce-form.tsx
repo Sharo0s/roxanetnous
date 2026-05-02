@@ -8,7 +8,11 @@ import { MapRadius } from '@/components/ui/map-radius'
 import { JOURS_SEMAINE, CRENEAUX } from '@/lib/constants'
 import Link from 'next/link'
 
-export function NouvelleAnnonceForm() {
+type Props = {
+  departementsOuverts: string[]
+}
+
+export function NouvelleAnnonceForm({ departementsOuverts }: Props) {
   const [description, setDescription] = useState('')
   const [ville, setVille] = useState('')
   const [codePostal, setCodePostal] = useState('')
@@ -86,6 +90,7 @@ export function NouvelleAnnonceForm() {
             codePostal={codePostal}
             onVilleChange={setVille}
             onCodePostalChange={setCodePostal}
+            departementsOuverts={departementsOuverts}
             required
           />
           <div className="mt-4">

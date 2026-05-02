@@ -49,9 +49,10 @@ type Props = {
     isFilleule: boolean
     marraineFirstName: string | null
   }
+  departementsOuverts: string[]
 }
 
-export function OnboardingClient({ parrainage }: Props) {
+export function OnboardingClient({ parrainage, departementsOuverts }: Props) {
   const [step, setStep] = useState(0)
   const [data, setData] = useState<OnboardingData>(initialData)
   const [error, setError] = useState<string | null>(null)
@@ -173,7 +174,7 @@ export function OnboardingClient({ parrainage }: Props) {
         <div className="bg-white rounded-xl border p-6">
           {step === 0 && <StepDiplome data={data} onChange={updateData} onUpload={handleUpload} onUploadsChange={setUploads} isFilleule={parrainage.isFilleule} />}
           {step === 1 && <StepSpecialites data={data} onChange={updateData} />}
-          {step === 2 && <StepLocalisation data={data} onChange={updateData} onUpload={handleUpload} onPermisUploaded={setPermisUploaded} />}
+          {step === 2 && <StepLocalisation data={data} onChange={updateData} onUpload={handleUpload} onPermisUploaded={setPermisUploaded} departementsOuverts={departementsOuverts} />}
           {step === 3 && <StepDisponibilites data={data} onChange={updateData} />}
         </div>
 

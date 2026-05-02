@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { hasActiveSubscription } from '@/lib/subscription-helpers'
 import { geocodeAddress } from '@/lib/geocoding'
+import { isDepartementOuvert, getMessageRestriction } from '@/lib/departements'
 import { notifyMatchingUsers } from '@/lib/matching-notifications'
 
 export type AnnonceResult = {
@@ -46,6 +47,10 @@ export async function createAnnonceAccompagnante(data: {
 
   if (!data.ville.trim() || !data.code_postal.trim()) {
     return { error: 'La ville et le code postal sont requis.' }
+  }
+
+  if (!(await isDepartementOuvert(data.code_postal))) {
+    return { error: await getMessageRestriction() }
   }
 
   const coords = await geocodeAddress(data.ville.trim(), data.code_postal.trim())
@@ -115,6 +120,10 @@ export async function updateAnnonceAccompagnante(
 
   if (!data.description.trim()) {
     return { error: 'La description est requise.' }
+  }
+
+  if (data.code_postal.trim() && !(await isDepartementOuvert(data.code_postal))) {
+    return { error: await getMessageRestriction() }
   }
 
   const { error } = await supabase
@@ -201,6 +210,10 @@ export async function createAnnonceAccompagne(data: {
 
   if (!userData || userData.role !== 'accompagne') {
     return { error: 'Accès non autorisé.' }
+  }
+
+  if (data.code_postal.trim() && !(await isDepartementOuvert(data.code_postal))) {
+    return { error: await getMessageRestriction() }
   }
 
   // Verifier l'abonnement actif
@@ -323,6 +336,10 @@ export async function updateAnnonceAccompagne(
 
   if (!data.ville.trim() || data.specialites_recherchees.length === 0) {
     return { error: 'La ville et au moins une spécialité sont requis.' }
+  }
+
+  if (data.code_postal.trim() && !(await isDepartementOuvert(data.code_postal))) {
+    return { error: await getMessageRestriction() }
   }
 
   const coords = await geocodeAddress(data.ville.trim(), data.code_postal.trim() || '')

@@ -17,7 +17,7 @@ type Annonce = {
   disponibilites: Record<string, string[]> | null
 }
 
-export function ModifierAnnonceForm({ annonce }: { annonce: Annonce }) {
+export function ModifierAnnonceForm({ annonce, departementsOuverts }: { annonce: Annonce; departementsOuverts: string[] }) {
   const [description, setDescription] = useState(annonce.description || '')
   const [ville, setVille] = useState(annonce.ville || '')
   const [codePostal, setCodePostal] = useState(annonce.code_postal || '')
@@ -96,6 +96,7 @@ export function ModifierAnnonceForm({ annonce }: { annonce: Annonce }) {
           codePostal={codePostal}
           onVilleChange={setVille}
           onCodePostalChange={setCodePostal}
+          departementsOuverts={departementsOuverts}
           required
         />
         <div className="mt-4">

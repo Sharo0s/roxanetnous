@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import { ModifierAnnonceForm } from '@/components/accompagnante/modifier-annonce-form'
 import { AccompagnanteHeader } from '@/components/layout/accompagnante-header'
 import { getUnreadCount } from '@/lib/unread-count'
+import { getCodesDepartementsOuverts } from '@/lib/departements'
 
 export default async function ModifierAnnoncePage({
   params,
@@ -41,6 +42,7 @@ export default async function ModifierAnnoncePage({
   if (!annonce) redirect('/accompagnante/annonces')
 
   const unreadCount = await getUnreadCount(user.id)
+  const departementsOuverts = await getCodesDepartementsOuverts()
 
   return (
     <main className="min-h-screen kraft bg-kraft">
@@ -54,7 +56,7 @@ export default async function ModifierAnnoncePage({
 
       <div className="max-w-3xl mx-auto px-4 py-8 relative z-10">
         <h2 className="text-2xl font-bold text-gray-900 mb-6">Modifier l'annonce</h2>
-        <ModifierAnnonceForm annonce={annonce} />
+        <ModifierAnnonceForm annonce={annonce} departementsOuverts={departementsOuverts} />
       </div>
     </main>
   )

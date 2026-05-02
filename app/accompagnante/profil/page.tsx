@@ -5,6 +5,7 @@ import { ExportDataButton } from '@/components/export-data-button'
 import { DeleteAccountButton } from '@/components/delete-account-button'
 import { AccompagnanteHeader } from '@/components/layout/accompagnante-header'
 import { getUnreadCount } from '@/lib/unread-count'
+import { getCodesDepartementsOuverts } from '@/lib/departements'
 
 export default async function AccompagnanteProfilPage() {
   const supabase = await createClient()
@@ -39,6 +40,7 @@ export default async function AccompagnanteProfilPage() {
   }
 
   const unreadCount = await getUnreadCount(user.id)
+  const departementsOuverts = await getCodesDepartementsOuverts()
 
   return (
     <main className="min-h-screen kraft bg-kraft">
@@ -116,6 +118,7 @@ export default async function AccompagnanteProfilPage() {
             justificatifs_diplomes: (profile.justificatifs_diplomes as Record<string, string>) || {},
             justificatif_cv_url: profile.justificatif_cv_url || null,
           }}
+          departementsOuverts={departementsOuverts}
         />
 
         <div className="mt-10 pt-8 border-t">

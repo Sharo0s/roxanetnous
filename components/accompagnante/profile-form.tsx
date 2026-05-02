@@ -30,9 +30,10 @@ type Props = {
     justificatifs_diplomes: Record<string, string>
     justificatif_cv_url: string | null
   }
+  departementsOuverts: string[]
 }
 
-export function AccompagnanteProfileForm({ userInfo, profile }: Props) {
+export function AccompagnanteProfileForm({ userInfo, profile, departementsOuverts }: Props) {
   const [firstName, setFirstName] = useState(userInfo.first_name)
   const [lastName, setLastName] = useState(userInfo.last_name)
   const [phone, setPhone] = useState(userInfo.phone)
@@ -381,6 +382,7 @@ export function AccompagnanteProfileForm({ userInfo, profile }: Props) {
               codePostal={codePostal}
               onVilleChange={setVille}
               onCodePostalChange={setCodePostal}
+              departementsOuverts={departementsOuverts}
             />
           </div>
           <div>

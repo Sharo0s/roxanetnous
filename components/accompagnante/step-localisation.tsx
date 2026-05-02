@@ -8,9 +8,10 @@ type Props = {
   onChange: (partial: Partial<OnboardingData>) => void
   onUpload?: (file: File, type: 'permis') => Promise<boolean>
   onPermisUploaded?: (uploaded: boolean) => void
+  departementsOuverts: string[]
 }
 
-export function StepLocalisation({ data, onChange, onUpload, onPermisUploaded }: Props) {
+export function StepLocalisation({ data, onChange, onUpload, onPermisUploaded, departementsOuverts }: Props) {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [uploading, setUploading] = useState(false)
   const [uploadedFileName, setUploadedFileName] = useState<string | null>(null)
@@ -38,6 +39,7 @@ export function StepLocalisation({ data, onChange, onUpload, onPermisUploaded }:
         codePostal={data.code_postal}
         onVilleChange={(ville) => onChange({ ville })}
         onCodePostalChange={(code_postal) => onChange({ code_postal })}
+        departementsOuverts={departementsOuverts}
         required
       />
 

@@ -8,7 +8,11 @@ import { CityAutocomplete } from '@/components/ui/city-autocomplete'
 import { MapRadius } from '@/components/ui/map-radius'
 import Link from 'next/link'
 
-export function NouvelleAnnonceAccompagneForm() {
+type Props = {
+  departementsOuverts: string[]
+}
+
+export function NouvelleAnnonceAccompagneForm({ departementsOuverts }: Props) {
   const [step, setStep] = useState(1)
   const [titre, setTitre] = useState('')
   const [description, setDescription] = useState('')
@@ -272,6 +276,7 @@ export function NouvelleAnnonceAccompagneForm() {
                 codePostal={codePostal}
                 onVilleChange={setVille}
                 onCodePostalChange={setCodePostal}
+                departementsOuverts={departementsOuverts}
                 required
               />
             </div>

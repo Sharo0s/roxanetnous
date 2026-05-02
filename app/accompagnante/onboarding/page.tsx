@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { OnboardingClient } from '@/components/accompagnante/onboarding-client'
+import { getCodesDepartementsOuverts } from '@/lib/departements'
 
 export default async function OnboardingPage() {
   const supabase = await createClient()
@@ -29,12 +30,15 @@ export default async function OnboardingPage() {
     marraineFirstName = marraine?.first_name || null
   }
 
+  const departementsOuverts = await getCodesDepartementsOuverts()
+
   return (
     <OnboardingClient
       parrainage={{
         isFilleule: !!marraineId,
         marraineFirstName,
       }}
+      departementsOuverts={departementsOuverts}
     />
   )
 }

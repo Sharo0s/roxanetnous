@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { useDebounce } from '@/hooks/use-debounce'
 import { searchCommunes, type CommuneResult } from '@/lib/adresse-api'
 
@@ -10,6 +10,16 @@ type Props = {
   onVilleChange: (value: string) => void
   onCodePostalChange: (value: string) => void
   required?: boolean
+  // Liste des codes departement ouverts (ex: ["22", "29", "35", "44", "56"]).
+  // Si fournie, filtre les suggestions et bloque la selection hors zone.
+  // Si omise (undefined), aucun filtrage (compatibilite ascendante).
+  departementsOuverts?: string[]
+}
+
+function codeDepartementDuPostcode(postcode: string): string {
+  // Corse : codes postaux 20XXX. On ne peut pas distinguer 2A/2B sans context,
+  // donc on retourne "20" et la verification accepte 2A ou 2B en aval.
+  return postcode.slice(0, 2)
 }
 
 export function CityAutocomplete({
@@ -18,34 +28,61 @@ export function CityAutocomplete({
   onVilleChange,
   onCodePostalChange,
   required,
+  departementsOuverts,
 }: Props) {
   const [suggestions, setSuggestions] = useState<CommuneResult[]>([])
   const [open, setOpen] = useState(false)
   const [activeIndex, setActiveIndex] = useState(-1)
   const [query, setQuery] = useState('')
+  const [horsZone, setHorsZone] = useState(false)
 
   const debouncedQuery = useDebounce(query, 300)
   const containerRef = useRef<HTMLDivElement>(null)
 
+  const filtreActif = useMemo(() => {
+    return Array.isArray(departementsOuverts) && departementsOuverts.length > 0
+  }, [departementsOuverts])
+
+  const accepteCorse = useMemo(() => {
+    return (
+      filtreActif &&
+      (departementsOuverts!.includes('2A') || departementsOuverts!.includes('2B'))
+    )
+  }, [departementsOuverts, filtreActif])
+
+  const commentFiltrer = useCallback(
+    (results: CommuneResult[]) => {
+      if (!filtreActif) return results
+      return results.filter((r) => {
+        const code = codeDepartementDuPostcode(r.postcode)
+        if (code === '20') return accepteCorse
+        return departementsOuverts!.includes(code)
+      })
+    },
+    [filtreActif, accepteCorse, departementsOuverts]
+  )
+
   useEffect(() => {
     if (debouncedQuery.length < 2) {
       setSuggestions([])
+      setHorsZone(false)
       return
     }
 
     let cancelled = false
     searchCommunes(debouncedQuery).then((results) => {
-      if (!cancelled) {
-        setSuggestions(results)
-        setOpen(results.length > 0)
-        setActiveIndex(-1)
-      }
+      if (cancelled) return
+      const filtres = commentFiltrer(results)
+      setSuggestions(filtres)
+      setHorsZone(filtreActif && results.length > 0 && filtres.length === 0)
+      setOpen(filtres.length > 0 || (filtreActif && results.length > 0 && filtres.length === 0))
+      setActiveIndex(-1)
     })
 
     return () => {
       cancelled = true
     }
-  }, [debouncedQuery])
+  }, [debouncedQuery, commentFiltrer, filtreActif])
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -64,6 +101,7 @@ export function CityAutocomplete({
       setOpen(false)
       setSuggestions([])
       setQuery('')
+      setHorsZone(false)
     },
     [onVilleChange, onCodePostalChange]
   )
@@ -110,7 +148,7 @@ export function CityAutocomplete({
             setQuery(e.target.value)
           }}
           onFocus={() => {
-            if (suggestions.length > 0) setOpen(true)
+            if (suggestions.length > 0 || horsZone) setOpen(true)
           }}
           onKeyDown={handleKeyDown}
           placeholder="Paris"
@@ -130,7 +168,7 @@ export function CityAutocomplete({
             setQuery(e.target.value)
           }}
           onFocus={() => {
-            if (suggestions.length > 0) setOpen(true)
+            if (suggestions.length > 0 || horsZone) setOpen(true)
           }}
           onKeyDown={handleKeyDown}
           placeholder="75001"
@@ -156,6 +194,13 @@ export function CityAutocomplete({
             </li>
           ))}
         </ul>
+      )}
+
+      {open && suggestions.length === 0 && horsZone && (
+        <div className="absolute top-full left-0 right-0 z-50 mt-1 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-900 shadow-lg">
+          Roxane et Nous n&apos;est pas encore disponible dans cette zone. D&apos;autres territoires
+          ouvriront prochainement.
+        </div>
       )}
     </div>
   )
