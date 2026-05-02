@@ -25,7 +25,7 @@ export default async function AdminDepartementsPage() {
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Où sommes-nous ?</h1>
         <p className="text-sm text-gray-600 mt-1">
-          Les départements où Roxane et Nous accueille de nouvelles inscriptions. {totalOuverts} territoire
+          Les départements où Roxane et Nous accueille de nouvelles inscriptions. {totalOuverts} département
           {totalOuverts > 1 ? 's' : ''} ouvert{totalOuverts > 1 ? 's' : ''} sur {departements.length}.
         </p>
         <p className="text-xs text-gray-500 mt-1">
