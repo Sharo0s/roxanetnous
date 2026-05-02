@@ -38,6 +38,12 @@ const VALIDATION_LABELS: Record<string, string> = {
   a_completer: 'À compléter',
 }
 
+const ROLE_LABELS: Record<string, string> = {
+  accompagnante: 'Accompagnante',
+  accompagne: 'Accompagné',
+  admin: 'Administrateur',
+}
+
 const VALIDATION_STYLES: Record<string, string> = {
   en_attente: 'bg-gray-200 text-gray-700',
   visio_a_planifier: 'bg-blue-50 text-blue-800 border border-blue-200',
@@ -433,7 +439,7 @@ function ResiliationsPanel({ annulations }: { annulations: AnnulationRow[] }) {
                   <div className="text-xs text-gray-400">{a.email}</div>
                 </td>
                 <td className="px-4 py-3">
-                  <span className="text-xs bg-gray-200 text-gray-700 px-2 py-0.5 rounded-full">{a.role}</span>
+                  <span className="text-xs bg-gray-200 text-gray-700 px-2 py-0.5 rounded-full">{ROLE_LABELS[a.role] || a.role}</span>
                 </td>
                 <td className="px-4 py-3 text-gray-600">
                   {a.plan === 'annuel' || a.plan === 'annual' ? 'Annuel' : 'Mensuel'}

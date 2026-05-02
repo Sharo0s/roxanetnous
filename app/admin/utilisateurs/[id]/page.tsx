@@ -7,6 +7,12 @@ import { DeleteUserButton } from '@/components/admin/delete-user-button'
 import { CancelSubscriptionButton } from '@/components/admin/cancel-subscription-button'
 import { getSubscriptionStatus } from '@/lib/subscription-helpers'
 
+const ROLE_LABELS: Record<string, string> = {
+  accompagnante: 'Accompagnante',
+  accompagne: 'Accompagné',
+  admin: 'Administrateur',
+}
+
 export default async function AdminUtilisateurDetailPage({
   params,
 }: {
@@ -153,7 +159,7 @@ export default async function AdminUtilisateurDetailPage({
             </div>
             <div className="flex items-center gap-2 mt-1">
               <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-white/80 text-gray-700">
-                {userData.role}
+                {ROLE_LABELS[userData.role] || userData.role}
               </span>
               {auxProfile && (
                 <StatusBadge

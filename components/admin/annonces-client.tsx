@@ -15,6 +15,12 @@ type AnnonceRow = {
   type: 'accompagnante' | 'accompagne'
 }
 
+const STATUS_LABELS: Record<string, string> = {
+  publiee: 'Publiée',
+  suspendue: 'Suspendue',
+  archivee: 'Archivée',
+}
+
 export function AnnoncesSearchTable({
   annonces,
   type,
@@ -81,7 +87,7 @@ export function AnnoncesSearchTable({
                         annonce.status === 'suspendue' ? 'bg-gray-200 text-gray-700 border border-gray-400' :
                         'bg-gray-200 text-gray-600'
                       }`}>
-                        {annonce.status}
+                        {STATUS_LABELS[annonce.status] || annonce.status}
                       </span>
                     </td>
                     <td className="px-4 py-3 text-gray-400">

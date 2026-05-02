@@ -337,7 +337,7 @@ export function NouvelleAnnonceAccompagneForm() {
           </div>
 
           <div className="flex gap-3">
-            <Button variant="ghost" onClick={() => setStep(2)}>Precedent</Button>
+            <Button variant="ghost" onClick={() => setStep(2)}>Précédent</Button>
             <Button onClick={() => setStep(4)}>Suivant</Button>
           </div>
         </div>
@@ -410,7 +410,7 @@ export function NouvelleAnnonceAccompagneForm() {
           </div>
 
           <div className="flex gap-3">
-            <Button variant="ghost" onClick={() => setStep(3)}>Precedent</Button>
+            <Button variant="ghost" onClick={() => setStep(3)}>Précédent</Button>
             <Button onClick={handleSubmit} disabled={loading}>
               {loading ? 'Publication...' : 'Publier l\'annonce'}
             </Button>

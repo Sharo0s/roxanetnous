@@ -145,7 +145,7 @@ export function ChatWindow({ conversationId, currentUserId, initialMessages, oth
                 }
               }}
               onKeyDown={handleKeyDown}
-              placeholder="Ecrivez votre message..."
+              placeholder="Écrivez votre message..."
               rows={1}
               className="flex-1 bg-transparent px-2 py-2 text-sm focus:outline-none resize-none max-h-[120px] placeholder:text-gray-400"
               style={{ minHeight: '36px' }}

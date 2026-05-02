@@ -19,11 +19,11 @@ export async function sendContactMessage(formData: FormData): Promise<{ error?: 
   }
 
   if (subject.length > 150) {
-    return { error: 'Le sujet ne doit pas depasser 150 caracteres.' }
+    return { error: 'Le sujet ne doit pas dépasser 150 caractères.' }
   }
 
   if (message.length > 2000) {
-    return { error: 'Le message ne doit pas depasser 2000 caracteres.' }
+    return { error: 'Le message ne doit pas dépasser 2000 caractères.' }
   }
 
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -73,6 +73,6 @@ export async function sendContactMessage(formData: FormData): Promise<{ error?: 
       error: error instanceof Error ? error.message : 'Erreur inconnue',
     })
 
-    return { error: 'Une erreur est survenue. Veuillez reessayer.' }
+    return { error: 'Une erreur est survenue. Veuillez réessayer.' }
   }
 }

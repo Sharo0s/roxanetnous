@@ -6,7 +6,7 @@ const tabs = [
   { id: 'overview', label: 'Vue d\'ensemble' },
   { id: 'inscriptions', label: 'Inscriptions' },
   { id: 'revenus', label: 'Revenus' },
-  { id: 'activite', label: 'Activite' },
+  { id: 'activite', label: 'Activité' },
 ] as const
 
 type TabId = (typeof tabs)[number]['id']

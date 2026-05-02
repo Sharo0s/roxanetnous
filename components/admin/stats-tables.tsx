@@ -233,6 +233,12 @@ const FEEDBACK_LABELS: Record<string, string> = {
   other: 'Autre',
 }
 
+const ROLE_LABELS: Record<string, string> = {
+  accompagnante: 'Accompagnante',
+  accompagne: 'Accompagné',
+  admin: 'Administrateur',
+}
+
 type AnnulationRow = {
   date: string | null
   nom: string
@@ -307,7 +313,7 @@ export function ResiliationsTable({ data }: { data: AnnulationRow[] }) {
                   <td className="px-4 py-3 font-medium">{a.nom}</td>
                   <td className="px-4 py-3 text-gray-500">{a.email}</td>
                   <td className="px-4 py-3">
-                    <span className="text-xs bg-gray-200 text-gray-700 px-2 py-0.5 rounded-full">{a.role}</span>
+                    <span className="text-xs bg-gray-200 text-gray-700 px-2 py-0.5 rounded-full">{ROLE_LABELS[a.role] || a.role}</span>
                   </td>
                   <td className="px-4 py-3">{a.plan === 'annuel' || a.plan === 'annual' ? 'Annuel' : 'Mensuel'}</td>
                   <td className="px-4 py-3 text-gray-500">{a.feedback ? FEEDBACK_LABELS[a.feedback] || a.feedback : '-'}</td>

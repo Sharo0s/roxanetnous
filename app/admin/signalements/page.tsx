@@ -1,6 +1,20 @@
 import { createClient } from '@/lib/supabase/server'
 import { SignalementActions } from '@/components/admin/signalement-actions'
 
+const CIBLE_TYPE_LABELS: Record<string, string> = {
+  user: 'Utilisateur',
+  annonce_accompagnante: 'Annonce accompagnante',
+  annonce_accompagne: 'Annonce accompagné',
+  message: 'Message',
+}
+
+const DECISION_LABELS: Record<string, string> = {
+  suspendu: 'Suspendu',
+  supprime: 'Supprimé',
+  averti: 'Averti',
+  ignore: 'Ignoré',
+}
+
 export default async function AdminSignalementsPage() {
   const supabaseAdmin = await createClient({ serviceRole: true })
 
@@ -43,7 +57,7 @@ export default async function AdminSignalementsPage() {
                         }`}>
                           {sig.status === 'en_attente' ? 'En attente' : sig.status === 'traite' ? 'Traité' : 'Ignoré'}
                         </span>
-                        <span className="text-xs text-gray-400 capitalize">{sig.cible_type.replace('_', ' ')}</span>
+                        <span className="text-xs text-gray-400">{CIBLE_TYPE_LABELS[sig.cible_type] || sig.cible_type}</span>
                       </div>
                       <p className="font-medium text-gray-900">{sig.motif}</p>
                       {sig.description && (
@@ -60,7 +74,7 @@ export default async function AdminSignalementsPage() {
                       </p>
                       {sig.decision && (
                         <p className="text-xs text-gray-500 mt-1">
-                          Décision : <span className="font-medium capitalize">{sig.decision}</span>
+                          Décision : <span className="font-medium">{DECISION_LABELS[sig.decision] || sig.decision}</span>
                           {sig.notes_admin && ` — ${sig.notes_admin}`}
                         </p>
                       )}

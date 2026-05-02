@@ -47,7 +47,7 @@ export async function analyzeDocument(
       confidence_score: null,
       coherence_diplome: null,
       coherence_identite: null,
-      alerts: ['PDF - analyse manuelle requise'],
+      alerts: ['PDF — analyse manuelle requise'],
     })
     return
   }
@@ -171,10 +171,10 @@ function checkCoherence(
     const lastNameFound = lastName.length > 1 && textLower.includes(lastName)
 
     if (!firstNameFound && firstName.length > 1) {
-      alerts.push(`Prenom "${user?.first_name}" non trouve dans le document`)
+      alerts.push(`Prénom "${user?.first_name}" non trouvé dans le document`)
     }
     if (!lastNameFound && lastName.length > 1) {
-      alerts.push(`Nom "${user?.last_name}" non trouve dans le document`)
+      alerts.push(`Nom "${user?.last_name}" non trouvé dans le document`)
     }
 
     return {
@@ -186,7 +186,7 @@ function checkCoherence(
   if (documentType === 'diplome') {
     const diplomesValues = (profile.diplomes as string[]) || []
     if (diplomesValues.length === 0 || (diplomesValues.length === 1 && diplomesValues[0] === 'autre')) {
-      return { coherent: false, alerts: ['Verification automatique non disponible pour ce type de diplome'] }
+      return { coherent: false, alerts: ['Vérification automatique non disponible pour ce type de diplôme'] }
     }
 
     // Verifier si au moins un diplome correspond
@@ -207,14 +207,14 @@ function checkCoherence(
     }
 
     if (!diplomeInfo) {
-      return { coherent: false, alerts: ['Verification automatique non disponible pour ce type de diplome'] }
+      return { coherent: false, alerts: ['Vérification automatique non disponible pour ce type de diplôme'] }
     }
 
     const keywords = diplomeKeywords[diplomeInfo.value] || []
     const matchedKeywords = keywords.filter((kw) => textLower.includes(kw))
 
     if (matchedKeywords.length === 0) {
-      alerts.push(`Aucun mot-cle du diplome "${diplomeInfo.label}" trouve dans le document`)
+      alerts.push(`Aucun mot-clé du diplôme "${diplomeInfo.label}" trouvé dans le document`)
     }
 
     return {
@@ -234,13 +234,13 @@ function checkCoherence(
     const hasCvKeyword = cvKeywords.some((kw) => textLower.includes(kw))
 
     if (!hasCvKeyword) {
-      alerts.push('Le document ne semble pas etre un CV')
+      alerts.push('Le document ne semble pas être un CV')
     }
     if (!firstNameFound && firstName.length > 1) {
-      alerts.push(`Prenom "${user?.first_name}" non trouve dans le document`)
+      alerts.push(`Prénom "${user?.first_name}" non trouvé dans le document`)
     }
     if (!lastNameFound && lastName.length > 1) {
-      alerts.push(`Nom "${user?.last_name}" non trouve dans le document`)
+      alerts.push(`Nom "${user?.last_name}" non trouvé dans le document`)
     }
 
     return {
@@ -259,13 +259,13 @@ function checkCoherence(
     const lastNameFound = lastName.length > 1 && textLower.includes(lastName)
 
     if (!hasPermisKeyword) {
-      alerts.push('Le document ne semble pas etre un permis de conduire')
+      alerts.push('Le document ne semble pas être un permis de conduire')
     }
     if (!firstNameFound && firstName.length > 1) {
-      alerts.push(`Prenom "${user?.first_name}" non trouve dans le document`)
+      alerts.push(`Prénom "${user?.first_name}" non trouvé dans le document`)
     }
     if (!lastNameFound && lastName.length > 1) {
-      alerts.push(`Nom "${user?.last_name}" non trouve dans le document`)
+      alerts.push(`Nom "${user?.last_name}" non trouvé dans le document`)
     }
 
     return {
