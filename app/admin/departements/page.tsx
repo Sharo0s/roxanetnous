@@ -23,14 +23,13 @@ export default async function AdminDepartementsPage() {
   return (
     <div className="max-w-5xl mx-auto px-4 py-8">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Départements ouverts</h1>
+        <h1 className="text-2xl font-bold text-gray-900">Où sommes-nous ?</h1>
         <p className="text-sm text-gray-600 mt-1">
-          Pilotage du déploiement progressif. {totalOuverts} département{totalOuverts > 1 ? 's' : ''} ouvert
-          {totalOuverts > 1 ? 's' : ''} sur {departements.length}.
+          Les départements où Roxane et Nous accueille de nouvelles inscriptions. {totalOuverts} territoire
+          {totalOuverts > 1 ? 's' : ''} ouvert{totalOuverts > 1 ? 's' : ''} sur {departements.length}.
         </p>
         <p className="text-xs text-gray-500 mt-1">
-          Les changements sont propagés en moins de 30 secondes (cache invalidé immédiatement à
-          chaque action).
+          Vos changements sont visibles en moins d&apos;une minute.
         </p>
       </div>
 
