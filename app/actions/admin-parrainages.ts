@@ -117,7 +117,7 @@ export async function confirmerFraude(
 
   const { error: updateErr } = await supabaseAdmin
     .from('parrainages')
-    .update({ statut: 'fraude' })
+    .update({ statut: 'fraude', flag_suspicion: null })
     .eq('id', parrainageId)
   if (updateErr) return { error: 'Erreur lors de la mise à jour.' }
 

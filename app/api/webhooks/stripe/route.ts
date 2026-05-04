@@ -108,7 +108,12 @@ async function detectBlacklistAtWebhook(
         const customerId = (marraineSub?.stripe_customer_id as string) || null
         if (customerId) {
           try {
-            const pms = await stripe.paymentMethods.list({ customer: customerId, type: 'card' })
+            // P8 (code review 2026-05-04) : limit=100 (max Stripe) pour
+            // couvrir les marraines avec plusieurs cartes attachées. Le
+            // fallback charges historiques (ligne ~129) couvre déjà le cas
+            // où une carte aurait été détachée, mais autant maximiser la
+            // détection ici aussi.
+            const pms = await stripe.paymentMethods.list({ customer: customerId, type: 'card', limit: 100 })
             for (const pm of pms.data) {
               if (pm.card?.fingerprint === parrainage.stripe_fingerprint) {
                 carteMatch = true
@@ -162,6 +167,21 @@ async function detectBlacklistAtWebhook(
     const filleuleName =
       `${filleuleUser?.first_name || ''} ${filleuleUser?.last_name || ''}`.trim() || 'Filleule'
 
+    // P12 (code review 2026-05-04) : si meme_carte ET meme_adresse, on pose
+    // d'abord le flag adresse (traçabilité historique) AVANT de bloquer sur
+    // carte. Sinon le `return` après blocage carte ferait perdre le signal
+    // adresse, masquant un pattern fraude double.
+    if (carteMatch && adresseMatch) {
+      const { error: mergeErr } = await supabase
+        .rpc('merge_parrainage_flag_suspicion', {
+          p_parrainage_id: parrainage.id,
+          p_flag: 'meme_adresse',
+        })
+      if (mergeErr) {
+        console.error('[parrainage_blacklist][webhook][merge_adresse_avant_carte]', mergeErr)
+      }
+    }
+
     if (carteMatch) {
       // Compare-and-swap : ne déclencher email/log que si on est le premier à passer la
       // row en bloque (idempotence en cas de redelivery webhook ou race avec admin).
@@ -181,6 +201,7 @@ async function detectBlacklistAtWebhook(
       await revokeFilleuleValidationFromWebhook(parrainage.filleule_id, 'webhook_meme_carte', {
         parrainageId: parrainage.id,
         marraineId: parrainage.marraine_id,
+        internalSecret: process.env.PARRAINAGE_INTERNAL_SECRET,
       })
 
       const { error: logErr } = await supabase.from('admin_actions_log').insert({
@@ -192,6 +213,7 @@ async function detectBlacklistAtWebhook(
           marraine_id: parrainage.marraine_id,
           filleule_id: parrainage.filleule_id,
           raison: 'meme_carte',
+          flag_adresse_pose: adresseMatch,
         },
       })
       if (logErr) console.error('[parrainage_blacklist][webhook][log_carte]', logErr)

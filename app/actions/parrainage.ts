@@ -52,6 +52,32 @@ async function detectBlacklist(params: {
     if (marraineEmailNorm && marraineEmailNorm === filleuleEmailNorm) {
       return { blocage: 'meme_email' }
     }
+
+    // P9 (code review 2026-05-04) : plusieurs filleules d'une même marraine
+    // partageant le même email = pattern fraude évident. On scanne les autres
+    // parrainages actifs/historiques de cette marraine et on compare l'email
+    // de chaque filleule passée à celle qui s'inscrit.
+    const { data: otherFilleulesIds } = await supabaseAdmin
+      .from('parrainages')
+      .select('filleule_id')
+      .eq('marraine_id', params.marraineId)
+      .neq('id', params.parrainageId)
+      .not('filleule_id', 'is', null)
+    const filleuleIds = (otherFilleulesIds ?? [])
+      .map((r) => (r as { filleule_id: string | null }).filleule_id)
+      .filter((id): id is string => !!id && id !== params.filleuleId)
+    if (filleuleIds.length > 0) {
+      const { data: otherFilleuleUsers } = await supabaseAdmin
+        .from('users')
+        .select('email')
+        .in('id', filleuleIds)
+      const sameEmail = (otherFilleuleUsers ?? []).some(
+        (u) => normalizeEmail((u as { email: string | null }).email || '') === filleuleEmailNorm,
+      )
+      if (sameEmail) {
+        return { blocage: 'meme_email' }
+      }
+    }
   }
 
   // Lookup IP : une autre row parrainages de la même marraine avec la même IP.
@@ -145,11 +171,40 @@ async function revokeFilleuleValidation(
 
 // Re-export interne pour le webhook (qui ne peut pas importer depuis un fichier
 // 'use server' avec usage non-action). Utilisable comme server action depuis le webhook.
+//
+// Auth guard : tout export d'un fichier 'use server' devient un endpoint POST
+// public exploitable. Ce helper accepte un filleuleId arbitraire ; sans guard,
+// n'importe quel client authentifié peut révoquer la validation de n'importe
+// quelle accompagnante. On exige un secret partagé connu uniquement du webhook
+// (PARRAINAGE_INTERNAL_SECRET) ou un appelant admin authentifié.
 export async function revokeFilleuleValidationFromWebhook(
   filleuleId: string,
   raison: string,
-  context: { parrainageId?: string; marraineId?: string } = {},
+  context: { parrainageId?: string; marraineId?: string; internalSecret?: string } = {},
 ): Promise<void> {
+  const expectedSecret = process.env.PARRAINAGE_INTERNAL_SECRET
+  const hasValidSecret =
+    !!expectedSecret &&
+    !!context.internalSecret &&
+    context.internalSecret === expectedSecret
+
+  if (!hasValidSecret) {
+    const supabase = await createClient()
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+    if (!user) throw new Error('revokeFilleuleValidationFromWebhook: non authentifié')
+
+    const { data: caller } = await supabase
+      .from('users')
+      .select('role')
+      .eq('id', user.id)
+      .single()
+    if (caller?.role !== 'admin') {
+      throw new Error('revokeFilleuleValidationFromWebhook: accès refusé')
+    }
+  }
+
   return revokeFilleuleValidation(filleuleId, raison, context)
 }
 

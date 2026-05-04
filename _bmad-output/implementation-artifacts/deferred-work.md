@@ -37,3 +37,10 @@
 - Pas de pagination sur `/admin/parrainages/blacklist` [app/admin/parrainages/blacklist/page.tsx] — charge tous les rows blacklistés en mémoire. OK MVP volume faible, à risque si volume grossit.
 - `notes` admin sans cap longueur [app/actions/admin-parrainages.ts] — `details: { notes }` jsonb peut grossir. Cap à 5000 chars à ajouter si abus.
 - Email admin fallback silencieux sur `RESEND_FROM_EMAIL` [lib/emails.ts:2023-2030] — si `ADMIN_NOTIFICATIONS_EMAIL` non configurée, email part vers l'adresse `from` (no-reply). À documenter ou fail loud plus tard.
+
+## Deferred from: code review of 2-3-blacklist-admin-anti-fraude (2026-05-04)
+
+- `validateCode` exposé sans rate-limit (oracle d'énumération de codes 8 chars) [app/actions/parrainage.ts:255-298] — reconnu dans la spec comme « à traiter séparément ». Combiner avec rate-limit IP global et/ou refondre en route API protégée.
+- `console.error` sans alerting/Sentry partout dans les chemins fraude/email/blacklist — dette pré-existante de toute la stack, pas spécifique à 2-3. À traiter de façon transverse (Sentry + alertes côté monitoring).
+- Types `as any` dans pages admin [app/admin/parrainages/page.tsx:185, app/admin/parrainages/blacklist/page.tsx:134] — dette TS pré-existante. À typer proprement quand la BDD aura des types Supabase générés stables.
+- `escapeHtml` dans `lib/emails.ts` non visible dans le diff — dépendance externe utilisée intensivement, à valider hors review (test XSS dédié sur les templates email).

@@ -1,6 +1,6 @@
 # Story 2.3 : Blacklist admin et detection anti-fraude parrainage
 
-Status: in-progress
+Status: done
 
 <!-- Note: Validation est optionnelle. Lancer `validate-create-story` avant `dev-story` pour un controle qualite. -->
 
@@ -74,17 +74,17 @@ afin de **proteger l'integrite financiere du programme** (5 parrainages = 6 mois
 8. **AC8 - Server actions `app/actions/admin-parrainages.ts`**
    Nouveau fichier (`'use server'`) qui exporte 3 actions, chacune avec controle strict `userData.role === 'admin'` (pattern admin-signalements.ts) :
    - `autoriserException(parrainageId, notes): Promise<{ error?: string }>` :
-     - `UPDATE parrainages SET statut='inscrite', blocage_raison=NULL, flag_suspicion=NULL WHERE id=parrainageId` (le flow normal pourra reprendre - la filleule pourra payer et etre validee).
+     - `UPDATE parrainages SET statut = (statut IN ('abonnee','confirme') ? statut : 'inscrite'), blocage_raison=NULL, flag_suspicion=NULL WHERE id=parrainageId`. **Decision 2026-05-04 D2** : si la filleule a deja paye (statut `abonnee` ou `confirme`) au moment de l'autorisation admin, on **preserve** ce statut au lieu de regresser vers `inscrite` -- evite la desync avec Stripe et le compteur recompense. Sinon, le flow normal reprend (`inscrite`, la filleule pourra payer et etre validee).
+     - **Quota recompense** : le parrainage compte normalement dans le quota de la marraine (lecture stricte). L'admin a explicitement valide qu'il ne s'agit pas d'une fraude, le parrainage est donc legitime cote palier 5 = 6 mois.
      - **Critique** : si la filleule etait deja `valide` via Story 2.1 AC9 (cas de la decouverte fraude post-paiement par re-vue admin), `validation_status` reste `valide` (l'admin a explicitement decide d'autoriser).
      - Si la filleule avait perdu son `parrainee_par` au moment du blocage (AC2), restaurer `parrainee_par = parrainages.marraine_id`.
      - Log `admin_actions_log` (`action_type='parrainage_autorise_exception'`, `details: { notes }`).
      - `revalidatePath('/admin/parrainages')` et `revalidatePath('/admin/parrainages/blacklist')`.
    - `confirmerFraude(parrainageId, notes): Promise<{ error?: string }>` :
-     - `UPDATE parrainages SET statut='fraude' WHERE id=parrainageId`.
-     - Si la filleule etait `valide` via parrainage : appel `revokeFilleuleValidation(filleuleId, 'fraude_confirmee')` (helper AC4).
-     - **Suspension** : aussi mettre `accompagnantes_profiles.validation_status='refuse'` ET `refus_motif='Suspicion fraude parrainage - confirme par admin'` pour la filleule.
+     - `UPDATE parrainages SET statut='fraude', flag_suspicion=NULL WHERE id=parrainageId` (le flag suspicion est aussi nettoye pour coherence d'etat).
+     - **Decision 2026-05-04 D1** : ne retrograder la filleule QUE si sa validation provient du parrainage. Charger `accompagnantes_profiles.validation_source` avant : si `validation_source='parrainage'`, appeler `revokeFilleuleValidation(filleuleId, 'fraude_confirmee')` (helper AC4) qui met `validation_status='refuse'` + `refus_motif='Suspicion fraude parrainage - confirme par admin'` + log structure. Si `validation_source IN ('ocr','visio','manuelle')`, **preserver** la validation -- la filleule a prouve son identite par un autre canal, elle n'est pas penalisee pour la fraude (presumee) de la marraine.
      - **Suspension marraine optionnelle** : pour MVP, on **ne suspend PAS automatiquement** la marraine - l'admin decidera manuellement via la page utilisateurs si besoin (decision design assumee, eviter les faux positifs cote marraine). Documenter en Dev Notes.
-     - Log `admin_actions_log` (`action_type='parrainage_fraude_confirmee'`, `details: { notes, marraine_id, filleule_id }`).
+     - Log `admin_actions_log` (`action_type='parrainage_fraude_confirmee'`, `details: { notes, marraine_id, filleule_id, filleule_validation_preservee: boolean }`).
      - `revalidatePath` idem.
    - `ignorerFlag(parrainageId): Promise<{ error?: string }>` :
      - `UPDATE parrainages SET flag_suspicion=NULL WHERE id=parrainageId` (statut reste tel quel, le flag est juste marque comme revu).
@@ -210,6 +210,28 @@ Code review effectuee le 2026-04-28 (3 sous-agents : Blind Hunter, Edge Case Hun
 - [x] [Review][Defer] Pas de pagination sur `/admin/parrainages/blacklist` [app/admin/parrainages/blacklist/page.tsx] -- deferred, OK MVP volume faible
 - [x] [Review][Defer] `notes` admin sans cap longueur [app/actions/admin-parrainages.ts] -- deferred, jsonb tolere mais a borner ulterieurement
 - [x] [Review][Defer] Email admin fallback silencieux sur `RESEND_FROM_EMAIL` [lib/emails.ts:2023-2030] -- deferred, documenter ou fail loud plus tard
+
+### Review Findings -- 2026-05-04 (passe code review multi-agent)
+
+- [x] [Review][Patch] confirmerFraude doit filtrer sur validation_source='parrainage' avant rétrogradation -- décision 2026-05-04 D1=1 : préserver les filleules validées OCR/visio. **Déjà patché sur main** (lignes 175-203 de admin-parrainages.ts, logique `wasValidatedByParrainage`).
+- [x] [Review][Patch] autoriserException : préserver statut='abonnee'/'confirme' si déjà payé -- décision 2026-05-04 D2=2 : ne pas régresser une filleule payante. **Déjà patché sur main** (lignes 49-51 de admin-parrainages.ts). **Spec AC8 mise à jour** dans cette session pour acter la nuance + quota stricte.
+- [x] [Review][Patch] revokeFilleuleValidationFromWebhook exposé sans authz -- **Patché 2026-05-04** : auth guard ajouté (secret partagé `PARRAINAGE_INTERNAL_SECRET` ou auth admin). Webhook met à jour pour passer le secret. [app/actions/parrainage.ts]
+- [x] [Review][Patch] generateCodeForUserSystem ré-exporté comme server action sans authz -- **Déjà fixé sur main** : pas de ré-export dans parrainage.ts, import depuis `lib/parrainage-codes.ts` (module non `'use server'`).
+- [x] [Review][Patch] UPDATE meme_carte sans compare-and-swap -- **Déjà patché sur main** (route.ts ligne 165-179, `.in('statut',[...])`+`.is('blocage_raison',null)`+`.select('id')`).
+- [x] [Review][Patch] mergeFlagSuspicion UPDATE sans CAS guard -- **Déjà patché sur main** via RPC atomique `merge_parrainage_flag_suspicion` qui retourne `was_added`.
+- [x] [Review][Patch] PostgREST .or() avec interpolation directe d'UUID -- **Déjà patché sur main** (route.ts lignes 77-92, deux `.eq()` parallèles).
+- [x] [Review][Patch] confirmerFraude n'utilise pas le helper revokeFilleuleValidation -- **Déjà patché sur main** (admin-parrainages.ts ligne 185, appel `revokeFilleuleValidationFromWebhook`).
+- [x] [Review][Patch] revokeFilleuleValidation log toujours parrainage_fraude_confirmee -- **Déjà patché sur main** (parrainage.ts lignes 102-113, no-op log distinct via `console.warn` au lieu d'INSERT inconditionnel).
+- [x] [Review][Patch] stripe.paymentMethods.list non paginé -- **Patché 2026-05-04** : `limit: 100` ajouté. Fallback `stripe.charges.list` couvrait déjà la majorité des cas mais autant maximiser ici. [app/api/webhooks/stripe/route.ts]
+- [x] [Review][Patch] Détection meme_email trop étroite -- **Patché 2026-05-04** : extension à plusieurs filleules d'une même marraine partageant le même email. [app/actions/parrainage.ts]
+- [x] [Review][Patch] confirmerFraude ne reset pas flag_suspicion -- **Patché 2026-05-04** : ajout `flag_suspicion: null` dans l'UPDATE. [app/actions/admin-parrainages.ts]
+- [x] [Review][Patch] CSV flag_suspicion non normalisé en ordre canonique -- **Patché 2026-05-04** : tri alphabétique avant `.join(',')` dans `mergeFlagSuspicion` (helper local ; le RPC BDD couvre l'idempotence runtime). [lib/parrainage-detection.ts]
+- [x] [Review][Patch] Webhook : si meme_carte ET meme_adresse, seul meme_carte est posé -- **Patché 2026-05-04** : pose explicite du flag `meme_adresse` AVANT le bloc carteMatch, plus champ `flag_adresse_pose` dans le log de blocage carte pour traçabilité. [app/api/webhooks/stripe/route.ts]
+- [x] [Review][Patch] parrainee_par désynchronisé du parrainages.statut -- **Déjà patché sur main** (parrainage.ts lignes 451-480, détection AVANT de poser parrainee_par).
+- [x] [Review][Defer] validateCode exposé sans rate-limit (oracle d'énumération de codes) -- deferred, reconnu dans la spec comme « à traiter séparément »
+- [x] [Review][Defer] console.error sans alerting/Sentry partout -- deferred, dette pré-existante de la stack
+- [x] [Review][Defer] Types `as any` dans pages admin -- deferred, dette TS pré-existante
+- [x] [Review][Defer] escapeHtml dans lib/emails.ts non visible dans le diff -- deferred, dépendance externe à valider hors review
 
 ## Dev Notes
 
@@ -419,3 +441,4 @@ claude-opus-4-7[1m]
 | Date | Auteur | Description |
 |------|--------|-------------|
 | 2026-04-28 | Dev (Claude Opus 4.7) | Implementation Story 2.3 - blacklist admin et detection anti-fraude (AC1-AC12). Migration index, helpers detection, integration createParrainageRelation et webhook Stripe, email admin, server actions admin, pages admin /admin/parrainages et /admin/parrainages/blacklist, layout + historique, documentation politique de confidentialite et TODO-LAUNCH. Tests purs 18 PASS, tsc 0 erreur, build 42 routes succes. |
+| 2026-05-04 | Dev (Claude Opus 4.7) | Code review multi-agent (Blind Hunter + Edge Case Hunter + Acceptance Auditor). 15 patches identifies, 9 deja appliques sur main, 6 nouveaux patches appliques : (1) auth guard sur revokeFilleuleValidationFromWebhook avec PARRAINAGE_INTERNAL_SECRET, (2) detection meme_email etendue aux filleules d'une meme marraine, (3) reset flag_suspicion dans confirmerFraude, (4) tri canonique CSV mergeFlagSuspicion, (5) flag meme_adresse pose avant blocage meme_carte pour tracabilite, (6) limit 100 sur stripe.paymentMethods.list. Decisions D1=preserve OCR/visio, D2=preserve abonnee/confirme, quota=stricte. Spec AC8 mise a jour. tsc 0 erreur. Statut passe a done. |
