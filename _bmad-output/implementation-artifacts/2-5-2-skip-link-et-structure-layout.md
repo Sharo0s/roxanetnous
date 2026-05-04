@@ -1,6 +1,6 @@
 # Story 2.5.2 : Skip-link et structure layout
 
-Status: review
+Status: done
 
 <!-- Note: Validation est optionnelle. Lancer `validate-create-story` avant `dev-story` pour un controle qualite. -->
 
@@ -373,6 +373,7 @@ claude-opus-4-7 (Claude Opus 4.7, 1M context) -- session 2026-05-04 via skill `b
 ### Change Log
 
 - 2026-05-04 -- Implementation Story 2.5.2 (skip-link et structure layout). Ajout du skip-link au layout root, ancrage `id="main-content"` + `tabIndex={-1}` + `focus:outline-none` sur tous les `<main>` du repo, conversion du double-`<main>` admin/messages/[id] en `<div>`. Build Next 16 vert, lint a11y baseline preserve (160 violations). Status : ready-for-dev -> review.
+- 2026-05-04 -- CI Vercel verte sur commit `364b4be` (deploiement `roxanetnous-r3bqg83db`, 40s). Tests manuels clavier valides par Sylvain sur landing, accompagne/dashboard, accompagne/abonnement. VoiceOver annonce correctement le skip-link. Status : review -> done.
 
 ### Review Findings
 
