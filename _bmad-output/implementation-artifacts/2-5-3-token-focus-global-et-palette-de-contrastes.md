@@ -1,6 +1,6 @@
 # Story 2.5.3 : Token de focus global et palette de contrastes
 
-Status: review
+Status: done
 
 <!-- Note: Validation est optionnelle. Lancer `validate-create-story` avant `dev-story` pour un controle qualite. -->
 
