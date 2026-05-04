@@ -17,7 +17,7 @@ export default async function AbonnementAccompagneSuccessPage() {
   if (!userData || userData.role !== 'accompagne') redirect('/')
 
   return (
-    <main className="min-h-screen kraft bg-kraft flex items-center justify-center">
+    <main id="main-content" tabIndex={-1} className="min-h-screen kraft bg-kraft flex items-center justify-center focus:outline-none">
       <div className="relative z-10 max-w-md mx-auto px-4 text-center">
         <div className="bg-white rounded-xl border p-8">
           <h1 className="text-2xl font-bold text-gray-900 mb-4">Abonnement activé</h1>

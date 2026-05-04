@@ -183,7 +183,7 @@ export function RegisterForm() {
 
   if (emailSent) {
     return (
-      <main className="min-h-screen flex items-center justify-center p-4 kraft bg-kraft">
+      <main id="main-content" tabIndex={-1} className="min-h-screen flex items-center justify-center p-4 kraft bg-kraft focus:outline-none">
         <div className="w-full max-w-md text-center relative z-10">
           <Link href="/" className="text-3xl font-bold text-black">
             roxanetnous
@@ -212,7 +212,7 @@ export function RegisterForm() {
   }
 
   return (
-    <main className="min-h-screen flex items-center justify-center p-4 kraft bg-kraft">
+    <main id="main-content" tabIndex={-1} className="min-h-screen flex items-center justify-center p-4 kraft bg-kraft focus:outline-none">
       <div className="w-full max-w-md relative z-10">
         <div className="text-center mb-8">
           <Link href="/" className="text-3xl font-bold text-black">

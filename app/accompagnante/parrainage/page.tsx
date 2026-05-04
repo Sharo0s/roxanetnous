@@ -73,7 +73,7 @@ export default async function AccompagnanteParrainagePage() {
   const unreadCount = await getUnreadCount(user.id)
 
   return (
-    <main className="min-h-screen kraft bg-kraft">
+    <main id="main-content" tabIndex={-1} className="min-h-screen kraft bg-kraft focus:outline-none">
       <AccompagnanteHeader
         userId={user.id}
         unreadCount={unreadCount}

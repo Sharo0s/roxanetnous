@@ -231,7 +231,7 @@ export default async function RecherchePage({
   const unreadCount = user ? await getUnreadCount(user.id) : 0
 
   return (
-    <main className="min-h-screen kraft bg-kraft">
+    <main id="main-content" tabIndex={-1} className="min-h-screen kraft bg-kraft focus:outline-none">
       {userData?.role === 'accompagnante' && user ? (
         <AccompagnanteHeader
           userId={user.id}

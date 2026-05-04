@@ -103,7 +103,7 @@ export default async function ConversationPage({
   const unreadCount = await getUnreadCount(user.id)
 
   return (
-    <main className="min-h-screen kraft bg-kraft flex flex-col">
+    <main id="main-content" tabIndex={-1} className="min-h-screen kraft bg-kraft flex flex-col focus:outline-none">
       {userData.role === 'accompagnante' ? (
         <AccompagnanteHeader
           userId={user.id}

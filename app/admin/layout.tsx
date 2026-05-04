@@ -22,7 +22,7 @@ export default async function AdminLayout({
   if (!userData || userData.role !== 'admin') redirect('/')
 
   return (
-    <main className="min-h-screen kraft bg-kraft">
+    <main id="main-content" tabIndex={-1} className="min-h-screen kraft bg-kraft focus:outline-none">
       <header className="relative z-10 bg-white border-b">
         <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">

@@ -2,7 +2,7 @@ import Link from 'next/link'
 
 export default function NotFound() {
   return (
-    <main className="min-h-screen kraft bg-kraft flex flex-col items-center justify-center p-8">
+    <main id="main-content" tabIndex={-1} className="min-h-screen kraft bg-kraft flex flex-col items-center justify-center p-8 focus:outline-none">
       <div className="text-center max-w-md relative z-10">
         <h1 className="text-6xl font-bold text-black mb-4">404</h1>
         <p className="text-xl text-gray-600 mb-8">

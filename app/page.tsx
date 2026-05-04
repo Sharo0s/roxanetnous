@@ -86,7 +86,7 @@ export default async function HomePage() {
           </div>
         </div>
       )}
-      <main className="flex-1">
+      <main id="main-content" tabIndex={-1} className="flex-1 focus:outline-none">
         {/* ===== HERO ===== */}
         <section className="px-4 py-16 md:py-24 kraft bg-kraft">
           <div className="max-w-7xl mx-auto relative z-10">

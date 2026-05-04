@@ -4,7 +4,7 @@ import { Footer } from '@/components/footer'
 export default function PolitiqueConfidentialitePage() {
   return (
     <div className="min-h-screen flex flex-col kraft bg-kraft">
-      <main className="flex-1 max-w-3xl mx-auto px-4 py-12 relative z-10">
+      <main id="main-content" tabIndex={-1} className="flex-1 max-w-3xl mx-auto px-4 py-12 relative z-10 focus:outline-none">
         <Link href="/" className="text-sm text-black/50 hover:text-black transition">
           Retour à l&apos;accueil
         </Link>

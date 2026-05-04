@@ -82,7 +82,7 @@ export default async function MessagesPage() {
   const unreadCount = await getUnreadCount(user.id)
 
   return (
-    <main className="min-h-screen kraft bg-kraft">
+    <main id="main-content" tabIndex={-1} className="min-h-screen kraft bg-kraft focus:outline-none">
       {userData.role === 'accompagnante' ? (
         <AccompagnanteHeader
           userId={user.id}

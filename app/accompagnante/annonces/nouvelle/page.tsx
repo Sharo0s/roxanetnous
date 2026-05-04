@@ -23,7 +23,7 @@ export default async function NouvelleAnnonceAccompagnante() {
   const departementsOuverts = await getCodesDepartementsOuverts()
 
   return (
-    <main className="min-h-screen kraft bg-kraft">
+    <main id="main-content" tabIndex={-1} className="min-h-screen kraft bg-kraft focus:outline-none">
       <AccompagnanteHeader
         userId={user.id}
         unreadCount={unreadCount}
