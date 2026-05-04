@@ -44,3 +44,11 @@
 - `console.error` sans alerting/Sentry partout dans les chemins fraude/email/blacklist — dette pré-existante de toute la stack, pas spécifique à 2-3. À traiter de façon transverse (Sentry + alertes côté monitoring).
 - Types `as any` dans pages admin [app/admin/parrainages/page.tsx:185, app/admin/parrainages/blacklist/page.tsx:134] — dette TS pré-existante. À typer proprement quand la BDD aura des types Supabase générés stables.
 - `escapeHtml` dans `lib/emails.ts` non visible dans le diff — dépendance externe utilisée intensivement, à valider hors review (test XSS dédié sur les templates email).
+
+## Deferred from: code review of 2-5-1-outillage-a11y-baseline-lint (2026-05-04)
+
+- `npm run lint` retourne exit 0 avec 231 warnings (160 a11y + 71 tseslint) -- faux signal "tout clean" en local. Decision tech-spec assumee (mode warn au demarrage), bascule en `error` planifiee post-Lot A complet (toutes les stories 2.5.x livrees).
+- `downgradeErrorsToWarn` masque toutes les erreurs ESLint critiques au-dela d'a11y (`no-undef`, `no-unused-vars`, `@typescript-eslint/no-explicit-any`...) -- intentionnel pour bootstrap, a reverser post-Lot A complet.
+- `lint:fix` peut modifier `scripts/build-a11y-baseline.mjs` lui-meme (autofix `} catch {}` -> `/* empty */`) -- pollution diff potentielle. Fix : ajouter `scripts/` aux ignores du flat config ou corriger la directive `} catch {}` source.
+- `findLatestBaseline()` trie par nom (date ISO) -- un baseline genere avec clock skew futur (CI runner desynchronise) sera selectionne indefiniment, masquant des regressions massives jusqu'a la date reelle. Ajouter une validation `date <= today` dans le wrapper.
+- Position de la section "## DoD a11y" dans le template `bmad-create-story` -- placee apres `## Dev Agent Record / ### File List`, descend sous le fold sur stories volumineuses. Risque de DoD oubliee. Deplacer plus haut si necessaire.

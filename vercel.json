@@ -1,4 +1,5 @@
 {
+  "buildCommand": "npm run lint:a11y-check && next build",
   "crons": [
     {
       "path": "/api/cron/update-badges",
