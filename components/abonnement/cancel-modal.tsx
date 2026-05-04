@@ -48,7 +48,7 @@ export function CancelModal({ subscription }: { subscription: SubscriptionInfo }
       <button
         type="button"
         onClick={handleOpen}
-        className="px-4 py-2.5 text-sm font-medium border border-gray-300 text-gray-700 rounded-lg hover:border-gray-400 transition-colors"
+        className="px-4 py-2.5 text-sm font-medium border border-gray-400 text-gray-700 rounded-lg hover:border-gray-400 transition-colors"
       >
         Résilier mon abonnement
       </button>
@@ -79,7 +79,7 @@ export function CancelModal({ subscription }: { subscription: SubscriptionInfo }
                   <button
                     type="button"
                     onClick={handleClose}
-                    className="px-4 py-2.5 text-sm font-medium border border-gray-300 text-gray-700 rounded-lg hover:border-gray-400 transition-colors"
+                    className="px-4 py-2.5 text-sm font-medium border border-gray-400 text-gray-700 rounded-lg hover:border-gray-400 transition-colors"
                   >
                     Annuler
                   </button>
@@ -130,7 +130,7 @@ export function CancelModal({ subscription }: { subscription: SubscriptionInfo }
                   <button
                     type="button"
                     onClick={handleClose}
-                    className="px-4 py-2.5 text-sm font-medium border border-gray-300 text-gray-700 rounded-lg hover:border-gray-400 transition-colors"
+                    className="px-4 py-2.5 text-sm font-medium border border-gray-400 text-gray-700 rounded-lg hover:border-gray-400 transition-colors"
                   >
                     Fermer
                   </button>

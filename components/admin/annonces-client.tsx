@@ -49,7 +49,7 @@ export function AnnoncesSearchTable({
           placeholder="Rechercher par titre, auteur ou ville..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-xl text-sm focus:outline-none focus:border-accent transition-colors"
+          className="w-full px-4 py-2.5 bg-white border border-gray-400 rounded-xl text-sm focus:outline-none focus:border-accent transition-colors"
         />
       </div>
 
@@ -97,7 +97,7 @@ export function AnnoncesSearchTable({
                       <Link
                         href={`/recherche/${annonce.id}`}
                         target="_blank"
-                        className="px-3 py-1.5 text-xs font-medium border border-gray-300 rounded-lg hover:border-accent transition-colors"
+                        className="px-3 py-1.5 text-xs font-medium border border-gray-400 rounded-lg hover:border-accent transition-colors"
                       >
                         Voir
                       </Link>

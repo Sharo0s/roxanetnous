@@ -52,7 +52,7 @@ export function StepJustificatifs({ onUpload }: Props) {
           className={`w-full p-4 rounded-lg border-2 border-dashed transition text-sm ${
             identiteFile
               ? 'border-accent bg-gray-50'
-              : 'border-gray-300 hover:border-gray-500'
+              : 'border-gray-400 hover:border-gray-500'
           }`}
         >
           {uploading ? (

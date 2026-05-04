@@ -119,7 +119,7 @@ export function ModifierAnnonceAccompagneForm({ annonce, departementsOuverts }: 
                 type="text"
                 value={titre}
                 onChange={(e) => setTitre(e.target.value)}
-                className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
+                className="w-full rounded-lg border border-gray-400 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
               />
             </div>
             <div>
@@ -130,7 +130,7 @@ export function ModifierAnnonceAccompagneForm({ annonce, departementsOuverts }: 
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 rows={5}
-                className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black resize-none"
+                className="w-full rounded-lg border border-gray-400 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black resize-none"
               />
             </div>
             <div>
@@ -141,7 +141,7 @@ export function ModifierAnnonceAccompagneForm({ annonce, departementsOuverts }: 
                 value={besoinsSpecifiques}
                 onChange={(e) => setBesoinsSpecifiques(e.target.value)}
                 rows={3}
-                className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black resize-none"
+                className="w-full rounded-lg border border-gray-400 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black resize-none"
               />
             </div>
           </div>
@@ -158,7 +158,7 @@ export function ModifierAnnonceAccompagneForm({ annonce, departementsOuverts }: 
                 className={`px-3 py-1.5 rounded-full text-sm border transition ${
                   specialitesRecherchees.includes(spec.value)
                     ? 'bg-accent text-black border-accent'
-                    : 'bg-white text-gray-700 border-gray-300 hover:border-gray-400'
+                    : 'bg-white text-gray-700 border-gray-400 hover:border-gray-400'
                 }`}
               >
                 {spec.label}
@@ -187,7 +187,7 @@ export function ModifierAnnonceAccompagneForm({ annonce, departementsOuverts }: 
                     className={`px-4 py-2 rounded-lg text-sm border transition flex-1 ${
                       niveauDependance === opt.value
                         ? 'bg-accent text-black border-accent'
-                        : 'bg-white text-gray-700 border-gray-300 hover:border-gray-400'
+                        : 'bg-white text-gray-700 border-gray-400 hover:border-gray-400'
                     }`}
                   >
                     {opt.label}
@@ -203,7 +203,7 @@ export function ModifierAnnonceAccompagneForm({ annonce, departementsOuverts }: 
                 type="text"
                 value={equipeEnPlace}
                 onChange={(e) => setEquipeEnPlace(e.target.value)}
-                className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
+                className="w-full rounded-lg border border-gray-400 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
               />
             </div>
           </div>
@@ -217,7 +217,7 @@ export function ModifierAnnonceAccompagneForm({ annonce, departementsOuverts }: 
               <select
                 value={diplomeRequis}
                 onChange={(e) => setDiplomeRequis(e.target.value)}
-                className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
+                className="w-full rounded-lg border border-gray-400 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
               >
                 <option value="">Pas de préférence</option>
                 {DIPLOMES.map((d) => (
@@ -230,7 +230,7 @@ export function ModifierAnnonceAccompagneForm({ annonce, departementsOuverts }: 
               <select
                 value={experienceMin}
                 onChange={(e) => setExperienceMin(e.target.value)}
-                className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
+                className="w-full rounded-lg border border-gray-400 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
               >
                 <option value="">Pas de préférence</option>
                 {EXPERIENCE_LEVELS.map((e) => (
@@ -262,7 +262,7 @@ export function ModifierAnnonceAccompagneForm({ annonce, departementsOuverts }: 
               type="date"
               value={dateDebut}
               onChange={(e) => setDateDebut(e.target.value)}
-              className="w-full sm:w-auto rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
+              className="w-full sm:w-auto rounded-lg border border-gray-400 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
             />
           </div>
 
@@ -293,7 +293,7 @@ export function ModifierAnnonceAccompagneForm({ annonce, departementsOuverts }: 
                             className={`w-8 h-8 rounded-md border transition flex items-center justify-center ${
                               isSelected
                                 ? 'border-accent bg-white text-black'
-                                : 'bg-white border-gray-300 hover:border-gray-400'
+                                : 'bg-white border-gray-400 hover:border-gray-400'
                             }`}
                           >
                             {isSelected && (
@@ -323,7 +323,7 @@ export function ModifierAnnonceAccompagneForm({ annonce, departementsOuverts }: 
                 value={infosComplementaires}
                 onChange={(e) => setInfosComplementaires(e.target.value)}
                 rows={3}
-                className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black resize-none"
+                className="w-full rounded-lg border border-gray-400 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black resize-none"
               />
             </div>
             <div>
@@ -334,7 +334,7 @@ export function ModifierAnnonceAccompagneForm({ annonce, departementsOuverts }: 
                 value={messageAccompagnantes}
                 onChange={(e) => setMessageAccompagnantes(e.target.value)}
                 rows={3}
-                className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black resize-none"
+                className="w-full rounded-lg border border-gray-400 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black resize-none"
               />
             </div>
           </div>

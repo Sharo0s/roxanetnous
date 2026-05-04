@@ -43,7 +43,7 @@ export function SignalementActions({ signalementId }: Props) {
         <select
           value={decision}
           onChange={(e) => setDecision(e.target.value as typeof decision)}
-          className="w-full rounded-lg border border-gray-300 bg-white px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-black"
+          className="w-full rounded-lg border border-gray-400 bg-white px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-black"
         >
           <option value="averti">Avertissement</option>
           <option value="suspendu">Suspension</option>
@@ -58,7 +58,7 @@ export function SignalementActions({ signalementId }: Props) {
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
           rows={2}
-          className="w-full rounded-lg border border-gray-300 bg-white px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-black resize-none"
+          className="w-full rounded-lg border border-gray-400 bg-white px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-black resize-none"
         />
       </div>
 

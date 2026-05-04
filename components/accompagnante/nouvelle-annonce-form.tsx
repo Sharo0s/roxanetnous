@@ -78,7 +78,7 @@ export function NouvelleAnnonceForm({ departementsOuverts }: Props) {
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Décrivez vos compétences, votre approche et ce que vous proposez..."
               rows={5}
-              className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black resize-none"
+              className="w-full rounded-lg border border-gray-400 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black resize-none"
             />
           </div>
         </div>
@@ -142,7 +142,7 @@ export function NouvelleAnnonceForm({ departementsOuverts }: Props) {
                             className={`w-8 h-8 rounded-md border transition flex items-center justify-center ${
                               isSelected
                                 ? 'border-accent bg-white text-black'
-                                : 'bg-white border-gray-300 hover:border-gray-400'
+                                : 'bg-white border-gray-400 hover:border-gray-400'
                             }`}
                           >
                             {isSelected && (

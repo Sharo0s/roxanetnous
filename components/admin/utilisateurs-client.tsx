@@ -115,7 +115,7 @@ export function UtilisateursClient({
           className={`px-4 py-2 rounded-lg text-sm font-medium transition btn-hover ${
             tab === 'accompagnantes'
               ? 'bg-accent text-black'
-              : 'bg-white border border-gray-300 text-gray-700 hover:border-accent'
+              : 'bg-white border border-gray-400 text-gray-700 hover:border-accent'
           }`}
         >
           Accompagnantes ({accompagnantes.length})
@@ -125,7 +125,7 @@ export function UtilisateursClient({
           className={`px-4 py-2 rounded-lg text-sm font-medium transition btn-hover ${
             tab === 'accompagnes'
               ? 'bg-accent text-black'
-              : 'bg-white border border-gray-300 text-gray-700 hover:border-accent'
+              : 'bg-white border border-gray-400 text-gray-700 hover:border-accent'
           }`}
         >
           Accompagnés ({accompagnes.length})
@@ -136,7 +136,7 @@ export function UtilisateursClient({
             className={`px-4 py-2 rounded-lg text-sm font-medium transition btn-hover ${
               tab === 'resiliations'
                 ? 'bg-accent text-black'
-                : 'bg-white border border-gray-300 text-gray-700 hover:border-accent'
+                : 'bg-white border border-gray-400 text-gray-700 hover:border-accent'
             }`}
           >
             Résiliations ({annulations.length})
@@ -201,7 +201,7 @@ export function UtilisateursClient({
           placeholder="Rechercher par nom, email ou ville..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-xl text-sm focus:outline-none focus:border-accent transition-colors"
+          className="w-full px-4 py-2.5 bg-white border border-gray-400 rounded-xl text-sm focus:outline-none focus:border-accent transition-colors"
         />
       </div>}
 

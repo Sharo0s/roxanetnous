@@ -39,7 +39,7 @@ export function CancelSubscriptionButton({
     return (
       <button
         onClick={() => setConfirming(true)}
-        className="px-4 py-2 text-sm font-medium border border-gray-300 text-gray-700 rounded-lg hover:border-gray-400 transition-colors"
+        className="px-4 py-2 text-sm font-medium border border-gray-400 text-gray-700 rounded-lg hover:border-gray-400 transition-colors"
       >
         Annuler l&apos;abonnement
       </button>
@@ -66,7 +66,7 @@ export function CancelSubscriptionButton({
         <button
           onClick={() => { setConfirming(false); setError(null) }}
           disabled={loading}
-          className="px-4 py-2 text-sm font-medium border border-gray-300 rounded-lg hover:bg-white transition-colors disabled:opacity-50"
+          className="px-4 py-2 text-sm font-medium border border-gray-400 rounded-lg hover:bg-white transition-colors disabled:opacity-50"
         >
           Annuler
         </button>

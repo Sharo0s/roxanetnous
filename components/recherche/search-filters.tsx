@@ -120,7 +120,7 @@ export function SearchFilters({ currentVille, currentSpecialite, currentExperien
             onFocus={() => { if (suggestions.length > 0) setOpen(true) }}
             onKeyDown={handleKeyDown}
             placeholder="Ex: Paris, Lyon..."
-            className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
+            className="w-full rounded-lg border border-gray-400 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
           />
           {open && suggestions.length > 0 && (
             <ul className="absolute top-full left-0 right-0 z-50 mt-1 rounded-lg border border-gray-300 bg-white shadow-lg max-h-60 overflow-auto">
@@ -145,7 +145,7 @@ export function SearchFilters({ currentVille, currentSpecialite, currentExperien
           <button
             type="button"
             onClick={() => setSpecOpen(!specOpen)}
-            className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-left focus:outline-none focus:ring-2 focus:ring-black flex items-center justify-between"
+            className="w-full rounded-lg border border-gray-400 bg-white px-3 py-2 text-sm text-left focus:outline-none focus:ring-2 focus:ring-black flex items-center justify-between"
           >
             <span className={specialites.length === 0 ? 'text-gray-400' : 'text-gray-900 truncate'}>
               {specialites.length === 0
@@ -169,7 +169,7 @@ export function SearchFilters({ currentVille, currentSpecialite, currentExperien
                     type="checkbox"
                     checked={specialites.includes(s.value)}
                     onChange={() => toggleSpecialite(s.value)}
-                    className="rounded border-gray-300 accent-black"
+                    className="rounded border-gray-400 accent-black"
                   />
                   {s.label}
                 </label>
@@ -182,7 +182,7 @@ export function SearchFilters({ currentVille, currentSpecialite, currentExperien
           <select
             value={experience}
             onChange={(e) => setExperience(e.target.value)}
-            className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
+            className="w-full rounded-lg border border-gray-400 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
           >
             <option value="">Toutes</option>
             {EXPERIENCE_LEVELS.map((e) => (

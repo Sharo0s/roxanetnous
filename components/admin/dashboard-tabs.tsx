@@ -26,7 +26,7 @@ export function DashboardTabs({ children }: {
             className={`px-4 py-2 rounded-lg text-sm font-medium transition btn-hover ${
               active === tab.id
                 ? 'bg-accent text-black'
-                : 'bg-white border border-gray-300 text-gray-700 hover:border-accent'
+                : 'bg-white border border-gray-400 text-gray-700 hover:border-accent'
             }`}
           >
             {tab.label}

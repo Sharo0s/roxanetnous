@@ -58,7 +58,7 @@ export function StepDisponibilites({ data, onChange }: Props) {
                       className={`w-8 h-8 rounded-md border transition ${
                         isSelected(jour.value, creneau.value)
                           ? 'bg-accent border-accent text-black'
-                          : 'bg-white border-gray-300 hover:border-gray-500'
+                          : 'bg-white border-gray-400 hover:border-gray-500'
                       }`}
                     >
                       {isSelected(jour.value, creneau.value) && (

@@ -128,7 +128,7 @@ export function ValidationActions({ profileId, status }: Props) {
               type="datetime-local"
               value={visioDate}
               onChange={(e) => setVisioDate(e.target.value)}
-              className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
+              className="w-full rounded-lg border border-gray-400 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
             />
           </div>
           <div>
@@ -140,7 +140,7 @@ export function ValidationActions({ profileId, status }: Props) {
               onChange={(e) => setVisioNotes(e.target.value)}
               placeholder="Impressions, points notables, éléments à retenir..."
               rows={4}
-              className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black resize-none"
+              className="w-full rounded-lg border border-gray-400 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black resize-none"
             />
           </div>
         </div>
@@ -160,7 +160,7 @@ export function ValidationActions({ profileId, status }: Props) {
                 : 'Précisez les documents ou informations manquants...'
             }
             rows={4}
-            className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black resize-none"
+            className="w-full rounded-lg border border-gray-400 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black resize-none"
           />
         </div>
       )}

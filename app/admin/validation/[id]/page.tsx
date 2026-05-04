@@ -188,7 +188,7 @@ export default async function ValidationDetailPage({
                     href={cvUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-sm hover:border-accent transition"
+                    className="inline-flex items-center px-4 py-2 border border-gray-400 rounded-lg text-sm hover:border-accent transition"
                   >
                     Voir le document
                   </a>
@@ -203,7 +203,7 @@ export default async function ValidationDetailPage({
                     href={identiteUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-sm hover:border-accent transition"
+                    className="inline-flex items-center px-4 py-2 border border-gray-400 rounded-lg text-sm hover:border-accent transition"
                   >
                     Voir le document
                   </a>
@@ -218,7 +218,7 @@ export default async function ValidationDetailPage({
                     href={permisUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-sm hover:border-accent transition"
+                    className="inline-flex items-center px-4 py-2 border border-gray-400 rounded-lg text-sm hover:border-accent transition"
                   >
                     Voir le document
                   </a>
@@ -233,7 +233,7 @@ export default async function ValidationDetailPage({
                     href={d.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-sm hover:border-accent transition"
+                    className="inline-flex items-center px-4 py-2 border border-gray-400 rounded-lg text-sm hover:border-accent transition"
                   >
                     Voir le document
                   </a>

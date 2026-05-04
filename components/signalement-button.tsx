@@ -77,7 +77,7 @@ export function SignalementButton({ cibleType, cibleId }: Props) {
         <select
           value={motif}
           onChange={(e) => setMotif(e.target.value)}
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#FFB06E]"
+          className="w-full px-3 py-2 border border-gray-400 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-focus-ring"
         >
           <option value="">Sélectionnez...</option>
           {MOTIFS.map((m) => (
@@ -91,7 +91,7 @@ export function SignalementButton({ cibleType, cibleId }: Props) {
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           rows={4}
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#FFB06E] resize-none"
+          className="w-full px-3 py-2 border border-gray-400 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-focus-ring resize-none"
           placeholder="Décrivez le problème..."
         />
       </div>

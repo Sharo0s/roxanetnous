@@ -41,7 +41,7 @@ export function ContactForm() {
             name="firstname"
             type="text"
             required
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#FFB06E]"
+            className="w-full px-3 py-2 border border-gray-400 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-focus-ring"
             placeholder="Votre prénom"
           />
         </div>
@@ -52,7 +52,7 @@ export function ContactForm() {
             name="lastname"
             type="text"
             required
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#FFB06E]"
+            className="w-full px-3 py-2 border border-gray-400 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-focus-ring"
             placeholder="Votre nom"
           />
         </div>
@@ -64,7 +64,7 @@ export function ContactForm() {
           name="email"
           type="email"
           required
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#FFB06E]"
+          className="w-full px-3 py-2 border border-gray-400 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-focus-ring"
           placeholder="vous@exemple.com"
         />
       </div>
@@ -76,7 +76,7 @@ export function ContactForm() {
           type="text"
           required
           maxLength={150}
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#FFB06E]"
+          className="w-full px-3 py-2 border border-gray-400 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-focus-ring"
           placeholder="Sujet de votre message"
         />
       </div>
@@ -88,7 +88,7 @@ export function ContactForm() {
           required
           rows={4}
           maxLength={2000}
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#FFB06E] resize-none"
+          className="w-full px-3 py-2 border border-gray-400 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-focus-ring resize-none"
           placeholder="Votre message..."
         />
       </div>

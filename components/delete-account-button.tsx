@@ -24,7 +24,7 @@ export function DeleteAccountButton() {
     return (
       <button
         onClick={() => setShowConfirm(true)}
-        className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100 transition text-sm"
+        className="px-4 py-2 border border-gray-400 text-gray-700 rounded-lg hover:bg-gray-100 transition text-sm"
       >
         Supprimer mon compte
       </button>
@@ -63,7 +63,7 @@ export function DeleteAccountButton() {
             setConfirmation('')
             setError(null)
           }}
-          className="px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-100 transition"
+          className="px-4 py-2 border border-gray-400 rounded-lg text-sm hover:bg-gray-100 transition"
           disabled={loading}
         >
           Annuler

@@ -193,7 +193,7 @@ export function AccompagnanteProfileForm({ userInfo, profile, departementsOuvert
               type="text"
               value={firstName}
               onChange={(e) => setFirstName(e.target.value)}
-              className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
+              className="w-full rounded-lg border border-gray-400 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
             />
           </div>
           <div>
@@ -202,7 +202,7 @@ export function AccompagnanteProfileForm({ userInfo, profile, departementsOuvert
               type="text"
               value={lastName}
               onChange={(e) => setLastName(e.target.value)}
-              className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
+              className="w-full rounded-lg border border-gray-400 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
             />
           </div>
           <div>
@@ -220,7 +220,7 @@ export function AccompagnanteProfileForm({ userInfo, profile, departementsOuvert
               type="tel"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
-              className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
+              className="w-full rounded-lg border border-gray-400 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
             />
           </div>
         </div>
@@ -233,7 +233,7 @@ export function AccompagnanteProfileForm({ userInfo, profile, departementsOuvert
           onChange={(e) => setDescription(e.target.value)}
           placeholder="Présentez-vous, votre parcours et votre approche..."
           rows={5}
-          className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black resize-none"
+          className="w-full rounded-lg border border-gray-400 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black resize-none"
         />
       </div>
 
@@ -259,7 +259,7 @@ export function AccompagnanteProfileForm({ userInfo, profile, departementsOuvert
             className={`w-full p-4 rounded-lg border-2 border-dashed transition text-sm ${
               cvFileName
                 ? 'border-accent bg-gray-50'
-                : 'border-gray-300 hover:border-gray-500'
+                : 'border-gray-400 hover:border-gray-500'
             }`}
           >
             {uploadingCv
@@ -321,7 +321,7 @@ export function AccompagnanteProfileForm({ userInfo, profile, departementsOuvert
                         className={`w-full rounded-lg border-2 border-dashed px-4 py-3 text-sm transition ${
                           diplomeFileNames[d.value]
                             ? 'border-accent bg-gray-50 text-gray-700'
-                            : 'border-gray-300 text-gray-500 hover:border-gray-400'
+                            : 'border-gray-400 text-gray-500 hover:border-gray-400'
                         }`}
                       >
                         {uploadingDiplome === d.value
@@ -344,7 +344,7 @@ export function AccompagnanteProfileForm({ userInfo, profile, departementsOuvert
           <select
             value={experience}
             onChange={(e) => setExperience(e.target.value)}
-            className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
+            className="w-full rounded-lg border border-gray-400 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
           >
             {EXPERIENCE_LEVELS.map((e) => (
               <option key={e.value} value={e.value}>{e.label}</option>
@@ -364,7 +364,7 @@ export function AccompagnanteProfileForm({ userInfo, profile, departementsOuvert
               className={`px-3 py-1.5 rounded-full text-sm border transition ${
                 specialites.includes(spec.value)
                   ? 'bg-accent text-black border-accent'
-                  : 'bg-white text-gray-700 border-gray-300 hover:border-gray-400'
+                  : 'bg-white text-gray-700 border-gray-400 hover:border-gray-400'
               }`}
             >
               {spec.label}
@@ -393,7 +393,7 @@ export function AccompagnanteProfileForm({ userInfo, profile, departementsOuvert
               onChange={(e) => setRayonKm(Number(e.target.value))}
               min={1}
               max={100}
-              className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
+              className="w-full rounded-lg border border-gray-400 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
             />
           </div>
         </div>
@@ -407,7 +407,7 @@ export function AccompagnanteProfileForm({ userInfo, profile, departementsOuvert
                 type="checkbox"
                 checked={permisConduire}
                 onChange={(e) => setPermisConduire(e.target.checked)}
-                className="rounded border-gray-300"
+                className="rounded border-gray-400"
               />
               Permis de conduire
             </label>
@@ -425,7 +425,7 @@ export function AccompagnanteProfileForm({ userInfo, profile, departementsOuvert
                   type="button"
                   onClick={() => permisFileRef.current?.click()}
                   disabled={uploadingPermis}
-                  className="w-full rounded-lg border-2 border-dashed border-gray-300 px-4 py-3 text-sm text-gray-500 hover:border-gray-400 transition"
+                  className="w-full rounded-lg border-2 border-dashed border-gray-400 px-4 py-3 text-sm text-gray-500 hover:border-gray-400 transition"
                 >
                   {uploadingPermis
                     ? 'Upload en cours...'
@@ -442,7 +442,7 @@ export function AccompagnanteProfileForm({ userInfo, profile, departementsOuvert
               type="checkbox"
               checked={vehicule}
               onChange={(e) => setVehicule(e.target.checked)}
-              className="rounded border-gray-300"
+              className="rounded border-gray-400"
             />
             Véhicule personnel
           </label>
@@ -475,7 +475,7 @@ export function AccompagnanteProfileForm({ userInfo, profile, departementsOuvert
                           className={`w-8 h-8 rounded-md border transition ${
                             isSelected
                               ? 'bg-accent border-accent text-black'
-                              : 'bg-white border-gray-300 hover:border-gray-400'
+                              : 'bg-white border-gray-400 hover:border-gray-400'
                           }`}
                         >
                           {isSelected ? 'O' : ''}

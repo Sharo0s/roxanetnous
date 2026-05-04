@@ -192,7 +192,7 @@ export function DepartementsManager({ regions }: Props) {
                 disabled={enCours.has(`r:${region.nom}`)}
                 className={`text-xs px-3 py-1.5 rounded-lg border font-medium transition-colors ml-3 ${
                   e === 'tous'
-                    ? 'border-gray-300 text-gray-700 hover:bg-gray-100'
+                    ? 'border-gray-400 text-gray-700 hover:bg-gray-100'
                     : 'border-black bg-black text-white hover:bg-gray-800'
                 } disabled:opacity-50 disabled:cursor-not-allowed`}
               >

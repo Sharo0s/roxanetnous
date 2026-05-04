@@ -72,7 +72,7 @@ export default async function AdminAnnoncesPage({
           <Link
             href="/admin/annonces?type=accompagnante"
             className={`px-4 py-2 rounded-lg text-sm font-medium transition btn-hover ${
-              type === 'accompagnante' ? 'bg-accent text-black' : 'bg-white border border-gray-300 text-gray-700 hover:border-accent'
+              type === 'accompagnante' ? 'bg-accent text-black' : 'bg-white border border-gray-400 text-gray-700 hover:border-accent'
             }`}
           >
             Accompagnantes ({auxCount})
@@ -80,7 +80,7 @@ export default async function AdminAnnoncesPage({
           <Link
             href="/admin/annonces?type=accompagne"
             className={`px-4 py-2 rounded-lg text-sm font-medium transition btn-hover ${
-              type === 'accompagne' ? 'bg-accent text-black' : 'bg-white border border-gray-300 text-gray-700 hover:border-accent'
+              type === 'accompagne' ? 'bg-accent text-black' : 'bg-white border border-gray-400 text-gray-700 hover:border-accent'
             }`}
           >
             Accompagnés ({benCount})

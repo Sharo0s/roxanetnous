@@ -27,7 +27,7 @@ export function AnnonceStatusToggle({ annonceId, currentStatus, type }: Props) {
     <button
       onClick={handleToggle}
       disabled={loading}
-      className="px-3 py-1.5 text-xs font-medium border border-gray-300 text-gray-700 rounded-lg hover:border-accent transition disabled:opacity-50"
+      className="px-3 py-1.5 text-xs font-medium border border-gray-400 text-gray-700 rounded-lg hover:border-accent transition disabled:opacity-50"
     >
       {loading
         ? '...'

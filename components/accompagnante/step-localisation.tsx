@@ -70,7 +70,7 @@ export function StepLocalisation({ data, onChange, onUpload, onPermisUploaded, d
               type="checkbox"
               checked={data.permis_conduire}
               onChange={(e) => onChange({ permis_conduire: e.target.checked })}
-              className="h-4 w-4 rounded border-gray-300 accent-black"
+              className="h-4 w-4 rounded border-gray-400 accent-black"
             />
             <span className="text-sm">Permis de conduire</span>
           </label>
@@ -88,7 +88,7 @@ export function StepLocalisation({ data, onChange, onUpload, onPermisUploaded, d
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
                 disabled={uploading}
-                className="w-full rounded-lg border-2 border-dashed border-gray-300 px-4 py-3 text-sm text-gray-500 hover:border-gray-400 transition"
+                className="w-full rounded-lg border-2 border-dashed border-gray-400 px-4 py-3 text-sm text-gray-500 hover:border-gray-400 transition"
               >
                 {uploading
                   ? 'Upload en cours...'
@@ -106,7 +106,7 @@ export function StepLocalisation({ data, onChange, onUpload, onPermisUploaded, d
             type="checkbox"
             checked={data.vehicule}
             onChange={(e) => onChange({ vehicule: e.target.checked })}
-            className="h-4 w-4 rounded border-gray-300 accent-black"
+            className="h-4 w-4 rounded border-gray-400 accent-black"
           />
           <span className="text-sm">Véhicule personnel</span>
         </label>

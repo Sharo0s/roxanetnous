@@ -83,7 +83,7 @@ export function GrantSubscriptionModal({ userId, userName }: Props) {
                 <div className="flex gap-3">
                   <button
                     onClick={handleClose}
-                    className="flex-1 px-4 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                    className="flex-1 px-4 py-2 text-sm border border-gray-400 rounded-lg hover:bg-gray-50 transition-colors"
                   >
                     Annuler
                   </button>
@@ -128,7 +128,7 @@ export function GrantSubscriptionModal({ userId, userName }: Props) {
                 <p className="text-sm text-red-600 mb-4">{errorMsg}</p>
                 <button
                   onClick={() => setStep('choose')}
-                  className="px-4 py-2 text-sm font-medium border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                  className="px-4 py-2 text-sm font-medium border border-gray-400 rounded-lg hover:bg-gray-50 transition-colors"
                 >
                   Réessayer
                 </button>

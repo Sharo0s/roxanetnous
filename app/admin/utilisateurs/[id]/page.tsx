@@ -489,14 +489,14 @@ export default async function AdminUtilisateurDetailPage({
       <div className="mt-8 flex flex-wrap gap-3">
         <a
           href={`mailto:${userData.email}`}
-          className="px-4 py-2.5 text-sm font-medium bg-white border border-gray-300 rounded-lg hover:border-accent transition-colors"
+          className="px-4 py-2.5 text-sm font-medium bg-white border border-gray-400 rounded-lg hover:border-accent transition-colors"
         >
           Envoyer un email
         </a>
         {auxProfile?.validation_status === 'valide' && (
           <Link
             href={`/recherche?accompagnante=${id}`}
-            className="px-4 py-2.5 text-sm font-medium bg-white border border-gray-300 rounded-lg hover:border-accent transition-colors"
+            className="px-4 py-2.5 text-sm font-medium bg-white border border-gray-400 rounded-lg hover:border-accent transition-colors"
             target="_blank"
           >
             Voir le profil public

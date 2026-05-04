@@ -155,7 +155,7 @@ export default async function AdminParrainagesPage({
       <div className="flex items-center gap-2 mb-4 flex-wrap">
         <Link
           href={buildHref({ statut: '', page: '1' })}
-          className={`px-3 py-1.5 text-xs rounded-full border ${!statutFilter ? 'bg-black text-white border-black' : 'bg-white text-gray-700 border-gray-300 hover:border-black'}`}
+          className={`px-3 py-1.5 text-xs rounded-full border ${!statutFilter ? 'bg-black text-white border-black' : 'bg-white text-gray-700 border-gray-400 hover:border-black'}`}
         >
           Tous
         </Link>
@@ -163,14 +163,14 @@ export default async function AdminParrainagesPage({
           <Link
             key={s}
             href={buildHref({ statut: s, page: '1' })}
-            className={`px-3 py-1.5 text-xs rounded-full border ${statutFilter === s ? 'bg-black text-white border-black' : 'bg-white text-gray-700 border-gray-300 hover:border-black'}`}
+            className={`px-3 py-1.5 text-xs rounded-full border ${statutFilter === s ? 'bg-black text-white border-black' : 'bg-white text-gray-700 border-gray-400 hover:border-black'}`}
           >
             {STATUT_LABELS[s] || s}
           </Link>
         ))}
         <Link
           href={buildHref({ flag: flagOnly ? '' : '1', page: '1' })}
-          className={`px-3 py-1.5 text-xs rounded-full border ${flagOnly ? 'bg-black text-white border-black' : 'bg-white text-gray-700 border-gray-300 hover:border-black'}`}
+          className={`px-3 py-1.5 text-xs rounded-full border ${flagOnly ? 'bg-black text-white border-black' : 'bg-white text-gray-700 border-gray-400 hover:border-black'}`}
         >
           Avec flag
         </Link>
@@ -275,7 +275,7 @@ export default async function AdminParrainagesPage({
             {page > 1 && (
               <Link
                 href={buildHref({ page: String(page - 1) })}
-                className="px-3 py-1.5 text-xs rounded border border-gray-300 bg-white hover:border-black"
+                className="px-3 py-1.5 text-xs rounded border border-gray-400 bg-white hover:border-black"
               >
                 Précédent
               </Link>
@@ -283,7 +283,7 @@ export default async function AdminParrainagesPage({
             {page < totalPages && (
               <Link
                 href={buildHref({ page: String(page + 1) })}
-                className="px-3 py-1.5 text-xs rounded border border-gray-300 bg-white hover:border-black"
+                className="px-3 py-1.5 text-xs rounded border border-gray-400 bg-white hover:border-black"
               >
                 Suivant
               </Link>

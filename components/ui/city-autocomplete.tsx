@@ -131,7 +131,7 @@ export function CityAutocomplete({
   }
 
   const inputClasses =
-    'w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black'
+    'w-full rounded-lg border border-gray-400 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-focus-ring'
 
   return (
     <div ref={containerRef} className="relative grid grid-cols-2 gap-4">

@@ -122,7 +122,7 @@ export function DisponibleToggle({ initial, initialIndisponibleJusquAu, compact 
               value={dateRetour}
               min={today}
               onChange={(e) => setDateRetour(e.target.value)}
-              className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent"
+              className="w-full rounded-lg border border-gray-400 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent"
             />
           </div>
           <div className="flex gap-2">
@@ -136,7 +136,7 @@ export function DisponibleToggle({ initial, initialIndisponibleJusquAu, compact 
             <button
               onClick={handleCancel}
               disabled={loading}
-              className="px-4 py-2 text-sm font-medium border border-gray-300 rounded-lg hover:border-accent transition"
+              className="px-4 py-2 text-sm font-medium border border-gray-400 rounded-lg hover:border-accent transition"
             >
               Annuler
             </button>

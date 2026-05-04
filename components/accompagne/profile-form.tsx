@@ -84,7 +84,7 @@ export function AccompagneProfileForm({ userInfo, profile }: Props) {
               type="text"
               value={firstName}
               onChange={(e) => setFirstName(e.target.value)}
-              className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
+              className="w-full rounded-lg border border-gray-400 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
             />
           </div>
           <div>
@@ -93,7 +93,7 @@ export function AccompagneProfileForm({ userInfo, profile }: Props) {
               type="text"
               value={lastName}
               onChange={(e) => setLastName(e.target.value)}
-              className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
+              className="w-full rounded-lg border border-gray-400 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
             />
           </div>
           <div>
@@ -111,7 +111,7 @@ export function AccompagneProfileForm({ userInfo, profile }: Props) {
               type="tel"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
-              className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
+              className="w-full rounded-lg border border-gray-400 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
             />
           </div>
         </div>
@@ -127,7 +127,7 @@ export function AccompagneProfileForm({ userInfo, profile }: Props) {
               value={adresse}
               onChange={(e) => setAdresse(e.target.value)}
               placeholder="12 rue de la Paix"
-              className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
+              className="w-full rounded-lg border border-gray-400 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
             />
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -137,7 +137,7 @@ export function AccompagneProfileForm({ userInfo, profile }: Props) {
                 type="text"
                 value={ville}
                 onChange={(e) => setVille(e.target.value)}
-                className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
+                className="w-full rounded-lg border border-gray-400 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
               />
             </div>
             <div>
@@ -147,7 +147,7 @@ export function AccompagneProfileForm({ userInfo, profile }: Props) {
                 value={codePostal}
                 onChange={(e) => setCodePostal(e.target.value)}
                 maxLength={5}
-                className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
+                className="w-full rounded-lg border border-gray-400 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
               />
             </div>
           </div>

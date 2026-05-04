@@ -281,7 +281,7 @@ export default async function RecherchePage({
                     <select
                       name="annonce"
                       defaultValue={matchAnnonce.id}
-                      className="rounded-lg border border-gray-300 bg-white px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-black"
+                      className="rounded-lg border border-gray-400 bg-white px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-black"
                     >
                       {allBenAnnonces.map((a: any) => (
                         <option key={a.id} value={a.id}>{a.titre}</option>
