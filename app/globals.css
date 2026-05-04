@@ -91,3 +91,23 @@ h1, h2, h3, h4, h5, h6 {
   }
 
 }
+
+@media (prefers-reduced-motion: reduce) {
+  /* `.animate-spin` (spinners) volontairement non exempte : choix de respecter
+     strictement la preference utilisateur sur le mouvement, voir Story 2.5.4
+     review (D3). Spinner statique reste un signal de chargement valide. */
+  .animate-marquee,
+  .animate-marquee-reverse,
+  .animate-blink,
+  .animate-fade-in {
+    animation: none !important;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

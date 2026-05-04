@@ -52,3 +52,8 @@
 - `lint:fix` peut modifier `scripts/build-a11y-baseline.mjs` lui-meme (autofix `} catch {}` -> `/* empty */`) -- pollution diff potentielle. Fix : ajouter `scripts/` aux ignores du flat config ou corriger la directive `} catch {}` source.
 - `findLatestBaseline()` trie par nom (date ISO) -- un baseline genere avec clock skew futur (CI runner desynchronise) sera selectionne indefiniment, masquant des regressions massives jusqu'a la date reelle. Ajouter une validation `date <= today` dans le wrapper.
 - Position de la section "## DoD a11y" dans le template `bmad-create-story` -- placee apres `## Dev Agent Record / ### File List`, descend sous le fold sur stories volumineuses. Risque de DoD oubliee. Deplacer plus haut si necessaire.
+
+## Deferred from: code review of 2-5-4-prefers-reduced-motion (2026-05-05)
+
+- Pas de cleanup des `setTimeout` cascade au unmount [components/landing/hero-carte.tsx:179-185] -- pre-existant avant cette story (la cascade existait deja). Le `setTimeout` outer 1800ms et les inners 150ms*N ne sont pas clear au demontage. Strict Mode peut produire des indices doublons dans `visibleCities`. A traiter dans une story future de hardening hero-carte.
+- Toggle reduce -> normal asymetrique sur le path stroke [components/landing/hero-carte.tsx:165-173] -- tolerance acceptable per spec (AC8). Si l'utilisateur arrive avec `reduce` actif puis le desactive, le contour Bretagne reste statique, pas de re-trace. Documente.

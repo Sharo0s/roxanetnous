@@ -111,12 +111,33 @@ type VilleCoord = { ville: string; lat: number; lon: number }
 export function HeroCarte({ villes }: { villes: VilleCoord[] }) {
   const [visibleCities, setVisibleCities] = useState<number[]>([])
   const [hoveredCity, setHoveredCity] = useState<number | null>(null)
+  const [reducedMotion, setReducedMotion] = useState(false)
+  const reducedMotionRef = useRef(false)
   const containerRef = useRef<HTMLDivElement>(null)
   const pathRef = useRef<SVGPathElement>(null)
   const startedRef = useRef(false)
+  const currentAnimationRef = useRef<Animation | null>(null)
 
   // Convertir et melanger cote client uniquement
   const [cities, setCities] = useState<{ name: string; x: number; y: number }[]>([])
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)')
+    reducedMotionRef.current = mq.matches
+    setReducedMotion(mq.matches)
+    const handler = (e: MediaQueryListEvent) => {
+      reducedMotionRef.current = e.matches
+      setReducedMotion(e.matches)
+      if (e.matches && currentAnimationRef.current) {
+        currentAnimationRef.current.cancel()
+        currentAnimationRef.current = null
+        if (pathRef.current) pathRef.current.style.strokeDashoffset = '0'
+      }
+    }
+    mq.addEventListener('change', handler)
+    return () => mq.removeEventListener('change', handler)
+  }, [])
 
   useEffect(() => {
     // Filtrer les villes reellement dans le contour de la Bretagne
@@ -152,20 +173,28 @@ export function HeroCarte({ villes }: { villes: VilleCoord[] }) {
           if (path) {
             const length = path.getTotalLength()
             path.style.strokeDasharray = `${length}`
-            path.style.strokeDashoffset = `${length}`
-            path.animate(
-              [{ strokeDashoffset: length }, { strokeDashoffset: 0 }],
-              { duration: 2000, easing: 'ease-in-out', fill: 'forwards' }
-            )
+            if (reducedMotionRef.current) {
+              path.style.strokeDashoffset = '0'
+            } else {
+              path.style.strokeDashoffset = `${length}`
+              currentAnimationRef.current = path.animate(
+                [{ strokeDashoffset: length }, { strokeDashoffset: 0 }],
+                { duration: 2000, easing: 'ease-in-out', fill: 'forwards' }
+              )
+            }
           }
 
-          setTimeout(() => {
-            for (let i = 0; i < filtered.length; i++) {
-              setTimeout(() => {
-                setVisibleCities((prev) => [...prev, i])
-              }, i * 150)
-            }
-          }, 1800)
+          if (reducedMotionRef.current) {
+            setVisibleCities(filtered.map((_, i) => i))
+          } else {
+            setTimeout(() => {
+              for (let i = 0; i < filtered.length; i++) {
+                setTimeout(() => {
+                  setVisibleCities((prev) => [...prev, i])
+                }, i * 150)
+              }
+            }, 1800)
+          }
         }
       },
       { threshold: 0.15 }
@@ -206,7 +235,7 @@ export function HeroCarte({ villes }: { villes: VilleCoord[] }) {
               style={{ pointerEvents: 'none' }}
             >
               {/* Ripple */}
-              {isVisible && (
+              {isVisible && !reducedMotion && (
                 <circle cx={city.x} cy={city.y} r={5} fill="none" stroke="black" strokeWidth={1.5}>
                   <animate attributeName="r" from="5" to="25" dur="0.8s" fill="freeze" />
                   <animate attributeName="opacity" from="0.5" to="0" dur="0.8s" fill="freeze" />
@@ -214,7 +243,7 @@ export function HeroCarte({ villes }: { villes: VilleCoord[] }) {
               )}
 
               {/* Pulse */}
-              {isVisible && (
+              {isVisible && !reducedMotion && (
                 <circle cx={city.x} cy={city.y} r={5} fill="none" stroke="black" strokeWidth={0.8}>
                   <animate attributeName="r" values="5;16;5" dur="3s" repeatCount="indefinite" />
                   <animate attributeName="opacity" values="0.25;0;0.25" dur="3s" repeatCount="indefinite" />
