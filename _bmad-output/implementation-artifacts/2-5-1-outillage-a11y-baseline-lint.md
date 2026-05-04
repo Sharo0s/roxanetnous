@@ -1,6 +1,6 @@
 # Story 2.5.1 : Outillage a11y et baseline lint
 
-Status: ready-to-merge
+Status: done
 
 <!-- Note: Validation est optionnelle. Lancer `validate-create-story` avant `dev-story` pour un controle qualite. -->
 
