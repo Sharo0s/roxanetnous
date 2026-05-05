@@ -1,6 +1,6 @@
 # Story 2.6.7-C : Hierarchie h1 - Pages admin (11 pages) + bilan global cloture Lot B
 
-Status: review
+Status: done
 
 <!-- Note: Validation est optionnelle. Lancer `validate-create-story` avant `dev-story` pour un controle qualite. -->
 
