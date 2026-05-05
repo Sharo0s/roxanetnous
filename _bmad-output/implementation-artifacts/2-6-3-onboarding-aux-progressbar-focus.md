@@ -1,6 +1,6 @@
 # Story 2.6.3 : Onboarding accompagnante - progressbar ARIA + focus inter-etapes + erreurs annoncees
 
-Status: review
+Status: done
 
 <!-- Note: Validation est optionnelle. Lancer `validate-create-story` avant `dev-story` pour un controle qualite. -->
 
