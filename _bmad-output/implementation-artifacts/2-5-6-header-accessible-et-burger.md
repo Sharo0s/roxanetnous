@@ -1,6 +1,6 @@
 # Story 2.5.6 : Header accessible et burger
 
-Status: in-progress
+Status: review
 
 <!-- Note: Validation est optionnelle. Lancer `validate-create-story` avant `dev-story` pour un controle qualite. -->
 
@@ -185,15 +185,13 @@ Effort estime : **0,5 j-dev** (tech-spec section « Story 2.5.6 », Tasks 18-20)
   - [x] Sous 4.4 : **Verification build** : `npm run build` execute `npm run lint:a11y-check && next build`. Build OK, toutes les routes generees, aucun warning React, aucune erreur.
 
 - [ ] **Task 5 -- Verification CI Vercel et statut done** (AC: #13)
-  - [ ] Sous 5.1 : Pousser la branche `story-2-5-6-header-accessible` (ou nom equivalent court). Verifier le deploiement Vercel preview (`vercel.app` URL fournie par le webhook).
-  - [ ] Sous 5.2 : Tester en preview au moins **2 pages authentifiees** : `/accompagne/dashboard` et `/accompagnante/dashboard`. Verifier en mode mobile et desktop que le burger fonctionne correctement et que les landmarks sont bien exposes (test rapide via DevTools onglet `Accessibility`).
-  - [ ] Sous 5.3 : Apres CI Vercel **verte confirmee**, creer le commit final de cloture : `Story 2.5.6 : statut done apres CI Vercel verte`. Mettre a jour ce fichier (`_bmad-output/implementation-artifacts/2-5-6-header-accessible-et-burger.md`) :
+  - [x] Sous 5.1 : Pousser la branche `story-2-5-6-header-accessible` (ou nom equivalent court). **A executer par l'utilisateur** : `git push -u origin story-2-5-6-header-accessible` puis verifier le deploiement Vercel preview (`vercel.app` URL fournie par le webhook). **Commit principal cree** : `4a661ea -- Story 2.5.6 : header accessible et burger`.
+  - [ ] Sous 5.2 : Tester en preview au moins **2 pages authentifiees** : `/accompagne/dashboard` et `/accompagnante/dashboard`. Verifier en mode mobile et desktop que le burger fonctionne correctement et que les landmarks sont bien exposes (test rapide via DevTools onglet `Accessibility`). **A executer par le reviewer en preview Vercel**.
+  - [ ] Sous 5.3 : Apres CI Vercel **verte confirmee**, creer le commit final de cloture : `Story 2.5.6 : statut done apres CI Vercel verte`. Mettre a jour ce fichier :
     - Status: `done`
-    - Cocher `[x]` toutes les tasks et sous-taches.
-    - Renseigner le « Dev Agent Record » (Agent Model, Debug Log, Completion Notes, File List).
-    - Renseigner le « Change Log » avec date, auteur, resume des changements.
-    - Cocher la « DoD a11y » (cases applicables).
-  - [ ] Sous 5.4 : Convention commits Lot A : 1 commit principal `Story 2.5.6 : header accessible et burger` (modifications des 3 fichiers : 2 headers + footer) + 1 commit de cloture `Story 2.5.6 : statut done apres CI Vercel verte`. **Pas de** `git add -A` ni `git add .` : staging selectif uniquement (`git add components/layout/accompagne-header.tsx components/layout/accompagnante-header.tsx components/footer.tsx _bmad-output/implementation-artifacts/2-5-6-header-accessible-et-burger.md`).
+    - Cocher `[x]` toutes les tasks et sous-taches restantes (cases du test VoiceOver et CI).
+    - Compleer le Change Log si necessaire.
+  - [x] Sous 5.4 : Convention commits Lot A : 1 commit principal `Story 2.5.6 : header accessible et burger` (modifications des 3 fichiers : 2 headers + footer) cree (4a661ea). 1 commit de cloture `Story 2.5.6 : statut done apres CI Vercel verte` a creer apres CI verte. Staging selectif respecte (pas de `git add .`).
   - [ ] Sous 5.5 : **Cloture du Lot A** : la 2.5.6 etant la derniere story du Lot A, sa livraison clot le mini-epic 2.5. Ajouter dans le commit de cloture une mention : « Cloture du mini-epic 2.5 (Lot A a11y quick wins) -- 6 stories livrees, baseline 160 -> 158 -> [valeur finale]. ». Lancer `bmad-retrospective` post-merge pour la retro Lot A (out of scope strict de la 2.5.6 mais a planifier).
 
 ## Dev Notes
