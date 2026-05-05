@@ -3,11 +3,11 @@
     "Ne pas regenerer ce baseline pour faire passer la CI sans justification dans le PR.",
     "Toute regeneration doit etre motivee : montee de version axe-core, livraison story Lot B, ou correction massive justifiee."
   ],
-  "generatedAt": "2026-05-05T13:41:04.966Z",
-  "commitSha": "b8f0b69bedeb7783056edb611896f9c4883b1136",
+  "generatedAt": "2026-05-05T22:12:27.574Z",
+  "commitSha": "bcabe50613032cefd19a47216409a8fb653311a0",
   "totals": {
-    "violations": 1,
-    "nodes": 1
+    "violations": 0,
+    "nodes": 0
   },
   "parcours": [
     {
@@ -20,23 +20,7 @@
       "id": "p2-recherche",
       "url": "/recherche",
       "proxy": false,
-      "violations": [
-        {
-          "ruleId": "select-name",
-          "impact": "critical",
-          "count": 1,
-          "help": "Select element must have an accessible name",
-          "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/select-name?application=playwright",
-          "nodes": [
-            {
-              "target": [
-                "select"
-              ],
-              "failureSummary": "Fix any of the following:\n  Element does not have an implicit (wrapped) <label>\n  Element does not have an explicit <label>\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\""
-            }
-          ]
-        }
-      ]
+      "violations": []
     },
     {
       "id": "p3-messagerie",

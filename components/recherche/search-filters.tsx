@@ -178,8 +178,9 @@ export function SearchFilters({ currentVille, currentSpecialite, currentExperien
           )}
         </div>
         <div>
-          <label className="block text-xs font-medium text-gray-500 mb-1">Expérience</label>
+          <label htmlFor="search-filter-experience" className="block text-xs font-medium text-gray-500 mb-1">Expérience</label>
           <select
+            id="search-filter-experience"
             value={experience}
             onChange={(e) => setExperience(e.target.value)}
             className="w-full rounded-lg border border-gray-400 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
