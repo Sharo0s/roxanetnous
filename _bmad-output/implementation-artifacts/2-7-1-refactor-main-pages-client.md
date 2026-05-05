@@ -1,6 +1,6 @@
 # Story 2.7.1 : Refactor pages a `<main>` rendu par composant client
 
-Status: review
+Status: done
 
 <!-- Note: Validation est optionnelle. Lancer `validate-create-story` avant `dev-story` pour un controle qualite. -->
 
