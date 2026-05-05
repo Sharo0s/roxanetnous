@@ -1,14 +1,20 @@
 ---
-stepsCompleted: [step-01-init, step-02-discovery, step-03-success, step-04-journeys, step-05-domain, step-06-innovation, step-07-project-type, step-08-scoping, step-09-functional, step-10-nonfunctional, step-11-polish]
+stepsCompleted: [step-01-init, step-02-discovery, step-03-success, step-04-journeys, step-05-domain, step-06-innovation, step-07-project-type, step-08-scoping, step-09-functional, step-10-nonfunctional, step-11-polish, step-e-01-discovery, step-e-02-review, step-e-03-edit]
 inputDocuments:
   - product-brief-roxanetnous-2026-02-09.md
   - architecture-technique-roxanetnous-2026-02-09.md
+  - audit-a11y-2026-05-04.md
+  - ../test-artifacts/nfr-assessment-a11y-2026-05-04.md
 workflowType: 'prd'
 classification:
   projectType: web_app
   domain: general
   complexity: medium
   projectContext: greenfield
+lastEdited: '2026-05-04'
+editHistory:
+  - date: '2026-05-04'
+    changes: 'NFR Accessibilité (WCAG 2.2 AA / RGAA / EAA) — remplacement intégral de la sous-section Accessibilité dans Exigences Non-Fonctionnelles. Ajout des 6 parcours critiques, critères mesurables, calendrier en 3 lots (A/B/C), DoD a11y par story, page de déclaration publique.'
 ---
 
 # Product Requirements Document - roxanetnous
@@ -259,10 +265,32 @@ classification:
 - Balises sémantiques HTML5
 - URLs propres et descriptives
 
-### Accessibilité
+### Accessibilité (NFR transverse)
 
-- Pas de conformité WCAG formelle visée
-- Bonne pratique UX : texte lisible, contraste suffisant, navigation simple
+**Standard cible :** WCAG 2.2 niveau AA, aligné RGAA 4.1, anticipant la conformité à l'Acte européen sur l'accessibilité (EAA, en vigueur depuis le 28 juin 2025).
+
+**Périmètre de conformité :** la conformité AA est exigée sur les **6 parcours critiques** suivants : (1) onboarding auxiliaire, (2) recherche bénéficiaire et favoris, (3) messagerie temps réel, (4) inscription et checkout Stripe, (5) landing page publique, (6) suppression compte / export RGPD. Les autres pages doivent respecter les exigences de base (sémantique HTML, contrastes, focus, labels) sans audit exhaustif obligatoire.
+
+**Critères d'acceptation mesurables :**
+
+- **Contrastes :** texte normal ≥ 4,5:1 ; éléments d'interface (bordures, focus, icônes informatives) ≥ 3:1.
+- **Navigation clavier :** 100 % des parcours critiques complétables au clavier seul, focus visible en permanence (ring contrasté ≥ 3:1, épaisseur ≥ 2 px), skip-link « Aller au contenu » fonctionnel sur toutes les pages.
+- **Formulaires :** chaque champ a un `<label>` associé via `htmlFor` ou `aria-labelledby` ; erreurs liées au champ (`aria-describedby` + `aria-invalid`) ; champs requis annoncés textuellement (pas uniquement par couleur).
+- **Composants dynamiques :** ARIA states corrects sur burger, modales, progressbars (`aria-expanded`, `aria-controls`, `aria-modal`, `role="progressbar"`).
+- **Régions live :** messagerie en `role="log"` + `aria-live="polite"` ; toasts en `aria-live`.
+- **Mouvement :** respect de `prefers-reduced-motion: reduce` (animations désactivables).
+- **Alternatives textuelles :** 100 % des images informatives ont un `alt` ; carte hero SVG accompagnée d'un équivalent textuel.
+- **Outillage :** `eslint-plugin-jsx-a11y` en CI (build rouge sur nouvelle violation) ; tests automatisés `@axe-core/playwright` sur les 6 parcours critiques (objectif : 0 violation Critical/Serious) ; tests manuels VoiceOver et NVDA documentés sur les parcours onboarding auxiliaire et messagerie, exécutés avant chaque release majeure.
+- **Process :** chaque story future avec impact UI inclut une definition-of-done a11y (labels, focus, contrastes, ARIA, clavier, vérification ponctuelle au lecteur d'écran). Une story ne peut être marquée Done sans validation explicite de cette checklist.
+- **Déclaration publique :** page `/accessibilite` accessible depuis le footer, indiquant le niveau de conformité, la méthode d'évaluation, la date de mise à jour et un contact dédié.
+
+**Calendrier de mise en conformité :**
+
+- **Lot A — Quick wins (3-4 j-dev) :** micro-épic exécuté **avant le démarrage de l'épic 3**. Couvre le minimum sémantique : skip-link, focus global conforme, `prefers-reduced-motion`, refactor du composant `Input` (labels + erreurs), ARIA burger, palette de contrastes durcie, installation `eslint-plugin-jsx-a11y`.
+- **Lot B — Conformité fonctionnelle (5-7 j-dev) :** étalé sur l'épic 3. Couvre les parcours critiques : ARIA progressbar et gestion focus dans l'onboarding, régions live messagerie, audit Leaflet, alternative textuelle carte hero, audit complet des formulaires.
+- **Lot C — Excellence (3-5 j-dev) :** épics 4-5. Suite axe-core en CI sur les 6 parcours, tests manuels VoiceOver/NVDA documentés, page de déclaration d'accessibilité, cible tactile 44×44 px, audit additionnel.
+
+**Statut actuel (audité le 2026-05-04) :** non conforme (~25-30 % WCAG 2.2 AA). Voir audit complet : `_bmad-output/planning-artifacts/audit-a11y-2026-05-04.md` et NFR : `_bmad-output/test-artifacts/nfr-assessment-a11y-2026-05-04.md`.
 
 ## Exigences Fonctionnelles
 
