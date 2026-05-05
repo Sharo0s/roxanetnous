@@ -1,6 +1,6 @@
 # Story 2.6.7-A : Hierarchie h1 - Pages publiques + auth (10 pages)
 
-Status: review
+Status: done
 
 <!-- Note: Validation est optionnelle. Lancer `validate-create-story` avant `dev-story` pour un controle qualite. -->
 
