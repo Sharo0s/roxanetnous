@@ -1,6 +1,6 @@
 # Story 2.6.6 : Audit Leaflet et alternative clavier (composant tiers)
 
-Status: review
+Status: done
 
 <!-- Note: Validation est optionnelle. Lancer `validate-create-story` avant `dev-story` pour un controle qualite. -->
 
