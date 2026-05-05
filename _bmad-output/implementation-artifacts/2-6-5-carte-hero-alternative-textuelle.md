@@ -1,6 +1,6 @@
 # Story 2.6.5 : Carte hero - alternative textuelle visible (zone de couverture)
 
-Status: review
+Status: done
 
 <!-- Note: Validation est optionnelle. Lancer `validate-create-story` avant `dev-story` pour un controle qualite. -->
 
