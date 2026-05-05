@@ -60,3 +60,4 @@ A renseigner pour toute story avec impact UI (ignorer si pas de changement visue
 - [ ] Navigation clavier complete (Tab, Enter, Escape, fleches selon pattern)
 - [ ] Verification ponctuelle au lecteur d'ecran (VoiceOver ou NVDA) sur le composant touche
 - [ ] Pas de regression `eslint-plugin-jsx-a11y` (`npm run lint:a11y-check` vert en CI)
+- [ ] Pas de regression axe-core (`npm run a11y:axe:check` vert ou delta documente avec justification dans la PR)

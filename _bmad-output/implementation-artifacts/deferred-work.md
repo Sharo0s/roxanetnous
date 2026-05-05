@@ -63,3 +63,10 @@
 - Violations baseline `label-has-for (1) + label-has-associated-control (1)` sur `register-form.tsx` [components/auth/register-form.tsx:233] -- pre-existantes, viennent d'un autre label orphelin (step `Role` qui groupe des boutons radio non-input « Vous etes »), pas du label `parrainage_code`. Decouvert post-application D2. La spec story Dev Notes ligne 235 attribuait incorrectement les 3 violations au label `parrainage_code`. Reel split : 1 du `parrainage_code` (resorbe par D2) + 2 du step `Role` (ce defer). A traiter dans une story dediee Lot B (refactor des labels groupant des controles non-input via fieldset/legend ou `role="radiogroup"` + `aria-labelledby`).
 - Violations baseline `jsx-a11y/no-autofocus x4` sur `register-form.tsx` + `x1` sur `app/login/page.tsx` -- hors scope explicite story 2.5.5 (Dev Notes ligne 235). A traiter Lot B ou story dediee.
 - Test manuel VoiceOver `/forgot-password` ET `/register?role=accompagnante` (Task 3 cochee `[ ]`) -- bloqueur pour passage en `done`, hors revue de code statique. A executer par Sylvain avant merge.
+
+## Deferred from: code review of 2-6-1-outillage-axe-core-playwright (2026-05-05)
+
+- Nouveau parcours avec 0 violation passe silencieusement jusqu'a regen manuelle [scripts/check-axe-baseline.mjs:126-135] -- comportement acceptable, le warning explicite suffit, regen baseline = process documente dans tests/a11y/README.md.
+- Pas de garde explicite si port 3000 deja occupe en CI [playwright.config.ts:27-28] -- message Playwright standard suffit, audit local pour l'instant. A revoir avec la bascule CI Lot C.
+- Webserver timeout 120s peut etre court en CI cold cache [playwright.config.ts:27] -- pas de CI Vercel actuellement pour la suite Playwright, a revoir avec la bascule CI Lot C.
+- `PLAYWRIGHT_JSON_OUTPUT_NAME` et `reportFile` hardcodes en sync dans build/check-axe-baseline.mjs [scripts/build-axe-baseline.mjs:44-55] -- pas un bug actuel, latent si refacto. A documenter en commentaire si modification.

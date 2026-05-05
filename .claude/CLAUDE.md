@@ -3,7 +3,7 @@
 ## Regles strictes
 
 - **Pas d'emojis** dans le code ni les interfaces.
-- **Accessibilite (a11y)** : toute story avec impact UI doit valider la checklist DoD a11y avant merge (labels, focus, contrastes, ARIA, clavier, lecteur d'ecran). Voir `.claude/skills/bmad-create-story/template.md`. La CI Vercel bloque toute regression `eslint-plugin-jsx-a11y` au-dela du baseline (`npm run lint:a11y-check`).
+- **Accessibilite (a11y)** : toute story avec impact UI doit valider la checklist DoD a11y avant merge (labels, focus, contrastes, ARIA, clavier, lecteur d'ecran). Voir `.claude/skills/bmad-create-story/template.md`. La CI Vercel bloque toute regression `eslint-plugin-jsx-a11y` au-dela du baseline (`npm run lint:a11y-check`). En complement, executer `npm run a11y:axe:check` localement avant merge pour valider le baseline dynamique axe-core (6 parcours critiques, voir `tests/a11y/README.md`).
 
 ## Contexte technique
 
