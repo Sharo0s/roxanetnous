@@ -302,15 +302,10 @@ export function RegisterForm() {
               className="space-y-4 animate-fade-in"
             >
               <div>
-                <label
-                  htmlFor="parrainage_code"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
-                  Code de parrainage <span className="text-gray-400">(optionnel)</span>
-                </label>
                 <Input
                   id="parrainage_code"
                   name="parrainage_code"
+                  label="Code de parrainage (optionnel)"
                   placeholder="Ex : K7QM2X9P"
                   maxLength={10}
                   value={parrainageCode}

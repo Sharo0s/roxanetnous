@@ -57,3 +57,9 @@
 
 - Pas de cleanup des `setTimeout` cascade au unmount [components/landing/hero-carte.tsx:179-185] -- pre-existant avant cette story (la cascade existait deja). Le `setTimeout` outer 1800ms et les inners 150ms*N ne sont pas clear au demontage. Strict Mode peut produire des indices doublons dans `visibleCities`. A traiter dans une story future de hardening hero-carte.
 - Toggle reduce -> normal asymetrique sur le path stroke [components/landing/hero-carte.tsx:165-173] -- tolerance acceptable per spec (AC8). Si l'utilisateur arrive avec `reduce` actif puis le desactive, le contour Bretagne reste statique, pas de re-trace. Documente.
+
+## Deferred from: code review of 2-5-5-composant-input-accessible (2026-05-05)
+
+- Violations baseline `label-has-for (1) + label-has-associated-control (1)` sur `register-form.tsx` [components/auth/register-form.tsx:233] -- pre-existantes, viennent d'un autre label orphelin (step `Role` qui groupe des boutons radio non-input « Vous etes »), pas du label `parrainage_code`. Decouvert post-application D2. La spec story Dev Notes ligne 235 attribuait incorrectement les 3 violations au label `parrainage_code`. Reel split : 1 du `parrainage_code` (resorbe par D2) + 2 du step `Role` (ce defer). A traiter dans une story dediee Lot B (refactor des labels groupant des controles non-input via fieldset/legend ou `role="radiogroup"` + `aria-labelledby`).
+- Violations baseline `jsx-a11y/no-autofocus x4` sur `register-form.tsx` + `x1` sur `app/login/page.tsx` -- hors scope explicite story 2.5.5 (Dev Notes ligne 235). A traiter Lot B ou story dediee.
+- Test manuel VoiceOver `/forgot-password` ET `/register?role=accompagnante` (Task 3 cochee `[ ]`) -- bloqueur pour passage en `done`, hors revue de code statique. A executer par Sylvain avant merge.
