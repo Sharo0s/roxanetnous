@@ -207,7 +207,7 @@ export function HeroCarte({ villes }: { villes: VilleCoord[] }) {
 
   return (
     <div ref={containerRef} className="w-full">
-      <svg viewBox="-30 -20 850 560" className="w-full h-auto" aria-hidden="true">
+      <svg viewBox="-30 -20 850 560" className="w-full h-auto" aria-hidden="true" role="presentation">
         {/* Contour Bretagne */}
         <path
           ref={pathRef}
@@ -294,6 +294,9 @@ export function HeroCarte({ villes }: { villes: VilleCoord[] }) {
           )
         })}
       </svg>
+      <p className="mt-3 text-center text-sm text-white/80">
+        Notre service couvre la Bretagne.
+      </p>
     </div>
   )
 }
