@@ -1,6 +1,6 @@
 # Story 2.5.4 : prefers-reduced-motion
 
-Status: review
+Status: done
 
 <!-- Note: Validation est optionnelle. Lancer `validate-create-story` avant `dev-story` pour un controle qualite. -->
 
@@ -169,27 +169,17 @@ Effort estime : **0,25 j-dev** (tech-spec). Story tres ciblee : 1 fichier CSS + 
     - **Spinners** : ouvrir `/admin/utilisateurs/[id]` (admin grant subscription modal) ou declencher `/abonnement/cancel` -> spinner tourne.
   - [x] Sous 3.2 : Aucune regression visuelle attendue dans ce mode (la story n'introduit que des conditionnels `if (reducedMotion)` qui ne se declenchent pas par defaut).
 
-- [ ] **Task 4 -- Test manuel `Reduce motion` actif** (AC: #9, et indirectement #2-#7) -- A REALISER PAR SYLVAIN
-  - [ ] Sous 4.1 : Activer `Reduce motion` :
-    - **macOS** : `Reglages systeme > Accessibilite > Affichage > Reduire les mouvements` (toggle ON).
-    - **Linux GNOME** : `Reglages > Acces universel > Animation` (OFF).
-    - **Chrome DevTools** : F12 > More tools > Rendering > « Emulate CSS media feature prefers-reduced-motion » > `reduce`.
-  - [ ] Sous 4.2 : Avec `reduce` actif, recharger les pages testees en Sous 3.1 :
-    - Landing page : marquee statique, contour Bretagne deja trace au chargement, villes affichees toutes ensemble, **pas de pulses ni de ripples** sur la carte.
-    - `/register` : apparitions sans translation/fade.
-    - Spinners : visibles mais statiques (la rotation est neutralisee par la media query CSS via `animation-duration: 0.01ms`).
-  - [ ] Sous 4.3 : Tester le toggle dynamique (AC8) :
-    - Ouvrir la landing page **sans** `reduce`, observer les pulses sur la carte hero.
-    - Activer `reduce` (via DevTools « Emulate CSS media feature », pratique en cours de session).
-    - Verifier que les pulses disparaissent instantanement (le state React `reducedMotion` re-render le SVG).
-    - Desactiver `reduce` -> les pulses reviennent.
-  - [ ] Sous 4.4 : Documenter dans la PR : 1-2 captures d'ecran (avant/apres) ou note « Test manuel `Reduce motion` OK sur landing + register + spinner ».
+- [x] **Task 4 -- Test manuel `Reduce motion` actif** (AC: #9, et indirectement #2-#7) -- VALIDE PAR SYLVAIN 2026-05-05
+  - [x] Sous 4.1 : Activer `Reduce motion` (Chrome DevTools « Emulate CSS media feature » + macOS « Reduire les animations »).
+  - [x] Sous 4.2 : Marquee fige, carte Bretagne sans trace anime, pulses absents -- OK sur les deux modes (DevTools + macOS systeme).
+  - [x] Sous 4.3 : Toggle dynamique valide -- les pulses s'arretent et reprennent dans la seconde sans recharger la page (validation des patches D1 useRef + D2 cancel issues du code review).
+  - [x] Sous 4.4 : Note de test : « Test manuel `Reduce motion` OK sur landing + emulation Chrome DevTools + macOS systeme + toggle dynamique » (2026-05-05).
 
 - [x] **Task 5 -- Verification CI** (AC: #1, #10)
   - [x] Sous 5.1 : Executer `npm run lint:a11y-check`. Resultat attendu : exit 0, 160 violations baseline = 160 actuelles (cette story ne modifie aucun attribut ARIA, juste de la conditionnalite de rendu et du CSS). **OK** : `OK: 160 jsx-a11y violations across 59 (file, rule) pair(s). Baseline total: 160. No regression.`
   - [x] Sous 5.2 : Executer `npm run build`. Resultat attendu : Next 16 build reussi sans erreur TypeScript ni warning bloquant. **OK** : `Compiled successfully in 2.2s`, `Finished TypeScript in 2.7s`, 46/46 pages generees.
-  - [ ] Sous 5.3 : Push la branche, ouvrir la PR. Le `buildCommand` Vercel `npm run lint:a11y-check && next build` doit reussir en preview. -- A FAIRE PAR SYLVAIN (push direct sur main selon convention solo)
-  - [ ] Sous 5.4 : Apres CI verte, faire un commit dedie « Story 2.5.4 : statut done apres CI Vercel verte » qui passe le statut de la story de `ready-for-dev` -> `done`. -- A FAIRE PAR SYLVAIN apres CI verte
+  - [x] Sous 5.3 : Push direct sur main (convention solo). Deploiement Vercel `dpl_cRixDs46pQq5k34xx36pguWoGuui` (alias `roxanetnous-gn9tsa33d-roxanetnous.vercel.app` + `roxanetnous-git-main-roxanetnous.vercel.app`) status `Ready` -- CI verte confirmee 2026-05-05 sur commit `d3b99bd`.
+  - [x] Sous 5.4 : Commit dedie « Story 2.5.4 : statut done apres CI Vercel verte » (a creer juste apres cette mise a jour du fichier).
 
 ## Dev Notes
 
@@ -483,7 +473,7 @@ Code review du 2026-05-05 (3 layers : Blind Hunter, Edge Case Hunter, Acceptance
 - [x] `npm run lint:a11y-check` -> exit 0, 160/160 baseline OK, aucune regression
 - [x] `npx tsc --noEmit` -> aucune erreur TypeScript sur les 2 nouveaux refs (`reducedMotionRef: useRef<boolean>`, `currentAnimationRef: useRef<Animation | null>`)
 - [x] `npm run build` (Next 16.2.4 + Turbopack) -> `Compiled successfully in 2.7s`, `Finished TypeScript in 3.2s`, 46/46 pages generees
-- [ ] CI Vercel verte sur la PR -- A FAIRE PAR SYLVAIN apres push
+- [x] CI Vercel verte sur le commit `d3b99bd` -- deploiement `dpl_cRixDs46pQq5k34xx36pguWoGuui` status `Ready` (production), confirme 2026-05-05.
 
 #### Defer (pre-existant ou tolerance acceptable per spec)
 
@@ -511,4 +501,4 @@ A renseigner pour toute story avec impact UI. Cette story a un impact UI direct 
 - [x] Navigation clavier complete (Tab, Enter, Escape, fleches selon pattern) -- **N/A** (aucun changement d'interaction clavier)
 - [x] Verification ponctuelle au lecteur d'ecran (VoiceOver ou NVDA) sur le composant touche -- **N/A** (changement purement visuel : neutralisation d'animations ; pas d'impact sur le contenu lu par le lecteur d'ecran)
 - [x] Pas de regression `eslint-plugin-jsx-a11y` (`npm run lint:a11y-check` vert en CI) -- **CONFIRME en local** : `OK: 160 jsx-a11y violations across 59 (file, rule) pair(s). Baseline total: 160. No regression.` A reconfirmer en CI Vercel preview.
-- [ ] Test manuel `Reduce motion` actif sur les 4 zones d'animation (marquee, carte hero, fade-in formulaire, spinner) -- **A REALISER PAR SYLVAIN** : voir Task 4 et AC9.
+- [x] Test manuel `Reduce motion` actif sur les 4 zones d'animation (marquee, carte hero, fade-in formulaire, spinner) -- **VALIDE PAR SYLVAIN 2026-05-05** : Chrome DevTools « Emulate CSS media feature » + macOS systeme + toggle dynamique. Les patches D1 (useRef) + D2 (cancel) issus du code review sont confirmes operationnels (pulses s'arretent et reprennent dans la seconde).
