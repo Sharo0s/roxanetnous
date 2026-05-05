@@ -60,17 +60,15 @@ export function OnboardingClient({ parrainage, departementsOuverts }: Props) {
   const [uploads, setUploads] = useState<{ cv: boolean; diplomes: Record<string, boolean> }>({ cv: false, diplomes: {} })
   const [permisUploaded, setPermisUploaded] = useState(false)
   const headingRef = useRef<HTMLHeadingElement>(null)
-  const isFirstRender = useRef(true)
+  const previousStep = useRef(step)
 
-  // Apres un changement d'etape, deplace le focus sur le h2 de la nouvelle etape
-  // pour que le lecteur d'ecran annonce le titre. Pas de focus au premier render
-  // (le skip-link et le flux clavier classique restent prioritaires a l'arrivee
-  // sur la page).
+  // Deplace le focus sur le h2 de la nouvelle etape uniquement quand `step`
+  // change effectivement (pas au mount, ni au double-mount React Strict Mode
+  // en dev). Le skip-link et le flux clavier classique restent prioritaires
+  // a l'arrivee sur la page.
   useEffect(() => {
-    if (isFirstRender.current) {
-      isFirstRender.current = false
-      return
-    }
+    if (previousStep.current === step) return
+    previousStep.current = step
     headingRef.current?.focus()
   }, [step])
 
