@@ -54,6 +54,7 @@ export default async function AccompagneDashboard() {
 
   return (
     <main id="main-content" tabIndex={-1} className="min-h-screen kraft bg-kraft focus:outline-none">
+      <h1 className="sr-only">Tableau de bord</h1>
       <AccompagneHeader
         userId={user.id}
         unreadCount={unreadCount}

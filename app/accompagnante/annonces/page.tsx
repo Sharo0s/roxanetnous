@@ -50,7 +50,7 @@ export default async function MesAnnoncesAccompagnante() {
 
       <div className="max-w-5xl mx-auto px-4 py-8 relative z-10">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold text-gray-900">Mes annonces</h2>
+          <h1 className="text-2xl font-bold text-gray-900">Mes annonces</h1>
           {subscribed && (
             <Link
               href="/accompagnante/annonces/nouvelle"

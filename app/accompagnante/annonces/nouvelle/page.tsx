@@ -33,7 +33,7 @@ export default async function NouvelleAnnonceAccompagnante() {
       />
 
       <div className="max-w-3xl mx-auto px-4 py-8 relative z-10">
-        <h2 className="text-2xl font-bold text-gray-900 mb-6">Créer une annonce</h2>
+        <h1 className="text-2xl font-bold text-gray-900 mb-6">Créer une annonce</h1>
         <NouvelleAnnonceForm departementsOuverts={departementsOuverts} />
       </div>
     </main>

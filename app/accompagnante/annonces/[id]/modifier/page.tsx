@@ -55,7 +55,7 @@ export default async function ModifierAnnoncePage({
       />
 
       <div className="max-w-3xl mx-auto px-4 py-8 relative z-10">
-        <h2 className="text-2xl font-bold text-gray-900 mb-6">Modifier l'annonce</h2>
+        <h1 className="text-2xl font-bold text-gray-900 mb-6">Modifier l'annonce</h1>
         <ModifierAnnonceForm annonce={annonce} departementsOuverts={departementsOuverts} />
       </div>
     </main>

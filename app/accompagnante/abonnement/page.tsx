@@ -57,7 +57,7 @@ export default async function AbonnementAccompagnantePage({
       />
 
       <div className="relative z-10 max-w-2xl mx-auto px-4 py-8">
-        <h2 className="text-2xl font-bold text-gray-900 mb-6">Mon abonnement</h2>
+        <h1 className="text-2xl font-bold text-gray-900 mb-6">Mon abonnement</h1>
         <SubscriptionPageContent
           subscription={subscription}
           paymentMethod={paymentMethod}

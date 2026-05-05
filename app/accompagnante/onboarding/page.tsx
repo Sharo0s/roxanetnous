@@ -33,12 +33,15 @@ export default async function OnboardingPage() {
   const departementsOuverts = await getCodesDepartementsOuverts()
 
   return (
-    <OnboardingClient
-      parrainage={{
-        isFilleule: !!marraineId,
-        marraineFirstName,
-      }}
-      departementsOuverts={departementsOuverts}
-    />
+    <>
+      <h1 className="sr-only">Onboarding accompagnante</h1>
+      <OnboardingClient
+        parrainage={{
+          isFilleule: !!marraineId,
+          marraineFirstName,
+        }}
+        departementsOuverts={departementsOuverts}
+      />
+    </>
   )
 }

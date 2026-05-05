@@ -39,7 +39,7 @@ export default async function AccompagneProfilPage() {
       />
 
       <div className="max-w-3xl mx-auto px-4 py-8 relative z-10">
-        <h2 className="text-2xl font-bold text-gray-900 mb-6">Mon profil</h2>
+        <h1 className="text-2xl font-bold text-gray-900 mb-6">Mon profil</h1>
 
         <AccompagneProfileForm
           userInfo={{

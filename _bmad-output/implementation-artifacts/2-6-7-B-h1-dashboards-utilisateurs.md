@@ -1,6 +1,6 @@
 # Story 2.6.7-B : Hierarchie h1 - Dashboards accompagnante/accompagne (11 pages)
 
-Status: ready-for-dev
+Status: review
 
 <!-- Note: Validation est optionnelle. Lancer `validate-create-story` avant `dev-story` pour un controle qualite. -->
 
@@ -56,36 +56,36 @@ Cette story est la deuxieme des 3 sous-stories du decoupage 2.6.7 (decision Proj
 
 ## Tasks / Subtasks
 
-- [ ] **Task 1 - Ajouter h1 sur 11 pages dashboards** (AC: #8) - 0,3 j
+- [x] **Task 1 - Ajouter h1 sur 11 pages dashboards** (AC: #8) - 0,3 j
   Accompagnante :
-  - [ ] Sub 1.1 : `app/accompagnante/profil/page.tsx`.
-  - [ ] Sub 1.2 : `app/accompagnante/dashboard/page.tsx`.
-  - [ ] Sub 1.3 : `app/accompagnante/annonces/page.tsx`.
-  - [ ] Sub 1.4 : `app/accompagnante/annonces/nouvelle/page.tsx`.
-  - [ ] Sub 1.5 : `app/accompagnante/abonnement/page.tsx`.
-  - [ ] Sub 1.6 : `app/accompagnante/onboarding/page.tsx` (`sr-only` recommande, voir AC3).
+  - [x] Sub 1.1 : `app/accompagnante/profil/page.tsx` -> `<h2>` -> `<h1>` « Mon profil » (visible).
+  - [x] Sub 1.2 : `app/accompagnante/dashboard/page.tsx` -> ajout `<h1 sr-only>Tableau de bord</h1>` apres ouverture `<main>` (le `<h2>` du nom user reste, hierarchie h1 page > h2 user > h3 cards coherente).
+  - [x] Sub 1.3 : `app/accompagnante/annonces/page.tsx` -> `<h2>` -> `<h1>` « Mes annonces » (visible).
+  - [x] Sub 1.4 : `app/accompagnante/annonces/nouvelle/page.tsx` -> `<h2>` -> `<h1>` « Créer une annonce » (visible).
+  - [x] Sub 1.5 : `app/accompagnante/abonnement/page.tsx` -> `<h2>` -> `<h1>` « Mon abonnement » (visible).
+  - [x] Sub 1.6 : `app/accompagnante/onboarding/page.tsx` -> ajout `<h1 sr-only>Onboarding accompagnante</h1>` dans un fragment avant `<OnboardingClient>` (pattern register : le `<main>` est rendu par le composant client). Coherent avec story 2.6.3 : les `<h2>` sub-steps focusables restent (h1 page > h2 sub-step).
 
   Accompagne :
-  - [ ] Sub 1.7 : `app/accompagne/profil/page.tsx`.
-  - [ ] Sub 1.8 : `app/accompagne/dashboard/page.tsx`.
-  - [ ] Sub 1.9 : `app/accompagne/annonces/page.tsx`.
-  - [ ] Sub 1.10 : `app/accompagne/annonces/nouvelle/page.tsx`.
-  - [ ] Sub 1.11 : `app/accompagne/abonnement/page.tsx`.
+  - [x] Sub 1.7 : `app/accompagne/profil/page.tsx` -> `<h2>` -> `<h1>` « Mon profil » (visible).
+  - [x] Sub 1.8 : `app/accompagne/dashboard/page.tsx` -> ajout `<h1 sr-only>Tableau de bord</h1>` apres ouverture `<main>` (meme pattern que dashboard accompagnante).
+  - [x] Sub 1.9 : `app/accompagne/annonces/page.tsx` -> `<h2>` -> `<h1>` « Mes annonces » (visible).
+  - [x] Sub 1.10 : `app/accompagne/annonces/nouvelle/page.tsx` -> ajout `<h1 sr-only>Nouvelle annonce</h1>` dans le `<main>` (le composant `NouvelleAnnonceAccompagneForm` rend lui-meme un `<h2>Publier une annonce</h2>` interne — pas touche pour eviter modification composant client).
+  - [x] Sub 1.11 : `app/accompagne/abonnement/page.tsx` -> `<h2>` -> `<h1>` « Mon abonnement » (visible).
 
-  - [ ] Sub 1.12 : Pour chaque page, verifier que le h1 est dans le `<main>` (Lot A 2.5.2 skip-link).
+  - [x] Sub 1.12 : 10/11 pages ont leur h1 dans le `<main>`. Exception `accompagnante/onboarding/page.tsx` (h1 dans fragment avant le composant client qui rend le `<main>`) : meme compromis qu'avec `register/page.tsx` story 2.6.7-A. Refactor reporte Lot C.
 
-- [ ] **Task 2 - Verification non-regression sur 2 pages success** (AC: #9) - 0,02 j
-  - [ ] Sub 2.1 : Lire `app/accompagnante/abonnement/success/page.tsx` et `app/accompagne/abonnement/success/page.tsx` -> verifier h1 deja present, ne rien modifier.
+- [x] **Task 2 - Verification non-regression sur 2 pages success** (AC: #9) - 0,02 j
+  - [x] Sub 2.1 : `accompagnante/abonnement/success/page.tsx` et `accompagne/abonnement/success/page.tsx` confirmes deja conformes (1 occurrence `<h1` chacune dans le decompte). Non touches.
 
-- [ ] **Task 3 - Verification axe-core sur parcours touches** (AC: #11) - 0,1 j
-  - [ ] Sub 3.1 : `npm run a11y:axe:check` localement.
-  - [ ] Sub 3.2 : Verifier delta sur P1, P3, P6.
+- [x] **Task 3 - Verification axe-core sur parcours touches** (AC: #11) - 0,1 j
+  - [x] Sub 3.1 : `npm run a11y:axe:check` -> **OK** aucun delta Critical/Serious vs baseline.
+  - [x] Sub 3.2 : Pas de regression sur P1/P3/P6. Les violations `page-has-heading-one` sont `moderate` (hors scope baseline Critical/Serious).
 
-- [ ] **Task 4 - Garde-fou + DoD + commits** (AC: #12, AC commun #3) - 0,1 j
-  - [ ] Sub 4.1 : Executer `find app/accompagnante app/accompagne -name 'page.tsx' | xargs grep -L '<h1' | wc -l` -> verifier 0.
-  - [ ] Sub 4.2 : `npm run lint:a11y-check` vert.
-  - [ ] Sub 4.3 : DoD a11y cochee.
-  - [ ] Sub 4.4 : Commit 1 + push, attendre Preview Vercel verte, commit 2 cloture.
+- [x] **Task 4 - Garde-fou + DoD + commits** (AC: #12, AC commun #3) - 0,1 j
+  - [x] Sub 4.1 : `find app/accompagnante app/accompagne -name 'page.tsx' | xargs grep -L '<h1' | wc -l` -> **0**. Garde-fou OK (incluant les 2 pages bonus `[id]/modifier` traitees aussi pour respecter la condition stricte).
+  - [x] Sub 4.2 : `npm run lint:a11y-check` -> **OK** 155/158.
+  - [x] Sub 4.3 : DoD a11y cochee ci-dessous.
+  - [ ] Sub 4.4 : Commit 1 + push, attendre Preview Vercel verte, commit 2 cloture (a faire par le user).
 
 ## Dev Notes
 
@@ -131,21 +131,77 @@ claude-opus-4-7[1m]
 
 ### Debug Log References
 
+- `find app/accompagnante app/accompagne -name 'page.tsx' | xargs grep -L '<h1' | wc -l` -> **0** (toutes pages dashboards + bonus `[id]/modifier` OK).
+- `npm run lint:a11y-check` -> **OK** 155/158.
+- `npm run a11y:axe:check` -> **OK** aucun delta Critical/Serious.
+
 ### Completion Notes List
 
+**Conventions appliquees**
+
+- **8 pages avec h1 visible** (transformation `<h2>` titre -> `<h1>`, meme styling) : profil ×2, annonces ×2, annonces/nouvelle (accompagnante uniquement), abonnement ×2, [id]/modifier ×2.
+- **3 pages avec h1 sr-only** : dashboard ×2 (le `<h2>` du nom user reste comme titre visible), accompagne/annonces/nouvelle (le composant rend son propre `<h2>` interne « Publier une annonce »), accompagnante/onboarding (le composant client rend `<main>`).
+
+**Bonus inclus (2 pages hors liste story)**
+
+- `accompagnante/annonces/[id]/modifier/page.tsx` et `accompagne/annonces/[id]/modifier/page.tsx` : pages cousines des pages « nouvelle » avec meme structure `<h2>Modifier l'annonce</h2>`. Transformees en `<h1>` pour respecter strictement la condition garde-fou `find app/accompagnante app/accompagne -name 'page.tsx' | xargs grep -L '<h1' | wc -l == 0`. Pas de regression, sub-tasks ajoutees au scope.
+
+**Compromis accompagnante/onboarding/page.tsx**
+
+- Pattern identique a `register/page.tsx` story 2.6.7-A : le composant `<OnboardingClient>` rend lui-meme le `<main>`. Solution adoptee : `<h1 sr-only>Onboarding accompagnante</h1>` dans un fragment React avant le composant client. Le h1 est donc en dehors du `<main>` mais toujours dans le DOM avant. Coherent avec story 2.6.3 (h2 sub-steps focusables restent inchanges).
+
+**Coordination avec story 2.6.3 (AC3 verifie)**
+
+- Story 2.6.3 a ajoute des `<h2>` focusables (`<h2 ref={headingRef} tabIndex={-1}>`) au sommet de chaque sub-step de l'onboarding (`step-diplome.tsx`, `step-specialites.tsx`, `step-localisation.tsx`, `step-disponibilites.tsx`).
+- Story 2.6.7-B ajoute un `<h1 sr-only>Onboarding accompagnante</h1>` au niveau page wrapper.
+- Hierarchie finale : 1 h1 page > 4 h2 sub-steps (un seul actif a la fois selon `step` state). **Pas de conflit**.
+
+**Hierarchie heading (heading-order)**
+
+- Comme dans 2.6.7-A, les pages avec h1 -> h3 cards introduisent un saut de niveau. Regle `heading-order` est `moderate` (hors scope baseline Critical/Serious). Refactor h3->h2 reporte (story de cloture Lot B ou Lot C).
+
+**Pages deja conformes (AC2 — non regression)**
+
+- `accompagnante/abonnement/success/page.tsx`, `accompagne/abonnement/success/page.tsx` : `<h1>` deja present, non touches.
+- `accompagnante/parrainage/page.tsx` : `<h1>` deja present (verifie au decompte), hors scope, non touche.
+
 ### File List
+
+Fichiers modifies (13) :
+- app/accompagnante/profil/page.tsx
+- app/accompagnante/dashboard/page.tsx
+- app/accompagnante/annonces/page.tsx
+- app/accompagnante/annonces/nouvelle/page.tsx
+- app/accompagnante/annonces/[id]/modifier/page.tsx (bonus)
+- app/accompagnante/abonnement/page.tsx
+- app/accompagnante/onboarding/page.tsx
+- app/accompagne/profil/page.tsx
+- app/accompagne/dashboard/page.tsx
+- app/accompagne/annonces/page.tsx
+- app/accompagne/annonces/nouvelle/page.tsx
+- app/accompagne/annonces/[id]/modifier/page.tsx (bonus)
+- app/accompagne/abonnement/page.tsx
+
+Fichier de story (statut) :
+- _bmad-output/implementation-artifacts/2-6-7-B-h1-dashboards-utilisateurs.md (Status -> review)
+
+### Change Log
+
+| Date | Auteur | Description |
+|---|---|---|
+| 2026-05-06 | dev-story (claude-opus-4-7) | Story 2.6.7-B : ajout `<h1>` unique sur 11 pages dashboards utilisateurs + 2 pages bonus `[id]/modifier`. 8 visibles (transformation h2->h1) + 3 sr-only (dashboards ×2, onboarding aux). Garde-fou wc -l = 0. lint:a11y-check OK 155/158. axe:check OK aucun delta. Compromis onboarding doc (h1 hors main du composant client, pattern register). |
 
 ## DoD a11y
 
 A renseigner au moment de la PR :
 
-- [ ] Labels associes aux champs (`htmlFor` ou `aria-labelledby`) — N/A
-- [ ] Erreurs liees aux champs via `aria-describedby` + `aria-invalid` — N/A
-- [ ] Focus visible sur tous les elements interactifs — N/A
-- [ ] Contrastes texte >= 4,5:1 et UI >= 3:1 — heritage Lot A 2.5.3
-- [ ] ARIA states corrects sur composants dynamiques — N/A
-- [ ] Navigation clavier complete — N/A
-- [ ] Verification ponctuelle au lecteur d'ecran — non requis pour cette story (axe-core suffit)
-- [ ] Pas de regression `eslint-plugin-jsx-a11y` (`npm run lint:a11y-check` vert en CI)
-- [ ] Pas de regression axe-core (`npm run a11y:axe:check` vert ou delta documente — reduction `page-has-heading-one` attendue sur P1/P3/P6)
-- [ ] Garde-fou : `find app/accompagnante app/accompagne -name 'page.tsx' | xargs grep -L '<h1' | wc -l == 0`
+- [x] Labels associes aux champs (`htmlFor` ou `aria-labelledby`) — N/A
+- [x] Erreurs liees aux champs via `aria-describedby` + `aria-invalid` — N/A
+- [x] Focus visible sur tous les elements interactifs — N/A
+- [x] Contrastes texte >= 4,5:1 et UI >= 3:1 — heritage Lot A 2.5.3, h1 visibles utilisent `text-gray-900` sur fond clair, ratio largement OK.
+- [x] ARIA states corrects sur composants dynamiques — N/A
+- [x] Navigation clavier complete — N/A
+- [x] Verification ponctuelle au lecteur d'ecran — non requis (story mecanique, axe-core suffit).
+- [x] Pas de regression `eslint-plugin-jsx-a11y` (`npm run lint:a11y-check` vert : 155/158).
+- [x] Pas de regression axe-core (`npm run a11y:axe:check` vert : aucun delta Critical/Serious).
+- [x] Garde-fou : `find app/accompagnante app/accompagne -name 'page.tsx' | xargs grep -L '<h1' | wc -l = 0`.

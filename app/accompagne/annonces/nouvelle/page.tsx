@@ -33,6 +33,7 @@ export default async function NouvelleAnnonceAccompagne() {
       />
 
       <div className="max-w-3xl mx-auto px-4 py-8 relative z-10">
+        <h1 className="sr-only">Nouvelle annonce</h1>
         <NouvelleAnnonceAccompagneForm departementsOuverts={departementsOuverts} />
       </div>
     </main>
