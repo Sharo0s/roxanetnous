@@ -1,6 +1,6 @@
 # Story 2.5.6 : Header accessible et burger
 
-Status: review
+Status: done
 
 <!-- Note: Validation est optionnelle. Lancer `validate-create-story` avant `dev-story` pour un controle qualite. -->
 
