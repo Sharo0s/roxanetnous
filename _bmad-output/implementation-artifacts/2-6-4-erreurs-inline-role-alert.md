@@ -1,6 +1,6 @@
 # Story 2.6.4 : Erreurs inline `role="alert"` sur 23 fichiers
 
-Status: review
+Status: done
 
 <!-- Note: Validation est optionnelle. Lancer `validate-create-story` avant `dev-story` pour un controle qualite. -->
 
