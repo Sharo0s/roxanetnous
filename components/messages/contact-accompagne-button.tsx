@@ -20,9 +20,10 @@ export function ContactAccompagneButton({ accompagneProfileId }: { accompagnePro
 
   return (
     <button
+      type="button"
       onClick={handleContact}
       disabled={loading}
-      className="mt-auto px-4 py-2 bg-accent text-black rounded-lg text-sm font-medium btn-hover transition disabled:opacity-50 w-full"
+      className="mt-auto px-4 py-2 bg-accent text-black rounded-lg text-sm font-medium btn-hover transition disabled:opacity-50 w-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring focus-visible:ring-offset-2"
     >
       {loading ? 'Chargement...' : 'Contacter'}
     </button>

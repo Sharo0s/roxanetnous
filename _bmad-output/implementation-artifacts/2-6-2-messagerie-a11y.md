@@ -1,6 +1,6 @@
 # Story 2.6.2 : Messagerie a11y (`role="log"`, `aria-live`, labels textarea et bouton envoyer)
 
-Status: ready-for-dev
+Status: review
 
 <!-- Note: Validation est optionnelle. Lancer `validate-create-story` avant `dev-story` pour un controle qualite. -->
 
@@ -143,20 +143,39 @@ claude-opus-4-7[1m]
 
 ### Debug Log References
 
+- `npm run lint:a11y-check` : 157 violations vs baseline 158 (-1, baseline stable, pas de regeneration).
+- `npm run a11y:axe:check` : 7/7 parcours OK, aucun delta Critical/Serious vs baseline `axe-core-baseline-2026-05-05.json`.
+- `npx tsc --noEmit` : pas d'erreur de typage.
+
 ### Completion Notes List
 
+- **Refonte ARIA conteneur messages** : `role="log"` + `aria-live="polite"` + `aria-relevant="additions text"` + `aria-label` dynamique « Messages avec {otherUserName} » + `tabIndex={0}` pour scroll clavier (PageUp/PageDown). Focus visible avec token `--focus-ring`.
+- **Label textarea** : `useId()` + `<label htmlFor sr-only>` « Ecrivez votre message a {otherUserName} ». Pattern aligne avec composant `Input` Lot A 2.5.5.
+- **Bouton envoyer** : `aria-label="Envoyer le message"`, svg `aria-hidden="true" focusable="false"`, focus visible token. `type="button"` ajoute (defensive, evite submit involontaire).
+- **Coordination optimistic / realtime (Task 4)** : strategie retenue = matching `(optimistic, sender_id, content)` dans le callback realtime pour **remplacer en place** le message optimiste par la version server, plutot que d'ajouter un second noeud DOM. Sans cette coordination, le `aria-live` annoncerait deux fois (insertion optimiste, puis insertion server). Le marker `data-optimistic="true"` est expose sur le DOM pour debug/tests futurs. Decision documentee : pas de bascule `aria-busy` au premier coup (suffit, complexite reduite). Ajustable si test VoiceOver revele un double-annonce residuel (replier sur `aria-busy` Sub 4.3 du plan de story).
+- **Erreur d'envoi (Task 5)** : nouvel etat `sendError` + bloc `<p role="alert">` au-dessus du composer, restitution du brouillon dans le textarea pour permettre un retry. Focus reste sur le textarea apres erreur (ligne 103, `inputRef.current?.focus()` execute dans tous les cas).
+- **Boutons contact (Task 6)** : `contact-button.tsx` utilise `<Button>` partage (focus visible deja gere Lot A 2.5.3) — aucune modification necessaire ; le `<p className="text-xs text-red-600">` d'erreur ligne 44 reste sans `role="alert"` car releve du perimetre **story 2.6.4** (audit blocs erreur inline). `contact-accompagne-button.tsx` : `<button>` natif avec texte visible OK ; classes focus-visible ajoutees pour aligner sur le token global `--focus-ring`.
+- **Deux `eslint-disable-next-line` cibles** :
+  - `jsx-a11y/no-noninteractive-tabindex` sur le conteneur log (regle generique, ignore le pattern WAI-ARIA log scrollable ; AC6 impose `tabIndex={0}`).
+  - `jsx-a11y/label-has-for` sur le label textarea (regle depreciee qui exige nesting + htmlFor ; le pattern moderne `htmlFor` seul est preconise par `label-has-associated-control`).
+  Justification documentee inline. Baseline lint reduite a 157 (pas de regeneration : delta -1).
+- **Test manuel VoiceOver** : non execute par l'agent (necessite environnement utilisateur avec compte test + VoiceOver actif). Procedure detaillee documentee dans Task 7 et a derouler par le porteur avant merge — narratif a coller dans la description de la PR.
+
 ### File List
+
+- **Modifie** : `components/messages/chat-window.tsx`
+- **Modifie** : `components/messages/contact-accompagne-button.tsx` (ajout focus-visible token)
 
 ## DoD a11y
 
 A renseigner au moment de la PR :
 
-- [ ] Labels associes aux champs (`htmlFor` ou `aria-labelledby`) — textarea label `sr-only`
-- [ ] Erreurs liees aux champs via `aria-describedby` + `aria-invalid` — N/A (pas de champ avec erreur structuree dans ce composant ; erreur globale via `role="alert"` Task 5)
-- [ ] Focus visible sur tous les elements interactifs (contraste >= 3:1) — token `--focus-ring`
-- [ ] Contrastes texte >= 4,5:1 et UI >= 3:1 — heritage Lot A 2.5.3
-- [ ] ARIA states corrects sur composants dynamiques (`role="log"`, `aria-live`, `aria-relevant`, `aria-busy` si retenu)
-- [ ] Navigation clavier complete (Tab, Enter, PageUp/PageDown sur liste log)
-- [ ] Verification ponctuelle au lecteur d'ecran (VoiceOver) sur `/messages/[id]` — narratif documente PR
-- [ ] Pas de regression `eslint-plugin-jsx-a11y` (`npm run lint:a11y-check` vert en CI)
-- [ ] Pas de regression axe-core (`npm run a11y:axe:check` vert ou delta documente)
+- [x] Labels associes aux champs (`htmlFor` ou `aria-labelledby`) — textarea label `sr-only` via `useId()` + `htmlFor`
+- [x] Erreurs liees aux champs via `aria-describedby` + `aria-invalid` — N/A (pas de champ avec erreur structuree dans ce composant ; erreur d'envoi globale via `role="alert"` ligne 162)
+- [x] Focus visible sur tous les elements interactifs (contraste >= 3:1) — token `--focus-ring` applique sur conteneur log, bouton envoyer, bouton contact-accompagne
+- [x] Contrastes texte >= 4,5:1 et UI >= 3:1 — heritage Lot A 2.5.3
+- [x] ARIA states corrects sur composants dynamiques (`role="log"`, `aria-live="polite"`, `aria-relevant="additions text"`, `role="alert"` sur erreur d'envoi)
+- [x] Navigation clavier complete (Tab, Enter, PageUp/PageDown sur liste log via `tabIndex={0}`)
+- [ ] Verification ponctuelle au lecteur d'ecran (VoiceOver) sur `/messages/[id]` — narratif a documenter PR (test manuel a executer par le porteur avant merge)
+- [x] Pas de regression `eslint-plugin-jsx-a11y` (`npm run lint:a11y-check` vert : 157 violations, -1 vs baseline 158)
+- [x] Pas de regression axe-core (`npm run a11y:axe:check` vert : 0 delta Critical/Serious sur les 7 parcours)
