@@ -10,9 +10,10 @@ type Props = {
   onUpload?: (file: File, type: string) => Promise<boolean>
   onUploadsChange?: (uploads: { cv: boolean; diplomes: Record<string, boolean> }) => void
   isFilleule?: boolean
+  headingRef?: React.Ref<HTMLHeadingElement>
 }
 
-export function StepDiplome({ data, onChange, onUpload, onUploadsChange, isFilleule = false }: Props) {
+export function StepDiplome({ data, onChange, onUpload, onUploadsChange, isFilleule = false, headingRef }: Props) {
   const cvRef = useRef<HTMLInputElement>(null)
   const diplomeRefs = useRef<Record<string, HTMLInputElement | null>>({})
   const [uploading, setUploading] = useState<string | null>(null)
@@ -79,7 +80,7 @@ export function StepDiplome({ data, onChange, onUpload, onUploadsChange, isFille
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-xl font-semibold mb-1">Diplôme et expérience</h2>
+        <h2 ref={headingRef} tabIndex={-1} className="text-xl font-semibold mb-1 focus:outline-none">Diplôme et expérience</h2>
         <p className="text-sm text-gray-500">Indiquez vos qualifications et votre niveau d'expérience.</p>
       </div>
 

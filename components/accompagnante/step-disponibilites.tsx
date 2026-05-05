@@ -4,9 +4,10 @@ import type { OnboardingData } from '@/components/accompagnante/onboarding-clien
 type Props = {
   data: OnboardingData
   onChange: (partial: Partial<OnboardingData>) => void
+  headingRef?: React.Ref<HTMLHeadingElement>
 }
 
-export function StepDisponibilites({ data, onChange }: Props) {
+export function StepDisponibilites({ data, onChange, headingRef }: Props) {
   function toggleCreneau(jour: string, creneau: string) {
     const current = { ...data.disponibilites }
     const jourCreneaux = current[jour] || []
@@ -28,7 +29,7 @@ export function StepDisponibilites({ data, onChange }: Props) {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-xl font-semibold mb-1">Disponibilités</h2>
+        <h2 ref={headingRef} tabIndex={-1} className="text-xl font-semibold mb-1 focus:outline-none">Disponibilités</h2>
         <p className="text-sm text-gray-500">
           Indiquez vos créneaux de disponibilité (facultatif).
         </p>

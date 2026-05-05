@@ -1,6 +1,6 @@
 # Story 2.6.3 : Onboarding accompagnante - progressbar ARIA + focus inter-etapes + erreurs annoncees
 
-Status: ready-for-dev
+Status: review
 
 <!-- Note: Validation est optionnelle. Lancer `validate-create-story` avant `dev-story` pour un controle qualite. -->
 
@@ -146,20 +146,39 @@ claude-opus-4-7[1m]
 
 ### Debug Log References
 
+- `npm run lint:a11y-check` : 157 violations (baseline 158, stable, pas de regeneration).
+- `npm run a11y:axe:check` : 7/7 parcours OK, aucun delta Critical/Serious vs baseline `axe-core-baseline-2026-05-05.json`. Note : le parcours `p1-onboarding-aux` audite `/login` comme proxy auth-required, donc les modifs ARIA de l'onboarding ne sont pas verifiees dynamiquement — validation passe par test manuel VoiceOver + code review.
+- `npx tsc --noEmit` : pas d'erreur de typage.
+
 ### Completion Notes List
 
+- **Pattern ref direct (React 19)** : utilise la nouvelle API React 19 ou `ref` peut etre passe en prop standard sans `forwardRef`. Ajoute un prop `headingRef?: React.Ref<HTMLHeadingElement>` aux 4 sub-steps (`step-diplome`, `step-specialites`, `step-localisation`, `step-disponibilites`). Plus simple que `forwardRef` (decision technique de la story Sub 2.1).
+- **Heading focusable** : chaque `<h2>` recoit `ref={headingRef}` + `tabIndex={-1}` + classe `focus:outline-none`. Le `tabIndex={-1}` permet le focus programmatique sans inclure le heading dans l'ordre Tab naturel. Le `focus:outline-none` est aligne sur le pattern existant du `<main id="main-content">` ligne 126 (focus programmatique de container, pas d'outline visuel attendu).
+- **Focus management dans `onboarding-client.tsx`** : `useRef<HTMLHeadingElement>` partage par les 4 sub-steps (rendus conditionnellement, le ref attache au composant courant). `useEffect([step])` declenche `headingRef.current?.focus()`. Garde-fou `isFirstRender` pour ne pas voler le focus au premier mount (l'utilisateur arrive avec son flux clavier classique, le skip-link reste prioritaire).
+- **Progressbar ARIA** : conteneur des 4 barres recoit `role="progressbar"` + `aria-valuenow={step+1}` + `aria-valuemin={1}` + `aria-valuemax={STEPS.length}` + `aria-valuetext` complet « Etape X sur Y : <libelle> » + `aria-label="Progression de l'onboarding"`. Le `aria-valuetext` enrichit l'annonce VoiceOver (sans, VO lirait juste « 1 sur 4, indicateur de progression »). Les 4 div enfants restent purement visuels (pas de role ARIA).
+- **role=alert sur bloc erreur** : ajoute au `<div>` ligne 175. `role="alert"` est equivalent a `aria-live="assertive"` + `aria-atomic="true"` — annonce immediate au lecteur d'ecran. L'erreur s'affiche au clic « Suivant » ou a l'echec de submit, donc l'assertive ne coupe pas un autre message en cours.
+- **Hierarchie h1 absente** : la page parent `/accompagnante/onboarding` n'a pas de `<h1>` au moment de cette story — c'est traite par la **story 2.6.7-B** (h1 dashboards utilisateurs). Aucune duplication ici.
+- **`step-justificatifs.tsx`** : present dans le dossier mais **non importe** par `onboarding-client.tsx`. Confirme inactif → hors scope, pas de pattern applique.
+- **Test manuel VoiceOver** : non execute par l'agent (necessite environnement utilisateur avec compte test accompagnante actif + VoiceOver). Procedure detaillee dans Task 5 — a derouler par le porteur avant merge.
+
 ### File List
+
+- **Modifie** : `components/accompagnante/onboarding-client.tsx` (progressbar ARIA + role=alert + focus management + headingRef partage)
+- **Modifie** : `components/accompagnante/step-diplome.tsx` (prop headingRef + h2 focusable)
+- **Modifie** : `components/accompagnante/step-specialites.tsx` (prop headingRef + h2 focusable)
+- **Modifie** : `components/accompagnante/step-localisation.tsx` (prop headingRef + h2 focusable)
+- **Modifie** : `components/accompagnante/step-disponibilites.tsx` (prop headingRef + h2 focusable)
 
 ## DoD a11y
 
 A renseigner au moment de la PR :
 
-- [ ] Labels associes aux champs (`htmlFor` ou `aria-labelledby`) — N/A (pas de nouveau champ ; champs existants traites Lot A 2.5.5)
-- [ ] Erreurs liees aux champs via `aria-describedby` + `aria-invalid` — N/A pour cette story (couvert composant Input Lot A) ; erreur globale via `role="alert"` Task 4
-- [ ] Focus visible sur tous les elements interactifs (contraste >= 3:1) — token `--focus-ring`
-- [ ] Contrastes texte >= 4,5:1 et UI >= 3:1 — heritage Lot A 2.5.3
-- [ ] ARIA states corrects sur composants dynamiques (`role="progressbar"`, `aria-valuenow`, `role="alert"`)
-- [ ] Navigation clavier complete (Tab, Enter, Espace, focus deplace inter-etapes)
-- [ ] Verification ponctuelle au lecteur d'ecran (VoiceOver) sur les 4 etapes — narratif documente PR
-- [ ] Pas de regression `eslint-plugin-jsx-a11y` (`npm run lint:a11y-check` vert en CI)
-- [ ] Pas de regression axe-core (`npm run a11y:axe:check` vert ou delta documente)
+- [x] Labels associes aux champs (`htmlFor` ou `aria-labelledby`) — N/A (pas de nouveau champ ; champs existants traites Lot A 2.5.5)
+- [x] Erreurs liees aux champs via `aria-describedby` + `aria-invalid` — N/A pour cette story (couvert composant Input Lot A) ; erreur globale via `role="alert"` Task 4
+- [x] Focus visible sur tous les elements interactifs (contraste >= 3:1) — token `--focus-ring` herite Lot A 2.5.3 sur tous les boutons existants ; h2 focusable volontairement sans outline (focus programmatique de container, aligne sur pattern `<main id="main-content">`)
+- [x] Contrastes texte >= 4,5:1 et UI >= 3:1 — heritage Lot A 2.5.3
+- [x] ARIA states corrects sur composants dynamiques (`role="progressbar"` + `aria-valuenow/min/max/text`, `role="alert"` sur erreur)
+- [x] Navigation clavier complete (Tab, Enter, Espace, focus deplace inter-etapes via `useEffect([step])`)
+- [ ] Verification ponctuelle au lecteur d'ecran (VoiceOver) sur les 4 etapes — narratif a documenter PR (test manuel a executer par le porteur avant merge)
+- [x] Pas de regression `eslint-plugin-jsx-a11y` (`npm run lint:a11y-check` vert : 157, baseline stable)
+- [x] Pas de regression axe-core (`npm run a11y:axe:check` vert : 0 delta Critical/Serious sur 7 parcours)

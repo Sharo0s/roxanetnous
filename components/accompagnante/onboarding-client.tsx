@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { submitOnboarding, uploadJustificatif } from '@/app/actions/accompagnante'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
@@ -59,6 +59,20 @@ export function OnboardingClient({ parrainage, departementsOuverts }: Props) {
   const [loading, setLoading] = useState(false)
   const [uploads, setUploads] = useState<{ cv: boolean; diplomes: Record<string, boolean> }>({ cv: false, diplomes: {} })
   const [permisUploaded, setPermisUploaded] = useState(false)
+  const headingRef = useRef<HTMLHeadingElement>(null)
+  const isFirstRender = useRef(true)
+
+  // Apres un changement d'etape, deplace le focus sur le h2 de la nouvelle etape
+  // pour que le lecteur d'ecran annonce le titre. Pas de focus au premier render
+  // (le skip-link et le flux clavier classique restent prioritaires a l'arrivee
+  // sur la page).
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false
+      return
+    }
+    headingRef.current?.focus()
+  }, [step])
 
   function updateData(partial: Partial<OnboardingData>) {
     setData((prev) => ({ ...prev, ...partial }))
@@ -151,7 +165,15 @@ export function OnboardingClient({ parrainage, departementsOuverts }: Props) {
 
       {/* Progress bar */}
       <div className="max-w-3xl mx-auto px-4 pt-6 relative z-10">
-        <div className="flex gap-1">
+        <div
+          role="progressbar"
+          aria-valuenow={step + 1}
+          aria-valuemin={1}
+          aria-valuemax={STEPS.length}
+          aria-valuetext={`Etape ${step + 1} sur ${STEPS.length} : ${STEPS[step]}`}
+          aria-label="Progression de l'onboarding"
+          className="flex gap-1"
+        >
           {STEPS.map((_, i) => (
             <div
               key={i}
@@ -166,16 +188,16 @@ export function OnboardingClient({ parrainage, departementsOuverts }: Props) {
 
       <div className="max-w-3xl mx-auto px-4 py-6 relative z-10">
         {error && (
-          <div className="mb-4 p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
+          <div role="alert" className="mb-4 p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
             {error}
           </div>
         )}
 
         <div className="bg-white rounded-xl border p-6">
-          {step === 0 && <StepDiplome data={data} onChange={updateData} onUpload={handleUpload} onUploadsChange={setUploads} isFilleule={parrainage.isFilleule} />}
-          {step === 1 && <StepSpecialites data={data} onChange={updateData} />}
-          {step === 2 && <StepLocalisation data={data} onChange={updateData} onUpload={handleUpload} onPermisUploaded={setPermisUploaded} departementsOuverts={departementsOuverts} />}
-          {step === 3 && <StepDisponibilites data={data} onChange={updateData} />}
+          {step === 0 && <StepDiplome data={data} onChange={updateData} onUpload={handleUpload} onUploadsChange={setUploads} isFilleule={parrainage.isFilleule} headingRef={headingRef} />}
+          {step === 1 && <StepSpecialites data={data} onChange={updateData} headingRef={headingRef} />}
+          {step === 2 && <StepLocalisation data={data} onChange={updateData} onUpload={handleUpload} onPermisUploaded={setPermisUploaded} departementsOuverts={departementsOuverts} headingRef={headingRef} />}
+          {step === 3 && <StepDisponibilites data={data} onChange={updateData} headingRef={headingRef} />}
         </div>
 
         <div className="flex justify-between mt-6">

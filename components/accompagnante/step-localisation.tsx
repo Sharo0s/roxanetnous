@@ -9,9 +9,10 @@ type Props = {
   onUpload?: (file: File, type: 'permis') => Promise<boolean>
   onPermisUploaded?: (uploaded: boolean) => void
   departementsOuverts: string[]
+  headingRef?: React.Ref<HTMLHeadingElement>
 }
 
-export function StepLocalisation({ data, onChange, onUpload, onPermisUploaded, departementsOuverts }: Props) {
+export function StepLocalisation({ data, onChange, onUpload, onPermisUploaded, departementsOuverts, headingRef }: Props) {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [uploading, setUploading] = useState(false)
   const [uploadedFileName, setUploadedFileName] = useState<string | null>(null)
@@ -30,7 +31,7 @@ export function StepLocalisation({ data, onChange, onUpload, onPermisUploaded, d
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-xl font-semibold mb-1">Localisation</h2>
+        <h2 ref={headingRef} tabIndex={-1} className="text-xl font-semibold mb-1 focus:outline-none">Localisation</h2>
         <p className="text-sm text-gray-500">Indiquez votre zone d'intervention.</p>
       </div>
 
