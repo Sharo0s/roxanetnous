@@ -1,6 +1,6 @@
 # Story 2.6.2 : Messagerie a11y (`role="log"`, `aria-live`, labels textarea et bouton envoyer)
 
-Status: review
+Status: done
 
 <!-- Note: Validation est optionnelle. Lancer `validate-create-story` avant `dev-story` pour un controle qualite. -->
 
