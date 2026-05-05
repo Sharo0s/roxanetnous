@@ -1,6 +1,6 @@
 # Story 2.6.1 : Outillage axe-core/Playwright et baseline parcours critiques
 
-Status: review
+Status: done
 
 <!-- Note: Validation est optionnelle. Lancer `validate-create-story` avant `dev-story` pour un controle qualite. -->
 
@@ -255,6 +255,7 @@ claude-opus-4-7[1m]
 | Date       | Auteur                | Resume                                                                                                                          |
 | ---------- | --------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
 | 2026-05-05 | claude-opus-4-7[1m]   | Story 2.6.1 livree : suite Playwright + axe-core sur 6 parcours critiques, baseline 2026-05-05 (1 violation Critical), DoD a11y mise a jour. AC8 partiel (mode audit local pre-merge documente). |
+| 2026-05-05 | claude-opus-4-7[1m]   | Story 2.6.1 statut done apres CI Vercel verte. Pattern double commit Lot A respecte. |
 
 ## DoD a11y
 
