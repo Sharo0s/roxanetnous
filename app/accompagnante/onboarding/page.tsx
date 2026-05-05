@@ -33,7 +33,11 @@ export default async function OnboardingPage() {
   const departementsOuverts = await getCodesDepartementsOuverts()
 
   return (
-    <>
+    <main
+      id="main-content"
+      tabIndex={-1}
+      className="min-h-screen kraft bg-kraft focus:outline-none"
+    >
       <h1 className="sr-only">Onboarding accompagnante</h1>
       <OnboardingClient
         parrainage={{
@@ -42,6 +46,6 @@ export default async function OnboardingPage() {
         }}
         departementsOuverts={departementsOuverts}
       />
-    </>
+    </main>
   )
 }

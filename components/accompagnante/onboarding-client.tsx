@@ -135,7 +135,7 @@ export function OnboardingClient({ parrainage, departementsOuverts }: Props) {
   }
 
   return (
-    <main id="main-content" tabIndex={-1} className="min-h-screen kraft bg-kraft focus:outline-none">
+    <>
       <header className="bg-white border-b relative z-10">
         <div className="max-w-3xl mx-auto px-4 py-4 flex items-center justify-between">
           <Link href="/accompagnante/dashboard" className="text-xl font-bold text-black">
@@ -221,6 +221,6 @@ export function OnboardingClient({ parrainage, departementsOuverts }: Props) {
           )}
         </div>
       </div>
-    </main>
+    </>
   )
 }

@@ -70,3 +70,11 @@
 - Pas de garde explicite si port 3000 deja occupe en CI [playwright.config.ts:27-28] -- message Playwright standard suffit, audit local pour l'instant. A revoir avec la bascule CI Lot C.
 - Webserver timeout 120s peut etre court en CI cold cache [playwright.config.ts:27] -- pas de CI Vercel actuellement pour la suite Playwright, a revoir avec la bascule CI Lot C.
 - `PLAYWRIGHT_JSON_OUTPUT_NAME` et `reportFile` hardcodes en sync dans build/check-axe-baseline.mjs [scripts/build-axe-baseline.mjs:44-55] -- pas un bug actuel, latent si refacto. A documenter en commentaire si modification.
+
+## Deferred from: code review of 2-7-1-refactor-main-pages-client (2026-05-06)
+
+- `kraft bg-kraft` redondant repete sur les 2 wrappers `<main>` (`app/register/page.tsx`, `app/accompagnante/onboarding/page.tsx`) -- pre-existant, present avant le refactor sur les composants. Si `kraft` definit deja `background-color`, `bg-kraft` est doublon ou override silencieux. Hors scope story 2.7.1 (refactor structurel `<main>`). A clarifier dans une story de hardening Tailwind.
+- `<Suspense>` sans `fallback` dans `app/register/page.tsx` -- pre-existant, hors scope refactor structurel `<main>`. Surface d'ecran blanc theorique pendant l'hydratation cote client (si SSR ne pre-rend pas le formulaire). A traiter si UX percue.
+- Skip-link `/accompagnante/onboarding` non couvert par axe-check automatise -- documente dans la spec story 2.7.1 AC7 Note explicite : page hors 7 parcours critiques. Couverture statique uniquement (lint a11y + DOM grep). Decision Lot C de ne pas etendre la suite axe-core a cette page.
+- Parite `animate-fade-in` au mount non validee visuellement post-refactor -- risque theorique mineur, React diffing preserve normalement l'identite des nodes (pas de remount lors du changement de wrapper externe `<main>` -> `<div>`). Couvert par DoD a11y manuelle (Sub 2.3, 2.4, 3.3 marquees a executer par l'utilisateur).
+- Pas de `.editorconfig` ni `.prettierrc` dans le projet -- la reindentation -2 espaces sur ~200 lignes (`register-form.tsx`) ne sera pas validee par un formatter automatique. Risque d'incoherence si un dev futur lance Prettier avec des defauts differents. A traiter en story d'outillage dev-experience.
