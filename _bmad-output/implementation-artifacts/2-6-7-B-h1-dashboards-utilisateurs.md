@@ -1,6 +1,6 @@
 # Story 2.6.7-B : Hierarchie h1 - Dashboards accompagnante/accompagne (11 pages)
 
-Status: review
+Status: done
 
 <!-- Note: Validation est optionnelle. Lancer `validate-create-story` avant `dev-story` pour un controle qualite. -->
 
