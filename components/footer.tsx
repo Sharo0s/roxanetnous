@@ -8,7 +8,7 @@ export function Footer() {
           <p className="text-sm text-black">
             roxanetnous - {new Date().getFullYear()}
           </p>
-          <nav className="flex gap-6">
+          <nav aria-label="Liens légaux" className="flex gap-6">
             <Link
               href="/mentions-legales"
               className="text-sm text-black hover:text-black transition"

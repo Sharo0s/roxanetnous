@@ -29,7 +29,10 @@ export function AccompagnanteHeader({
         </Link>
 
         {/* Desktop */}
-        <div className="hidden md:flex items-center gap-4">
+        <nav
+          aria-label="Navigation principale"
+          className="hidden md:flex items-center gap-4"
+        >
           {currentPage !== 'dashboard' && (
             <Link href="/accompagnante/dashboard" className="text-sm text-gray-600 hover:text-black">
               Mon espace
@@ -39,13 +42,16 @@ export function AccompagnanteHeader({
             {firstName} {lastName}
           </span>
           <LogoutButton />
-        </div>
+        </nav>
 
         {/* Burger mobile */}
         <button
           className="md:hidden p-2"
           onClick={() => setMenuOpen(!menuOpen)}
           aria-label="Menu"
+          aria-expanded={menuOpen}
+          aria-controls="mobile-menu"
+          aria-haspopup="true"
         >
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             {menuOpen ? (
@@ -59,7 +65,11 @@ export function AccompagnanteHeader({
 
       {/* Menu mobile */}
       {menuOpen && (
-        <div className="md:hidden border-t border-accent px-4 py-3 flex flex-col gap-3">
+        <nav
+          id="mobile-menu"
+          aria-label="Navigation principale"
+          className="md:hidden border-t border-accent px-4 py-3 flex flex-col gap-3"
+        >
           <span className="text-sm font-medium text-black">
             {firstName} {lastName}
           </span>
@@ -69,7 +79,7 @@ export function AccompagnanteHeader({
             </Link>
           )}
           <LogoutButton />
-        </div>
+        </nav>
       )}
     </header>
   )
