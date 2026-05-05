@@ -43,6 +43,7 @@ Cette story leve le critere D4 (composants tiers) du NFR a11y transverse. Elle e
    - **Strategie 1** : la carte est annoncee « Carte de la zone d'intervention » et l'utilisateur peut soit interagir (si Leaflet le permet en clavier sans focus piege) soit utiliser les champs alternatifs.
    - **Strategie 2** : la carte est completement ignoree par le lecteur d'ecran, les champs ville/rayon prennent le relais, le texte alternatif est annonce.
 10. **AC7 - Hors scope refonte ergonomique** : Given que cette story est time-boxee, when le developpeur identifie un besoin de refonte profonde (ajout markers focusables, panel de controle clavier custom, etc.), then ce besoin est **documente comme report Lot C** dans le document audit, pas implemente.
+11. **AC8 - Resorption violation `select-name` heritee 2.6.1** : Given le baseline axe-core 2026-05-05 contient 1 violation Critical `select-name` sur `/recherche` (target `select`, dans `components/recherche/search-filters.tsx:182` et/ou `app/recherche/page.tsx:281` — selects « Experience » et « Annonce de reference »), when la story 2.6.6 livre, then cette violation est resorbee (label associe via `htmlFor` + `id`, ou `aria-label` explicite). Le baseline est regenere et le total Critical/Serious passe a 0 sur P2. **Cette violation doit etre resorbee avant cloture Lot B** — c'est un pre-requis a la bascule de `a11y:axe:check` en mode bloquant (story de cloture Lot B).
 
 ## Tasks / Subtasks
 
@@ -80,6 +81,14 @@ Cette story leve le critere D4 (composants tiers) du NFR a11y transverse. Elle e
   - [ ] Sub 6.2 : DoD a11y cochee.
   - [ ] Sub 6.3 : Commit 1 + push, attendre Preview Vercel verte, commit 2 cloture.
 
+- [ ] **Task 7 - Resorption violation `select-name` /recherche heritee 2.6.1** (AC: #11) - 0,1 j
+  - [ ] Sub 7.1 : Identifier le(s) `<select>` fautif(s) sur `/recherche` :
+    - `components/recherche/search-filters.tsx:182` : `<select>` « Experience », `<label>` parent en frere (pas wrappant) sans `htmlFor`/`id`.
+    - `app/recherche/page.tsx:281` : `<select name="annonce">` « Annonce de reference », `<label>` en frere sans `htmlFor`/`id`.
+  - [ ] Sub 7.2 : Corriger en associant chaque `<label>` a son `<select>` via `htmlFor`/`id` explicite, ou en wrappant le `<select>` dans le `<label>` (label implicite). Pas d'`aria-label` standalone (decision Lot A : prefere les labels visibles natifs).
+  - [ ] Sub 7.3 : Regenerer le baseline (`npm run a11y:axe:baseline`), verifier que `totals.violations` passe de 1 a 0 sur P2.
+  - [ ] Sub 7.4 : Documenter la regen baseline dans la PR (delta : -1 violation Critical `select-name`).
+
 ## Dev Notes
 
 ### Patterns architecturaux
@@ -106,6 +115,10 @@ Cette story leve le critere D4 (composants tiers) du NFR a11y transverse. Elle e
 - **R1 - Audit Leaflet revele des problemes structurels** (focus piege, dizaines de boutons polluants) qui depassent le budget time-box. Mitigation : repli automatique Strategie 2.
 - **R2 - 5 usagers ne se comportent pas tous pareil** : `step-localisation.tsx` peut avoir besoin d'un texte alternatif specifique. Verification individuelle Task 4.
 - **R3 - Refonte ergonomique demandee** : reportee Lot C explicitement (AC7 garde-fou).
+
+### Dette heritee story 2.6.1
+
+La story 2.6.1 a livre un baseline axe-core avec **1 violation Critical `select-name`** sur `/recherche` (selects « Experience » et « Annonce de reference », labels en frere sans `htmlFor`/`id`). Cette violation **doit etre resorbee avant cloture Lot B** (pre-requis bascule `a11y:axe:check` bloquant). Couverte par la nouvelle Task 7 ci-dessus. Sources : `components/recherche/search-filters.tsx:182`, `app/recherche/page.tsx:281`.
 
 ### Project Structure Notes
 
