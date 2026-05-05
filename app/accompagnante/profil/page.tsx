@@ -80,7 +80,7 @@ export default async function AccompagnanteProfilPage() {
           </div>
         )}
         {profile.validation_status === 'a_completer' && (
-          <div className="mb-6 p-4 rounded-xl border border-red-200 bg-red-50 text-sm">
+          <div role="alert" className="mb-6 p-4 rounded-xl border border-red-200 bg-red-50 text-sm">
             <p className="font-medium text-red-800">Des informations complémentaires sont demandées.</p>
             {profile.refus_motif && (
               <p className="text-red-700 mt-1">Détails : {profile.refus_motif}</p>
@@ -88,7 +88,7 @@ export default async function AccompagnanteProfilPage() {
           </div>
         )}
         {profile.validation_status === 'refuse' && (
-          <div className="mb-6 p-4 rounded-xl border border-red-200 bg-red-50 text-sm">
+          <div role="alert" className="mb-6 p-4 rounded-xl border border-red-200 bg-red-50 text-sm">
             <p className="font-medium text-red-800">Votre profil a été refusé.</p>
             {profile.refus_motif && (
               <p className="text-red-700 mt-1">Motif : {profile.refus_motif}</p>

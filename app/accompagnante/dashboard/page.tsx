@@ -268,7 +268,7 @@ export default async function AccompagnanteDashboard() {
               </div>
             )}
             {(profile.validation_status === 'refuse' || profile.validation_status === 'a_completer') && (
-              <div className="p-4 rounded-xl border border-red-200 bg-red-50 text-sm">
+              <div role="alert" className="p-4 rounded-xl border border-red-200 bg-red-50 text-sm">
                 <p className="font-medium text-red-800">
                   {profile.validation_status === 'refuse'
                     ? 'Votre profil a été refusé. Veuillez corriger les informations demandées.'

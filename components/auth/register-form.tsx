@@ -223,7 +223,7 @@ export function RegisterForm() {
 
         <div className="bg-white p-8 rounded-xl shadow-sm border space-y-6">
           {error && (
-            <div className="p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm animate-fade-in">
+            <div role="alert" className="p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm animate-fade-in">
               {error}
             </div>
           )}
@@ -331,7 +331,7 @@ export function RegisterForm() {
                   </p>
                 )}
                 {parrainageState.status === 'invalid' && (
-                  <p className="mt-2 text-xs text-red-600">
+                  <p role="alert" className="mt-2 text-xs text-red-600">
                     {PARRAINAGE_ERRORS[parrainageState.reason]}
                   </p>
                 )}

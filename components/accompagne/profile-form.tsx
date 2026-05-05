@@ -65,7 +65,7 @@ export function AccompagneProfileForm({ userInfo, profile }: Props) {
   return (
     <div className="space-y-6">
       {error && (
-        <div className="p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
+        <div role="alert" className="p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
           {error}
         </div>
       )}

@@ -126,7 +126,7 @@ export function DepartementsManager({ regions }: Props) {
   return (
     <div className="space-y-4">
       {erreur && (
-        <div className="p-3 rounded-lg border border-red-200 bg-red-50 text-sm text-red-800">
+        <div role="alert" className="p-3 rounded-lg border border-red-200 bg-red-50 text-sm text-red-800">
           {erreur}
         </div>
       )}

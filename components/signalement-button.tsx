@@ -70,7 +70,7 @@ export function SignalementButton({ cibleType, cibleId }: Props) {
   return (
     <div className="bg-white border rounded-xl p-6 space-y-4 text-left mt-3">
       {error && (
-        <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg p-3">{error}</p>
+        <p role="alert" className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg p-3">{error}</p>
       )}
       <div>
         <label className="block text-sm font-medium text-black mb-1">Motif</label>

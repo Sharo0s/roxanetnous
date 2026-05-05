@@ -58,7 +58,7 @@ export default function LoginPage() {
         {step === 'email' ? (
           <form onSubmit={handleEmailSubmit} className="bg-white p-8 rounded-xl shadow-sm border space-y-5">
             {error && (
-              <div className="p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
+              <div role="alert" className="p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
                 {error}
               </div>
             )}
@@ -80,7 +80,7 @@ export default function LoginPage() {
         ) : (
           <form action={handleLoginSubmit} className="bg-white p-8 rounded-xl shadow-sm border space-y-5">
             {error && (
-              <div className="p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
+              <div role="alert" className="p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
                 {error}
               </div>
             )}

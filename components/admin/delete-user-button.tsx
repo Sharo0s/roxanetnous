@@ -37,7 +37,7 @@ export function DeleteUserButton({ userId, userName }: { userId: string; userNam
         L'abonnement Stripe sera annulé et toutes les données seront supprimées.
       </p>
       {error && (
-        <p className="text-sm text-red-600 mb-3">{error}</p>
+        <p role="alert" className="text-sm text-red-600 mb-3">{error}</p>
       )}
       <div className="flex gap-2">
         <button

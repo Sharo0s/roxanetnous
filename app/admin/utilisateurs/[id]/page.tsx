@@ -226,7 +226,7 @@ export default async function AdminUtilisateurDetailPage({
 
       {/* Refus motif */}
       {auxProfile?.validation_status === 'refuse' && auxProfile.refus_motif && (
-        <div className="mb-8 bg-red-50 border border-red-200 rounded-xl p-5">
+        <div role="alert" className="mb-8 bg-red-50 border border-red-200 rounded-xl p-5">
           <h3 className="font-semibold text-red-800 mb-1">Motif du refus</h3>
           <p className="text-sm text-red-700">{auxProfile.refus_motif}</p>
         </div>

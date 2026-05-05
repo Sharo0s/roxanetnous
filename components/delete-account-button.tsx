@@ -48,7 +48,7 @@ export function DeleteAccountButton() {
         placeholder="SUPPRIMER"
         disabled={loading}
       />
-      {error && <p className="text-sm text-gray-900 font-medium">{error}</p>}
+      {error && <p role="alert" className="text-sm text-gray-900 font-medium">{error}</p>}
       <div className="flex gap-2">
         <button
           onClick={handleDelete}
