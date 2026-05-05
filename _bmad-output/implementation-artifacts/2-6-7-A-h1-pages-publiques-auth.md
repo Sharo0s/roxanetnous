@@ -1,6 +1,6 @@
 # Story 2.6.7-A : Hierarchie h1 - Pages publiques + auth (10 pages)
 
-Status: ready-for-dev
+Status: review
 
 <!-- Note: Validation est optionnelle. Lancer `validate-create-story` avant `dev-story` pour un controle qualite. -->
 
@@ -51,30 +51,30 @@ Cette story est la premiere des 3 sous-stories du decoupage 2.6.7 (decision Proj
 
 ## Tasks / Subtasks
 
-- [ ] **Task 1 - Ajouter h1 sur 10 pages publiques + auth** (AC: #8) - 0,3 j
-  - [ ] Sub 1.1 : `app/messages/page.tsx`.
-  - [ ] Sub 1.2 : `app/messages/[id]/page.tsx`.
-  - [ ] Sub 1.3 : `app/favoris/page.tsx`.
-  - [ ] Sub 1.4 : `app/recherche/page.tsx`.
-  - [ ] Sub 1.5 : `app/recherche/demandes/page.tsx`.
-  - [ ] Sub 1.6 : `app/recherche/[id]/page.tsx`.
-  - [ ] Sub 1.7 : `app/register/page.tsx`.
-  - [ ] Sub 1.8 : `app/login/page.tsx`.
-  - [ ] Sub 1.9 : `app/forgot-password/page.tsx`.
-  - [ ] Sub 1.10 : `app/reset-password/page.tsx`.
-  - [ ] Sub 1.11 : Pour chaque page, verifier que le h1 est au **sommet du contenu principal** (apres skip-link, dans le `<main>`, pas dans le header).
-  - [ ] Sub 1.12 : Si le h1 doit etre visuellement discret (design ne le veut pas visible), utiliser `className="sr-only"`.
+- [x] **Task 1 - Ajouter h1 sur 10 pages publiques + auth** (AC: #8) - 0,3 j
+  - [x] Sub 1.1 : `app/messages/page.tsx` -> `<h2>` titre transforme en `<h1>` « Messages » (visible).
+  - [x] Sub 1.2 : `app/messages/[id]/page.tsx` -> ajout `<h1 className="sr-only">` dynamique « Conversation avec {otherUserNameForHeading} » au debut du `<main>`.
+  - [x] Sub 1.3 : `app/favoris/page.tsx` -> `<h2>` titre transforme en `<h1>` « Mes favoris » (visible).
+  - [x] Sub 1.4 : `app/recherche/page.tsx` -> `<h2>` titre transforme en `<h1>` « Trouver un(e) accompagnant(e) de vie » (visible).
+  - [x] Sub 1.5 : `app/recherche/demandes/page.tsx` -> `<h2>` titre transforme en `<h1>` « Demandes des accompagnés » (visible).
+  - [x] Sub 1.6 : `app/recherche/[id]/page.tsx` -> `<h2>` du nom de l'accompagnante (« Prénom L. ») transforme en `<h1>` (visible).
+  - [x] Sub 1.7 : `app/register/page.tsx` -> ajout `<h1 className="sr-only">Créer un compte</h1>` dans un fragment `<>` autour du Suspense (le `<main>` est rendu par `<RegisterForm>`, h1 place avant — compromis documente).
+  - [x] Sub 1.8 : `app/login/page.tsx` -> ajout `<h1 className="sr-only">Se connecter</h1>` dans le `<main>`.
+  - [x] Sub 1.9 : `app/forgot-password/page.tsx` -> ajout `<h1 className="sr-only">Mot de passe oublié</h1>` dans le `<main>`.
+  - [x] Sub 1.10 : `app/reset-password/page.tsx` -> ajout `<h1 className="sr-only">Réinitialiser le mot de passe</h1>` dans le `<main>`.
+  - [x] Sub 1.11 : 9/10 pages ont leur h1 **dans le `<main>`**. Exception `register/page.tsx` : le `<main>` est encapsule dans le composant `<RegisterForm>` (rendu en deux branches : default + emailSent). Compromis : `<h1>` place avant le `<Suspense>` dans la page wrapper, donc avant le `<main>` mais reste accessible aux SR via navigation sequentielle (heading suivant/precedent). Refactor profond reporte Lot C.
+  - [x] Sub 1.12 : 5 pages auth (register, login, forgot, reset, messages/[id]) utilisent `sr-only` (design conserve le logo `roxanetnous` comme repere visuel, pas besoin de h1 visible).
 
-- [ ] **Task 2 - Verification axe-core sur parcours touches** (AC: #10) - 0,1 j
-  - [ ] Sub 2.1 : `npm run a11y:axe:check` localement.
-  - [ ] Sub 2.2 : Verifier delta sur P2, P4, P5 — reduction des violations `page-has-heading-one`.
-  - [ ] Sub 2.3 : Si P5 (landing) regresse : alerter (l'AC2 garantit non-regression sur les pages deja conformes).
+- [x] **Task 2 - Verification axe-core sur parcours touches** (AC: #10) - 0,1 j
+  - [x] Sub 2.1 : `npm run a11y:axe:check` -> **OK** aucun delta Critical/Serious vs baseline.
+  - [x] Sub 2.2 : Pas de delta sur P2/P4/P5 (les violations `page-has-heading-one` sont `moderate`, donc hors scope baseline Critical/Serious — mais l'absence de regression est confirmee).
+  - [x] Sub 2.3 : Pas de regression P5 (landing — `app/page.tsx` non touche, conserve son `<h1 sr-only>roxanetnous</h1>`).
 
-- [ ] **Task 3 - Garde-fou + DoD + commits** (AC: #11, AC commun #3) - 0,1 j
-  - [ ] Sub 3.1 : Executer `find app/messages app/favoris app/recherche app/register app/login app/forgot-password app/reset-password -name 'page.tsx' | xargs grep -L '<h1' | wc -l` -> verifier 0.
-  - [ ] Sub 3.2 : `npm run lint:a11y-check` vert.
-  - [ ] Sub 3.3 : DoD a11y cochee.
-  - [ ] Sub 3.4 : Commit 1 + push, attendre Preview Vercel verte, commit 2 cloture.
+- [x] **Task 3 - Garde-fou + DoD + commits** (AC: #11, AC commun #3) - 0,1 j
+  - [x] Sub 3.1 : `find app/messages app/favoris app/recherche app/register app/login app/forgot-password app/reset-password -name 'page.tsx' | xargs grep -L '<h1' | wc -l` -> **0**. Garde-fou OK : 10/10 pages contiennent un `<h1`.
+  - [x] Sub 3.2 : `npm run lint:a11y-check` -> **OK** 155/158 (pas de regression).
+  - [x] Sub 3.3 : DoD a11y cochee ci-dessous.
+  - [ ] Sub 3.4 : Commit 1 + push, attendre Preview Vercel verte, commit 2 cloture (a faire par le user).
 
 ## Dev Notes
 
@@ -123,21 +123,69 @@ claude-opus-4-7[1m]
 
 ### Debug Log References
 
+- `find app/messages app/favoris app/recherche app/register app/login app/forgot-password app/reset-password -name 'page.tsx' | xargs grep -L '<h1' | wc -l` -> **0** (10/10 pages OK).
+- `npm run lint:a11y-check` -> **OK** 155/158 (pas de regression).
+- `npm run a11y:axe:check` -> **OK** aucun delta Critical/Serious vs baseline.
+
 ### Completion Notes List
 
+**Conventions appliquees**
+
+- **5 pages avec h1 visible** (transformation `<h2>` titre -> `<h1>`, meme styling `text-2xl font-bold text-gray-900 mb-6`) : messages, favoris, recherche, recherche/demandes, recherche/[id].
+- **5 pages auth/conversation avec h1 sr-only** : login, forgot-password, reset-password, register, messages/[id]. Le design conserve le logo `<Link>roxanetnous</Link>` comme repere visuel principal — pas de duplication visible souhaitee.
+- **`messages/[id]` h1 dynamique** : `<h1 className="sr-only">Conversation avec {otherUserNameForHeading}</h1>` ou `otherUserNameForHeading` est calcule (« Équipe roxanetnous » pour les conv admin, sinon prenom + nom de l'interlocuteur).
+- **`recherche/[id]` h1 = nom de l'accompagnante** : `<h1>{u?.first_name} {u?.last_name?.[0]}.</h1>` (anonymisation par initiale du nom de famille, pattern hérité). Choisi plutot qu'un h1 generique « Detail de l'annonce » car le nom de l'accompagnante est la donnee centrale de la page.
+
+**Compromis register/page.tsx**
+
+- Le composant `<RegisterForm>` rend lui-meme le `<main>` (en deux branches : default + emailSent). Pour eviter de toucher au composant client (responsabilite separee, et 2 h1 si on en met dans les deux branches sans coordination), le `<h1 className="sr-only">Créer un compte</h1>` est place dans la page wrapper, **avant** le `<Suspense>` qui contient le `<RegisterForm>`. Consequence : le h1 est dans le DOM **avant** le `<main>`, pas a l'interieur.
+- Impact a11y : un user de SR qui suit le skip-link arrive direct au `<main>` (saute le h1). Mais en navigation sequentielle ou par heading, le h1 reste accessible. AC commun 4 dit « au sommet de son contenu principal » -> strictement non respecte ici, mais l'AC4 garde-fou (`<h1` dans `page.tsx`) est respecte. **Refactor profond report Lot C** : refactoriser `<RegisterForm>` pour separer la logique du markup `<main>`, permettant d'avoir un `<h1>` unique dans la page wrapper a l'interieur du `<main>`.
+
+**Hierarchie heading (heading-order)**
+
+- Les pages avec h2->h3 cards qui passent en h1->h3 introduisent un saut de niveau. Cette regle (`heading-order`) est `moderate` chez axe-core, donc **pas dans le baseline Critical/Serious**. Le baseline reste vert.
+- Refactor h3->h2 sur cards reporte (story de cloture Lot B ou Lot C).
+
+**Pages deja conformes (AC2 — non regression)**
+
+- `app/page.tsx` (`<h1 sr-only>roxanetnous</h1>` l.95) : **non touche**.
+- `app/not-found.tsx` (`<h1>404</h1>`) : non touche.
+- `app/cgu/page.tsx`, `app/mentions-legales/page.tsx`, `app/politique-de-confidentialite/page.tsx` : `<h1>` deja present, non touches.
+
 ### File List
+
+Fichiers modifies (10) :
+- app/messages/page.tsx
+- app/messages/[id]/page.tsx
+- app/favoris/page.tsx
+- app/recherche/page.tsx
+- app/recherche/demandes/page.tsx
+- app/recherche/[id]/page.tsx
+- app/register/page.tsx
+- app/login/page.tsx
+- app/forgot-password/page.tsx
+- app/reset-password/page.tsx
+
+Fichier de story (statut) :
+- _bmad-output/implementation-artifacts/2-6-7-A-h1-pages-publiques-auth.md (Status -> review)
+
+### Change Log
+
+| Date | Auteur | Description |
+|---|---|---|
+| 2026-05-06 | dev-story (claude-opus-4-7) | Story 2.6.7-A : ajout d'un `<h1>` unique sur 10 pages publiques + auth. 5 visibles (messages, favoris, recherche, recherche/demandes, recherche/[id]) via transformation `<h2>`->`<h1>`. 5 sr-only (login, forgot, reset, register, messages/[id]). Garde-fou `find ... grep -L '<h1' wc -l = 0`. lint:a11y-check OK 155/158, axe:check OK aucun delta. Compromis register/page.tsx documente (h1 hors `<main>` du composant). |
 
 ## DoD a11y
 
 A renseigner au moment de la PR :
 
-- [ ] Labels associes aux champs (`htmlFor` ou `aria-labelledby`) — N/A
-- [ ] Erreurs liees aux champs via `aria-describedby` + `aria-invalid` — N/A
-- [ ] Focus visible sur tous les elements interactifs — N/A (pas d'element interactif modifie)
-- [ ] Contrastes texte >= 4,5:1 et UI >= 3:1 — heritage Lot A 2.5.3
-- [ ] ARIA states corrects sur composants dynamiques — N/A
-- [ ] Navigation clavier complete — N/A
-- [ ] Verification ponctuelle au lecteur d'ecran (VoiceOver) — non requis pour cette story (mecanique multi-pages, axe-core suffit)
-- [ ] Pas de regression `eslint-plugin-jsx-a11y` (`npm run lint:a11y-check` vert en CI)
-- [ ] Pas de regression axe-core (`npm run a11y:axe:check` vert ou delta documente — reduction `page-has-heading-one` attendue sur P2/P4)
-- [ ] Garde-fou : `find app/messages app/favoris app/recherche app/register app/login app/forgot-password app/reset-password -name 'page.tsx' | xargs grep -L '<h1' | wc -l == 0`
+- [x] Labels associes aux champs (`htmlFor` ou `aria-labelledby`) — N/A
+- [x] Erreurs liees aux champs via `aria-describedby` + `aria-invalid` — N/A
+- [x] Focus visible sur tous les elements interactifs — N/A (pas d'element interactif modifie)
+- [x] Contrastes texte >= 4,5:1 et UI >= 3:1 — h1 visibles utilisent `text-gray-900` sur fond clair (heritage Lot A 2.5.3, ratio largement OK).
+- [x] ARIA states corrects sur composants dynamiques — N/A
+- [x] Navigation clavier complete — N/A
+- [x] Verification ponctuelle au lecteur d'ecran (VoiceOver) — non requis (story mecanique multi-pages, axe-core suffit).
+- [x] Pas de regression `eslint-plugin-jsx-a11y` (`npm run lint:a11y-check` vert : 155/158).
+- [x] Pas de regression axe-core (`npm run a11y:axe:check` vert : aucun delta Critical/Serious).
+- [x] Garde-fou : `find ... | xargs grep -L '<h1' | wc -l = 0`.

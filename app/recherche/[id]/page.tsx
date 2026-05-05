@@ -127,9 +127,9 @@ export default async function AnnonceDetailPage({
             </div>
             <div>
               <div className="flex items-center gap-3">
-                <h2 className="text-2xl font-bold text-gray-900">
+                <h1 className="text-2xl font-bold text-gray-900">
                   {u?.first_name} {u?.last_name?.[0]}.
-                </h2>
+                </h1>
                 <BadgesDisplay badges={badgesMap[auxUserId]} />
               </div>
               <p className="text-black">

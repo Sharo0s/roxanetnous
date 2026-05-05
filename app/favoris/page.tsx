@@ -65,7 +65,7 @@ export default async function FavorisPage() {
       )}
 
       <div className="max-w-5xl mx-auto px-4 py-8 relative z-10">
-        <h2 className="text-2xl font-bold text-gray-900 mb-6">Mes favoris</h2>
+        <h1 className="text-2xl font-bold text-gray-900 mb-6">Mes favoris</h1>
 
         {!favoris || favoris.length === 0 ? (
           <div className="bg-white rounded-xl border p-8 text-center">

@@ -102,8 +102,13 @@ export default async function ConversationPage({
 
   const unreadCount = await getUnreadCount(user.id)
 
+  const otherUserNameForHeading = isAdminConv && isAux
+    ? 'Équipe roxanetnous'
+    : `${otherUser?.first_name || ''} ${otherUser?.last_name || ''}`.trim() || 'votre interlocuteur'
+
   return (
     <main id="main-content" tabIndex={-1} className="min-h-screen kraft bg-kraft flex flex-col focus:outline-none">
+      <h1 className="sr-only">Conversation avec {otherUserNameForHeading}</h1>
       {userData.role === 'accompagnante' ? (
         <AccompagnanteHeader
           userId={user.id}

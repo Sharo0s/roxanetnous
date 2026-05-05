@@ -89,7 +89,7 @@ export default async function DemandesAccompagnesPage({
       )}
 
       <div className="max-w-6xl mx-auto px-4 py-8 relative z-10">
-        <h2 className="text-2xl font-bold text-gray-900 mb-6">Demandes des accompagnés</h2>
+        <h1 className="text-2xl font-bold text-gray-900 mb-6">Demandes des accompagnés</h1>
 
         {!annonces || annonces.length === 0 ? (
           <div className="bg-white rounded-xl border p-8 text-center">

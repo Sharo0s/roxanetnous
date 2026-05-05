@@ -27,6 +27,7 @@ export default function ForgotPasswordPage() {
   return (
     <main id="main-content" tabIndex={-1} className="min-h-screen flex items-center justify-center p-4 kraft bg-kraft focus:outline-none">
       <div className="w-full max-w-md relative z-10">
+        <h1 className="sr-only">Mot de passe oublié</h1>
         <div className="text-center mb-8">
           <Link href="/" className="text-3xl font-bold text-black">
             roxanetnous
