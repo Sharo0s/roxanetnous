@@ -125,7 +125,7 @@ export default async function AdminParrainagesPage({
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold text-gray-900">Parrainages</h2>
+        <h1 className="text-2xl font-bold text-gray-900">Parrainages</h1>
         <Link
           href="/admin/parrainages/blacklist"
           className="text-sm font-medium text-black hover:underline"

@@ -90,9 +90,9 @@ export default async function ValidationDetailPage({
       <div className="max-w-4xl mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h2 className="text-2xl font-bold text-gray-900">
+            <h1 className="text-2xl font-bold text-gray-900">
               {u?.first_name} {u?.last_name}
-            </h2>
+            </h1>
             <p className="text-gray-500">{u?.email}</p>
           </div>
           <StatusBadge status={profile.validation_status} />

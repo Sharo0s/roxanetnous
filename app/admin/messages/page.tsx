@@ -38,7 +38,7 @@ export default async function AdminMessagesPage() {
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-8">
-      <h2 className="text-2xl font-bold text-gray-900 mb-6">Messages avec les accompagnantes</h2>
+      <h1 className="text-2xl font-bold text-gray-900 mb-6">Messages avec les accompagnantes</h1>
 
       {!conversations || conversations.length === 0 ? (
         <div className="bg-white rounded-xl border p-8 text-center text-gray-500">

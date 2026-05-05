@@ -148,9 +148,9 @@ export default async function AdminUtilisateurDetailPage({
                 {userData.first_name?.[0]}{userData.last_name?.[0]}
               </div>
               <div>
-                <h2 className="text-2xl font-bold text-gray-900">
+                <h1 className="text-2xl font-bold text-gray-900">
                   {userData.first_name} {userData.last_name}
-                </h2>
+                </h1>
                 <p className="text-sm text-gray-600 mt-0.5">{userData.email}</p>
                 {userData.phone && (
                   <p className="text-sm text-gray-500 mt-0.5">{userData.phone}</p>

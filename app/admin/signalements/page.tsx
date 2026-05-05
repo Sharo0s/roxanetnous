@@ -31,7 +31,7 @@ export default async function AdminSignalementsPage() {
   return (
       <div className="max-w-6xl mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold text-gray-900">Signalements</h2>
+          <h1 className="text-2xl font-bold text-gray-900">Signalements</h1>
           <span className="text-sm text-gray-500">{pendingCount} en attente</span>
         </div>
 

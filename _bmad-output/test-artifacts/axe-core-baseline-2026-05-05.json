@@ -3,8 +3,8 @@
     "Ne pas regenerer ce baseline pour faire passer la CI sans justification dans le PR.",
     "Toute regeneration doit etre motivee : montee de version axe-core, livraison story Lot B, ou correction massive justifiee."
   ],
-  "generatedAt": "2026-05-05T22:12:27.574Z",
-  "commitSha": "bcabe50613032cefd19a47216409a8fb653311a0",
+  "generatedAt": "2026-05-05T22:30:06.109Z",
+  "commitSha": "a0cdb8a39f3bf5bce2856c1ff2065bb910901c41",
   "totals": {
     "violations": 0,
     "nodes": 0

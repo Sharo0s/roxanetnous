@@ -85,7 +85,7 @@ export default async function AdminDashboard() {
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
-      <h2 className="text-2xl font-bold text-gray-900 mb-6">Tableau de bord</h2>
+      <h1 className="text-2xl font-bold text-gray-900 mb-6">Tableau de bord</h1>
 
       {/* Queue de validation - compact quand vide */}
       {!pending || pending.length === 0 ? (

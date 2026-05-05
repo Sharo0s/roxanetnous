@@ -66,7 +66,7 @@ export default async function AdminAnnoncesPage({
 
   return (
       <div className="max-w-6xl mx-auto px-4 py-8">
-        <h2 className="text-2xl font-bold text-gray-900 mb-6">Gestion des annonces</h2>
+        <h1 className="text-2xl font-bold text-gray-900 mb-6">Gestion des annonces</h1>
 
         <div className="flex gap-2 mb-6">
           <Link

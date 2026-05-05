@@ -104,14 +104,17 @@ export default async function AdminUtilisateursPage() {
   const annulations = await getDernieresAnnulations()
 
   return (
-    <UtilisateursClient
-      accompagnantes={accompagnantes}
-      accompagnes={accompagnes}
-      enAttenteCount={enAttenteCount}
-      validesCount={validesCount}
-      diplomeLabels={Object.fromEntries(DIPLOMES.map((d) => [d.value, d.label]))}
-      experienceLabels={Object.fromEntries(EXPERIENCE_LEVELS.map((e) => [e.value, e.label]))}
-      annulations={annulations}
-    />
+    <>
+      <h1 className="sr-only">Utilisateurs</h1>
+      <UtilisateursClient
+        accompagnantes={accompagnantes}
+        accompagnes={accompagnes}
+        enAttenteCount={enAttenteCount}
+        validesCount={validesCount}
+        diplomeLabels={Object.fromEntries(DIPLOMES.map((d) => [d.value, d.label]))}
+        experienceLabels={Object.fromEntries(EXPERIENCE_LEVELS.map((e) => [e.value, e.label]))}
+        annulations={annulations}
+      />
+    </>
   )
 }

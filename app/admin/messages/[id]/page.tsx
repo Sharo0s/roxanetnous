@@ -45,6 +45,7 @@ export default async function AdminConversationPage({
 
   return (
     <div className="flex flex-col flex-1">
+      <h1 className="sr-only">Conversation admin avec {fullName}</h1>
       <div className="max-w-3xl mx-auto w-full px-4 py-3 flex items-center gap-2">
         <Link href="/admin/messages" className="inline-flex items-center gap-2 px-4 h-[52px] bg-accent text-black rounded-xl text-base font-medium btn-hover transition">
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
