@@ -1,6 +1,6 @@
 # Story 3.2 : Blocage inscription auxiliaire hors zone
 
-Status: review
+Status: done
 
 <!-- Note: Validation est optionnelle. Lancer `validate-create-story` avant `dev-story` pour un controle qualite. -->
 
