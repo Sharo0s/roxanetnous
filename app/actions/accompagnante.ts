@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { geocodeAddress } from '@/lib/geocoding'
+import { isDepartementOuvert, getMessageRestriction } from '@/lib/departements'
 
 export type OnboardingResult = {
   error?: string
@@ -79,6 +80,10 @@ export async function submitOnboarding(data: {
 
   if (!/^\d{5}$/.test(data.code_postal)) {
     return { error: 'Le code postal doit contenir 5 chiffres.' }
+  }
+
+  if (!(await isDepartementOuvert(data.code_postal))) {
+    return { error: await getMessageRestriction() }
   }
 
   // M2 (code review 2026-04-28) : validation des disponibilités, applicable

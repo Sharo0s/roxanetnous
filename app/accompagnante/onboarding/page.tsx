@@ -45,6 +45,7 @@ export default async function OnboardingPage() {
           marraineFirstName,
         }}
         departementsOuverts={departementsOuverts}
+        userEmail={user.email ?? ''}
       />
     </main>
   )

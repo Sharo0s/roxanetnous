@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react'
 import { submitOnboarding, uploadJustificatif } from '@/app/actions/accompagnante'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
+import { extraireCodeDepartement } from '@/lib/departements'
 import { StepDiplome } from '@/components/accompagnante/step-diplome'
 import { StepSpecialites } from '@/components/accompagnante/step-specialites'
 import { StepLocalisation } from '@/components/accompagnante/step-localisation'
@@ -50,9 +51,10 @@ type Props = {
     marraineFirstName: string | null
   }
   departementsOuverts: string[]
+  userEmail: string
 }
 
-export function OnboardingClient({ parrainage, departementsOuverts }: Props) {
+export function OnboardingClient({ parrainage, departementsOuverts, userEmail }: Props) {
   const [step, setStep] = useState(0)
   const [data, setData] = useState<OnboardingData>(initialData)
   const [error, setError] = useState<string | null>(null)
@@ -75,6 +77,22 @@ export function OnboardingClient({ parrainage, departementsOuverts }: Props) {
   function updateData(partial: Partial<OnboardingData>) {
     setData((prev) => ({ ...prev, ...partial }))
   }
+
+  function buildWaitlistHref(): string | null {
+    if (!error) return null
+    const isZoneError = /departement|territoire/i.test(error)
+    if (!isZoneError) return null
+    const code = extraireCodeDepartement(data.code_postal)
+    if (!userEmail || !code) return null
+    const params = new URLSearchParams({
+      email: userEmail,
+      code_departement: code,
+      role: 'accompagnante',
+    })
+    return `/waitlist?${params.toString()}`
+  }
+
+  const waitlistHref = buildWaitlistHref()
 
   function canProceed(): boolean {
     // Si filleule (parrainee) : meme exigences que la voie manuelle SAUF
@@ -187,7 +205,17 @@ export function OnboardingClient({ parrainage, departementsOuverts }: Props) {
       <div className="max-w-3xl mx-auto px-4 py-6 relative z-10">
         {error && (
           <div role="alert" className="mb-4 p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
-            {error}
+            <p>{error}</p>
+            {waitlistHref && (
+              <p className="mt-2">
+                <Link
+                  href={waitlistHref}
+                  className="underline font-medium text-red-700 hover:text-red-900 focus:outline-none focus:ring-2 focus:ring-focus-ring rounded-sm"
+                >
+                  Rejoindre la waitlist pour mon departement
+                </Link>
+              </p>
+            )}
           </div>
         )}
 
