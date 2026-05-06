@@ -925,11 +925,24 @@ export async function sendWaitlistOpeningNotificationEmail(params: {
   nomDepartement: string
   userId?: string
 }) {
-  const subject = `Le service est ouvert dans ${params.nomDepartement}`
+  // Validation defensive : nomDepartement vide / trop long / contenant CRLF
+  // ferait planter le subject Resend ou ouvrirait une header injection.
+  // Code review patch #13/#14.
+  const nom = (params.nomDepartement || '').trim()
+  if (!nom || nom.length > 80 || /[\r\n]/.test(nom)) {
+    console.error('[notify-waitlist][invalid_nom]', { code: params.codeDepartement, nom: params.nomDepartement })
+    return
+  }
+  const subject = `Le service est ouvert dans ${nom}`
   const canLog = Boolean(params.userId)
-  const ctaUrl = `${BASE_URL}/recherche?code_departement=${encodeURIComponent(params.codeDepartement)}`
+  // BASE_URL peut avoir un trailing slash en preview Vercel : on neutralise.
+  // Code review patch #12.
+  const baseClean = (BASE_URL || '').replace(/\/+$/, '')
+  const ctaUrl = `${baseClean}/recherche?code_departement=${encodeURIComponent(params.codeDepartement)}`
   try {
-    await resend.emails.send({
+    // Resend peut resoudre avec { error } sans throw (rate-limit, recipient
+    // invalide). Code review patch #1 : on verifie explicitement.
+    const result = await resend.emails.send({
       from: FROM_EMAIL,
       to: params.email,
       subject,
@@ -937,16 +950,32 @@ export async function sendWaitlistOpeningNotificationEmail(params: {
         <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
           <h1 style="color: #000;">Bonne nouvelle</h1>
           <p>Bonjour,</p>
-          <p>Le service roxanetnous est désormais ouvert dans le département <strong>${escapeHtml(params.nomDepartement)}</strong> (${escapeHtml(params.codeDepartement)}).</p>
+          <p>Le service roxanetnous est désormais ouvert dans le département <strong>${escapeHtml(nom)}</strong> (${escapeHtml(params.codeDepartement)}).</p>
           <p>Vous pouvez dès maintenant explorer les profils disponibles dans votre zone.</p>
           <p style="margin-top: 24px;">
-            <a href="${ctaUrl}" style="background: #000; color: #fff; padding: 12px 24px; text-decoration: none; display: inline-block;">
-              Découvrir roxanetnous dans ${escapeHtml(params.nomDepartement)}
+            <a href="${escapeHtml(ctaUrl)}" style="background: #000; color: #fff; padding: 12px 24px; text-decoration: none; display: inline-block;">
+              Découvrir roxanetnous dans ${escapeHtml(nom)}
             </a>
           </p>
         </div>
       `,
     })
+
+    const resendError = result.error
+    if (resendError) {
+      console.error('[notify-waitlist][resend_error]', { code: params.codeDepartement, email: params.email, error: resendError })
+      if (canLog) {
+        await logNotification({
+          userId: params.userId,
+          email: params.email,
+          type: 'waitlist_opening',
+          subject,
+          status: 'failed',
+          error: typeof resendError === 'string' ? resendError : JSON.stringify(resendError),
+        })
+      }
+      return
+    }
 
     if (canLog) {
       await logNotification({

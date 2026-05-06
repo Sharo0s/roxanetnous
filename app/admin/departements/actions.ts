@@ -45,13 +45,21 @@ export async function toggleDepartement(code: string, ouvrir: boolean): Promise<
 
   const supabase = await createClient({ serviceRole: true })
 
-  // SELECT pre-update pour detecter transition false -> true (story 3.5 D2)
-  const { data: avant } = await supabase
+  // SELECT pre-update pour detecter transition false -> true (story 3.5 D2).
+  // Code review patch #6 : gerer error explicitement, sinon une erreur
+  // transitoire BDD masque la transition reelle (etaitFerme=false silencieux).
+  const { data: avant, error: preErr } = await supabase
     .from('departements_ouverts')
     .select('ouvert')
     .eq('code', code)
     .single()
-  const etaitFerme = avant?.ouvert === false
+  if (preErr) {
+    return { error: 'Erreur lors de la lecture de l\'etat du departement.' }
+  }
+  if (!avant) {
+    return { error: 'Departement introuvable.' }
+  }
+  const etaitFerme = avant.ouvert === false
 
   const updateData: Record<string, unknown> = {
     ouvert: ouvrir,
@@ -61,16 +69,23 @@ export async function toggleDepartement(code: string, ouvrir: boolean): Promise<
     updateData.ouvert_le = new Date().toISOString()
   }
 
-  const { error } = await supabase
+  // Code review patch #7 : verifier que l'UPDATE touche bien >=1 ligne
+  // (defense en profondeur, le SELECT pre-update verifie deja l'existence).
+  const { data: updated, error } = await supabase
     .from('departements_ouverts')
     .update(updateData)
     .eq('code', code)
+    .select('code')
 
   if (error) return { error: 'Erreur lors de la mise à jour.' }
+  if (!updated || updated.length === 0) {
+    return { error: 'Departement introuvable.' }
+  }
 
   // Bug latent fix (story 3.5 D1) : target_id_text au lieu de target_id
   // (UUID NOT NULL en BDD, code dpt est TEXT).
-  await supabase.from('admin_actions_log').insert({
+  // Code review patch #8 : logger l'erreur insert log explicitement.
+  const { error: logErr } = await supabase.from('admin_actions_log').insert({
     admin_id: auth.adminId,
     action_type: ouvrir ? 'departement_ouvert' : 'departement_ferme',
     target_type: 'departement',
@@ -78,6 +93,9 @@ export async function toggleDepartement(code: string, ouvrir: boolean): Promise<
     target_id_text: code,
     details: { code, ouvert: ouvrir },
   })
+  if (logErr) {
+    console.error('[toggleDepartement][log_error]', { code, ouvrir, err: logErr })
+  }
 
   // Notification waitlist : transition false -> true uniquement (AC4, AC8).
   // Synchrone : on attend l'envoi dans la meme requete server action.
@@ -99,14 +117,29 @@ export async function toggleRegion(region: string, ouvrir: boolean): Promise<Tog
 
   const supabase = await createClient({ serviceRole: true })
 
-  // SELECT pre-update pour capturer codes actuellement fermes (story 3.5 D3)
-  const { data: avant } = await supabase
+  // SELECT pre-update pour capturer codes actuellement fermes (story 3.5 D3).
+  // Code review patch #6 : gerer error explicitement.
+  const { data: avant, error: preErr } = await supabase
     .from('departements_ouverts')
     .select('code, ouvert')
     .eq('region', region)
+  if (preErr) {
+    return { error: 'Erreur lors de la lecture de la region.' }
+  }
   const codesAvantFermes = (avant || [])
     .filter((d) => d.ouvert === false)
     .map((d) => d.code)
+
+  // Code review patch #11 : warn si batch region depasse le budget timeout
+  // 60s server action (~5 codes * ~50 emails * 300ms = ~75s). Le cron retry
+  // rattrape, mais on signale le risque pour observabilite ops.
+  if (ouvrir && codesAvantFermes.length > 5) {
+    console.warn('[toggleRegion][batch_large]', {
+      region,
+      codesCount: codesAvantFermes.length,
+      info: 'risque timeout 60s server action, cron retry rattrapera surplus',
+    })
+  }
 
   const updateData: Record<string, unknown> = {
     ouvert: ouvrir,
@@ -125,7 +158,8 @@ export async function toggleRegion(region: string, ouvrir: boolean): Promise<Tog
   if (error) return { error: 'Erreur lors de la mise à jour.' }
 
   // Bug latent fix (story 3.5 D1) : target_id_text au lieu de target_id.
-  await supabase.from('admin_actions_log').insert({
+  // Code review patch #8 : logger l'erreur insert log explicitement.
+  const { error: logErr } = await supabase.from('admin_actions_log').insert({
     admin_id: auth.adminId,
     action_type: ouvrir ? 'region_ouverte' : 'region_fermee',
     target_type: 'region',
@@ -133,6 +167,9 @@ export async function toggleRegion(region: string, ouvrir: boolean): Promise<Tog
     target_id_text: region,
     details: { region, ouvert: ouvrir, codes: codes?.map((d) => d.code) || [] },
   })
+  if (logErr) {
+    console.error('[toggleRegion][log_error]', { region, ouvrir, err: logErr })
+  }
 
   // Notification waitlist sequentielle pour chaque code passe false -> true
   // (AC5). Sequentiel pour ne pas burst Resend. Cron retry rattrape ce qui

@@ -33,7 +33,7 @@ Elle s'appuie sur les fondations deja livrees :
 
 3. **AC3 - Helper `lib/notify-waitlist.ts:notifyWaitlistForCode(code)`** : Given le helper est invoque avec un code departement valide (existant dans `departements_ouverts`), when la fonction s'execute en serveur (Server Action ou route cron), then :
    - Charge le `nom` du departement depuis `departements_ouverts` (via `supabase.from('departements_ouverts').select('nom').eq('code', code).single()`).
-   - Charge **toutes** les lignes `waitlist_departements` avec `code_departement = code AND notified_at IS NULL` (`.select('id, email').limit(500)` cap defensif anti-runaway).
+   - Charge **toutes** les lignes `waitlist_departements` avec `code_departement = code AND notified_at IS NULL` (`.select('id, email').limit(NOTIFY_WAITLIST_BATCH_LIMIT)` cap defensif anti-runaway, valeur `200` partagee avec le cron retry — coherent avec D4/AC4/R1).
    - Pour chaque ligne, **dans l'ordre** :
      - **Compare-and-swap atomique** : `UPDATE waitlist_departements SET notified_at = now() WHERE id = row.id AND notified_at IS NULL RETURNING id`. Si `data.length === 0` -> skip silencieux (concurrence cron + admin trigger : la ligne a deja ete prise en charge par l'autre run).
      - **Si swap reussi** : `await sendWaitlistOpeningNotificationEmail({ email, codeDepartement: code, nomDepartement: nom })`. **L'erreur Resend est capturee dans la fonction email** (try/catch interne, comme `sendWaitlistConfirmationEmail`). Pas d'erreur remonte ici.
@@ -475,7 +475,57 @@ Elle s'appuie sur les fondations deja livrees :
   - [x] Sub 8.2 : Push sur main, attendre CI Vercel verte. *(commit `4f2c189` deploye en prod, dpl_62ZVPhygFV4SR4h2RRsaBui2bnVT, status Ready 2026-05-06 23:57)*
   - [x] Sub 8.3 : Commit cloture : `Story 3.5 : statut done apres CI Vercel verte`. Modifier uniquement `_bmad-output/implementation-artifacts/sprint-status.yaml` (3-5 -> done) et le Status du present fichier story.
 
-## Dev Notes
+### Review Findings
+
+*Code review adversarial 3 layers (Blind Hunter / Edge Case Hunter / Acceptance Auditor) execute 2026-05-07 sur commit `4f2c189`. 24 findings bruts -> 3 dismiss, 3 defer, 2 decision_needed, 16 patch.*
+
+**Acceptance Auditor synthese** : 15/18 AC PASS, 3 PARTIAL (F1 Low spec contradiction, F2 Low XSS theorique href, F3 Med tests manuels reportes), 0 FAIL. Toutes decisions D1-D9 appliquees. Risques R1-R13 mitiges sauf R6 partiel.
+
+#### Resolution code review 2026-05-07
+
+- **Decision 1 (#3 email perdu)** : option **(c)** retenue — status quo D5 + observabilite. Verification `result.error` Resend ajoutee + log explicite (patch #1 `lib/emails.ts`). Volume pilote Bretagne (waitlist ~0-50 inscrits/dpt) ne justifie pas le refactor BDD (b) ou la recompromission de D5 (a).
+- **Decision 2 (#11 timeout 60s)** : option **(c)** retenue — accepter pour MVP Bretagne (4 dpt × ~10 inscrits = ~12s, loin des 60s). Warn defensive ajoutee si `codesAvantFermes.length > 5` (patch #11) pour signal ops sur regions hors scope pilote (IDF/AURA en Epic 4+).
+- **18 patches appliques** : try/catch defensif boucles, validation BASE_URL/nomDepartement, escapeHtml ctaUrl, gestion error SELECT pre-update, logging error INSERT log, constante `NOTIFY_WAITLIST_BATCH_LIMIT` partagee, warn batch limit, re-verif `ouvert=true` JS dans cron retry, garde `dpt.nom` null, alignement spec AC3.
+- **3 defers** : race dpt re-ferme (Epic 4), CHECK BDD mutex `target_id_xor` (Epic 4 apres backfill), tests manuels AC16 (a executer avant 1er toggle prod hors-Bretagne).
+- **Validations post-patches** : `tsc` 0 erreur, `lint:a11y-check` 155 stable, `axe:check` 0 violation Critical/Serious, `build` Turbopack route `notify-waitlist-retry` enregistree.
+
+#### Decision-needed (resolution requise avant patches)
+
+- [x] [Review][Decision] Email perdu apres swap si Resend echoue silencieusement [lib/notify-waitlist.ts:60-72, app/api/cron/notify-waitlist-retry/route.ts:165-170] — D5 acte le swap-avant-envoi pour eviter le double-envoi cross-source. Mais si `resend.emails.send()` resout avec `{ error }` sans throw (rate-limit, recipient invalide), la ligne reste `notified_at NOT NULL` ET l'email n'est jamais parti. Aucun mecanisme de retry borne. **Options** : (a) verifier `result.error` dans `sendWaitlistOpeningNotificationEmail` et throw pour declencher rollback du swap (ouvre fenetre double-envoi), (b) ajouter colonne `email_sent BOOLEAN DEFAULT false` swappee uniquement post-confirmation Resend (refactor BDD), (c) accepter le trade-off D5 et ajouter monitoring/alerting Resend logs (status quo + observabilite).
+- [x] [Review][Decision] Timeout 60s server action toggleRegion mid-batch [app/admin/departements/actions.ts:80-91] — Pour une region a 13 dpt avec ~50 inscrits/dpt, le worst case ~3min depasse le timeout 60s Vercel. Lignes deja swappees mais email non envoye sont definitivement perdues (cf. decision-needed precedente). R2 documente le risque mais pas de garde concrete. **Options** : (a) detecter `codesAvantFermes.length > 5` et basculer en mode async (queue Vercel/Supabase), (b) deplacer notifyWaitlistForCode hors server action vers un endpoint POST avec timeout 300s Fluid Compute (Vercel), (c) accepter pour MVP Bretagne (5 dpt, ~50 inscrits total) et documenter en R2 etendu.
+
+#### Patch (16 — fixables sans input utilisateur)
+
+- [x] [Review][Patch] Verifier `result.error` apres `resend.emails.send()` et logger explicitement [lib/emails.ts:195]
+- [x] [Review][Patch] Try/catch autour de `sendWaitlistOpeningNotificationEmail` dans la boucle helper [lib/notify-waitlist.ts:71]
+- [x] [Review][Patch] Try/catch autour de `sendWaitlistOpeningNotificationEmail` dans la boucle cron [app/api/cron/notify-waitlist-retry/route.ts:165]
+- [x] [Review][Patch] Warn si `lignes.length === BATCH_LIMIT` (overflow silencieux) [lib/notify-waitlist.ts:36]
+- [x] [Review][Patch] Warn si `lignes.length === BATCH_LIMIT` cron retry (backlog persistant) [app/api/cron/notify-waitlist-retry/route.ts:39]
+- [x] [Review][Patch] Gerer error SELECT pre-update toggleDepartement (etaitFerme silencieux false sur erreur transitoire) [app/admin/departements/actions.ts:50]
+- [x] [Review][Patch] Gerer error SELECT pre-update toggleRegion (codesAvantFermes silencieusement vide) [app/admin/departements/actions.ts:108]
+- [x] [Review][Patch] Verifier UPDATE `departements_ouverts` touche >=1 ligne avant log + notif [app/admin/departements/actions.ts:46]
+- [x] [Review][Patch] Logger error sur INSERT `admin_actions_log` (audit silencieusement perdu) [app/admin/departements/actions.ts:32-38, 64-78]
+- [x] [Review][Patch] Re-verification JS post-query du filtre `ouvert=true` (PostgREST `!inner` + `.eq()` non garanti selon version Supabase JS) [app/api/cron/notify-waitlist-retry/route.ts:25-29]
+- [x] [Review][Patch] Valider `BASE_URL` (trailing slash, env manquante) avant construction `ctaUrl` [lib/emails.ts:193]
+- [x] [Review][Patch] Garder `dpt.nom` null/empty (subject "Le service est ouvert dans null") [lib/notify-waitlist.ts:21, app/api/cron/notify-waitlist-retry/route.ts:163]
+- [x] [Review][Patch] Valider `params.nomDepartement` (longueur, CRLF subject header injection) [lib/emails.ts:191]
+- [x] [Review][Patch] Corriger spec AC3 contradiction `limit(500)` vs `BATCH_LIMIT=200` (alignement spec, pas code) [story file ligne 36]
+- [x] [Review][Patch] `escapeHtml` sur `ctaUrl` dans `<a href="">` (AC7 conformite stricte, vecteur XSS theorique) [lib/emails.ts:206]
+- [x] [Review][Patch] Constante partagee `BATCH_LIMIT` (factoriser duplication notify-waitlist.ts + cron retry) [lib/notify-waitlist.ts:11, app/api/cron/notify-waitlist-retry/route.ts:5]
+- [x] [Review][Patch] Gerer error SELECT dpt dans helper (null masque erreur reseau vs dpt inexistant) [lib/notify-waitlist.ts:23-25]
+- [x] [Review][Patch] PostgREST embed orphelin : utiliser `dpt?.nom` plutot que fallback sur code (envoi email avec nom = code degrade UX) [app/api/cron/notify-waitlist-retry/route.ts:163]
+
+#### Deferred (3)
+
+- [x] [Review][Defer] Race dpt re-ferme entre SELECT helper et envoi email [lib/notify-waitlist.ts:15-22] — deferred, edge case rare, mitigation possible Epic 4 (re-check ouvert avant chaque envoi).
+- [x] [Review][Defer] CHECK BDD mutex `target_id` / `target_id_text` [supabase/migrations/20260506130000_admin_actions_log_target_id_text.sql:21] — deferred Epic 4, requiert backfill lignes historiques.
+- [x] [Review][Defer] Tests manuels AC16 (a)-(i) reportes au reviewer sans execution documentee [story file lignes 113-122] — deferred, a executer avant 1er toggle reel en prod (waitlist actuellement vide en BDD).
+
+#### Dismiss (3)
+
+- Param `userId?: string` jamais utilise — clone strict pattern story 3.4 (D7), faux positif.
+- 2 admins toggle meme dpt simultanement — log admin ecrit 2x est benin (audit trail double, pas de corruption).
+- `new Date().toISOString()` swap vs Resend send timestamp — observabilite forensique de second ordre, hors scope.
 
 ### Decisions techniques numerotees
 
