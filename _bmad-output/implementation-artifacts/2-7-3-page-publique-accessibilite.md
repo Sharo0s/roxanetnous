@@ -1,6 +1,6 @@
 # Story 2.7.3 : Page publique `/accessibilite` (engagements + limites)
 
-Status: review
+Status: done
 
 <!-- Note: Validation est optionnelle. Lancer `validate-create-story` avant `dev-story` pour un controle qualite. -->
 
