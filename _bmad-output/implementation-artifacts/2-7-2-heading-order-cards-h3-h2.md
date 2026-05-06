@@ -1,6 +1,6 @@
 # Story 2.7.2 : Heading-order — cards `<h3>` -> `<h2>`
 
-Status: review
+Status: done
 
 <!-- Note: Validation est optionnelle. Lancer `validate-create-story` avant `dev-story` pour un controle qualite. -->
 
