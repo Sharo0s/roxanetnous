@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { calculateMatchScore } from '@/lib/matching'
 import { sendMatchingNotificationEmail } from '@/lib/emails'
+import { getCodesPostauxFilterOr, isDepartementOuvert } from '@/lib/departements'
 
 const MAX_NOTIFICATIONS = 20
 const MINIMUM_SCORE = 50
@@ -20,6 +21,10 @@ export async function notifyMatchingUsers(params: {
       .single()
 
     if (!annonce) return
+    // Defense en profondeur : ne pas notifier pour une annonce source hors zone
+    if (!(await isDepartementOuvert(annonce.code_postal))) return
+
+    const codesFilter = await getCodesPostauxFilterOr()
 
     const criteria = {
       specialites_recherchees: annonce.specialites_recherchees as string[],
@@ -32,11 +37,12 @@ export async function notifyMatchingUsers(params: {
       longitude: annonce.longitude ? Number(annonce.longitude) : undefined,
     }
 
-    // Recuperer les accompagnantes valides avec abonnement actif
+    // Recuperer les accompagnantes valides avec abonnement actif (whitelist departements_ouverts)
     const { data: auxProfiles } = await supabase
       .from('accompagnantes_profiles')
       .select('user_id, specialites, ville, code_postal, experience, diplomes, disponibilites, rayon_km, latitude, longitude')
       .eq('validation_status', 'valide')
+      .or(codesFilter)
 
     if (!auxProfiles || auxProfiles.length === 0) return
 
@@ -109,14 +115,18 @@ export async function notifyMatchingUsers(params: {
       .single()
 
     if (!auxAnnonce) return
+    // Defense en profondeur : ne pas notifier pour une annonce source hors zone
+    if (!(await isDepartementOuvert(auxAnnonce.code_postal))) return
 
     const auxProfile = auxAnnonce.accompagnantes_profiles as any
+    const codesFilter = await getCodesPostauxFilterOr()
 
-    // Recuperer les annonces accompagnes publiees
+    // Recuperer les annonces accompagnes publiees (whitelist departements_ouverts)
     const { data: benAnnonces } = await supabase
       .from('annonces_accompagnes')
       .select('id, titre, specialites_recherchees, ville, code_postal, latitude, longitude, diplome_requis, experience_min, disponibilites, accompagne_id')
       .eq('status', 'publiee')
+      .or(codesFilter)
 
     if (!benAnnonces || benAnnonces.length === 0) return
 

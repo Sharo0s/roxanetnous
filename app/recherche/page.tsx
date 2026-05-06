@@ -10,6 +10,7 @@ import { AccompagnanteHeader } from '@/components/layout/accompagnante-header'
 import { AccompagneHeader } from '@/components/layout/accompagne-header'
 import { getUnreadCount } from '@/lib/unread-count'
 import { calculateMatchScore } from '@/lib/matching'
+import { getCodesPostauxFilterOr } from '@/lib/departements'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
@@ -31,6 +32,7 @@ export default async function RecherchePage({
 }) {
   const params = await searchParams
   const supabase = await createClient()
+  const codesFilter = await getCodesPostauxFilterOr()
 
   // Optionnellement recuperer l'utilisateur pour personnaliser
   const { data: { user } } = await supabase.auth.getUser()
@@ -71,6 +73,7 @@ export default async function RecherchePage({
       `)
       .eq('status', 'publiee')
       .eq('accompagnantes_profiles.validation_status', 'valide')
+      .or(codesFilter)
       .order('published_at', { ascending: false })
 
     // Filtre par ville
@@ -176,6 +179,7 @@ export default async function RecherchePage({
             `)
             .eq('status', 'publiee')
             .eq('accompagnantes_profiles.validation_status', 'valide')
+            .or(codesFilter)
             .order('published_at', { ascending: false })
 
           matchSourceAnnonces = allAnnonces || []

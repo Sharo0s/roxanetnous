@@ -10,6 +10,7 @@ import { BadgesDisplay } from '@/components/badges-display'
 import { AccompagnanteHeader } from '@/components/layout/accompagnante-header'
 import { AccompagneHeader } from '@/components/layout/accompagne-header'
 import { getUnreadCount } from '@/lib/unread-count'
+import { isDepartementOuvert } from '@/lib/departements'
 
 export default async function AnnonceDetailPage({
   params,
@@ -58,6 +59,7 @@ export default async function AnnonceDetailPage({
     .single()
 
   if (!annonce) redirect('/recherche')
+  if (!(await isDepartementOuvert(annonce.code_postal))) redirect('/recherche')
 
   const profile = annonce.accompagnantes_profiles as any
   const u = profile?.users

@@ -4,6 +4,7 @@ import { SPECIALITES, DIPLOMES, EXPERIENCE_LEVELS } from '@/lib/constants'
 import { AccompagnanteHeader } from '@/components/layout/accompagnante-header'
 import { getUnreadCount } from '@/lib/unread-count'
 import { ContactAccompagneButton } from '@/components/messages/contact-accompagne-button'
+import { getCodesPostauxFilterOr } from '@/lib/departements'
 
 type SearchParams = {
   ville?: string
@@ -31,10 +32,13 @@ export default async function DemandesAccompagnesPage({
     userData = data
   }
 
+  const codesFilter = await getCodesPostauxFilterOr()
+
   let query = supabase
     .from('annonces_accompagnes')
     .select('*')
     .eq('status', 'publiee')
+    .or(codesFilter)
     .order('published_at', { ascending: false })
 
   if (params.ville) {

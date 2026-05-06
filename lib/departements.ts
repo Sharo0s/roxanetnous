@@ -40,6 +40,33 @@ export async function getCodesDepartementsOuverts(): Promise<string[]> {
   return ouverts.map((d) => d.code)
 }
 
+// Construit une chaine PostgREST `.or()` filtrant code_postal sur les 2
+// premiers chars (code departement). 2A et 2B sont mappes a code_postal LIKE
+// '20%' (codes postaux corses 20xxx). Liste vide -> filtre qui ne match jamais.
+export function buildCodesPostauxFilterOr(codesDepartements: string[]): string {
+  if (codesDepartements.length === 0) {
+    return 'code_postal.eq.__none__'
+  }
+
+  const prefixes = new Set<string>()
+  for (const code of codesDepartements) {
+    if (code === '2A' || code === '2B') {
+      prefixes.add('20')
+    } else {
+      prefixes.add(code)
+    }
+  }
+
+  return Array.from(prefixes)
+    .map((p) => `code_postal.like.${p}%`)
+    .join(',')
+}
+
+export async function getCodesPostauxFilterOr(): Promise<string> {
+  const codes = await getCodesDepartementsOuverts()
+  return buildCodesPostauxFilterOr(codes)
+}
+
 export function extraireCodeDepartement(codePostal: string | null | undefined): string | null {
   if (!codePostal) return null
   const cp = codePostal.trim()
