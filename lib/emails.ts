@@ -17,7 +17,7 @@ async function logNotification(params: {
   email: string
   type: string
   subject: string
-  status: 'sent' | 'error'
+  status: 'sent' | 'error' | 'failed'
   error?: string
 }) {
   const supabase = await createClient({ serviceRole: true })
@@ -858,6 +858,62 @@ export async function sendExpirationReminderEmail(params: {
 // la detection anti-fraude au moment du paiement. Volontairement
 // generique : ne revele pas la regle violee (meme_carte, meme_email,
 // etc.) pour ne pas aider un fraudeur a contourner le systeme.
+export async function sendWaitlistConfirmationEmail(params: {
+  email: string
+  codeDepartement: string
+  nomDepartement: string
+  userId?: string
+}) {
+  const subject = `Vous etes sur la waitlist pour ${params.nomDepartement}`
+  // Visiteur anonyme : userId est undefined dans le flow waitlist, alors que
+  // notifications_log.user_id est NOT NULL FK users(id). On ne log pas dans
+  // ce cas (la ligne waitlist_departements est la source de verite).
+  const canLog = Boolean(params.userId)
+  try {
+    await resend.emails.send({
+      from: FROM_EMAIL,
+      to: params.email,
+      subject,
+      html: `
+        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+          <h1 style="color: #000;">Merci pour votre inscription</h1>
+          <p>Bonjour,</p>
+          <p>Nous avons bien enregistré votre demande pour le département <strong>${escapeHtml(params.nomDepartement)}</strong> (${escapeHtml(params.codeDepartement)}).</p>
+          <p>Nous vous enverrons un email automatique dès l'ouverture du service dans votre département.</p>
+          <p style="margin-top: 24px;">
+            <a href="${BASE_URL}" style="background: #000; color: #fff; padding: 12px 24px; text-decoration: none; display: inline-block;">
+              Retour sur roxanetnous
+            </a>
+          </p>
+        </div>
+      `,
+    })
+
+    if (canLog) {
+      await logNotification({
+        userId: params.userId,
+        email: params.email,
+        type: 'waitlist_confirmation',
+        subject,
+        status: 'sent',
+      })
+    }
+  } catch (error) {
+    if (canLog) {
+      await logNotification({
+        userId: params.userId,
+        email: params.email,
+        type: 'waitlist_confirmation',
+        subject,
+        status: 'failed',
+        error: error instanceof Error ? error.message : 'Erreur inconnue',
+      })
+    } else {
+      console.error('[waitlist][email_send_error]', error)
+    }
+  }
+}
+
 export async function sendParrainageVerificationEmail(params: {
   email: string
   firstName: string
