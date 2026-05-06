@@ -1,6 +1,6 @@
 # Story 2.7.4 : Bascule `a11y:axe:check` bloquant CI (Option 1 - audit local discipline)
 
-Status: review
+Status: done
 
 <!-- Note: Validation est optionnelle. Lancer `validate-create-story` avant `dev-story` pour un controle qualite. -->
 
