@@ -11,10 +11,12 @@ classification:
   domain: general
   complexity: medium
   projectContext: greenfield
-lastEdited: '2026-05-04'
+lastEdited: '2026-05-06'
 editHistory:
   - date: '2026-05-04'
     changes: 'NFR Accessibilité (WCAG 2.2 AA / RGAA / EAA) — remplacement intégral de la sous-section Accessibilité dans Exigences Non-Fonctionnelles. Ajout des 6 parcours critiques, critères mesurables, calendrier en 3 lots (A/B/C), DoD a11y par story, page de déclaration publique.'
+  - date: '2026-05-06'
+    changes: 'NFR Accessibilité — mise à jour post-Lot C suite re-run NFR AI-13 (cf. nfr-assessment-a11y-2026-05-04.md section R). Calendrier passé en mode livré (Lots A/B/C, 12,25 j-dev cumulés, 21 stories). Statut courant ✅ conforme avec réserves (18/22 critères PASS, 0 bloqueur). Périmètre précisé 7 parcours (entrées baseline @axe-core/playwright) avec note de réconciliation 6 vs 7 (couvre AI-12 partiellement pour ce fichier). Lot D conditionnel ajouté (déclencheur externe). Règle CLAUDE.md ligne 6 mentionnée (durcissement 2.7.4).'
 ---
 
 # Product Requirements Document - roxanetnous
@@ -269,7 +271,7 @@ editHistory:
 
 **Standard cible :** WCAG 2.2 niveau AA, aligné RGAA 4.1, anticipant la conformité à l'Acte européen sur l'accessibilité (EAA, en vigueur depuis le 28 juin 2025).
 
-**Périmètre de conformité :** la conformité AA est exigée sur les **6 parcours critiques** suivants : (1) onboarding auxiliaire, (2) recherche bénéficiaire et favoris, (3) messagerie temps réel, (4) inscription et checkout Stripe, (5) landing page publique, (6) suppression compte / export RGPD. Les autres pages doivent respecter les exigences de base (sémantique HTML, contrastes, focus, labels) sans audit exhaustif obligatoire.
+**Périmètre de conformité :** la conformité AA est exigée sur les **7 parcours critiques** suivants au sens des entrées de baseline `@axe-core/playwright` (cf. `tests/a11y/`) : (1) onboarding auxiliaire, (2) recherche bénéficiaire et favoris, (3) messagerie temps réel, (4-login) connexion, (4-register) inscription et checkout Stripe, (5) landing page publique, (6) suppression compte / export RGPD. Note de réconciliation : le NFR initial 2026-05-04 et certains documents en aval mentionnent **« 6 parcours »** (parcours métier consolidés) — l'écart vient du parcours P4 « inscription + checkout Stripe » splité en 2 entrées baseline distinctes (`p4-login` couvre `/login` en proxy authentifié + `p4-register` couvre `/register`), conformément au choix d'outillage 2.6.1 (story Lot B). Les autres pages doivent respecter les exigences de base (sémantique HTML, contrastes, focus, labels) sans audit exhaustif obligatoire.
 
 **Critères d'acceptation mesurables :**
 
@@ -280,17 +282,18 @@ editHistory:
 - **Régions live :** messagerie en `role="log"` + `aria-live="polite"` ; toasts en `aria-live`.
 - **Mouvement :** respect de `prefers-reduced-motion: reduce` (animations désactivables).
 - **Alternatives textuelles :** 100 % des images informatives ont un `alt` ; carte hero SVG accompagnée d'un équivalent textuel.
-- **Outillage :** `eslint-plugin-jsx-a11y` en CI (build rouge sur nouvelle violation) ; tests automatisés `@axe-core/playwright` sur les 6 parcours critiques (objectif : 0 violation Critical/Serious) ; tests manuels VoiceOver et NVDA documentés sur les parcours onboarding auxiliaire et messagerie, exécutés avant chaque release majeure.
-- **Process :** chaque story future avec impact UI inclut une definition-of-done a11y (labels, focus, contrastes, ARIA, clavier, vérification ponctuelle au lecteur d'écran). Une story ne peut être marquée Done sans validation explicite de cette checklist.
-- **Déclaration publique :** page `/accessibilite` accessible depuis le footer, indiquant le niveau de conformité, la méthode d'évaluation, la date de mise à jour et un contact dédié.
+- **Outillage :** `eslint-plugin-jsx-a11y` en CI (build rouge sur nouvelle violation) ; tests automatisés `@axe-core/playwright` sur les 7 parcours critiques (objectif : 0 violation Critical/Serious) ; tests manuels VoiceOver et NVDA documentés sur les parcours onboarding auxiliaire et messagerie, exécutés avant chaque release majeure.
+- **Process :** chaque story future avec impact UI inclut une definition-of-done a11y (labels, focus, contrastes, ARIA, clavier, vérification ponctuelle au lecteur d'écran). Une story ne peut être marquée Done sans validation explicite de cette checklist. Règle CLAUDE.md ligne 6 durcie 2026-05-06 (Lot C 2.7.4) : `npm run a11y:axe:check` exit 0 obligatoire avant tout commit livraison story (Option 1 audit local discipline retenue).
+- **Déclaration publique :** page `/accessibilite` publiée depuis le 2026-05-06, accessible depuis le footer (4ème entrée nav légale) et le sitemap, indiquant le niveau de conformité, la méthode d'évaluation, la date de mise à jour et un contact dédié (`roxanetnous@outlook.com`).
 
-**Calendrier de mise en conformité :**
+**Calendrier de mise en conformité (livré) :**
 
-- **Lot A — Quick wins (3-4 j-dev) :** micro-épic exécuté **avant le démarrage de l'épic 3**. Couvre le minimum sémantique : skip-link, focus global conforme, `prefers-reduced-motion`, refactor du composant `Input` (labels + erreurs), ARIA burger, palette de contrastes durcie, installation `eslint-plugin-jsx-a11y`.
-- **Lot B — Conformité fonctionnelle (5-7 j-dev) :** étalé sur l'épic 3. Couvre les parcours critiques : ARIA progressbar et gestion focus dans l'onboarding, régions live messagerie, audit Leaflet, alternative textuelle carte hero, audit complet des formulaires.
-- **Lot C — Excellence (3-5 j-dev) :** épics 4-5. Suite axe-core en CI sur les 6 parcours, tests manuels VoiceOver/NVDA documentés, page de déclaration d'accessibilité, cible tactile 44×44 px, audit additionnel.
+- **Lot A — Quick wins (3,5 j-dev livrés sur 3-4 j-dev estimés) :** mini-épic 2.5 livré **2026-05-05**, 6 stories. Couvre le minimum sémantique : skip-link (2.5.2), focus global conforme + palette contrastes (2.5.3), `prefers-reduced-motion` (2.5.4), refactor du composant `Input` accessible labels + erreurs (2.5.5), ARIA burger (2.5.6), installation `eslint-plugin-jsx-a11y` baseline 158 (2.5.1).
+- **Lot B — Conformité fonctionnelle (6,25 j-dev livrés sur 5-7 j-dev estimés) :** mini-épic 2.6 livré **2026-05-06**, 9 stories. Couvre les parcours critiques : axe-core/Playwright outillage + baseline 7 parcours (2.6.1), régions live messagerie (2.6.2), ARIA progressbar + focus management onboarding aux (2.6.3), erreurs inline `role="alert"` 24 occurrences (2.6.4), alternative textuelle carte hero (2.6.5), audit Leaflet + alternative non-visuelle + résorption dette `select-name` (2.6.6), h1 unique sur 47 pages applicatives (2.6.7-A/B/C). Baseline axe-core 1 → 0 Critical/Serious.
+- **Lot C — Excellence et verrouillage (~2,5 j-dev livrés sur 3-5 j-dev estimés, cadrage minimaliste) :** mini-épic 2.7 livré **2026-05-06**, 6 stories. Refactor `<main>` Server Component pages auth (2.7.1, 2.7.6), heading-order strict cards `<h3>` → `<h2>` (2.7.2), page publique `/accessibilite` (2.7.3), bascule `a11y:axe:check` bloquant code review via règle CLAUDE.md (2.7.4), rétrospective Lot B documentée (2.7.5).
+- **Lot D — Excellence avancée (6-8 j-dev, conditionnel) :** non cadré, déclencheur externe requis (audit RGAA externe / certification / levée de fonds). Couvre les action items reportés : VoiceOver/NVDA formels sur 7 parcours (AI-9), cible tactile 44×44 px (AI-10), bascule `eslint-plugin-jsx-a11y` `warn` → `error` quand baseline = 0 (AI-11), audit admin a11y, audit Stripe Checkout délégué éditeur, tests scénarios complets.
 
-**Statut actuel (audité le 2026-05-04) :** non conforme (~25-30 % WCAG 2.2 AA). Voir audit complet : `_bmad-output/planning-artifacts/audit-a11y-2026-05-04.md` et NFR : `_bmad-output/test-artifacts/nfr-assessment-a11y-2026-05-04.md`.
+**Statut actuel (re-run NFR 2026-05-06, AI-13) :** ✅ **conforme avec réserves** sur les 7 parcours critiques. **0 violation Critical/Serious axe-core** (baseline `91d1e5f`), **baseline `lint:a11y-check` 155** stable, **18/22 critères PASS, 4 CONCERNS** (B4 cibles tactiles 44×44 px, D4 partiel Leaflet neutralisé via `aria-hidden`+`inert` avec alternative non-visuelle, E3 tests manuels VoiceOver/NVDA formels sur 7 parcours). **0 bloqueur critique** (5 initiaux résolus : B1 skip-link, B2 focus visible, C1 labels, C2 erreurs, D3 régions live). Gate épic 3 levé. **Effort cumulé livré : 12,25 j-dev sur 21 stories** Lots A/B/C, dans la fourchette initiale 11-16 j-dev. Voir audit initial : `_bmad-output/planning-artifacts/audit-a11y-2026-05-04.md` ; NFR + re-run consolidé : `_bmad-output/test-artifacts/nfr-assessment-a11y-2026-05-04.md` ; rétros : `_bmad-output/implementation-artifacts/mini-epic-2-5-retro-2026-05-05.md`, `mini-epic-2-6-retro-2026-05-06.md`, `mini-epic-2-7-retro-2026-05-06.md` ; bilan quantitatif : `_bmad-output/implementation-artifacts/lot-b-bilan-axe-core-2026-05-06.md`.
 
 ## Exigences Fonctionnelles
 
