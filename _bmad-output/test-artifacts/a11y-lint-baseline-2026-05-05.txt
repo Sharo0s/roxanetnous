@@ -3,15 +3,15 @@
 
 A11Y LINT BASELINE
 Generated: 2026-05-05
-Commit: 38382771d9ebb536f9fdc7eba03bcaf439a7275e
-Total a11y violations: 158
+Commit: 47e852ef12d4c735102c69228a9f4d23ee366315
+Total a11y violations: 155
 Total errors: 0
-Total warnings: 158
+Total warnings: 155
 
 By rule:
   jsx-a11y/label-has-for: 75
-  jsx-a11y/label-has-associated-control: 53
-  jsx-a11y/control-has-associated-label: 16
+  jsx-a11y/label-has-associated-control: 51
+  jsx-a11y/control-has-associated-label: 15
   jsx-a11y/no-autofocus: 5
   jsx-a11y/aria-role: 2
   jsx-a11y/click-events-have-key-events: 2
@@ -26,12 +26,9 @@ By file:
     jsx-a11y/aria-role (1)
   app/admin/utilisateurs/[id]/page.tsx:
     jsx-a11y/control-has-associated-label (1)
-  app/login/page.tsx:
-    jsx-a11y/no-autofocus (1)
   app/recherche/[id]/page.tsx:
     jsx-a11y/control-has-associated-label (1)
   app/recherche/page.tsx:
-    jsx-a11y/label-has-associated-control (1)
     jsx-a11y/label-has-for (1)
   components/abonnement/cancel-modal.tsx:
     jsx-a11y/click-events-have-key-events (1)
@@ -88,19 +85,19 @@ By file:
   components/admin/validation-actions.tsx:
     jsx-a11y/label-has-associated-control (3)
     jsx-a11y/label-has-for (3)
+  components/auth/login-form.tsx:
+    jsx-a11y/no-autofocus (1)
   components/auth/register-form.tsx:
     jsx-a11y/no-autofocus (4)
     jsx-a11y/label-has-associated-control (1)
     jsx-a11y/label-has-for (1)
   components/contact-form.tsx:
     jsx-a11y/label-has-for (5)
-  components/messages/chat-window.tsx:
-    jsx-a11y/control-has-associated-label (1)
   components/recherche/favori-button.tsx:
     jsx-a11y/control-has-associated-label (1)
   components/recherche/search-filters.tsx:
     jsx-a11y/label-has-for (4)
-    jsx-a11y/label-has-associated-control (3)
+    jsx-a11y/label-has-associated-control (2)
     jsx-a11y/no-noninteractive-element-interactions (1)
   components/signalement-button.tsx:
     jsx-a11y/label-has-associated-control (2)

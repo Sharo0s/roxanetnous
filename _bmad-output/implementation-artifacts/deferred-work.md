@@ -78,3 +78,23 @@
 - Skip-link `/accompagnante/onboarding` non couvert par axe-check automatise -- documente dans la spec story 2.7.1 AC7 Note explicite : page hors 7 parcours critiques. Couverture statique uniquement (lint a11y + DOM grep). Decision Lot C de ne pas etendre la suite axe-core a cette page.
 - Parite `animate-fade-in` au mount non validee visuellement post-refactor -- risque theorique mineur, React diffing preserve normalement l'identite des nodes (pas de remount lors du changement de wrapper externe `<main>` -> `<div>`). Couvert par DoD a11y manuelle (Sub 2.3, 2.4, 3.3 marquees a executer par l'utilisateur).
 - Pas de `.editorconfig` ni `.prettierrc` dans le projet -- la reindentation -2 espaces sur ~200 lignes (`register-form.tsx`) ne sera pas validee par un formatter automatique. Risque d'incoherence si un dev futur lance Prettier avec des defauts differents. A traiter en story d'outillage dev-experience.
+
+## Deferred from: code review of 2-7-6-refactor-main-pages-auth-jumelles (2026-05-06)
+
+Tous ces findings concernent du code **strictement preserve** depuis HEAD (verifie via `git show HEAD:app/{login,forgot-password,reset-password}/page.tsx`). Aucune regression introduite par 2.7.6 — ce sont des dettes anterieures relevees par les reviews adversariales sur le code migre tel quel.
+
+- Enumeration de comptes via `checkEmailExists` (login-form.tsx:25-29) -- le flux distingue publiquement compte existant (step password) vs absent (redirect `/register?email=...`). Contradiction avec la convention `/forgot-password` qui masque l'existence. Securite auth, story dediee.
+- `autoFocus` sur input password (login-form.tsx:104) -- pratique a11y discutable (focus deplace sans annonce AT). Accepte en baseline jsx-a11y/no-autofocus, hors scope refactor structurel.
+- `formData.set('email', email)` overwrite cote client sans hidden input ni revalidation serveur visible (login-form.tsx:41) -- audit securite a faire dans une story dediee Server Actions.
+- Race condition : submit pendant qu'un submit precedent est en cours (3 forms) -- pas de garde `if (loading) return` en debut de handler. Double appel possible si user clique vite ou Enter+clic.
+- Server Action throw vs `{error}` non gere (3 forms) -- `await login/resetPassword/updatePassword` sans `try/catch`. Si l'action throw (network, timeout), `loading` reste true, UI gelee.
+- `setLoading(false)` manquant apres succes `login()` (login-form.tsx:43-46) -- le code repose sur la redirection serveur pour unmount. Si la redirection echoue silencieusement, bouton reste desactive sans recours.
+- setState apres unmount sur navigation pendant submit (3 forms) -- pas de `mountedRef`. Warning React possible, fuite memoire mineure.
+- `role="alert"` rendu conditionnel non annonce par certains AT (3 forms) -- le role doit etre present au montage pour annoncer le contenu inseré apres. Conteneur live persistant manquant.
+- Region succes non `aria-live`/`role="status"` (forgot-password-form.tsx:36-48, reset-password-form.tsx:36-48) -- les blocs "Email envoye" / "Mot de passe mis a jour" remplacent le formulaire sans annonce auditive.
+- Hierarchie de titres cassee : `<p className="font-semibold">` au lieu de `<h2>` pour "Email envoye", "Mot de passe mis a jour", "Reinitialiser votre mot de passe" (forgot/reset). Pas de structure de titres exploitable au lecteur d'ecran.
+- Lien "Retour a la connexion" duplique sur forgot-password (forgot-password-form.tsx, 2 occurrences en cas de succes) -- anti-pattern a11y (2 liens identiques meme destination).
+- Token reset non verifie cote page (reset-password) -- la page affiche le formulaire sans verifier la presence d'une session reset valide via Supabase. Acces direct URL produit erreur generique au submit. Securite/UX, story dediee.
+- Validation client `email.trim()` insuffisante (login-form.tsx:20) -- accepte `"a"`. Pas de regex format avant round-trip serveur. `e.preventDefault()` court-circuite la validation HTML5 native.
+- `relative z-10` dead style sur les 3 wrappers `<div className="w-full max-w-md relative z-10">` -- aucun element en `absolute` derriere dans la nouvelle structure. Heritage copier-coller du pre-refactor.
+- Refactor manque : 3 composants dupliquent `<div className="text-center mb-8"><Link href="/">roxanetnous</Link>...</div>` + carte blanche + alerte erreur. Opportunite `AuthCard` partage hors scope 2.7.6 (centre sur l'extraction Server/Client, pas sur la factorisation visuelle).
