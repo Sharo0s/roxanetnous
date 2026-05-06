@@ -58,8 +58,11 @@ export default async function DemandesAccompagnesPage({
   const { data: annonces } = await query.range(from, to)
 
   const unreadCount = user ? await getUnreadCount(user.id) : 0
-  // Story 3.6 : prop subscribed pour defense en profondeur UI sur ContactAccompagneButton
-  const subscribed = user ? await hasActiveSubscription(user.id) : false
+  // Story 3.6 : prop subscribed pour defense en profondeur UI sur ContactAccompagneButton.
+  // Patch F10 review : court-circuiter quand le bouton ne sera pas rendu (role != accompagnante).
+  const subscribed = user && userData?.role === 'accompagnante'
+    ? await hasActiveSubscription(user.id)
+    : false
 
   return (
     <main id="main-content" tabIndex={-1} className="min-h-screen kraft bg-kraft focus:outline-none">

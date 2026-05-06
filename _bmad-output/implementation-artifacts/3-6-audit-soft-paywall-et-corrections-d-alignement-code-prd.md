@@ -185,6 +185,31 @@ Elle s'appuie sur les fondations deja en place :
   - [ ] Sub 8.2 : Push, attendre CI Vercel verte.
   - [ ] Sub 8.3 : Commit cloture `Story 3.6 : statut done apres CI Vercel verte` (sprint-status + Status story).
 
+### Review Findings (code-review 2026-05-07)
+
+Code review adversariale 3 layers (Blind Hunter / Edge Case Hunter / Acceptance Auditor) executee sur commit `4b2a42c`. 42 findings bruts -> 14 dismissed (faux positifs ou comportements conformes), 5 deferred (pre-existants, hors scope), 4 patches actionnables, 2 decisions necessaires.
+
+#### Decision needed (2) — resolus
+
+- [x] **[Review][Decision] Toggle "Republier" silencieux cote UI sur paywall refuse** — Resolu **option (b)** : patch leger `annonce-status-toggle.tsx` pour surfacer `result.error` avant le reload (sans elargir scope). Cf. patch P-F1 ci-dessous.
+- [x] **[Review][Decision] Default `subscribed=true` (fail-open) sur 3 composants Client** — Resolu **option (a) status quo** : retro-compatibilite ratifiee par AC9 Sub 4.3, server actions strictes (AC2/AC3/AC4) sont la source de verite securite. Aucun changement. Documente.
+
+#### Patch (5) — appliques 2026-05-07
+
+- [x] **[Review][Patch P-F1] Toggle "Republier" surface `result.error` avant reload** [`components/accompagnante/annonce-status-toggle.tsx`] — Ajout state `error`, render conditionnel `<p role="alert">`, retour anticipe si `result.error`.
+- [x] **[Review][Patch P-F2] `chat-window.tsx` propage `result.error` paywall au lieu du message generique** [`components/messages/chat-window.tsx:111`] — `setSendError(result.error || "Echec de l'envoi...")`.
+- [x] **[Review][Patch P-F3] `ContactAccompagneButton` affiche `result.error`** [`components/messages/contact-accompagne-button.tsx`] — Ajout `useState<string|null>` error + `<p role="alert">`, pattern aligne avec `ContactButton`.
+- [x] **[Review][Patch P-F9] Validation inputs avant `hasActiveSubscription` dans `update*` annonces** [`app/actions/annonces.ts:122-129,349-356`] — Reordonne pour eviter round-trip Supabase quand le formulaire est mal rempli.
+- [x] **[Review][Patch P-F10] Court-circuit `subscribed` selon role** [`app/recherche/[id]/page.tsx`, `app/recherche/demandes/page.tsx`] — `subscribed = user && userData?.role === '...' ? await hasActiveSubscription(user.id) : false`.
+
+#### Defer (5, vers `_bmad-output/implementation-artifacts/deferred-work.md`)
+
+- [x] **[Review][Defer] Erreurs server `getOrCreateConversation*` revelent le role cible (oracle)** — pre-existant a 3.6, libelles distincts par contrainte AC3/AC4. Mitigation Epic 4.
+- [x] **[Review][Defer] `hasActiveSubscription` failure silencieuse → faux paywall** [`lib/subscription-helpers.ts:39-57`] — pre-existant, helper hors scope D7. Mitigation Epic 4 : `.maybeSingle()`.
+- [x] **[Review][Defer] `getOrCreateConversation*` : `existing` null sur erreur Supabase silencieuse** — pre-existant, meme pattern que F6.
+- [x] **[Review][Defer] Toggle `updateAnnonce*Status(id, 'publiee')` sur annonce deja publiee bumpe `published_at`** — pre-existant, hors scope (effet "bump" non intentionnel mais sans paywall bypass).
+- [x] **[Review][Defer] Toggle status valeur out-of-band TS bypass** — pre-existant, hors scope.
+
 ## Dev Notes
 
 ### Decisions techniques numerotees

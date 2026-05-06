@@ -82,8 +82,12 @@ export default async function AnnonceDetailPage({
   const badgesMap = auxUserId ? await getBadges([auxUserId]) : {}
 
   const unreadCount = user ? await getUnreadCount(user.id) : 0
-  // Story 3.6 : prop subscribed pour defense en profondeur UI sur ContactButton
-  const subscribed = user ? await hasActiveSubscription(user.id) : false
+  // Story 3.6 : prop subscribed pour defense en profondeur UI sur ContactButton.
+  // Patch F10 review : court-circuiter quand le bouton ne sera pas rendu (role != accompagne) pour
+  // economiser un round-trip Supabase service-role.
+  const subscribed = user && userData?.role === 'accompagne'
+    ? await hasActiveSubscription(user.id)
+    : false
 
   const diplomeLabel = (profile?.diplomes as string[] || []).map((d: string) => DIPLOMES.find((dp) => dp.value === d)?.label || d).join(', ')
   const expLabel = EXPERIENCE_LEVELS.find((e) => e.value === profile?.experience)?.label || profile?.experience

@@ -108,7 +108,8 @@ export function ChatWindow({
     const result = await sendMessage(conversationId, content)
     if (result.error) {
       setMessages((prev) => prev.filter((m) => m.id !== optimisticMsg.id))
-      setSendError("Echec de l'envoi du message. Veuillez reessayer.")
+      // Story 3.6 patch F2 : propager le libelle paywall (AC11) au lieu d'un message generique trompeur.
+      setSendError(result.error || "Echec de l'envoi du message. Veuillez reessayer.")
       setNewMessage(content)
     }
 

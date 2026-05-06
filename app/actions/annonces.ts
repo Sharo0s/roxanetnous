@@ -118,18 +118,19 @@ export async function updateAnnonceAccompagnante(
 
   if (!profile) return { error: 'Profil non trouvé.' }
 
-  // Story 3.6 : paywall sur modification annonce (D5 : modification = mise en relation continue)
-  const subscribed = await hasActiveSubscription(user.id)
-  if (!subscribed) {
-    return { error: 'Un abonnement actif est requis pour modifier une annonce.' }
-  }
-
   if (!data.description.trim()) {
     return { error: 'La description est requise.' }
   }
 
   if (data.code_postal.trim() && !(await isDepartementOuvert(data.code_postal))) {
     return { error: await getMessageRestriction() }
+  }
+
+  // Story 3.6 (patch F9 review) : check abonnement apres validation des inputs pour eviter
+  // un round-trip Supabase inutile quand le formulaire est mal rempli.
+  const subscribed = await hasActiveSubscription(user.id)
+  if (!subscribed) {
+    return { error: 'Un abonnement actif est requis pour modifier une annonce.' }
   }
 
   const { error } = await supabase
@@ -345,12 +346,6 @@ export async function updateAnnonceAccompagne(
 
   if (!profile) return { error: 'Profil non trouvé.' }
 
-  // Story 3.6 : paywall sur modification annonce beneficiaire (D5 : modification = mise en relation continue)
-  const subscribed = await hasActiveSubscription(user.id)
-  if (!subscribed) {
-    return { error: 'Un abonnement actif est requis pour modifier une annonce.' }
-  }
-
   if (!data.titre.trim() || !data.description.trim()) {
     return { error: 'Le titre et la description sont requis.' }
   }
@@ -361,6 +356,13 @@ export async function updateAnnonceAccompagne(
 
   if (data.code_postal.trim() && !(await isDepartementOuvert(data.code_postal))) {
     return { error: await getMessageRestriction() }
+  }
+
+  // Story 3.6 (patch F9 review) : check abonnement apres validation des inputs pour eviter
+  // un round-trip Supabase inutile quand le formulaire est mal rempli.
+  const subscribed = await hasActiveSubscription(user.id)
+  if (!subscribed) {
+    return { error: 'Un abonnement actif est requis pour modifier une annonce.' }
   }
 
   const coords = await geocodeAddress(data.ville.trim(), data.code_postal.trim() || '')

@@ -12,12 +12,20 @@ type Props = {
 
 export function ContactAccompagneButton({ accompagneProfileId, subscribed = true }: Props) {
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const router = useRouter()
   const hintId = useId()
 
   async function handleContact() {
     setLoading(true)
+    setError(null)
     const result = await getOrCreateConversationAsAccompagnante(accompagneProfileId)
+
+    if (result.error) {
+      setError(result.error)
+      setLoading(false)
+      return
+    }
 
     if (result.conversationId) {
       router.push(`/messages/${result.conversationId}`)
@@ -48,13 +56,18 @@ export function ContactAccompagneButton({ accompagneProfileId, subscribed = true
   }
 
   return (
-    <button
-      type="button"
-      onClick={handleContact}
-      disabled={loading}
-      className="mt-auto px-4 py-2 bg-accent text-black rounded-lg text-sm font-medium btn-hover transition disabled:opacity-50 w-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring focus-visible:ring-offset-2"
-    >
-      {loading ? 'Chargement...' : 'Contacter'}
-    </button>
+    <div className="mt-auto">
+      <button
+        type="button"
+        onClick={handleContact}
+        disabled={loading}
+        className="px-4 py-2 bg-accent text-black rounded-lg text-sm font-medium btn-hover transition disabled:opacity-50 w-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring focus-visible:ring-offset-2"
+      >
+        {loading ? 'Chargement...' : 'Contacter'}
+      </button>
+      {error && (
+        <p role="alert" className="text-xs text-red-700 mt-2">{error}</p>
+      )}
+    </div>
   )
 }
