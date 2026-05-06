@@ -76,7 +76,7 @@ export function AccompagneProfileForm({ userInfo, profile }: Props) {
       )}
 
       <div className="bg-white rounded-xl border p-6">
-        <h3 className="font-semibold mb-4">Informations personnelles</h3>
+        <h2 className="font-semibold mb-4">Informations personnelles</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Prénom</label>
@@ -118,7 +118,7 @@ export function AccompagneProfileForm({ userInfo, profile }: Props) {
       </div>
 
       <div className="bg-white rounded-xl border p-6">
-        <h3 className="font-semibold mb-4">Adresse</h3>
+        <h2 className="font-semibold mb-4">Adresse</h2>
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Adresse</label>

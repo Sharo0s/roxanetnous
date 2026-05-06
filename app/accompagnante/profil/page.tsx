@@ -122,7 +122,7 @@ export default async function AccompagnanteProfilPage() {
         />
 
         <div className="mt-10 pt-8 border-t">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Mes données personnelles</h3>
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">Mes données personnelles</h2>
           <p className="text-sm text-gray-600 mb-4">
             Conformément au RGPD, vous pouvez exporter ou supprimer vos données à tout moment.
           </p>

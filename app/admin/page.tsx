@@ -94,7 +94,7 @@ export default async function AdminDashboard() {
         </div>
       ) : (
         <>
-          <h3 className="text-lg font-semibold mb-4">Accompagnantes en cours de validation</h3>
+          <h2 className="text-lg font-semibold mb-4">Accompagnantes en cours de validation</h2>
           <div className="space-y-3 mb-8">
             {pending.map((profile: any) => {
               const u = profile.users as any

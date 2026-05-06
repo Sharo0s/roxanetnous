@@ -145,19 +145,19 @@ export default async function AnnonceDetailPage({
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="md:col-span-2 space-y-6">
             <div className="bg-white rounded-xl border p-6">
-              <h3 className="font-semibold mb-3">Description</h3>
+              <h2 className="font-semibold mb-3">Description</h2>
               <p className="text-sm text-gray-700 whitespace-pre-wrap break-words overflow-hidden">{annonce.description}</p>
             </div>
 
             {profile?.description && (
               <div className="bg-white rounded-xl border p-6">
-                <h3 className="font-semibold mb-3">À propos</h3>
+                <h2 className="font-semibold mb-3">À propos</h2>
                 <p className="text-sm text-gray-700 whitespace-pre-wrap break-words overflow-hidden">{profile.description}</p>
               </div>
             )}
 
             <div className="bg-white rounded-xl border p-6">
-              <h3 className="font-semibold mb-3">Spécialités ({specLabels.length})</h3>
+              <h2 className="font-semibold mb-3">Spécialités ({specLabels.length})</h2>
               <div className="flex flex-wrap gap-2">
                 {specLabels.map((label: string, i: number) => (
                   <span key={i} className="px-3 py-1 bg-accent text-black rounded-full text-xs font-medium">
@@ -169,7 +169,7 @@ export default async function AnnonceDetailPage({
 
             {Object.keys(dispos).length > 0 && (
               <div className="bg-white rounded-xl border p-6">
-                <h3 className="font-semibold mb-3">Disponibilités</h3>
+                <h2 className="font-semibold mb-3">Disponibilités</h2>
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead>
@@ -213,7 +213,7 @@ export default async function AnnonceDetailPage({
 
           <div className="space-y-6">
             <div className="bg-white rounded-xl border p-6">
-              <h3 className="font-semibold mb-3">Informations</h3>
+              <h2 className="font-semibold mb-3">Informations</h2>
               <dl className="space-y-3 text-sm">
                 <div>
                   <dt className="text-gray-500">Localisation</dt>
@@ -244,7 +244,7 @@ export default async function AnnonceDetailPage({
 
             {userData?.role === 'accompagne' ? (
               <div className="bg-white rounded-xl border p-6">
-                <h3 className="font-semibold mb-3">Contacter</h3>
+                <h2 className="font-semibold mb-3">Contacter</h2>
                 <p className="text-sm text-gray-600 mb-4">
                   Envoyez un message pour en savoir plus ou proposer une mission.
                 </p>
@@ -252,7 +252,7 @@ export default async function AnnonceDetailPage({
               </div>
             ) : !user ? (
               <div className="bg-white rounded-xl border p-6">
-                <h3 className="font-semibold mb-3">Intéressé ?</h3>
+                <h2 className="font-semibold mb-3">Intéressé ?</h2>
                 <p className="text-sm text-gray-600 mb-4">
                   Connectez-vous pour contacter cette accompagnante.
                 </p>

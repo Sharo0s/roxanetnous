@@ -200,7 +200,7 @@ export default async function AdminUtilisateurDetailPage({
       {/* Bloc visio realisee */}
       {auxProfile?.visio_date && (
         <div className="mb-8 bg-white rounded-xl border p-5">
-          <h3 className="font-semibold mb-3">Visio de validation</h3>
+          <h2 className="font-semibold mb-3">Visio de validation</h2>
           <dl className="space-y-2 text-sm">
             <div className="flex gap-2">
               <dt className="text-gray-500">Réalisée le :</dt>
@@ -227,7 +227,7 @@ export default async function AdminUtilisateurDetailPage({
       {/* Refus motif */}
       {auxProfile?.validation_status === 'refuse' && auxProfile.refus_motif && (
         <div role="alert" className="mb-8 bg-red-50 border border-red-200 rounded-xl p-5">
-          <h3 className="font-semibold text-red-800 mb-1">Motif du refus</h3>
+          <h2 className="font-semibold text-red-800 mb-1">Motif du refus</h2>
           <p className="text-sm text-red-700">{auxProfile.refus_motif}</p>
         </div>
       )}
@@ -235,7 +235,7 @@ export default async function AdminUtilisateurDetailPage({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Informations personnelles */}
         <div className="bg-white rounded-xl border p-6">
-          <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4">Informations personnelles</h3>
+          <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4">Informations personnelles</h2>
           <dl className="space-y-4 text-sm">
             <div className="flex justify-between">
               <dt className="text-gray-500">Nom complet</dt>
@@ -263,7 +263,7 @@ export default async function AdminUtilisateurDetailPage({
         {/* Localisation */}
         {(auxProfile || benProfile) && (
           <div className="bg-white rounded-xl border p-6">
-            <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4">Localisation</h3>
+            <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4">Localisation</h2>
             <dl className="space-y-4 text-sm">
               {(auxProfile?.adresse || benProfile?.adresse) && (
                 <div className="flex justify-between">
@@ -305,7 +305,7 @@ export default async function AdminUtilisateurDetailPage({
         {/* Profil professionnel (accompagnante) */}
         {auxProfile && (
           <div className="bg-white rounded-xl border p-6">
-            <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4">Profil professionnel</h3>
+            <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4">Profil professionnel</h2>
             <dl className="space-y-4 text-sm">
               <div className="flex justify-between">
                 <dt className="text-gray-500">Diplômes</dt>
@@ -330,9 +330,9 @@ export default async function AdminUtilisateurDetailPage({
         {/* Specialites (accompagnante) */}
         {auxProfile && specialiteLabels.length > 0 && (
           <div className="bg-white rounded-xl border p-6">
-            <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4">
+            <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4">
               Spécialités <span className="text-gray-400 normal-case tracking-normal">({specialiteLabels.length})</span>
-            </h3>
+            </h2>
             <div className="flex flex-wrap gap-2">
               {specialiteLabels.map((label: string, i: number) => (
                 <span
@@ -349,7 +349,7 @@ export default async function AdminUtilisateurDetailPage({
         {/* Disponibilites (accompagnante) */}
         {auxProfile && disponibilites && Object.keys(disponibilites).length > 0 && (
           <div className="bg-white rounded-xl border p-6 md:col-span-2">
-            <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4">Disponibilités</h3>
+            <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4">Disponibilités</h2>
             <div className="overflow-x-auto">
               <table className="w-full text-xs">
                 <thead>
@@ -386,7 +386,7 @@ export default async function AdminUtilisateurDetailPage({
         {/* Description (accompagnante) */}
         {auxProfile && (
           <div className="bg-white rounded-xl border p-6 md:col-span-2">
-            <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4">Description</h3>
+            <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4">Description</h2>
             {auxProfile.description ? (
               <p className="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">{auxProfile.description}</p>
             ) : (
@@ -398,7 +398,7 @@ export default async function AdminUtilisateurDetailPage({
         {/* Justificatifs (accompagnante) */}
         {auxProfile && (
           <div className="bg-white rounded-xl border p-6 md:col-span-2">
-            <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4">Justificatifs</h3>
+            <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4">Justificatifs</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               <DocLink label="CV" url={cvUrl} />
               <DocLink label="Pièce d'identité" url={identiteUrl} />
@@ -417,7 +417,7 @@ export default async function AdminUtilisateurDetailPage({
       {/* Abonnement */}
       {(userData.role === 'accompagnante' || userData.role === 'accompagne') && (
         <div className="bg-white rounded-xl border p-6 mt-6">
-          <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4">Abonnement</h3>
+          <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4">Abonnement</h2>
           {subscriptionStatus.status ? (
             <dl className="space-y-3 text-sm">
               <div className="flex justify-between items-center">

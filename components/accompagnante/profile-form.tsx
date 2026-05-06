@@ -185,7 +185,7 @@ export function AccompagnanteProfileForm({ userInfo, profile, departementsOuvert
   return (
     <div className="space-y-6">
       <div className="bg-white rounded-xl border p-6">
-        <h3 className="font-semibold mb-4">Informations personnelles</h3>
+        <h2 className="font-semibold mb-4">Informations personnelles</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Prénom</label>
@@ -227,7 +227,7 @@ export function AccompagnanteProfileForm({ userInfo, profile, departementsOuvert
       </div>
 
       <div className="bg-white rounded-xl border p-6">
-        <h3 className="font-semibold mb-4">Description</h3>
+        <h2 className="font-semibold mb-4">Description</h2>
         <textarea
           value={description}
           onChange={(e) => setDescription(e.target.value)}
@@ -238,7 +238,7 @@ export function AccompagnanteProfileForm({ userInfo, profile, departementsOuvert
       </div>
 
       <div className="bg-white rounded-xl border p-6">
-        <h3 className="font-semibold mb-4">Formation</h3>
+        <h2 className="font-semibold mb-4">Formation</h2>
 
         {/* CV upload */}
         <div className="space-y-2 mb-6">
@@ -354,7 +354,7 @@ export function AccompagnanteProfileForm({ userInfo, profile, departementsOuvert
       </div>
 
       <div className="bg-white rounded-xl border p-6">
-        <h3 className="font-semibold mb-4">Spécialités</h3>
+        <h2 className="font-semibold mb-4">Spécialités</h2>
         <div className="flex flex-wrap gap-2">
           {SPECIALITES.map((spec) => (
             <button
@@ -374,7 +374,7 @@ export function AccompagnanteProfileForm({ userInfo, profile, departementsOuvert
       </div>
 
       <div className="bg-white rounded-xl border p-6">
-        <h3 className="font-semibold mb-4">Localisation</h3>
+        <h2 className="font-semibold mb-4">Localisation</h2>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
           <div className="sm:col-span-2">
             <CityAutocomplete
@@ -450,7 +450,7 @@ export function AccompagnanteProfileForm({ userInfo, profile, departementsOuvert
       </div>
 
       <div className="bg-white rounded-xl border p-6">
-        <h3 className="font-semibold mb-4">Disponibilités</h3>
+        <h2 className="font-semibold mb-4">Disponibilités</h2>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>

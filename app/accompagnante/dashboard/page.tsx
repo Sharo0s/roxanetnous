@@ -156,9 +156,9 @@ export default async function AccompagnanteDashboard() {
           // que pas validee.
           <div className="space-y-4">
             <div className="bg-white rounded-xl border border-amber-300 p-6">
-              <h3 className="font-semibold text-lg text-black mb-2">
+              <h2 className="font-semibold text-lg text-black mb-2">
                 Vérification supplémentaire en cours
-              </h3>
+              </h2>
               <p className="text-gray-600 mb-2">
                 Votre paiement a bien été reçu et votre abonnement est actif.
                 En revanche, notre système a relevé un signal qui nécessite
@@ -176,7 +176,7 @@ export default async function AccompagnanteDashboard() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="bg-white rounded-xl border p-6">
-                <h3 className="font-semibold text-lg mb-2">Messages</h3>
+                <h2 className="font-semibold text-lg mb-2">Messages</h2>
                 <p className="text-gray-600 mb-4">
                   Échangez avec l&apos;équipe pour résoudre la vérification.
                 </p>
@@ -188,7 +188,7 @@ export default async function AccompagnanteDashboard() {
                 </Link>
               </div>
               <div className="bg-white rounded-xl border p-6">
-                <h3 className="font-semibold text-lg mb-2">Mon profil</h3>
+                <h2 className="font-semibold text-lg mb-2">Mon profil</h2>
                 <p className="text-gray-600 mb-4">
                   Consultez et modifiez vos informations professionnelles.
                 </p>
@@ -200,7 +200,7 @@ export default async function AccompagnanteDashboard() {
                 </Link>
               </div>
               <div className="bg-white rounded-xl border p-6 md:col-span-2">
-                <h3 className="font-semibold text-lg mb-2">Mon abonnement</h3>
+                <h2 className="font-semibold text-lg mb-2">Mon abonnement</h2>
                 <p className="text-gray-600 mb-4">
                   {subscription.cancelAt
                     ? `Expire le ${new Date(subscription.cancelAt).toLocaleDateString('fr-FR')}`
@@ -223,7 +223,7 @@ export default async function AccompagnanteDashboard() {
             : !profile.diplomes || profile.diplomes.length === 0
         ) ? (
           <div className="bg-white rounded-xl border p-6">
-            <h3 className="font-semibold text-lg mb-2">Complétez votre profil</h3>
+            <h2 className="font-semibold text-lg mb-2">Complétez votre profil</h2>
             <p className="text-gray-600 mb-4">
               Pour apparaître sur la plateforme, vous devez d&#39;abord compléter votre profil professionnel.
             </p>
@@ -238,9 +238,9 @@ export default async function AccompagnanteDashboard() {
           <div className="space-y-4">
             {isFilleule && profile.validation_status === 'en_attente' && !subscribed && (
               <div className="bg-white rounded-xl border border-accent p-6">
-                <h3 className="font-semibold text-lg text-black mb-2">
+                <h2 className="font-semibold text-lg text-black mb-2">
                   Plus qu&apos;une étape : souscrivez votre abonnement
-                </h3>
+                </h2>
                 <p className="text-gray-600 mb-4">
                   Votre marraine se porte garante : pas de visio, pas de
                   vérification de documents. Souscrivez à un abonnement et
@@ -294,7 +294,7 @@ export default async function AccompagnanteDashboard() {
             {profile.validation_status === 'valide' && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="bg-white rounded-xl border p-6">
-                  <h3 className="font-semibold text-lg mb-2">Mes annonces</h3>
+                  <h2 className="font-semibold text-lg mb-2">Mes annonces</h2>
                   {subscribed ? (
                     <>
                       <p className="text-gray-600 mb-1">
@@ -315,7 +315,7 @@ export default async function AccompagnanteDashboard() {
                   )}
                 </div>
                 <div className="bg-white rounded-xl border p-6">
-                  <h3 className="font-semibold text-lg mb-2">Demandes accompagnés</h3>
+                  <h2 className="font-semibold text-lg mb-2">Demandes accompagnés</h2>
                   <p className="text-gray-600 mb-4">
                     Consultez les demandes des accompagnés.
                   </p>
@@ -328,7 +328,7 @@ export default async function AccompagnanteDashboard() {
                 </div>
 
                 <div className="bg-white rounded-xl border p-6">
-                  <h3 className="font-semibold text-lg mb-2">Messages</h3>
+                  <h2 className="font-semibold text-lg mb-2">Messages</h2>
                   <p className="text-gray-600 mb-4">
                     Consultez vos conversations avec les accompagnés.
                   </p>
@@ -341,7 +341,7 @@ export default async function AccompagnanteDashboard() {
                 </div>
 
                 <div className="bg-white rounded-xl border p-6">
-                  <h3 className="font-semibold text-lg mb-2">Mon profil</h3>
+                  <h2 className="font-semibold text-lg mb-2">Mon profil</h2>
                   <p className="text-gray-600 mb-4">
                     Consultez et modifiez vos informations professionnelles.
                   </p>
@@ -355,7 +355,7 @@ export default async function AccompagnanteDashboard() {
 
                 {parrainageCode && (
                   <div className="bg-white rounded-xl border p-6 md:col-span-2">
-                    <h3 className="font-semibold text-lg mb-2">Mon parrainage</h3>
+                    <h2 className="font-semibold text-lg mb-2">Mon parrainage</h2>
                     <p className="text-gray-600 mb-4">
                       {parrainageCompteur > 0 || parrainageTotalRecompenses > 0
                         ? `${parrainageCompteur}/5 parrainages confirmés`
@@ -371,7 +371,7 @@ export default async function AccompagnanteDashboard() {
                 )}
 
                 <div className="bg-white rounded-xl border p-6">
-                  <h3 className="font-semibold text-lg mb-2">Mon abonnement</h3>
+                  <h2 className="font-semibold text-lg mb-2">Mon abonnement</h2>
                   <p className="text-gray-600 mb-4">
                     {subscription.status === 'trialing'
                       ? `Essai gratuit - Fin le ${subscription.trialEnd ? new Date(subscription.trialEnd).toLocaleDateString('fr-FR') : subscription.currentPeriodEnd ? new Date(subscription.currentPeriodEnd).toLocaleDateString('fr-FR') : '-'}`

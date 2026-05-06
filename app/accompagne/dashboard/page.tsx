@@ -122,7 +122,7 @@ export default async function AccompagneDashboard() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="bg-white rounded-xl border p-6">
-            <h3 className="font-semibold text-lg mb-2">Rechercher un(e) accompagnant(e)</h3>
+            <h2 className="font-semibold text-lg mb-2">Rechercher un(e) accompagnant(e)</h2>
             <p className="text-gray-600 mb-4">
               Trouvez l&#39;accompagnant(e) dont vous avez besoin
             </p>
@@ -135,7 +135,7 @@ export default async function AccompagneDashboard() {
           </div>
 
           <div className="bg-white rounded-xl border p-6">
-            <h3 className="font-semibold text-lg mb-2">Publier une annonce</h3>
+            <h2 className="font-semibold text-lg mb-2">Publier une annonce</h2>
             <p className="text-gray-600 mb-4">
               Décrivez vos besoins et recevez des candidatures.
             </p>
@@ -148,7 +148,7 @@ export default async function AccompagneDashboard() {
           </div>
 
           <div className="bg-white rounded-xl border p-6">
-            <h3 className="font-semibold text-lg mb-2">Mes annonces</h3>
+            <h2 className="font-semibold text-lg mb-2">Mes annonces</h2>
             <p className="text-gray-600 mb-1">
               {annoncesCount} annonce{annoncesCount > 1 ? 's' : ''} publiée{annoncesCount > 1 ? 's' : ''}
             </p>
@@ -162,7 +162,7 @@ export default async function AccompagneDashboard() {
           </div>
 
           <div className="bg-white rounded-xl border p-6">
-            <h3 className="font-semibold text-lg mb-2">Mes favoris</h3>
+            <h2 className="font-semibold text-lg mb-2">Mes favoris</h2>
             <p className="text-gray-600 mb-4">
               Retrouvez vos accompagnant(e)s que vous avez mis en favori.
             </p>
@@ -175,7 +175,7 @@ export default async function AccompagneDashboard() {
           </div>
 
           <div className="bg-white rounded-xl border p-6">
-            <h3 className="font-semibold text-lg mb-2">Messages</h3>
+            <h2 className="font-semibold text-lg mb-2">Messages</h2>
             <p className="text-gray-600 mb-4">
               Consultez vos conversations avec les accompagnant(e)s.
             </p>
@@ -188,7 +188,7 @@ export default async function AccompagneDashboard() {
           </div>
 
           <div className="bg-white rounded-xl border p-6">
-            <h3 className="font-semibold text-lg mb-2">Mon profil</h3>
+            <h2 className="font-semibold text-lg mb-2">Mon profil</h2>
             <p className="text-gray-600 mb-4">
               Consultez et modifiez vos informations personnelles.
             </p>
@@ -201,7 +201,7 @@ export default async function AccompagneDashboard() {
           </div>
 
           <div className="bg-white rounded-xl border p-6">
-            <h3 className="font-semibold text-lg mb-2">Mon abonnement</h3>
+            <h2 className="font-semibold text-lg mb-2">Mon abonnement</h2>
             <p className="text-gray-600 mb-4">
               {subscription.status === 'trialing'
                 ? `Essai gratuit - Fin le ${subscription.trialEnd ? new Date(subscription.trialEnd).toLocaleDateString('fr-FR') : subscription.currentPeriodEnd ? new Date(subscription.currentPeriodEnd).toLocaleDateString('fr-FR') : '-'}`

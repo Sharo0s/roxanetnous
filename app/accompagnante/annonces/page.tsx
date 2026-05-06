@@ -63,7 +63,7 @@ export default async function MesAnnoncesAccompagnante() {
 
         {!subscribed && (
           <div className="bg-white rounded-xl border-2 border-accent p-6 mb-6">
-            <h3 className="font-semibold text-lg mb-2">Abonnement requis</h3>
+            <h2 className="font-semibold text-lg mb-2">Abonnement requis</h2>
             <p className="text-gray-600 mb-4">
               Souscrivez un abonnement pour publier vos annonces.
             </p>

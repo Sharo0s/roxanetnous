@@ -101,7 +101,7 @@ export default async function ValidationDetailPage({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Informations personnelles */}
           <div className="bg-white rounded-xl border p-6">
-            <h3 className="font-semibold mb-4">Informations personnelles</h3>
+            <h2 className="font-semibold mb-4">Informations personnelles</h2>
             <dl className="space-y-3 text-sm">
               <div>
                 <dt className="text-gray-500">Nom complet</dt>
@@ -128,7 +128,7 @@ export default async function ValidationDetailPage({
 
           {/* Profil professionnel */}
           <div className="bg-white rounded-xl border p-6">
-            <h3 className="font-semibold mb-4">Profil professionnel</h3>
+            <h2 className="font-semibold mb-4">Profil professionnel</h2>
             <dl className="space-y-3 text-sm">
               <div>
                 <dt className="text-gray-500">Diplômes</dt>
@@ -157,7 +157,7 @@ export default async function ValidationDetailPage({
 
           {/* Specialites */}
           <div className="bg-white rounded-xl border p-6">
-            <h3 className="font-semibold mb-4">Spécialités ({specialiteLabels.length})</h3>
+            <h2 className="font-semibold mb-4">Spécialités ({specialiteLabels.length})</h2>
             <div className="flex flex-wrap gap-2">
               {specialiteLabels.map((label, i) => (
                 <span key={i} className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-xs font-medium">
@@ -169,7 +169,7 @@ export default async function ValidationDetailPage({
 
           {/* Description */}
           <div className="bg-white rounded-xl border p-6">
-            <h3 className="font-semibold mb-4">Description</h3>
+            <h2 className="font-semibold mb-4">Description</h2>
             {profile.description ? (
               <p className="text-sm text-gray-700 whitespace-pre-wrap">{profile.description}</p>
             ) : (
@@ -179,7 +179,7 @@ export default async function ValidationDetailPage({
 
           {/* Justificatifs */}
           <div className="bg-white rounded-xl border p-6 md:col-span-2">
-            <h3 className="font-semibold mb-4">Justificatifs</h3>
+            <h2 className="font-semibold mb-4">Justificatifs</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               <div>
                 <p className="text-sm text-gray-500 mb-2">CV</p>
@@ -253,7 +253,7 @@ export default async function ValidationDetailPage({
         {/* Bloc visio realisee */}
         {profile.visio_date && (
           <div className="mt-8 bg-white rounded-xl border p-6">
-            <h3 className="font-semibold mb-3">Visio de validation</h3>
+            <h2 className="font-semibold mb-3">Visio de validation</h2>
             <dl className="space-y-2 text-sm">
               <div className="flex gap-2">
                 <dt className="text-gray-500">Réalisée le :</dt>

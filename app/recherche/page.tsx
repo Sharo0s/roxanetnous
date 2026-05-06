@@ -274,7 +274,7 @@ export default async function RecherchePage({
           <div className="mt-6 mb-8">
             <div className="flex items-center justify-between mb-4">
               <div>
-                <h3 className="text-lg font-semibold text-gray-900">Les accompagnantes que nous vous recommandons</h3>
+                <h2 className="text-lg font-semibold text-gray-900">Les accompagnantes que nous vous recommandons</h2>
                 {allBenAnnonces.length > 1 ? (
                   <form className="flex items-center gap-2 mt-1">
                     <label htmlFor="recherche-annonce-reference" className="text-xs text-gray-500">Annonce de référence :</label>
@@ -379,7 +379,7 @@ export default async function RecherchePage({
 
         {matchResults.length > 0 && (
           <div className="border-t border-gray-300 mt-8 mb-6 pt-6">
-            <h3 className="text-lg font-semibold text-gray-900">Tous les accompagnantes</h3>
+            <h2 className="text-lg font-semibold text-gray-900">Tous les accompagnantes</h2>
           </div>
         )}
 
