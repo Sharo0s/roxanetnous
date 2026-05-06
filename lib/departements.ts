@@ -1,5 +1,8 @@
 import { unstable_cache } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
+import { extraireCodeDepartement } from '@/lib/code-postal'
+
+export { extraireCodeDepartement }
 
 export type Departement = {
   code: string
@@ -65,17 +68,6 @@ export function buildCodesPostauxFilterOr(codesDepartements: string[]): string {
 export async function getCodesPostauxFilterOr(): Promise<string> {
   const codes = await getCodesDepartementsOuverts()
   return buildCodesPostauxFilterOr(codes)
-}
-
-export function extraireCodeDepartement(codePostal: string | null | undefined): string | null {
-  if (!codePostal) return null
-  const cp = codePostal.trim()
-  if (cp.length < 2) return null
-  // Corse : 20xxx -> 2A si pair, 2B si impair (regle simplifiee, non utilisee
-  // ici car l'API api-adresse retourne directement le code postal 20xxx ;
-  // les communes corses sont rattachees a 2A/2B via leur context, pas via le CP).
-  // On extrait simplement les 2 premiers caracteres.
-  return cp.slice(0, 2)
 }
 
 export async function isDepartementOuvert(codePostal: string | null | undefined): Promise<boolean> {
