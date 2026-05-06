@@ -1,6 +1,6 @@
 # Story 3.5 : Notification automatique waitlist a l'ouverture departement
 
-Status: in-progress
+Status: done
 
 <!-- Note: Validation est optionnelle. Lancer `validate-create-story` avant `dev-story` pour un controle qualite. -->
 
@@ -470,10 +470,10 @@ Elle s'appuie sur les fondations deja livrees :
   - [x] Sub 7.5 : `git diff --stat` controle : exactement 5 nouveaux fichiers + 2 modifies (`app/admin/departements/actions.ts` + `lib/emails.ts` + `vercel.json`). **Aucun fichier `.tsx` non-admin** ne doit apparaitre dans le diff.
   - [x] Sub 7.6 : Tests manuels AC16 (a) a (i) executes. Documenter dans Completion Notes les tests passes vs reportes au reviewer.
 
-- [ ] **Task 8 - Double commit (AC commun 2)**
-  - [ ] Sub 8.1 : Commit livraison : `Story 3.5 : notification automatique waitlist a l'ouverture departement`. Corps : enumerer les 5 fichiers ajoutes + 2 modifies + le bug latent fix `target_id_text`.
-  - [ ] Sub 8.2 : Push sur main, attendre CI Vercel verte.
-  - [ ] Sub 8.3 : Commit cloture : `Story 3.5 : statut done apres CI Vercel verte`. Modifier uniquement `_bmad-output/implementation-artifacts/sprint-status.yaml` (3-5 -> done) et le Status du present fichier story.
+- [x] **Task 8 - Double commit (AC commun 2)**
+  - [x] Sub 8.1 : Commit livraison : `Story 3.5 : notification automatique waitlist a l'ouverture departement`. Corps : enumerer les 5 fichiers ajoutes + 2 modifies + le bug latent fix `target_id_text`.
+  - [x] Sub 8.2 : Push sur main, attendre CI Vercel verte. *(commit `4f2c189` deploye en prod, dpl_62ZVPhygFV4SR4h2RRsaBui2bnVT, status Ready 2026-05-06 23:57)*
+  - [x] Sub 8.3 : Commit cloture : `Story 3.5 : statut done apres CI Vercel verte`. Modifier uniquement `_bmad-output/implementation-artifacts/sprint-status.yaml` (3-5 -> done) et le Status du present fichier story.
 
 ## Dev Notes
 
