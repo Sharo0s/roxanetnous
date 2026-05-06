@@ -1,6 +1,6 @@
 # Story 2.7.6 : Refactor pages auth jumelles a `<main>` rendu cote Client Component (`/login`, `/forgot-password`, `/reset-password`)
 
-Status: review
+Status: done
 
 <!-- Note: Validation est optionnelle. Lancer `validate-create-story` avant `dev-story` pour un controle qualite. -->
 
