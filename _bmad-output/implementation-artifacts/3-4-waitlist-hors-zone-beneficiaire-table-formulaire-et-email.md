@@ -1,6 +1,6 @@
 # Story 3.4 : Waitlist hors zone bénéficiaire (table + formulaire + email)
 
-Status: review
+Status: done
 
 <!-- Note: Validation est optionnelle. Lancer `validate-create-story` avant `dev-story` pour un controle qualite. -->
 
