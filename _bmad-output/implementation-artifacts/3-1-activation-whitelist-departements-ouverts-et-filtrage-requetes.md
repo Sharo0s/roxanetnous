@@ -1,6 +1,6 @@
 # Story 3.1 : Activation whitelist `departements_ouverts` et filtrage requetes
 
-Status: review
+Status: done
 
 <!-- Note: Validation est optionnelle. Lancer `validate-create-story` avant `dev-story` pour un controle qualite. -->
 

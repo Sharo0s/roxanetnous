@@ -1,5 +1,5 @@
 # generated: 2026-05-06
-# last_updated: 2026-05-06 (story 3.1 review apres dev-story)
+# last_updated: 2026-05-06 (story 3.1 done apres CI Vercel verte)
 # project: roxanetnous
 # project_key: NOKEY
 # tracking_system: file-system
@@ -106,7 +106,7 @@ development_status:
   # Cadre formellement 2026-05-06 dans epic-3.md. 8 stories backlog.
   # ==========================================================================
   epic-3: in-progress
-  3-1-activation-whitelist-departements-ouverts-et-filtrage-requetes: review
+  3-1-activation-whitelist-departements-ouverts-et-filtrage-requetes: done
   3-2-blocage-inscription-auxiliaire-hors-zone: backlog
   3-3-affichage-landing-disponible-en-bretagne-depuis-bdd: backlog
   3-4-waitlist-hors-zone-beneficiaire-table-formulaire-et-email: backlog
