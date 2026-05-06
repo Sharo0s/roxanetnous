@@ -914,6 +914,65 @@ export async function sendWaitlistConfirmationEmail(params: {
   }
 }
 
+// Email envoye a un visiteur waitlist quand son departement est ouvert.
+// Pattern visiteur anonyme : userId est undefined par construction (les
+// lignes waitlist_departements ne sont pas liees a users.id). On skip le
+// logNotification dans ce cas pour eviter le bug latent NOT NULL FK
+// users(id) sur notifications_log (cf. memoire project_logNotification_bug).
+export async function sendWaitlistOpeningNotificationEmail(params: {
+  email: string
+  codeDepartement: string
+  nomDepartement: string
+  userId?: string
+}) {
+  const subject = `Le service est ouvert dans ${params.nomDepartement}`
+  const canLog = Boolean(params.userId)
+  const ctaUrl = `${BASE_URL}/recherche?code_departement=${encodeURIComponent(params.codeDepartement)}`
+  try {
+    await resend.emails.send({
+      from: FROM_EMAIL,
+      to: params.email,
+      subject,
+      html: `
+        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+          <h1 style="color: #000;">Bonne nouvelle</h1>
+          <p>Bonjour,</p>
+          <p>Le service roxanetnous est désormais ouvert dans le département <strong>${escapeHtml(params.nomDepartement)}</strong> (${escapeHtml(params.codeDepartement)}).</p>
+          <p>Vous pouvez dès maintenant explorer les profils disponibles dans votre zone.</p>
+          <p style="margin-top: 24px;">
+            <a href="${ctaUrl}" style="background: #000; color: #fff; padding: 12px 24px; text-decoration: none; display: inline-block;">
+              Découvrir roxanetnous dans ${escapeHtml(params.nomDepartement)}
+            </a>
+          </p>
+        </div>
+      `,
+    })
+
+    if (canLog) {
+      await logNotification({
+        userId: params.userId,
+        email: params.email,
+        type: 'waitlist_opening',
+        subject,
+        status: 'sent',
+      })
+    }
+  } catch (error) {
+    if (canLog) {
+      await logNotification({
+        userId: params.userId,
+        email: params.email,
+        type: 'waitlist_opening',
+        subject,
+        status: 'failed',
+        error: error instanceof Error ? error.message : 'Erreur inconnue',
+      })
+    } else {
+      console.error('[notify-waitlist][email_send_error]', { code: params.codeDepartement, email: params.email, error })
+    }
+  }
+}
+
 export async function sendParrainageVerificationEmail(params: {
   email: string
   firstName: string
