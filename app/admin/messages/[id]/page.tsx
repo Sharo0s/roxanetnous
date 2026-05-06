@@ -66,6 +66,8 @@ export default async function AdminConversationPage({
         currentUserId={user.id}
         initialMessages={messages || []}
         otherUserName={fullName}
+        subscribed
+        conversationHasAdmin
       />
     </div>
   )

@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { sendNewMessageEmail } from '@/lib/emails'
+import { hasActiveSubscription } from '@/lib/subscription-helpers'
 
 export type MessageResult = {
   error?: string
@@ -57,6 +58,12 @@ export async function getOrCreateConversation(
 
   if (existing) {
     return { conversationId: existing.id }
+  }
+
+  // Story 3.6 : paywall sur ouverture conversation (apres check existence pour preserver idempotence D3)
+  const subscribed = await hasActiveSubscription(user.id)
+  if (!subscribed) {
+    return { error: 'Abonnement requis pour contacter une accompagnante.' }
   }
 
   // Creer la conversation
@@ -114,6 +121,12 @@ export async function getOrCreateConversationAsAccompagnante(
 
   if (existing) {
     return { conversationId: existing.id }
+  }
+
+  // Story 3.6 : paywall sur ouverture conversation (apres check existence pour preserver idempotence D3)
+  const subscribed = await hasActiveSubscription(user.id)
+  if (!subscribed) {
+    return { error: 'Abonnement requis pour contacter un beneficiaire.' }
   }
 
   // Creer la conversation
@@ -221,6 +234,14 @@ export async function sendMessage(
 
   if (!isAux && !isBen && !isAdmin) {
     return { error: 'Accès non autorisé à cette conversation.' }
+  }
+
+  // Story 3.6 : paywall envoi message (D1 = skip si conversation contient un admin OU sender admin)
+  if (!isAdmin && adminUserId === null) {
+    const subscribed = await hasActiveSubscription(user.id)
+    if (!subscribed) {
+      return { error: 'Abonnement requis pour envoyer un message.' }
+    }
   }
 
   const { error } = await supabase

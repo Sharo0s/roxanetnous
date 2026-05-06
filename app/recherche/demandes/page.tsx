@@ -5,6 +5,7 @@ import { AccompagnanteHeader } from '@/components/layout/accompagnante-header'
 import { getUnreadCount } from '@/lib/unread-count'
 import { ContactAccompagneButton } from '@/components/messages/contact-accompagne-button'
 import { getCodesPostauxFilterOr } from '@/lib/departements'
+import { hasActiveSubscription } from '@/lib/subscription-helpers'
 
 type SearchParams = {
   ville?: string
@@ -57,6 +58,8 @@ export default async function DemandesAccompagnesPage({
   const { data: annonces } = await query.range(from, to)
 
   const unreadCount = user ? await getUnreadCount(user.id) : 0
+  // Story 3.6 : prop subscribed pour defense en profondeur UI sur ContactAccompagneButton
+  const subscribed = user ? await hasActiveSubscription(user.id) : false
 
   return (
     <main id="main-content" tabIndex={-1} className="min-h-screen kraft bg-kraft focus:outline-none">
@@ -143,7 +146,7 @@ export default async function DemandesAccompagnesPage({
                   </div>
 
                   {userData?.role === 'accompagnante' && (
-                    <ContactAccompagneButton accompagneProfileId={annonce.accompagne_id} />
+                    <ContactAccompagneButton accompagneProfileId={annonce.accompagne_id} subscribed={subscribed} />
                   )}
                 </div>
               )

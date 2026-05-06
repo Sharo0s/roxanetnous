@@ -11,6 +11,7 @@ import { AccompagnanteHeader } from '@/components/layout/accompagnante-header'
 import { AccompagneHeader } from '@/components/layout/accompagne-header'
 import { getUnreadCount } from '@/lib/unread-count'
 import { isDepartementOuvert } from '@/lib/departements'
+import { hasActiveSubscription } from '@/lib/subscription-helpers'
 
 export default async function AnnonceDetailPage({
   params,
@@ -81,6 +82,8 @@ export default async function AnnonceDetailPage({
   const badgesMap = auxUserId ? await getBadges([auxUserId]) : {}
 
   const unreadCount = user ? await getUnreadCount(user.id) : 0
+  // Story 3.6 : prop subscribed pour defense en profondeur UI sur ContactButton
+  const subscribed = user ? await hasActiveSubscription(user.id) : false
 
   const diplomeLabel = (profile?.diplomes as string[] || []).map((d: string) => DIPLOMES.find((dp) => dp.value === d)?.label || d).join(', ')
   const expLabel = EXPERIENCE_LEVELS.find((e) => e.value === profile?.experience)?.label || profile?.experience
@@ -250,7 +253,7 @@ export default async function AnnonceDetailPage({
                 <p className="text-sm text-gray-600 mb-4">
                   Envoyez un message pour en savoir plus ou proposer une mission.
                 </p>
-                <ContactButton accompagnanteProfileId={annonce.accompagnante_id} />
+                <ContactButton accompagnanteProfileId={annonce.accompagnante_id} subscribed={subscribed} />
               </div>
             ) : !user ? (
               <div className="bg-white rounded-xl border p-6">

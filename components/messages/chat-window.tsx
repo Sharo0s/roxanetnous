@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef, useId } from 'react'
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { sendMessage } from '@/app/actions/messages'
 
@@ -19,9 +20,21 @@ type Props = {
   currentUserId: string
   initialMessages: Message[]
   otherUserName: string
+  // Story 3.6 : defense en profondeur paywall (D1 + AC10/AC11)
+  subscribed?: boolean
+  conversationHasAdmin?: boolean
 }
 
-export function ChatWindow({ conversationId, currentUserId, initialMessages, otherUserName }: Props) {
+export function ChatWindow({
+  conversationId,
+  currentUserId,
+  initialMessages,
+  otherUserName,
+  subscribed = true,
+  conversationHasAdmin = false,
+}: Props) {
+  const canSend = subscribed || conversationHasAdmin
+  const paywallHintId = useId()
   const [messages, setMessages] = useState<OptimisticMessage[]>(initialMessages)
   const [newMessage, setNewMessage] = useState('')
   const [sending, setSending] = useState(false)
@@ -163,6 +176,21 @@ export function ChatWindow({ conversationId, currentUserId, initialMessages, oth
               {sendError}
             </p>
           )}
+          {!canSend && (
+            <p
+              id={paywallHintId}
+              role="status"
+              className="text-sm text-muted-foreground bg-white border border-gray-200 rounded-lg px-3 py-2 mb-2"
+            >
+              Abonnement requis pour répondre.{' '}
+              <Link
+                href="/abonnement?from=message"
+                className="underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring focus-visible:ring-offset-2 rounded"
+              >
+                S&apos;abonner
+              </Link>
+            </p>
+          )}
           <div className="flex items-end gap-2 bg-white rounded-2xl border-2 border-gray-200 hover:border-accent focus-within:border-accent shadow-sm px-3 py-2 transition">
             {/* eslint-disable-next-line jsx-a11y/label-has-for -- regle depreciee, htmlFor seul est le pattern moderne (WAI-ARIA + eslint-plugin-jsx-a11y label-has-associated-control) */}
             <label htmlFor={textareaId} className="sr-only">
@@ -182,13 +210,18 @@ export function ChatWindow({ conversationId, currentUserId, initialMessages, oth
               onKeyDown={handleKeyDown}
               placeholder="Écrivez votre message..."
               rows={1}
-              className="flex-1 bg-transparent px-2 py-2 text-sm focus:outline-none resize-none max-h-[120px] placeholder:text-gray-400"
+              disabled={!canSend}
+              aria-disabled={!canSend ? 'true' : undefined}
+              aria-describedby={!canSend ? paywallHintId : undefined}
+              className="flex-1 bg-transparent px-2 py-2 text-sm focus:outline-none resize-none max-h-[120px] placeholder:text-gray-400 disabled:opacity-50 disabled:cursor-not-allowed"
               style={{ minHeight: '36px' }}
             />
             <button
               type="button"
               onClick={handleSend}
-              disabled={!newMessage.trim() || sending}
+              disabled={!canSend || !newMessage.trim() || sending}
+              aria-disabled={!canSend ? 'true' : undefined}
+              aria-describedby={!canSend ? paywallHintId : undefined}
               aria-label="Envoyer le message"
               className="flex-shrink-0 w-10 h-10 rounded-full bg-accent text-black flex items-center justify-center btn-hover transition disabled:opacity-30 disabled:cursor-not-allowed mb-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring focus-visible:ring-offset-2"
             >

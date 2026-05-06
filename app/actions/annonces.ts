@@ -118,6 +118,12 @@ export async function updateAnnonceAccompagnante(
 
   if (!profile) return { error: 'Profil non trouvé.' }
 
+  // Story 3.6 : paywall sur modification annonce (D5 : modification = mise en relation continue)
+  const subscribed = await hasActiveSubscription(user.id)
+  if (!subscribed) {
+    return { error: 'Un abonnement actif est requis pour modifier une annonce.' }
+  }
+
   if (!data.description.trim()) {
     return { error: 'La description est requise.' }
   }
@@ -161,6 +167,15 @@ export async function updateAnnonceAccompagnanteStatus(
     .single()
 
   if (!profile) return { error: 'Profil non trouvé.' }
+
+  // Story 3.6 : paywall asymetrique sur toggle (D5) : reactivation 'publiee' = re-publication implicite => paywall.
+  // Archivage 'archivee' = retrait => pas de paywall (droit utilisateur).
+  if (status === 'publiee') {
+    const subscribed = await hasActiveSubscription(user.id)
+    if (!subscribed) {
+      return { error: 'Un abonnement actif est requis pour publier une annonce.' }
+    }
+  }
 
   const updateData: Record<string, unknown> = { status }
   if (status === 'publiee') {
@@ -330,6 +345,12 @@ export async function updateAnnonceAccompagne(
 
   if (!profile) return { error: 'Profil non trouvé.' }
 
+  // Story 3.6 : paywall sur modification annonce beneficiaire (D5 : modification = mise en relation continue)
+  const subscribed = await hasActiveSubscription(user.id)
+  if (!subscribed) {
+    return { error: 'Un abonnement actif est requis pour modifier une annonce.' }
+  }
+
   if (!data.titre.trim() || !data.description.trim()) {
     return { error: 'Le titre et la description sont requis.' }
   }
@@ -449,6 +470,15 @@ export async function updateAnnonceAccompagneStatus(
     .single()
 
   if (!profile) return { error: 'Profil non trouvé.' }
+
+  // Story 3.6 : paywall asymetrique sur toggle (D5) : reactivation 'publiee' = re-publication => paywall.
+  // Archivage 'archivee' = retrait => pas de paywall (droit utilisateur).
+  if (status === 'publiee') {
+    const subscribed = await hasActiveSubscription(user.id)
+    if (!subscribed) {
+      return { error: 'Un abonnement actif est requis pour publier une annonce.' }
+    }
+  }
 
   const updateData: Record<string, unknown> = { status }
   if (status === 'publiee') {

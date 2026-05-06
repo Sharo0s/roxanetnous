@@ -6,6 +6,7 @@ import { markMessagesAsRead } from '@/app/actions/messages'
 import { AccompagnanteHeader } from '@/components/layout/accompagnante-header'
 import { AccompagneHeader } from '@/components/layout/accompagne-header'
 import { getUnreadCount } from '@/lib/unread-count'
+import { hasActiveSubscription } from '@/lib/subscription-helpers'
 
 export default async function ConversationPage({
   params,
@@ -101,6 +102,9 @@ export default async function ConversationPage({
   await markMessagesAsRead(id)
 
   const unreadCount = await getUnreadCount(user.id)
+  // Story 3.6 : defense en profondeur paywall (D1 : skip si conversation contient un admin)
+  const subscribed = await hasActiveSubscription(user.id)
+  const conversationHasAdmin = isAdminConv
 
   const otherUserNameForHeading = isAdminConv && isAux
     ? 'Équipe roxanetnous'
@@ -169,6 +173,8 @@ export default async function ConversationPage({
             ? 'Équipe roxanetnous'
             : `${otherUser?.first_name || ''} ${otherUser?.last_name || ''}`
         }
+        subscribed={subscribed}
+        conversationHasAdmin={conversationHasAdmin}
       />
     </main>
   )
