@@ -1,6 +1,6 @@
 # Story 3.6 : Audit soft paywall et corrections d'alignement code/PRD
 
-Status: review
+Status: done
 
 <!-- Note: Validation est optionnelle. Lancer `validate-create-story` avant `dev-story` pour un controle qualite. -->
 

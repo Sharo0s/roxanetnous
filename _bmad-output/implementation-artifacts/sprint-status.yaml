@@ -1,5 +1,5 @@
 # generated: 2026-05-06
-# last_updated: 2026-05-07 (story 3.6 review)
+# last_updated: 2026-05-07 (story 3.6 done)
 # project: roxanetnous
 # project_key: NOKEY
 # tracking_system: file-system
@@ -111,7 +111,7 @@ development_status:
   3-3-affichage-landing-disponible-en-bretagne-depuis-bdd: done
   3-4-waitlist-hors-zone-beneficiaire-table-formulaire-et-email: done
   3-5-notification-automatique-waitlist-a-l-ouverture-departement: done
-  3-6-audit-soft-paywall-et-corrections-d-alignement-code-prd: review
+  3-6-audit-soft-paywall-et-corrections-d-alignement-code-prd: done
   3-7-audit-cookies-scripts-tiers-et-decision-granularite-bandeau-rgpd: backlog
   3-8-notifications-admin-parrainage-robustes: backlog
   epic-3-retrospective: optional
