@@ -1,0 +1,126 @@
+# generated: 2026-05-06
+# last_updated: 2026-05-06 (story 3.1 ready-for-dev)
+# project: roxanetnous
+# project_key: NOKEY
+# tracking_system: file-system
+# story_location: _bmad-output/implementation-artifacts/
+
+# STATUS DEFINITIONS:
+# ==================
+# Epic Status:
+#   - backlog: Epic not yet started
+#   - in-progress: Epic actively being worked on
+#   - done: All stories in epic completed
+#
+# Epic Status Transitions:
+#   - backlog -> in-progress: Automatically when first story is created (via create-story)
+#   - in-progress -> done: Manually when all stories reach 'done' status
+#
+# Story Status:
+#   - backlog: Story only exists in epic file
+#   - ready-for-dev: Story file created in stories folder
+#   - in-progress: Developer actively working on implementation
+#   - review: Ready for code review (via Dev's code-review workflow)
+#   - done: Story completed
+#
+# Retrospective Status:
+#   - optional: Can be completed but not required
+#   - done: Retrospective has been completed
+#
+# WORKFLOW NOTES:
+# ===============
+# - Epic transitions to 'in-progress' automatically when first story is created
+# - Stories can be worked in parallel if team capacity allows
+# - Developer typically creates next story after previous one is 'done' to incorporate learnings
+# - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
+#
+# PROJECT-SPECIFIC NOTES (roxanetnous):
+# =====================================
+# - Epic 1 livre retroactivement avant adoption BMad formelle. Pas de stories formatees
+#   dans implementation-artifacts/. Marque 'done' sans decomposition. Source de verite =
+#   code livre + DECISIONS.md 2026-02-*.
+# - Epic 2 livre 2026-05-06 (parrainage + NFR a11y transverse Lots A/B/C). 21 stories
+#   livrees, toutes 'done'. Source de verite = epic-2-retro-2026-05-04.md + retros
+#   mini-epic-2-5/6/7.
+# - Epic 3 cadre formellement 2026-05-06 dans epic-3.md. 8 stories backlog. Premier epic
+#   du projet a beneficier d'un cadrage BMad formel avant implementation.
+# - Epic 4 placeholder, sera cadre apres retro Epic 3.
+
+generated: 2026-05-06
+last_updated: 2026-05-06
+project: roxanetnous
+project_key: NOKEY
+tracking_system: file-system
+story_location: _bmad-output/implementation-artifacts/
+
+development_status:
+  # ==========================================================================
+  # Epic 1 : MVP Core (livre retroactivement, pas de stories formatees)
+  # ==========================================================================
+  epic-1: done
+  epic-1-retrospective: optional
+
+  # ==========================================================================
+  # Epic 2 : Programme parrainage + NFR Accessibilite transverse
+  # Cloture 2026-05-06. 21 stories livrees toutes en 'done'.
+  # ==========================================================================
+  epic-2: done
+
+  # Mini-epic parrainage (2.1 a 2.4) - cloture 2026-05-04
+  2-1-validation-automatique-filleule: done
+  2-2-ui-parrainage-card-et-fingerprint-stripe: done
+  2-3-blacklist-admin-anti-fraude: done
+  2-4-cycle-recompense-parrainage: done
+
+  # Mini-epic 2.5 - Lot A a11y (Quick wins) - cloture 2026-05-05
+  2-5-1-outillage-a11y-baseline-lint: done
+  2-5-2-skip-link-et-structure-layout: done
+  2-5-3-token-focus-global-et-palette-de-contrastes: done
+  2-5-4-prefers-reduced-motion: done
+  2-5-5-composant-input-accessible: done
+  2-5-6-header-accessible-et-burger: done
+
+  # Mini-epic 2.6 - Lot B a11y (Conformite fonctionnelle) - cloture 2026-05-06
+  2-6-1-outillage-axe-core-playwright: done
+  2-6-2-messagerie-a11y: done
+  2-6-3-onboarding-aux-progressbar-focus: done
+  2-6-4-erreurs-inline-role-alert: done
+  2-6-5-carte-hero-alternative-textuelle: done
+  2-6-6-audit-leaflet-alternative-clavier: done
+  2-6-7-a-h1-pages-publiques-auth: done
+  2-6-7-b-h1-dashboards-utilisateurs: done
+  2-6-7-c-h1-pages-admin: done
+
+  # Mini-epic 2.7 - Lot C a11y (Excellence et verrouillage) - cloture 2026-05-06
+  2-7-1-refactor-main-pages-client: done
+  2-7-2-heading-order-cards-h3-h2: done
+  2-7-3-page-publique-accessibilite: done
+  2-7-4-bascule-axe-check-bloquant: done
+  2-7-5-retrospective-lot-b: done
+  2-7-6-refactor-main-pages-auth-jumelles: done
+
+  epic-2-retrospective: done
+
+  # ==========================================================================
+  # Epic 3 : Lancement Bretagne
+  # Cadre formellement 2026-05-06 dans epic-3.md. 8 stories backlog.
+  # ==========================================================================
+  epic-3: in-progress
+  3-1-activation-whitelist-departements-ouverts-et-filtrage-requetes: ready-for-dev
+  3-2-blocage-inscription-auxiliaire-hors-zone: backlog
+  3-3-affichage-landing-disponible-en-bretagne-depuis-bdd: backlog
+  3-4-waitlist-hors-zone-beneficiaire-table-formulaire-et-email: backlog
+  3-5-notification-automatique-waitlist-a-l-ouverture-departement: backlog
+  3-6-audit-soft-paywall-et-corrections-d-alignement-code-prd: backlog
+  3-7-audit-cookies-scripts-tiers-et-decision-granularite-bandeau-rgpd: backlog
+  3-8-notifications-admin-parrainage-robustes: backlog
+  epic-3-retrospective: optional
+
+  # ==========================================================================
+  # Epic 4 : Hardening (placeholder)
+  # Sera cadre apres retro Epic 3 selon apprentissages lancement Bretagne.
+  # Candidats reportes : tests metier (G), OCR perfectionnement (D),
+  # types stricts (I), seeds (J), monitoring.
+  # ==========================================================================
+  epic-4: backlog
+  epic-4-retrospective: optional

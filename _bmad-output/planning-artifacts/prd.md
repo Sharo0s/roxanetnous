@@ -17,6 +17,8 @@ editHistory:
     changes: 'NFR Accessibilité (WCAG 2.2 AA / RGAA / EAA) — remplacement intégral de la sous-section Accessibilité dans Exigences Non-Fonctionnelles. Ajout des 6 parcours critiques, critères mesurables, calendrier en 3 lots (A/B/C), DoD a11y par story, page de déclaration publique.'
   - date: '2026-05-06'
     changes: 'NFR Accessibilité — mise à jour post-Lot C suite re-run NFR AI-13 (cf. nfr-assessment-a11y-2026-05-04.md section R). Calendrier passé en mode livré (Lots A/B/C, 12,25 j-dev cumulés, 21 stories). Statut courant ✅ conforme avec réserves (18/22 critères PASS, 0 bloqueur). Périmètre précisé 7 parcours (entrées baseline @axe-core/playwright) avec note de réconciliation 6 vs 7 (couvre AI-12 partiellement pour ce fichier). Lot D conditionnel ajouté (déclencheur externe). Règle CLAUDE.md ligne 6 mentionnée (durcissement 2.7.4).'
+  - date: '2026-05-06'
+    changes: 'Décisions A et F (DECISIONS.md 2026-05-06) reportées dans le PRD. (1) Soft paywall : résumé exécutif (modèle), Stratégie MVP item 4, FR16 reformulés — lecture libre, paywall sur actions de mise en relation uniquement (envoi message FR27, publication annonce FR18/FR19). (2) Couverture géographique progressive Bretagne 5 dpt (29, 22, 56, 35, 44) : résumé exécutif (cible), table critères de succès (ligne 65), Stratégie MVP item 15, ajout sous-section "Couverture géographique" avec FR45–FR48 (whitelist departements_ouverts, waitlist hors zone bénéficiaire, blocage inscription auxiliaire hors zone, affichage landing).'
 ---
 
 # Product Requirements Document - roxanetnous
@@ -30,9 +32,11 @@ editHistory:
 
 **Différenciateur :** Vérification manuelle obligatoire de chaque auxiliaire avant publication. Tous les profils sont contrôlés — la confiance est le pilier de la plateforme.
 
-**Modèle :** Abonnement symétrique (auxiliaires et bénéficiaires) — mensuel 4,99€ / annuel 49,99€. Hard paywall.
+**Modèle :** Abonnement symétrique (auxiliaires et bénéficiaires) — mensuel 4,99€ / annuel 49,99€. **Soft paywall** : lecture libre des profils et annonces, paywall déclenché sur les actions de mise en relation (envoi de message, publication d'annonce auxiliaire). Détail dans FR16 et `DECISIONS.md` (2026-05-06).
 
-**Cible :** Auxiliaires de vie indépendantes cherchant des clients sans intermédiaire. Bénéficiaires (personnes âgées/dépendantes) et leurs proches cherchant une aide à domicile vérifiée. Couverture : toutes les villes de France.
+**Cible :** Auxiliaires de vie indépendantes cherchant des clients sans intermédiaire. Bénéficiaires (personnes âgées/dépendantes) et leurs proches cherchant une aide à domicile vérifiée.
+
+**Couverture géographique :** **Déploiement progressif département par département**. Pilote au lancement = **Bretagne historique 5 départements** (29 Finistère, 22 Côtes-d'Armor, 56 Morbihan, 35 Ille-et-Vilaine, 44 Loire-Atlantique). Hors zone : capture email waitlist côté bénéficiaire, inscription bloquée côté auxiliaire. Détail dans FR45–FR48 et `DECISIONS.md` (2026-05-06).
 
 ## Critères de Succès
 
@@ -62,7 +66,7 @@ editHistory:
 | Utilisateurs totaux | 20 | 100 |
 | Auxiliaires vérifiés | 5 | 25 |
 | Bénéficiaires abonnés | 15 | 75 |
-| Couverture | Toutes villes de France | Toutes villes de France |
+| Couverture | Bretagne 5 dpt (29, 22, 56, 35, 44) | Bretagne 5 dpt + extension conditionnelle |
 
 **Engagement & Rétention :**
 - Rétention 1 mois >= **50%** (progression vers 70%+)
@@ -109,7 +113,7 @@ editHistory:
 1. Authentification multi-rôles (auxiliaire / bénéficiaire / admin)
 2. Vérification manuelle obligatoire des auxiliaires (justificatifs + OCR pré-validation)
 3. Abonnements Stripe (mensuel 4,99€ / annuel 49,99€ + offres de lancement)
-4. Hard paywall : tout bloqué sans abonnement actif
+4. Soft paywall : lecture libre des profils et annonces, paywall sur actions de mise en relation (envoi de message, publication d'annonce auxiliaire) — voir FR16
 5. Annonces bidirectionnelles (auxiliaires publient + bénéficiaires publient)
 6. Badges automatiques (annonce active, ancienneté)
 7. Matching intelligent 5 critères (spécialités, zone, disponibilités, diplôme, expérience)
@@ -120,7 +124,7 @@ editHistory:
 12. Landing page avec preuves sociales, FAQ, formulaire de contact
 13. Modération & signalements
 14. Conformité RGPD (suppression compte, export données, consentements)
-15. Couverture : toutes les villes de France
+15. Couverture géographique : déploiement progressif département par département. Pilote = Bretagne historique 5 dpt (29, 22, 56, 35, 44). Waitlist hors zone côté bénéficiaire, inscription bloquée hors zone côté auxiliaire — voir FR45–FR48
 
 ### Post-MVP (Phase 2 — Growth)
 
@@ -323,7 +327,7 @@ editHistory:
 - **FR13 :** Un utilisateur validé peut souscrire un abonnement (mensuel 4,99€ ou annuel 49,99€)
 - **FR14 :** Le système applique les offres de lancement (mois offerts)
 - **FR15 :** Un abonné peut gérer son abonnement (modifier, annuler) via le portail client
-- **FR16 :** Le système bloque l'accès aux fonctionnalités sans abonnement actif (hard paywall)
+- **FR16 :** Le système applique un **soft paywall**. Lecture libre (recherche, profils, annonces, pages légales) sans authentification ni abonnement. **Paywall déclenché uniquement sur les actions de mise en relation** : envoi de message (FR27), publication d'annonce auxiliaire (FR18), publication d'annonce bénéficiaire (FR19). Décision actée 2026-05-06 (`DECISIONS.md`). Acceptation : un visiteur non abonné accède à `/recherche`, `/messages` (lecture seule), `/favoris` (login requis pour ajouter, lecture sans abonnement) ; il est redirigé vers `/abonnement` à la première tentative d'envoi de message ou de publication d'annonce.
 - **FR17 :** Le système gère les webhooks Stripe (renouvellement, échec de paiement, annulation)
 
 ### Annonces
@@ -370,6 +374,15 @@ editHistory:
 - **FR42 :** Un visiteur peut consulter une FAQ sur la landing page
 - **FR43 :** Un visiteur peut envoyer un message via un formulaire de contact
 - **FR44 :** Un visiteur peut choisir son parcours via des boutons d'orientation ("Je suis aidant" / "Je recherche un aidant")
+
+### Couverture géographique
+
+Décision actée 2026-05-06 dans `DECISIONS.md` : déploiement progressif département par département. Pilote = Bretagne historique 5 départements (29 Finistère, 22 Côtes-d'Armor, 56 Morbihan, 35 Ille-et-Vilaine, 44 Loire-Atlantique). Whitelist technique : table `departements_ouverts` (migration `20260502120000`).
+
+- **FR45 :** Le système restreint la visibilité des profils auxiliaires et des annonces aux départements présents dans la whitelist `departements_ouverts`. Les requêtes de recherche, matching et listing d'annonces filtrent sur cette whitelist. Acceptation : une recherche avec `ville` située hors zone retourne 0 résultat de profils/annonces de cette zone et affiche un message explicite (cf. FR46) au lieu d'un état vide silencieux.
+- **FR46 :** Un visiteur ou utilisateur dont le département de recherche est hors zone peut s'inscrire à une **waitlist** pour être notifié à l'ouverture de son département. Capture : email + département cible + horodatage. Acceptation : le formulaire est accessible depuis tout résultat de recherche hors zone et depuis la landing page ; un email de confirmation est envoyé immédiatement ; un email de notification est envoyé automatiquement à l'ouverture du département concerné. Stockage en table dédiée (à créer : `waitlist_departements`).
+- **FR47 :** Le système bloque l'inscription auxiliaire si le département déclaré (adresse de résidence ou justificatif d'identité) est hors zone. Acceptation : le formulaire d'inscription auxiliaire valide la whitelist `departements_ouverts` et affiche un message explicatif "Service pas encore disponible dans votre département. Inscrivez-vous à la waitlist pour être averti à l'ouverture" avec lien vers le formulaire FR46.
+- **FR48 :** La landing page affiche explicitement les départements actuellement ouverts ("Disponible en Bretagne : Finistère, Côtes-d'Armor, Morbihan, Ille-et-Vilaine, Loire-Atlantique"). Acceptation : la liste est rendue côté serveur depuis `departements_ouverts` (pas de hard-coding) pour rester synchronisée à toute extension future.
 
 ## Exigences Non-Fonctionnelles
 

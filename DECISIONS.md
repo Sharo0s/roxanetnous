@@ -56,3 +56,74 @@ Il fait autorite sur les documents bmad en cas de contradiction.
 - Configurer Resend avec un vrai domaine pour l'envoi d'emails
 - Mettre a jour NEXT_PUBLIC_BASE_URL avec le domaine final
 - Definir la date exacte de LAUNCH_OFFER_END (offre de lancement 1 mois)
+
+---
+
+## 2026-05-06 : Soft paywall (lecture libre, action de mise en relation payante)
+
+**Decision :** Le PRD FR16 mentionne un "hard paywall" mais le code livre depuis le debut une lecture libre. On acte le **soft paywall** comme modele economique definitif. Lecture des profils et annonces accessible sans abonnement, paywall declenche uniquement au moment de la **mise en relation**.
+
+**Comportement par action :**
+
+| Action | Visiteur non connecte | Connecte sans abonnement | Abonne actif |
+|---|---|---|---|
+| Voir landing page | OK | OK | OK |
+| Recherche + filtres | OK | OK | OK |
+| Voir un profil auxiliaire | OK | OK | OK |
+| Voir favoris | login requis | OK | OK |
+| Ajouter aux favoris | login requis | OK | OK |
+| **Envoyer un message** | login requis | **paywall** | OK |
+| **Publier annonce auxiliaire** | login requis | **paywall** | OK |
+| Pages legales (CGU, RGPD, accessibilite) | OK | OK | OK |
+
+**Motivation :**
+- Aligne avec l'investissement SEO deja realise (sitemap, meta, indexabilite des profils).
+- Standard du secteur marketplaces de mise en relation (Malt, Yoopies, Click&Care).
+- Densite faible en zone pilote Bretagne (cf. decision F) impose de minimiser la friction de decouverte.
+- Pas de risque scrape critique : coordonnees personnelles auxiliaires non exposees publiquement, contact passe par messagerie in-app payante.
+
+**Implications techniques :**
+- Aucun middleware global d'enforcement abonnement a ajouter. Le pattern actuel (verification page par page via `hasActiveSubscription()`) est correct et conserve.
+- Toute nouvelle action de mise en relation doit appeler `hasActiveSubscription()` cote server action ou page protegee.
+- Le PRD FR16 doit etre reformule de "Hard paywall" vers "Paywall sur actions de mise en relation".
+
+**Regle :** Ne jamais ajouter d'enforcement bloquant sur la lecture (recherche, profils, annonces, favoris). Ne jamais retirer l'enforcement existant sur l'envoi de message ni la publication d'annonce auxiliaire.
+
+---
+
+## 2026-05-06 : Deploiement geographique progressif - pilote Bretagne historique
+
+**Decision :** Le PRD mentionne "Couverture : toutes les villes de France" mais la plateforme adopte un **deploiement progressif departement par departement**. Pilote au lancement = **Bretagne historique 5 departements** :
+
+- **29** Finistere
+- **22** Cotes-d'Armor
+- **56** Morbihan
+- **35** Ille-et-Vilaine
+- **44** Loire-Atlantique
+
+Migration support : `20260502120000_departements_ouverts` (table whitelist deja en place, a alimenter avec les 5 codes).
+
+**Comportement hors zone (departements non ouverts) :**
+
+- **Visiteur cote beneficiaire** : capture email "prevenez-moi quand vous arrivez dans mon departement" (composant a creer + table waitlist + email confirmation). C'est une story dediee a inclure dans l'epic 3.
+- **Auxiliaire** : **inscription bloquee** avec message explicatif. Plus simple, evite de gerer un pool d'auxiliaires invisibles. Trade-off accepte : on perd des inscriptions potentielles hors zone, mais le compromis simplicite l'emporte au stade pilote.
+- **Landing page** : afficher explicitement "Disponible actuellement en Bretagne (5 departements)" + invitation waitlist hors zone.
+
+**Motivation :**
+- Densite controlee par zone evite l'effet "0 resultat" qui plombe la premiere impression.
+- Bretagne historique = bassin culturel coherent geographiquement et identitairement, communication marketing plus efficace.
+- 5 departements = volume suffisant pour valider le modele (auxiliaires + beneficiaires) sans diluer le marketing sur la France entiere.
+- Validation manuelle Sylvain (5-25 auxiliaires gerable) coherente avec une zone restreinte.
+
+**Implications techniques :**
+- Activer la whitelist `departements_ouverts` en production avec les 5 codes a l'ouverture.
+- Filtrer toutes les requetes de recherche / matching / annonces sur cette whitelist.
+- Bloquer le formulaire d'inscription auxiliaire si `departement` du justificatif d'identite ou de l'adresse declaree est hors whitelist.
+- Composant + table waitlist a developper (story epic 3).
+- Le PRD FR15 et le resume executif doivent etre reformules pour refleter le deploiement progressif.
+
+**Strategie d'expansion future :**
+- L'ouverture d'un nouveau departement se fait par ajout dans la whitelist + email de notification a la waitlist du departement concerne.
+- Pas de calendrier fige : ouverture conditionnelle a l'atteinte de seuils a definir (densite auxiliaires, demande beneficiaires) ou a une decision business.
+
+**Regle :** Toute nouvelle feature touchant la geographie (matching, recherche, annonces, inscription) doit respecter la whitelist `departements_ouverts`. Toute communication publique (landing, marketing, presse) doit mentionner le perimetre Bretagne actuel sans laisser entendre une couverture France entiere.
