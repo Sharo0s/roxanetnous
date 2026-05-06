@@ -5,6 +5,7 @@ import { ContactForm } from '@/components/contact-form'
 import { HeroCarte } from '@/components/landing/hero-carte'
 import { AnimatedCounter } from '@/components/landing/animated-counter'
 import { Reveal } from '@/components/landing/reveal'
+import { DepartementsOuverts } from '@/components/landing/departements-ouverts'
 import { createClient } from '@/lib/supabase/server'
 
 export const revalidate = 120
@@ -136,6 +137,9 @@ export default async function HomePage() {
             </div>
           </div>
         </section>
+
+        {/* ===== DEPARTEMENTS OUVERTS (story 3.3, FR48) ===== */}
+        <DepartementsOuverts />
 
         {/* ===== BANDE COMMUNAUTE ===== */}
         <section className="bg-accent relative">
