@@ -22,6 +22,12 @@ export function Footer() {
               Politique de confidentialité
             </Link>
             <Link
+              href="/accessibilite"
+              className="text-sm text-black hover:text-black transition"
+            >
+              Accessibilité
+            </Link>
+            <Link
               href="/cgu"
               className="text-sm text-black hover:text-black transition"
             >
