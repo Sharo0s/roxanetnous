@@ -1,6 +1,6 @@
 # Story 4.2 : Fix schema `logNotification` transversal (`user_id NULLABLE` + `status` etendu)
 
-Status: ready-to-merge
+Status: done
 
 <!-- Note : Validation est optionnelle. Lancer `validate-create-story` avant `dev-story` pour un controle qualite. -->
 
