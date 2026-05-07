@@ -294,9 +294,6 @@ export function HeroCarte({ villes }: { villes: VilleCoord[] }) {
           )
         })}
       </svg>
-      <p className="mt-3 text-center text-sm text-white/80">
-        Notre service couvre la Bretagne.
-      </p>
     </div>
   )
 }
