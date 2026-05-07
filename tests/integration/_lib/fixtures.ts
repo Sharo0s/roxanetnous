@@ -29,21 +29,30 @@ export async function createTestUser(
   const email = opts?.email ?? `test-${role}-${randomUUID()}@test.local`
   const password = opts?.password ?? 'test-password-1234'
 
+  // Le trigger handle_new_user (migration brownfield 20260404134919_rename_*)
+  // INSERT automatiquement dans public.users + dans le profil correspondant au role
+  // metadata. On passe le role via raw_user_meta_data pour que le trigger l'utilise
+  // directement, puis on UPDATE pour les champs first_name/last_name (le trigger pose
+  // une string vide par defaut, on enrichit ensuite).
   const { data: authData, error: authError } = await supabase.auth.admin.createUser({
     email,
     password,
     email_confirm: true,
+    user_metadata: { role, first_name: 'Test', last_name: 'Fixture' },
   })
   if (authError || !authData.user) {
     throw new Error(`createTestUser auth.admin echec : ${authError?.message}`)
   }
   const userId = authData.user.id
 
-  const { error: insertError } = await supabase
+  // Le role 'admin' n'est pas pris par le trigger (qui ne supporte que 'accompagnante'
+  // / 'accompagne'), on UPDATE explicitement. Idem first_name/last_name dans tous les cas.
+  const { error: updateError } = await supabase
     .from('users')
-    .insert({ id: userId, email, role, first_name: 'Test', last_name: 'Fixture' })
-  if (insertError) {
-    throw new Error(`createTestUser INSERT users echec : ${insertError.message}`)
+    .update({ role, first_name: 'Test', last_name: 'Fixture' })
+    .eq('id', userId)
+  if (updateError) {
+    throw new Error(`createTestUser UPDATE users echec : ${updateError.message}`)
   }
   track('users', userId)
   return { id: userId, email, password, role }
@@ -92,11 +101,29 @@ export async function createTestSubscription(
 
 export type TestProfile = { id: string; userId: string }
 
+// Le trigger handle_new_user cree deja un profile pour les roles 'accompagnante'
+// et 'accompagne'. Ces helpers retournent le profile existant (UPDATE pour enrichir
+// les champs metier) plutot que d'INSERT en doublon.
 export async function createTestAccompagnanteProfile(
   userId: string,
   opts?: { adresse?: string },
 ): Promise<TestProfile> {
   const supabase = getAdminClient()
+  const { data: existing } = await supabase
+    .from('accompagnantes_profiles')
+    .select('id')
+    .eq('user_id', userId)
+    .maybeSingle()
+
+  if (existing) {
+    await supabase
+      .from('accompagnantes_profiles')
+      .update({ validation_status: 'valide', adresse: opts?.adresse ?? null })
+      .eq('id', existing.id)
+    track('accompagnantes_profiles', existing.id)
+    return { id: existing.id, userId }
+  }
+
   const { data, error } = await supabase
     .from('accompagnantes_profiles')
     .insert({
@@ -115,6 +142,17 @@ export async function createTestAccompagnanteProfile(
 
 export async function createTestAccompagneProfile(userId: string): Promise<TestProfile> {
   const supabase = getAdminClient()
+  const { data: existing } = await supabase
+    .from('accompagnes_profiles')
+    .select('id')
+    .eq('user_id', userId)
+    .maybeSingle()
+
+  if (existing) {
+    track('accompagnes_profiles', existing.id)
+    return { id: existing.id, userId }
+  }
+
   const { data, error } = await supabase
     .from('accompagnes_profiles')
     .insert({ user_id: userId })
