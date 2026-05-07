@@ -1,5 +1,6 @@
 'use server'
 
+import * as Sentry from '@sentry/nextjs'
 import { Resend } from 'resend'
 import { createClient } from '@/lib/supabase/server'
 
@@ -723,6 +724,11 @@ export async function sendAdminParrainageFlag(params: {
       '[sendAdminParrainageFlag] ADMIN_NOTIFICATIONS_EMAIL manquant — alerte parrainage non envoyée par email, voir admin_actions_log.',
       { type: params.type, parrainageId: params.parrainageId },
     )
+    Sentry.captureMessage('admin notifications email missing', {
+      level: 'warning',
+      tags: { flow: 'email', signal: 'admin-email-missing', severity: 'warning' },
+      extra: { type: params.type, parrainageId: params.parrainageId },
+    })
     try {
       const supabase = await createClient({ serviceRole: true })
       await supabase.from('admin_actions_log').insert({
@@ -739,6 +745,10 @@ export async function sendAdminParrainageFlag(params: {
       })
     } catch (logErr) {
       console.error('[sendAdminParrainageFlag][admin_log_failed]', logErr)
+      Sentry.captureException(logErr, {
+        tags: { flow: 'email', signal: 'admin-log-failed', severity: 'critical' },
+        extra: { type: params.type, parrainageId: params.parrainageId },
+      })
     }
     return
   }
@@ -913,6 +923,10 @@ export async function sendWaitlistConfirmationEmail(params: {
       })
     } else {
       console.error('[waitlist][email_send_error]', error)
+      Sentry.captureException(error, {
+        tags: { flow: 'email', signal: 'waitlist-confirm-failed', severity: 'warning' },
+        extra: { codeDepartement: params.codeDepartement },
+      })
     }
   }
 }
@@ -934,6 +948,15 @@ export async function sendWaitlistOpeningNotificationEmail(params: {
   const nom = (params.nomDepartement || '').trim()
   if (!nom || nom.length > 80 || /[\r\n]/.test(nom)) {
     console.error('[notify-waitlist][invalid_nom]', { code: params.codeDepartement, nom: params.nomDepartement })
+    Sentry.captureMessage('notify-waitlist invalid nom departement', {
+      level: 'error',
+      tags: { flow: 'email', signal: 'waitlist-invalid-nom', severity: 'critical' },
+      extra: {
+        code: params.codeDepartement,
+        nom_length: (params.nomDepartement || '').length,
+        has_crlf: /[\r\n]/.test(params.nomDepartement || ''),
+      },
+    })
     return
   }
   const subject = `Le service est ouvert dans ${nom}`
@@ -967,6 +990,13 @@ export async function sendWaitlistOpeningNotificationEmail(params: {
     const resendError = result.error
     if (resendError) {
       console.error('[notify-waitlist][resend_error]', { code: params.codeDepartement, email: params.email, error: resendError })
+      Sentry.captureException(
+        resendError instanceof Error ? resendError : new Error(typeof resendError === 'string' ? resendError : JSON.stringify(resendError)),
+        {
+          tags: { flow: 'email', signal: 'waitlist-resend-error', severity: 'warning' },
+          extra: { code: params.codeDepartement, userId: params.userId ?? null },
+        },
+      )
       if (canLog) {
         await logNotification({
           userId: params.userId,
@@ -1001,6 +1031,10 @@ export async function sendWaitlistOpeningNotificationEmail(params: {
       })
     } else {
       console.error('[notify-waitlist][email_send_error]', { code: params.codeDepartement, email: params.email, error })
+      Sentry.captureException(error, {
+        tags: { flow: 'email', signal: 'waitlist-opening-failed', severity: 'warning' },
+        extra: { code: params.codeDepartement },
+      })
     }
   }
 }

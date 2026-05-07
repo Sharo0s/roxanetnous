@@ -1,5 +1,6 @@
 'use server'
 
+import * as Sentry from '@sentry/nextjs'
 import { after } from 'next/server'
 import { revalidatePath } from 'next/cache'
 import { headers } from 'next/headers'
@@ -16,6 +17,7 @@ import {
   generateCodeForUserSystem,
   type GenerateCodeResult,
 } from '@/lib/parrainage-codes'
+import { hashRateLimitKey } from '@/lib/rate-limit-hash'
 
 // Alphabet 31 chars sans 0/O/1/I/L (lisibilité). Doit rester en sync avec lib/parrainage-codes.ts.
 const CODE_ALPHABET = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'
@@ -135,6 +137,16 @@ async function revokeFilleuleValidation(
       raison,
       current_status: profile?.validation_status ?? null,
       current_source: profile?.validation_source ?? null,
+    })
+    Sentry.captureMessage('parrainage revokeFilleuleValidation noop', {
+      level: 'warning',
+      tags: { flow: 'parrainage', signal: 'revoke-noop', severity: 'warning' },
+      extra: {
+        filleule_id: filleuleId,
+        raison,
+        current_status: profile?.validation_status ?? null,
+        current_source: profile?.validation_source ?? null,
+      },
     })
   }
 
@@ -317,13 +329,18 @@ export async function validateCode(rawCode: string): Promise<ValidationCodeResul
   // H12 : check rate-limit avant toute lecture BDD. Key = IP du client ;
   // si IP indisponible (cas rare en preview/dev), fallback global avec
   // limite plus stricte pour éviter qu'un attaquant masque son IP.
+  // TODO story 4.5 : remplacer x-forwarded-for par x-vercel-forwarded-for
+  // (hardening IP spoofing). Vercel sanitize en prod, OK pour MVP.
+  // Review 2026-05-07 : rateLimitKey hisse hors du try pour partager le
+  // keyHash entre la branche success et le catch RPC error.
+  let rateLimitKey: string | null = null
   try {
     const h = await headers()
     const ip =
       h.get('x-forwarded-for')?.split(',')[0]?.trim() ||
       h.get('x-real-ip') ||
       'unknown'
-    const rateLimitKey = `validate_code:${ip}`
+    rateLimitKey = `validate_code:${ip}`
     const { data: allowed } = await supabaseAdmin.rpc('try_consume_rate_limit', {
       p_key: rateLimitKey,
       p_max_requests: VALIDATE_CODE_MAX_REQUESTS,
@@ -331,6 +348,19 @@ export async function validateCode(rawCode: string): Promise<ValidationCodeResul
     })
     if (allowed === false) {
       console.warn('[validateCode][rate_limited]', { ip })
+      // Story 4.1 AC4 : evenement Sentry dedie pour signaler une tentative
+      // de bruteforce du keyspace 31^8 codes parrainage. keyHash HMAC-sale
+      // pour ne pas envoyer l'IP brute (PII) tout en permettant
+      // d'identifier un attaquant recurrent sur le dashboard.
+      Sentry.captureMessage('rate-limit-validate-code triggered', {
+        level: 'warning',
+        tags: {
+          flow: 'parrainage',
+          signal: 'rate-limit-validate-code',
+          severity: 'warning',
+        },
+        extra: { keyHash: hashRateLimitKey(rateLimitKey) },
+      })
       return { valid: false, reason: 'rate_limited' }
     }
   } catch (rateLimitErr) {
@@ -338,6 +368,17 @@ export async function validateCode(rawCode: string): Promise<ValidationCodeResul
     // validation pour ne pas casser le flow signup. L'erreur est logguée
     // pour observabilité.
     console.error('[validateCode][rate_limit_error]', rateLimitErr)
+    // Story 4.1 AC4 : critical car une defaillance du RPC rate-limit
+    // ouvre temporairement la fenetre brute-force. keyHash transmis pour
+    // correlation dashboard si l'erreur RPC coincide avec un attaquant.
+    Sentry.captureException(rateLimitErr, {
+      tags: {
+        flow: 'parrainage',
+        signal: 'rate-limit-rpc-error',
+        severity: 'critical',
+      },
+      extra: rateLimitKey ? { keyHash: hashRateLimitKey(rateLimitKey) } : {},
+    })
   }
 
   const { data: row } = await supabaseAdmin
@@ -515,6 +556,10 @@ export async function createParrainageRelation(params: {
     })
   } catch (err) {
     console.error('[parrainage_blacklist][signup]', err)
+    Sentry.captureException(err, {
+      tags: { flow: 'parrainage', signal: 'blacklist-signup', severity: 'critical' },
+      extra: { parrainageId: inserted.id, marraineId, filleuleId: params.filleuleId },
+    })
   }
 
   // parrainee_par n'est posé que si pas de blocage : la branche meme_email plus
@@ -531,7 +576,13 @@ export async function createParrainageRelation(params: {
       .update({ parrainee_par: validation.marraineId })
       .eq('id', params.filleuleId)
       .is('parrainee_par', null)
-    if (parraineeErr) console.error('[parrainage][signup][parrainee_par]', parraineeErr)
+    if (parraineeErr) {
+      console.error('[parrainage][signup][parrainee_par]', parraineeErr)
+      Sentry.captureException(parraineeErr, {
+        tags: { flow: 'parrainage', signal: 'signup-parrainee-par', severity: 'critical' },
+        extra: { parrainageId: inserted.id, filleuleId: params.filleuleId },
+      })
+    }
   }
 
   // Charger les infos pour les emails admin (best-effort).
@@ -556,7 +607,13 @@ export async function createParrainageRelation(params: {
       .from('parrainages')
       .update({ statut: 'bloque', blocage_raison: 'meme_email' })
       .eq('id', inserted.id)
-    if (blocErr) console.error('[parrainage_blacklist][signup][update_bloque]', blocErr)
+    if (blocErr) {
+      console.error('[parrainage_blacklist][signup][update_bloque]', blocErr)
+      Sentry.captureException(blocErr, {
+        tags: { flow: 'parrainage', signal: 'signup-update-bloque', severity: 'critical' },
+        extra: { parrainageId: inserted.id, raison: 'meme_email' },
+      })
+    }
 
     // parrainee_par n'a pas été posé (cf. plus haut) : pas de reset à faire.
 
@@ -571,7 +628,13 @@ export async function createParrainageRelation(params: {
         raison: 'meme_email',
       },
     })
-    if (logErr) console.error('[parrainage_blacklist][signup][log]', logErr)
+    if (logErr) {
+      console.error('[parrainage_blacklist][signup][log]', logErr)
+      Sentry.captureException(logErr, {
+        tags: { flow: 'parrainage', signal: 'signup-log-bloque', severity: 'critical' },
+        extra: { parrainageId: inserted.id, raison: 'meme_email' },
+      })
+    }
 
     try {
       const { marraineName, filleuleName } = await loadNamesForAdminEmail()
@@ -583,6 +646,10 @@ export async function createParrainageRelation(params: {
       })
     } catch (err) {
       console.error('[parrainage_blacklist][signup][email]', err)
+      Sentry.captureException(err, {
+        tags: { flow: 'parrainage', signal: 'signup-email-bloque', severity: 'warning' },
+        extra: { parrainageId: inserted.id, type: 'meme_email' },
+      })
     }
 
     return { ok: false, reason: 'blacklist_meme_email' }
@@ -598,7 +665,13 @@ export async function createParrainageRelation(params: {
       })
       .select('was_added')
       .maybeSingle()
-    if (mergeErr) console.error('[parrainage_blacklist][signup][merge_flag]', mergeErr)
+    if (mergeErr) {
+      console.error('[parrainage_blacklist][signup][merge_flag]', mergeErr)
+      Sentry.captureException(mergeErr, {
+        tags: { flow: 'parrainage', signal: 'signup-merge-flag', severity: 'critical' },
+        extra: { parrainageId: inserted.id, flag: 'meme_ip' },
+      })
+    }
 
     if (mergeResult?.was_added) {
       const { error: logErr } = await supabaseAdmin.from('admin_actions_log').insert({
@@ -612,7 +685,13 @@ export async function createParrainageRelation(params: {
           flag: 'meme_ip',
         },
       })
-      if (logErr) console.error('[parrainage_blacklist][signup][log_flag]', logErr)
+      if (logErr) {
+        console.error('[parrainage_blacklist][signup][log_flag]', logErr)
+        Sentry.captureException(logErr, {
+          tags: { flow: 'parrainage', signal: 'signup-log-flag', severity: 'critical' },
+          extra: { parrainageId: inserted.id, flag: 'meme_ip' },
+        })
+      }
 
       try {
         const { marraineName, filleuleName } = await loadNamesForAdminEmail()
@@ -624,6 +703,10 @@ export async function createParrainageRelation(params: {
         })
       } catch (err) {
         console.error('[parrainage_blacklist][signup][email]', err)
+        Sentry.captureException(err, {
+          tags: { flow: 'parrainage', signal: 'signup-email-flag', severity: 'warning' },
+          extra: { parrainageId: inserted.id, type: 'meme_ip' },
+        })
       }
     }
   }
@@ -766,6 +849,14 @@ export async function confirmParrainageOnSuccess(
         user_id: user.id,
         current_status: currentProfile?.validation_status ?? null,
       })
+      Sentry.captureMessage('parrainage validation status skipped', {
+        level: 'warning',
+        tags: { flow: 'parrainage', signal: 'validation-status-skipped', severity: 'warning' },
+        extra: {
+          user_id: user.id,
+          current_status: currentProfile?.validation_status ?? null,
+        },
+      })
       await supabaseAdmin.from('admin_actions_log').insert({
         admin_id: null,
         action_type: 'parrainage_validation_skipped',
@@ -784,6 +875,11 @@ export async function confirmParrainageOnSuccess(
     console.error('[confirmParrainageOnSuccess][generate_code_failed]', {
       user_id: user.id,
       reason: codeResult.error,
+    })
+    Sentry.captureMessage('parrainage generate code failed', {
+      level: 'error',
+      tags: { flow: 'parrainage', signal: 'generate-code-failed', severity: 'critical' },
+      extra: { user_id: user.id, reason: codeResult.error },
     })
     await supabaseAdmin.from('admin_actions_log').insert({
       admin_id: null,

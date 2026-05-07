@@ -1,5 +1,6 @@
 'use server'
 
+import * as Sentry from '@sentry/nextjs'
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { revokeFilleuleValidationFromWebhook } from '@/app/actions/parrainage'
@@ -65,7 +66,13 @@ export async function autoriserException(
       .from('users')
       .update({ parrainee_par: parrainage.marraine_id })
       .eq('id', parrainage.filleule_id)
-    if (parraineeErr) console.error('[parrainage_admin][autoriser][parrainee_par]', parraineeErr)
+    if (parraineeErr) {
+      console.error('[parrainage_admin][autoriser][parrainee_par]', parraineeErr)
+      Sentry.captureException(parraineeErr, {
+        tags: { flow: 'admin', signal: 'autoriser-parrainee-par', severity: 'critical' },
+        extra: { parrainageId, filleuleId: parrainage.filleule_id },
+      })
+    }
   }
 
   const { error: logErr } = await supabaseAdmin.from('admin_actions_log').insert({
@@ -79,7 +86,13 @@ export async function autoriserException(
       filleule_id: parrainage.filleule_id,
     },
   })
-  if (logErr) console.error('[parrainage_admin][autoriser][log]', logErr)
+  if (logErr) {
+    console.error('[parrainage_admin][autoriser][log]', logErr)
+    Sentry.captureException(logErr, {
+      tags: { flow: 'admin', signal: 'autoriser-log', severity: 'critical' },
+      extra: { parrainageId, adminId: user.id },
+    })
+  }
 
   revalidatePath('/admin/parrainages')
   revalidatePath('/admin/parrainages/blacklist')
@@ -137,6 +150,10 @@ export async function confirmerFraude(
         .eq('user_id', parrainage.marraine_id)
       if (decErr) {
         console.error('[parrainage_admin][confirmer_fraude][counter_rollback]', decErr)
+        Sentry.captureException(decErr, {
+          tags: { flow: 'admin', signal: 'confirmer-fraude-counter-rollback', severity: 'critical' },
+          extra: { parrainageId, marraineId: parrainage.marraine_id },
+        })
       }
 
       // Si la marraine a déjà reçu au moins une récompense, le parrainage
@@ -199,7 +216,13 @@ export async function confirmerFraude(
           refus_motif: 'Suspicion fraude parrainage - confirmé par admin',
         })
         .eq('id', profileBefore.id)
-      if (suspendErr) console.error('[parrainage_admin][confirmer_fraude][suspend]', suspendErr)
+      if (suspendErr) {
+        console.error('[parrainage_admin][confirmer_fraude][suspend]', suspendErr)
+        Sentry.captureException(suspendErr, {
+          tags: { flow: 'admin', signal: 'confirmer-fraude-suspend', severity: 'critical' },
+          extra: { parrainageId, filleuleId: parrainage.filleule_id },
+        })
+      }
     }
   }
 
@@ -215,7 +238,13 @@ export async function confirmerFraude(
       via: 'admin_confirme',
     },
   })
-  if (logErr) console.error('[parrainage_admin][confirmer_fraude][log]', logErr)
+  if (logErr) {
+    console.error('[parrainage_admin][confirmer_fraude][log]', logErr)
+    Sentry.captureException(logErr, {
+      tags: { flow: 'admin', signal: 'confirmer-fraude-log', severity: 'critical' },
+      extra: { parrainageId, adminId: user.id },
+    })
+  }
 
   revalidatePath('/admin/parrainages')
   revalidatePath('/admin/parrainages/blacklist')

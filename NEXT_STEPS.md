@@ -282,6 +282,12 @@ Ces variables doivent être configurées sur Vercel (scope `production`) avant l
 - `CRON_SECRET` — auth des routes `/api/cron/*`.
 - `PARRAINAGE_INTERNAL_SECRET` — auth du helper de révocation validation filleule (story 2.3).
 - `ENCRYPTION_KEY` — chiffrement justificatifs accompagnantes.
+- `NEXT_PUBLIC_SENTRY_DSN` — DSN Sentry exposé au client (capture exceptions browser). Sans, aucun signal Sentry côté navigateur.
+- `SENTRY_DSN` — DSN Sentry server-side (capture exceptions Node.js + Edge). Peut être identique au DSN public.
+- `SENTRY_ORG` — slug organisation Sentry (upload sourcemaps build-time).
+- `SENTRY_PROJECT` — slug projet Sentry (upload sourcemaps build-time).
+- `SENTRY_AUTH_TOKEN` — token upload sourcemaps (scope `project:releases`). Variable build-time uniquement, à configurer sur Vercel scope production via `vercel env add SENTRY_AUTH_TOKEN production`. Sans, sourcemaps non uploadées et stack traces Sentry restent minifiées (build reste OK).
+- `RATE_LIMIT_HASH_SALT` — sel HMAC pour le hash rate-limit envoyé à Sentry (story 4.1 review D3). Garantit l'irréversibilité du keyHash IPv4. Sans, fallback SHA-256 non-salé (l'IP reste précomputable). Générer avec `openssl rand -hex 32`.
 
 Voir aussi `TODO-LAUNCH.md` (checklist détaillée pré-go-live) et `.env.local.example` (template).
 

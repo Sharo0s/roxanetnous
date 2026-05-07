@@ -40,14 +40,48 @@ const REQUIRED_VARS = [
     name: 'ENCRYPTION_KEY',
     description: 'Chiffrement justificatifs accompagnantes.',
   },
+  // Story 4.1 : alerting Sentry runtime (capture exceptions critiques).
+  // Sans ces vars, aucun signal Sentry, debug uniquement via Vercel logs.
+  // productionOnly: true (review 2026-05-07) -> silencieux en preview/dev,
+  // warn uniquement en VERCEL_ENV=production conformement spec AC2.
+  {
+    name: 'NEXT_PUBLIC_SENTRY_DSN',
+    description: 'DSN Sentry expose au client (capture exceptions browser).',
+    productionOnly: true,
+  },
+  {
+    name: 'SENTRY_DSN',
+    description: 'DSN Sentry server-side (peut etre identique au public).',
+    productionOnly: true,
+  },
+  {
+    name: 'SENTRY_ORG',
+    description: 'Slug organisation Sentry (upload sourcemaps build-time).',
+    productionOnly: true,
+  },
+  {
+    name: 'SENTRY_PROJECT',
+    description: 'Slug projet Sentry (upload sourcemaps build-time).',
+    productionOnly: true,
+  },
+  // Story 4.1 review D3 : sel HMAC pour irreversibilite hash rate-limit.
+  // productionOnly: sans sel en preview/dev, le helper degrade en SHA-256
+  // non-sale (acceptable pour debug local).
+  {
+    name: 'RATE_LIMIT_HASH_SALT',
+    description: 'Sel HMAC hash rate-limit Sentry (irreversibilite IP).',
+    productionOnly: true,
+  },
 ]
 
 const vercelEnv = process.env.VERCEL_ENV
 
-const missing = REQUIRED_VARS.filter((v) => {
+const isMissing = (v) => {
   const raw = process.env[v.name]
   return !raw || String(raw).trim() === ''
-})
+}
+
+const missing = REQUIRED_VARS.filter(isMissing)
 
 if (vercelEnv === 'production') {
   if (missing.length > 0) {
@@ -61,8 +95,11 @@ if (vercelEnv === 'production') {
 }
 
 if (vercelEnv === 'preview') {
-  if (missing.length > 0) {
-    for (const v of missing) {
+  // Variables productionOnly (ex: Sentry alerting) : silencieuses en preview
+  // car leur absence est attendue tant que le projet externe n'est pas cree.
+  const missingForPreview = missing.filter((v) => !v.productionOnly)
+  if (missingForPreview.length > 0) {
+    for (const v of missingForPreview) {
       console.warn(`WARN (preview): ${v.name} is not set. ${v.description}`)
     }
   } else {

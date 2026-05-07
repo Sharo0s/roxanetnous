@@ -1,5 +1,5 @@
 # generated: 2026-05-06
-# last_updated: 2026-05-07 (story 3.8 done - Epic 3 termine)
+# last_updated: 2026-05-07 (Story 4.1 review - Sentry SDK installe + 40 instrumentations + rate-limit validateCode)
 # project: roxanetnous
 # project_key: NOKEY
 # tracking_system: file-system
@@ -44,7 +44,15 @@
 #   mini-epic-2-5/6/7.
 # - Epic 3 cadre formellement 2026-05-06 dans epic-3.md. 8 stories backlog. Premier epic
 #   du projet a beneficier d'un cadrage BMad formel avant implementation.
-# - Epic 4 placeholder, sera cadre apres retro Epic 3.
+# - Epic 3 retro livree 2026-05-07 (epic-3-retro-2026-05-07.md). Go-live Bretagne
+#   CONDITIONNE Epic 4 partiel : 4 axes bloquants identifies (AI-3.1 fix schema
+#   logNotification, AI-3.2 tests metier critiques, AI-3.3 email queue durable,
+#   AI-3.4 rate-limit validateCode + Sentry transverse). Pas de toggle admin
+#   premier dpt prod tant que ces 4 AI ne sont pas livres.
+# - Epic 4 cadre formellement 2026-05-07 dans epic-4.md (post-retro Epic 3).
+#   11 stories backlog (4 ordre 1 bloquantes + 5 ordre 2 differees + 2 conditionnelles).
+#   Sequencage recommande : 4.1 Sentry/rate-limit -> 4.7 seeds -> 4.2 schema fix
+#   -> 4.3 email queue -> 4.4 tests metier. Apres ces 5 stories, go-live Bretagne autorise.
 
 generated: 2026-05-06
 last_updated: 2026-05-07
@@ -114,13 +122,32 @@ development_status:
   3-6-audit-soft-paywall-et-corrections-d-alignement-code-prd: done
   3-7-audit-cookies-scripts-tiers-et-decision-granularite-bandeau-rgpd: done
   3-8-notifications-admin-parrainage-robustes: done
-  epic-3-retrospective: optional
+  epic-3-retrospective: done
 
   # ==========================================================================
-  # Epic 4 : Hardening (placeholder)
-  # Sera cadre apres retro Epic 3 selon apprentissages lancement Bretagne.
-  # Candidats reportes : tests metier (G), OCR perfectionnement (D),
-  # types stricts (I), seeds (J), monitoring.
+  # Epic 4 : Hardening pre-go-live Bretagne
+  # Cadre formellement 2026-05-07 dans epic-4.md.
+  # 4 stories ordre 1 BLOQUANTES go-live + 7 stories ordre 2 differees.
+  # Toggle admin premier dpt prod conditionne a livraison 4.1, 4.2, 4.3, 4.4 + 4.7 (seeds).
+  # Sequencage recommande : 4.1 -> 4.7 -> 4.2 -> 4.3 -> 4.4 -> ordre 2 ou go-live.
   # ==========================================================================
-  epic-4: backlog
+  epic-4: in-progress
+
+  # Stories ordre 1 - BLOQUANTES go-live Bretagne
+  4-1-alerting-sentry-rate-limit-validate-code: review
+  4-2-fix-schema-log-notification-transversal: backlog
+  4-3-email-queue-durable: backlog
+  4-4-tests-metier-stripe-webhook-paywall: backlog
+
+  # Stories ordre 2 - DIFFEREES (non bloquantes go-live)
+  4-5-hardening-ip-spoofing: backlog
+  4-6-resorption-as-any-pages-admin: backlog
+  4-7-seeds-supabase-tests-integration: backlog
+  4-8-separation-required-optional-on-preview-envs: backlog
+  4-9-validation-escape-html-test-xss-emails: backlog
+
+  # Stories conditionnelles (declenchement sur seuil)
+  4-10-ocr-perfectionnement: conditionnel
+  4-11-matching-ui: conditionnel
+
   epic-4-retrospective: optional

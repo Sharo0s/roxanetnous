@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/nextjs'
 import { NextRequest, NextResponse } from 'next/server'
 import { stripe } from '@/lib/stripe'
 import { createServerClient } from '@supabase/ssr'
@@ -122,6 +123,10 @@ async function detectBlacklistAtWebhook(
             }
           } catch (err) {
             console.error('[parrainage_blacklist][webhook][stripe_lookup]', err)
+            Sentry.captureException(err, {
+              tags: { flow: 'webhook-stripe', signal: 'pm-list-failed', severity: 'warning' },
+              extra: { parrainageId: parrainage.id, customerId },
+            })
           }
 
           // M10 (code review 2026-04-29) : fallback supplémentaire sur les
@@ -141,6 +146,10 @@ async function detectBlacklistAtWebhook(
               }
             } catch (err) {
               console.error('[parrainage_blacklist][webhook][charges_lookup]', err)
+              Sentry.captureException(err, {
+                tags: { flow: 'webhook-stripe', signal: 'charges-list-failed', severity: 'warning' },
+                extra: { parrainageId: parrainage.id, customerId },
+              })
             }
           }
         }
@@ -179,6 +188,10 @@ async function detectBlacklistAtWebhook(
         })
       if (mergeErr) {
         console.error('[parrainage_blacklist][webhook][merge_adresse_avant_carte]', mergeErr)
+        Sentry.captureException(mergeErr, {
+          tags: { flow: 'webhook-stripe', signal: 'merge-adresse-avant-carte', severity: 'critical' },
+          extra: { parrainageId: parrainage.id },
+        })
       }
     }
 
@@ -194,6 +207,10 @@ async function detectBlacklistAtWebhook(
         .select('id')
       if (updateErr) {
         console.error('[parrainage_blacklist][webhook][update_carte]', updateErr)
+        Sentry.captureException(updateErr, {
+          tags: { flow: 'webhook-stripe', signal: 'update-bloque-carte', severity: 'critical' },
+          extra: { parrainageId: parrainage.id, raison: 'meme_carte' },
+        })
         return
       }
       if (!updatedRows || updatedRows.length === 0) return
@@ -216,7 +233,13 @@ async function detectBlacklistAtWebhook(
           flag_adresse_pose: adresseMatch,
         },
       })
-      if (logErr) console.error('[parrainage_blacklist][webhook][log_carte]', logErr)
+      if (logErr) {
+        console.error('[parrainage_blacklist][webhook][log_carte]', logErr)
+        Sentry.captureException(logErr, {
+          tags: { flow: 'webhook-stripe', signal: 'log-bloque-carte', severity: 'critical' },
+          extra: { parrainageId: parrainage.id, raison: 'meme_carte' },
+        })
+      }
 
       try {
         await sendAdminParrainageFlag({
@@ -227,6 +250,10 @@ async function detectBlacklistAtWebhook(
         })
       } catch (err) {
         console.error('[parrainage_blacklist][webhook][email]', err)
+        Sentry.captureException(err, {
+          tags: { flow: 'webhook-stripe', signal: 'email-flag-carte', severity: 'warning' },
+          extra: { parrainageId: parrainage.id, type: 'meme_carte' },
+        })
       }
       return
     }
@@ -246,6 +273,10 @@ async function detectBlacklistAtWebhook(
 
       if (mergeErr) {
         console.error('[parrainage_blacklist][webhook][merge_adresse]', mergeErr)
+        Sentry.captureException(mergeErr, {
+          tags: { flow: 'webhook-stripe', signal: 'merge-adresse', severity: 'critical' },
+          extra: { parrainageId: parrainage.id },
+        })
         return
       }
       if (!mergeResult || !mergeResult.was_added) return
@@ -261,7 +292,13 @@ async function detectBlacklistAtWebhook(
           flag: 'meme_adresse',
         },
       })
-      if (logErr) console.error('[parrainage_blacklist][webhook][log_adresse]', logErr)
+      if (logErr) {
+        console.error('[parrainage_blacklist][webhook][log_adresse]', logErr)
+        Sentry.captureException(logErr, {
+          tags: { flow: 'webhook-stripe', signal: 'log-flag-adresse', severity: 'critical' },
+          extra: { parrainageId: parrainage.id, flag: 'meme_adresse' },
+        })
+      }
 
       try {
         await sendAdminParrainageFlag({
@@ -272,10 +309,18 @@ async function detectBlacklistAtWebhook(
         })
       } catch (err) {
         console.error('[parrainage_blacklist][webhook][email]', err)
+        Sentry.captureException(err, {
+          tags: { flow: 'webhook-stripe', signal: 'email-flag-adresse', severity: 'warning' },
+          extra: { parrainageId: parrainage.id, type: 'meme_adresse' },
+        })
       }
     }
   } catch (err) {
     console.error('[parrainage_blacklist][webhook]', err)
+    Sentry.captureException(err, {
+      tags: { flow: 'webhook-stripe', signal: 'detect-blacklist-crashed', severity: 'critical' },
+      extra: { parrainageId: parrainage.id },
+    })
   }
 }
 
@@ -315,6 +360,10 @@ async function captureParrainageFingerprint(
       // Distinguer un échec API Stripe (PM supprimé, perm refusée) d'un autre
       // bug local : log dédié pour faciliter le diagnostic en prod.
       console.error('[parrainage_fingerprint][subscription_updated][pm_retrieve]', { pmId, err: pmErr })
+      Sentry.captureException(pmErr, {
+        tags: { flow: 'webhook-stripe', signal: 'pm-retrieve-failed', severity: 'warning' },
+        extra: { parrainageId: existingParrainage.id, pmId },
+      })
       return
     }
     if (!fingerprint) {
@@ -357,6 +406,10 @@ async function captureParrainageFingerprint(
   } catch (err) {
     // best-effort, ne doit jamais bloquer le flow webhook
     console.error('[parrainage_fingerprint][subscription_updated]', err)
+    Sentry.captureException(err, {
+      tags: { flow: 'webhook-stripe', signal: 'fingerprint-capture-crashed', severity: 'warning' },
+      extra: { subscriptionId: subscription.id },
+    })
   }
 }
 
@@ -439,6 +492,10 @@ export async function POST(request: NextRequest) {
 
   if (eventInsertErr && (eventInsertErr as { code?: string }).code !== '23505') {
     console.error('[stripe_webhook][event_insert]', eventInsertErr)
+    Sentry.captureException(eventInsertErr, {
+      tags: { flow: 'webhook-stripe', signal: 'event-insert-failed', severity: 'critical' },
+      extra: { eventId: event.id, eventType: event.type },
+    })
     // Si la table elle-même est inaccessible, on bloque pour ne pas
     // perdre l'event ; Stripe rejouera et on aura une nouvelle chance.
     return NextResponse.json({ error: 'idempotency_storage_unavailable' }, { status: 500 })
@@ -568,6 +625,10 @@ export async function POST(request: NextRequest) {
         } catch (err) {
           // capture fingerprint best-effort, ne doit jamais bloquer le flow webhook principal
           console.error('[parrainage_fingerprint][checkout]', err)
+          Sentry.captureException(err, {
+            tags: { flow: 'webhook-stripe', signal: 'checkout-fingerprint-crashed', severity: 'warning' },
+            extra: { eventId: event.id, userId },
+          })
         }
       }
 
@@ -795,6 +856,10 @@ export async function POST(request: NextRequest) {
       event_type: event.type,
       error: handlerErr instanceof Error ? handlerErr.message : String(handlerErr),
     })
+    Sentry.captureException(handlerErr, {
+      tags: { flow: 'webhook-stripe', signal: 'handler-crashed', severity: 'critical' },
+      extra: { eventId: event.id, eventType: event.type },
+    })
     const { error: rollbackErr } = await supabase
       .from('stripe_events_processed')
       .delete()
@@ -805,6 +870,10 @@ export async function POST(request: NextRequest) {
       // s'est partiellement exécuté ET que le rollback échoue : acceptable
       // (les handlers individuels sont déjà idempotents : upsert, RPC, CAS).
       console.error('[stripe_webhook][rollback_failed]', rollbackErr)
+      Sentry.captureException(rollbackErr, {
+        tags: { flow: 'webhook-stripe', signal: 'rollback-failed', severity: 'critical' },
+        extra: { eventId: event.id, eventType: event.type },
+      })
     }
     return NextResponse.json({ error: 'handler_failed' }, { status: 500 })
   }
