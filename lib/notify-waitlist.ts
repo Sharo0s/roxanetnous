@@ -1,5 +1,6 @@
+import * as Sentry from '@sentry/nextjs'
 import { createClient } from '@/lib/supabase/server'
-import { sendWaitlistOpeningNotificationEmail } from '@/lib/emails'
+import { enqueueWaitlistOpeningNotificationEmail } from '@/lib/emails'
 
 export type NotifyWaitlistResult = {
   processed: number
@@ -57,12 +58,20 @@ export async function notifyWaitlistForCode(code: string): Promise<NotifyWaitlis
   }
 
   // Code review patch #4 : avertir si BATCH_LIMIT atteint, le surplus
-  // sera ramasse au prochain cron retry quotidien.
+  // sera ramasse au prochain cron retry quotidien. Story 4.3 AC10 : bascule
+  // du console.warn en Sentry.captureMessage pour observabilite (tag
+  // signal:queue-batch-saturation alerte un afflux anormal — DoS, ouverture
+  // massive non planifiee, etc.).
   if (lignes && lignes.length === NOTIFY_WAITLIST_BATCH_LIMIT) {
-    console.warn('[notify-waitlist][batch_limit_reached]', {
-      code,
-      limit: NOTIFY_WAITLIST_BATCH_LIMIT,
-      info: 'surplus reporte au prochain cron retry',
+    Sentry.captureMessage('Batch waitlist sature', {
+      level: 'warning',
+      tags: { flow: 'email', signal: 'queue-batch-saturation', severity: 'warning' },
+      extra: {
+        code,
+        limit: NOTIFY_WAITLIST_BATCH_LIMIT,
+        processed: lignes.length,
+        info: 'surplus reporte au prochain cron retry',
+      },
     })
   }
 
@@ -91,11 +100,14 @@ export async function notifyWaitlistForCode(code: string): Promise<NotifyWaitlis
       continue
     }
 
-    // Code review patch #2 : try/catch defensif. sendWaitlistOpeningNotificationEmail
-    // catche deja Resend en interne, mais une exception inattendue (timeout
-    // reseau hors try, programmation defensive) ne doit pas crasher la boucle.
+    // Story 4.3 : enqueue durable Workflow DevKit (return immediat ~50-100 ms,
+    // 3 retries automatiques). Le compare-and-swap notified_at au-dessus
+    // s'execute AVANT enqueue (D5 story 3.5 maintenu) : si l'enqueue throw
+    // a posteriori, la ligne reste swappee — acceptable et idempotent puisque
+    // le job durable a deja ete persiste OU le fallback synchrone (AC8) a
+    // tente l'envoi.
     try {
-      await sendWaitlistOpeningNotificationEmail({
+      await enqueueWaitlistOpeningNotificationEmail({
         email: row.email,
         codeDepartement: code,
         nomDepartement: dpt.nom,

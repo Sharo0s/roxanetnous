@@ -1,12 +1,33 @@
+// Safety net partiel post-migration story 4.3 (queue durable Vercel Workflow
+// DevKit). Code review 2026-05-08 P13 : portee du safety net clarifiee.
+//
+// Ce cron ramasse :
+//   (a) les inscriptions tardives apres ouverture dpt (race avec admin trigger),
+//   (b) les echecs admin trigger AVANT le compare-and-swap notified_at
+//       (queryErr Supabase, dpt non trouve, etc.).
+//
+// Ce cron NE ramasse PAS :
+//   (c) les pannes runtime Workflow apres le swap (job accepte par start()
+//       puis perdu par crash runtime). Ces cas sont detectes uniquement via
+//       le tag Sentry signal:queue-retry-exhausted cote workflow function.
+//
+// La decision suppression cron J+30 (Subtask 8.2) repose sur la combinaison :
+//   - zero alerte signal:queue-cron-fallback-active (avant-swap, ce cron),
+//   - zero alerte signal:queue-retry-exhausted persistante (post-swap, Sentry).
+//
+// Voir story 4.3 AC9, D6.
+
+import * as Sentry from '@sentry/nextjs'
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { sendWaitlistOpeningNotificationEmail } from '@/lib/emails'
+import { enqueueWaitlistOpeningNotificationEmail } from '@/lib/emails'
 import { NOTIFY_WAITLIST_BATCH_LIMIT } from '@/lib/notify-waitlist'
 
 type LigneAvecDpt = {
   id: string
   email: string
   code_departement: string
+  created_at: string
   departements_ouverts: { nom: string; ouvert: boolean } | { nom: string; ouvert: boolean }[] | null
 }
 
@@ -20,9 +41,11 @@ export async function GET(request: NextRequest) {
 
   // SELECT lignes waitlist non notifiees pour des dpt deja ouverts.
   // Le JOIN garantit qu'on ne notifie pas un dpt qui n'a jamais ete ouvert.
+  // Story 4.3 : on inclut created_at pour detecter le backlog persistant >24h
+  // (alerte queue-cron-fallback-active).
   const { data: lignes, error: queryErr } = await supabase
     .from('waitlist_departements')
-    .select('id, email, code_departement, departements_ouverts!inner(nom, ouvert)')
+    .select('id, email, code_departement, created_at, departements_ouverts!inner(nom, ouvert)')
     .is('notified_at', null)
     .eq('departements_ouverts.ouvert', true)
     .limit(NOTIFY_WAITLIST_BATCH_LIMIT)
@@ -32,13 +55,50 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Query failed' }, { status: 500 })
   }
 
-  // Code review patch #5 : avertir si batch plein, signal d'un backlog
-  // persistant qui devra etre traite (raise BATCH_LIMIT, cron plus frequent,
-  // ou intervention ops).
+  // Code review patch #5 + story 4.3 AC10 : bascule warn -> Sentry pour
+  // observabilite (signal:queue-batch-saturation alerte un afflux anormal).
   if (lignes && lignes.length === NOTIFY_WAITLIST_BATCH_LIMIT) {
-    console.warn('[cron_notify_waitlist_retry][batch_limit_reached]', {
-      limit: NOTIFY_WAITLIST_BATCH_LIMIT,
-      info: 'backlog persistant possible, surplus repris demain',
+    Sentry.captureMessage('Batch waitlist sature (cron retry)', {
+      level: 'warning',
+      tags: { flow: 'email', signal: 'queue-batch-saturation', severity: 'warning' },
+      extra: {
+        limit: NOTIFY_WAITLIST_BATCH_LIMIT,
+        processed: lignes.length,
+        info: 'backlog persistant possible, surplus repris demain',
+      },
+    })
+  }
+
+  // Story 4.3 AC9 : alerte si lignes detectees AVEC created_at > 24h.
+  // Signal d'un dysfonctionnement queue (l'admin trigger initial n'a pas
+  // reussi a queue, ou la queue a perdu le job). Permet de detecter les
+  // pannes silencieuses pendant la fenetre safety net 30 jours.
+  //
+  // P8 : count(*) separe sur la meme clause WHERE pour reporter la taille
+  // reelle du backlog (le `lignes` est cappee a BATCH_LIMIT=200, donc un
+  // backlog de 5k+ lignes serait sous-estime).
+  const aged24hThreshold = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
+  const { count: aged24hTotal } = await supabase
+    .from('waitlist_departements')
+    .select('id, departements_ouverts!inner(ouvert)', { count: 'exact', head: true })
+    .is('notified_at', null)
+    .eq('departements_ouverts.ouvert', true)
+    .lt('created_at', aged24hThreshold)
+
+  const aged24hInBatch = (lignes ?? []).filter((row) => {
+    const createdAt = (row as { created_at?: string }).created_at
+    if (!createdAt) return false
+    return new Date(createdAt).getTime() < Date.now() - 24 * 60 * 60 * 1000
+  }).length
+  if ((aged24hTotal ?? aged24hInBatch) > 0) {
+    Sentry.captureMessage('Backlog waitlist persistant >24h', {
+      level: 'warning',
+      tags: { flow: 'email', signal: 'queue-cron-fallback-active', severity: 'warning' },
+      extra: {
+        aged24hTotal: aged24hTotal ?? null,
+        aged24hInBatch,
+        totalBatch: lignes?.length ?? 0,
+      },
     })
   }
 
@@ -86,11 +146,11 @@ export async function GET(request: NextRequest) {
       continue
     }
 
-    // Code review patch #3 : try/catch defensif. sendWaitlistOpeningNotificationEmail
-    // catche deja Resend en interne, mais on protege la boucle d'une exception
-    // inattendue qui crasherait le batch entier.
+    // Story 4.3 : enqueue durable Workflow DevKit. Le cron devient symetrique
+    // de l'admin trigger (lib/notify-waitlist.ts) et du fallback synchrone
+    // (AC8) reste encapsule dans enqueue*Email.
     try {
-      await sendWaitlistOpeningNotificationEmail({
+      await enqueueWaitlistOpeningNotificationEmail({
         email: row.email,
         codeDepartement: row.code_departement,
         nomDepartement: dpt.nom,

@@ -1,5 +1,5 @@
 # generated: 2026-05-06
-# last_updated: 2026-05-07 (Story 4.2 done apres CI Vercel verte sur commit b48f08f)
+# last_updated: 2026-05-08 (Story 4.3 in-progress post code review batch-apply)
 # project: roxanetnous
 # project_key: NOKEY
 # tracking_system: file-system
@@ -55,7 +55,7 @@
 #   -> 4.3 email queue -> 4.4 tests metier. Apres ces 5 stories, go-live Bretagne autorise.
 
 generated: 2026-05-06
-last_updated: 2026-05-07
+last_updated: 2026-05-08
 project: roxanetnous
 project_key: NOKEY
 tracking_system: file-system
@@ -136,7 +136,7 @@ development_status:
   # Stories ordre 1 - BLOQUANTES go-live Bretagne
   4-1-alerting-sentry-rate-limit-validate-code: done
   4-2-fix-schema-log-notification-transversal: done
-  4-3-email-queue-durable: backlog
+  4-3-email-queue-durable: in-progress
   4-4-tests-metier-stripe-webhook-paywall: backlog
 
   # Stories ordre 2 - DIFFEREES (non bloquantes go-live)

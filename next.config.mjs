@@ -1,4 +1,5 @@
 import { withSentryConfig } from '@sentry/nextjs'
+import { withWorkflow } from '@workflow/next'
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -13,6 +14,12 @@ const nextConfig = {
   },
 }
 
+// Story 4.3 : enrobage Vercel Workflow DevKit pour activer les directives
+// "use workflow" et "use step" dans le build Next. Cf. doc bundled
+// node_modules/workflow/docs/getting-started/next.mdx. La queue durable email
+// (lib/workflows/send-email-workflow.ts) en depend.
+const nextConfigWithWorkflow = withWorkflow(nextConfig)
+
 // Story 4.1 : instrumentation Sentry transverse. Wrappe nextConfig pour
 // brancher l'upload sourcemaps (build-time, requiert SENTRY_AUTH_TOKEN) et
 // le tunnel route /monitoring (contourne les ad-blockers cote client).
@@ -25,7 +32,7 @@ const nextConfig = {
 //   des bundles client). Pattern v10 (remplace l'ancien disableLogger).
 // - tunnelRoute: '/monitoring' (route handler genere automatiquement par
 //   le SDK pour proxy les events vers Sentry server-side).
-export default withSentryConfig(nextConfig, {
+export default withSentryConfig(nextConfigWithWorkflow, {
   silent: true,
   org: process.env.SENTRY_ORG,
   project: process.env.SENTRY_PROJECT,

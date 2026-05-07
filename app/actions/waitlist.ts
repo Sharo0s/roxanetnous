@@ -3,7 +3,7 @@
 import { headers } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
 import { getAllDepartements } from '@/lib/departements'
-import { sendWaitlistConfirmationEmail } from '@/lib/emails'
+import { enqueueWaitlistConfirmationEmail } from '@/lib/emails'
 
 export type WaitlistResult = {
   error?: string
@@ -86,12 +86,13 @@ export async function submitWaitlist(formData: FormData): Promise<WaitlistResult
     return { error: "Erreur lors de l'inscription. Reessayez." }
   }
 
-  // Defense en profondeur : meme si sendWaitlistConfirmationEmail gere ses
-  // propres erreurs (try/catch interne + skip log si pas d'userId), un throw
-  // import-time ou inattendu ne doit jamais casser le retour success a
-  // l'utilisateur. La ligne waitlist_departements est deja persistee.
+  // Story 4.3 : enqueue durable (Vercel Workflow DevKit). Return immediat
+  // (~50-100 ms). En cas de queue down, fallback synchrone est encapsule dans
+  // enqueueWaitlistConfirmationEmail (Sentry tag queue-fallback-sync). Le
+  // try/catch defensif reste pour absorber un unhandled (defense en profondeur,
+  // la ligne waitlist_departements est deja persistee).
   try {
-    await sendWaitlistConfirmationEmail({
+    await enqueueWaitlistConfirmationEmail({
       email: rawEmail,
       codeDepartement: dpt.code,
       nomDepartement: dpt.nom,

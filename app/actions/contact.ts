@@ -1,7 +1,7 @@
 'use server'
 
 import { Resend } from 'resend'
-import { logNotification } from '@/lib/emails'
+import { logNotification } from '@/lib/notifications-log'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || 'roxanetnous <onboarding@resend.dev>'

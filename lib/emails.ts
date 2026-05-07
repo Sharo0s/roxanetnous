@@ -3,6 +3,8 @@
 import * as Sentry from '@sentry/nextjs'
 import { Resend } from 'resend'
 import { createClient } from '@/lib/supabase/server'
+import { enqueueEmail } from '@/lib/email-queue'
+import { logNotification } from '@/lib/notifications-log'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 
@@ -11,51 +13,6 @@ const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'
 
 function escapeHtml(str: string): string {
   return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
-}
-
-export type NotificationLogStatus =
-  | 'pending'
-  | 'sent'
-  | 'failed'
-  | 'error'
-  | 'lost'
-  | 'retry-scheduled'
-  | 'retry-exhausted'
-
-export async function logNotification(params: {
-  userId?: string
-  email: string
-  type: string
-  subject: string
-  status: NotificationLogStatus
-  error?: string
-}) {
-  // Defense en profondeur : un INSERT qui throw (BDD down, RLS, valeur
-  // invalide) ne doit ni propager dans le try du caller (risque double-log
-  // sent + failed sur le meme envoi) ni provoquer d'unhandled rejection.
-  // Sentry capture l'incident, l'audit BDD est sacrifie au profit de la
-  // disponibilite applicative. Code review story 4.2 D1.
-  try {
-    const supabase = await createClient({ serviceRole: true })
-    await supabase.from('notifications_log').insert({
-      user_id: params.userId || null,
-      email: params.email,
-      type: params.type,
-      subject: params.subject,
-      status: params.status,
-      error: params.error || null,
-      sent_at: params.status === 'sent' ? new Date().toISOString() : null,
-    })
-  } catch (insertError) {
-    Sentry.captureException(insertError, {
-      tags: { flow: 'notifications_log', signal: 'insert_failed', severity: 'warning' },
-      extra: {
-        type: params.type,
-        status: params.status,
-        hasUserId: Boolean(params.userId),
-      },
-    })
-  }
 }
 
 export async function sendWelcomeEmail(params: {
@@ -942,6 +899,11 @@ export async function sendWaitlistConfirmationEmail(params: {
       status: 'failed',
       error: error instanceof Error ? error.message : 'Erreur inconnue',
     })
+    // Code review 2026-05-08 P12 : re-throw apres log pour permettre au caller
+    // (chemin fallback synchrone enqueueWaitlistConfirmationEmail) de detecter
+    // un double incident infra (queue down + Resend down) et alerter Sentry
+    // critical signal:queue-fallback-sync-failed.
+    throw error
   }
 }
 
@@ -974,11 +936,15 @@ export async function sendWaitlistOpeningNotificationEmail(params: {
   // BASE_URL peut avoir un trailing slash en preview Vercel : on neutralise.
   // Code review patch #12.
   const baseClean = (BASE_URL || '').replace(/\/+$/, '')
+  // P5 : pas de escapeHtml sur ctaUrl dans le href (encodeURIComponent sur le
+  // param suffit, & dans les URL est valide en HTML). escapeHtml reste sur
+  // le label visible.
   const ctaUrl = `${baseClean}/recherche?code_departement=${encodeURIComponent(params.codeDepartement)}`
+  let result: Awaited<ReturnType<typeof resend.emails.send>>
   try {
     // Resend peut resoudre avec { error } sans throw (rate-limit, recipient
     // invalide). Code review patch #1 : on verifie explicitement.
-    const result = await resend.emails.send({
+    result = await resend.emails.send({
       from: FROM_EMAIL,
       to: params.email,
       subject,
@@ -989,43 +955,15 @@ export async function sendWaitlistOpeningNotificationEmail(params: {
           <p>Le service roxanetnous est désormais ouvert dans le département <strong>${escapeHtml(nom)}</strong> (${escapeHtml(params.codeDepartement)}).</p>
           <p>Vous pouvez dès maintenant explorer les profils disponibles dans votre zone.</p>
           <p style="margin-top: 24px;">
-            <a href="${escapeHtml(ctaUrl)}" style="background: #000; color: #fff; padding: 12px 24px; text-decoration: none; display: inline-block;">
+            <a href="${ctaUrl}" style="background: #000; color: #fff; padding: 12px 24px; text-decoration: none; display: inline-block;">
               Découvrir roxanetnous dans ${escapeHtml(nom)}
             </a>
           </p>
         </div>
       `,
     })
-
-    const resendError = result.error
-    if (resendError) {
-      console.error('[notify-waitlist][resend_error]', { code: params.codeDepartement, email: params.email, error: resendError })
-      Sentry.captureException(
-        resendError instanceof Error ? resendError : new Error(typeof resendError === 'string' ? resendError : JSON.stringify(resendError)),
-        {
-          tags: { flow: 'email', signal: 'waitlist-resend-error', severity: 'warning' },
-          extra: { code: params.codeDepartement, userId: params.userId ?? null },
-        },
-      )
-      await logNotification({
-        userId: params.userId,
-        email: params.email,
-        type: 'waitlist_opening',
-        subject,
-        status: 'failed',
-        error: typeof resendError === 'string' ? resendError : JSON.stringify(resendError),
-      })
-      return
-    }
-
-    await logNotification({
-      userId: params.userId,
-      email: params.email,
-      type: 'waitlist_opening',
-      subject,
-      status: 'sent',
-    })
   } catch (error) {
+    // SDK throw (timeout reseau, abort). Log + re-throw pour P12.
     Sentry.captureException(error, {
       tags: { flow: 'email', signal: 'waitlist-opening-failed', severity: 'warning' },
       extra: { code: params.codeDepartement },
@@ -1038,6 +976,121 @@ export async function sendWaitlistOpeningNotificationEmail(params: {
       status: 'failed',
       error: error instanceof Error ? error.message : 'Erreur inconnue',
     })
+    throw error
+  }
+
+  const resendError = result.error
+  if (resendError) {
+    console.error('[notify-waitlist][resend_error]', { code: params.codeDepartement, email: params.email, error: resendError })
+    const errorObject = resendError instanceof Error
+      ? resendError
+      : new Error(typeof resendError === 'string' ? resendError : JSON.stringify(resendError))
+    Sentry.captureException(errorObject, {
+      tags: { flow: 'email', signal: 'waitlist-resend-error', severity: 'warning' },
+      extra: { code: params.codeDepartement, userId: params.userId ?? null },
+    })
+    await logNotification({
+      userId: params.userId,
+      email: params.email,
+      type: 'waitlist_opening',
+      subject,
+      status: 'failed',
+      error: typeof resendError === 'string' ? resendError : JSON.stringify(resendError),
+    })
+    // P12 : re-throw au lieu de return silencieux pour permettre au caller
+    // fallback (enqueueWaitlistOpeningNotificationEmail) d'alerter Sentry
+    // critical signal:queue-fallback-sync-failed.
+    throw errorObject
+  }
+
+  await logNotification({
+    userId: params.userId,
+    email: params.email,
+    type: 'waitlist_opening',
+    subject,
+    status: 'sent',
+  })
+}
+
+// Story 4.3 : variantes asynchrones via la queue durable Vercel Workflow
+// DevKit. Les call-sites prioritaires (submitWaitlist, toggleDepartement,
+// toggleRegion, cron retry) basculent sur ces fonctions pour return immediat
+// (~50-100 ms) et beneficier des 3 retries automatiques + backoff exponentiel
+// du runtime. En cas de queue down (incident plateforme), un fallback
+// synchrone est emprunte (AC8) — l'email passe alors par sendWaitlist*Email
+// classique au prix de la latence Resend mais sans perte d'envoi.
+
+export async function enqueueWaitlistConfirmationEmail(params: {
+  email: string
+  codeDepartement: string
+  nomDepartement: string
+  userId?: string
+}) {
+  try {
+    await enqueueEmail({
+      template: 'waitlist_confirmation',
+      to: params.email,
+      userId: params.userId,
+      variables: {
+        codeDepartement: params.codeDepartement,
+        nomDepartement: params.nomDepartement,
+      },
+    })
+  } catch (queueError) {
+    // Fallback synchrone (AC8) : un envoi waitlist confirmation perdu =
+    // mauvaise UX (utilisateur sans email apres inscription). Mieux vaut
+    // bloquer la server action 500 ms supplementaires sur Resend que perdre
+    // l'email. Sentry alerte l'incident queue (warning).
+    Sentry.captureException(queueError, {
+      tags: { flow: 'email', signal: 'queue-fallback-sync', severity: 'warning' },
+      extra: { template: 'waitlist_confirmation', codeDepartement: params.codeDepartement },
+    })
+    // P12 : double-try pour detecter un double incident infra (queue down +
+    // Resend down). sendWaitlistConfirmationEmail re-throw apres log -> on
+    // alerte Sentry critical et propage au caller.
+    try {
+      await sendWaitlistConfirmationEmail(params)
+    } catch (fallbackError) {
+      Sentry.captureException(fallbackError, {
+        tags: { flow: 'email', signal: 'queue-fallback-sync-failed', severity: 'critical' },
+        extra: { template: 'waitlist_confirmation', codeDepartement: params.codeDepartement },
+      })
+      throw fallbackError
+    }
+  }
+}
+
+export async function enqueueWaitlistOpeningNotificationEmail(params: {
+  email: string
+  codeDepartement: string
+  nomDepartement: string
+  userId?: string
+}) {
+  try {
+    await enqueueEmail({
+      template: 'waitlist_opening',
+      to: params.email,
+      userId: params.userId,
+      variables: {
+        codeDepartement: params.codeDepartement,
+        nomDepartement: params.nomDepartement,
+      },
+    })
+  } catch (queueError) {
+    Sentry.captureException(queueError, {
+      tags: { flow: 'email', signal: 'queue-fallback-sync', severity: 'warning' },
+      extra: { template: 'waitlist_opening', codeDepartement: params.codeDepartement },
+    })
+    // P12 : double-try, cf. enqueueWaitlistConfirmationEmail.
+    try {
+      await sendWaitlistOpeningNotificationEmail(params)
+    } catch (fallbackError) {
+      Sentry.captureException(fallbackError, {
+        tags: { flow: 'email', signal: 'queue-fallback-sync-failed', severity: 'critical' },
+        extra: { template: 'waitlist_opening', codeDepartement: params.codeDepartement },
+      })
+      throw fallbackError
+    }
   }
 }
 
