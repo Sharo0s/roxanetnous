@@ -82,28 +82,31 @@ export default function PolitiqueConfidentialitePage() {
           </section>
 
           <section>
-            <h2 className="text-lg font-semibold text-black mb-2">Cookies</h2>
+            <h2 className="text-lg font-semibold text-black mb-2">Cookies et traceurs</h2>
             <p>
-              Ce site utilise uniquement un cookie HTTP, strictement nécessaire au fonctionnement
-              du service :
+              Ce site utilise uniquement des traceurs strictement nécessaires au
+              fonctionnement du service, exemptés de consentement au titre de
+              l&apos;article 82 de la loi Informatique et Libertés et de la délibération
+              CNIL n°2020-091 :
             </p>
             <ul className="list-disc pl-5 mt-2 space-y-1">
               <li>
-                Cookie d&apos;authentification Supabase
-                (<code className="text-xs">sb-&lt;project-ref&gt;-auth-token</code>) :
-                gère votre session utilisateur lorsque vous êtes connecté
-                (httpOnly, secure, sameSite=lax). Base légale : exécution du contrat
-                (article 6.1.b RGPD).
+                <strong>Cookies d&apos;authentification Supabase</strong> (famille de
+                cookies <code className="text-xs" aria-label="sb tiret crochet ouvrant project-ref crochet fermant tiret auth-token et variantes">sb-[project-ref]-auth-token*</code>,
+                pouvant inclure plusieurs cookies en cas de chunking ou de flux OAuth) :
+                gèrent votre session utilisateur lorsque vous êtes connecté. Base légale :
+                exécution du contrat (article 6.1.b RGPD).
+              </li>
+              <li>
+                <strong>Préférence locale du bandeau d&apos;information</strong>
+                (<code className="text-xs">cookies-accepted</code>) : assimilée à un
+                traceur par la CNIL mais exemptée de consentement car strictement
+                nécessaire à l&apos;ergonomie du bandeau (évite de le réafficher à chaque
+                visite). Cette donnée est stockée dans le <em>localStorage</em> de votre
+                navigateur, reste sur votre appareil et n&apos;est jamais transmise dans
+                une requête HTTP.
               </li>
             </ul>
-            <p className="mt-2">
-              Par souci de transparence, nous précisons également qu&apos;une préférence locale
-              (<code className="text-xs">cookies-accepted</code>) est stockée dans le
-              <em> localStorage</em> de votre navigateur pour ne pas réafficher la bannière
-              d&apos;information à chaque visite. Cette donnée reste sur votre appareil et
-              n&apos;est jamais transmise dans une requête HTTP : techniquement, ce
-              n&apos;est pas un cookie.
-            </p>
             <p className="mt-2">
               Aucun cookie publicitaire, analytique, de suivi ou de retargeting tiers
               n&apos;est utilisé sur le domaine roxanetnous. Aucun script tiers de
@@ -121,14 +124,15 @@ export default function PolitiqueConfidentialitePage() {
             </p>
             <p className="mt-2">
               Sur les pages permettant de configurer une zone géographique (création ou
-              modification d&apos;un profil ou d&apos;une annonce, accessibles uniquement
-              après connexion), une carte interactive charge des tuiles cartographiques
-              depuis OpenStreetMap Foundation
-              (<code className="text-xs">tile.openstreetmap.org</code>). Cela transmet
-              votre adresse IP à ce tiers, qui ne réalise pas de traçage commercial. Cette
-              fonctionnalité est strictement nécessaire à la configuration de votre rayon
-              d&apos;intervention ou de votre zone d&apos;annonce (base légale :
-              exécution du contrat, article 6.1.b RGPD).
+              modification d&apos;un profil accompagnante, onboarding initial accompagnante,
+              création d&apos;une annonce — toutes accessibles uniquement après connexion),
+              une carte interactive charge des tuiles cartographiques depuis OpenStreetMap
+              Foundation, fondation à but non lucratif
+              (sous-domaines <code className="text-xs" aria-label="a, b ou c, point tile point openstreetmap point org">{`{a,b,c}.tile.openstreetmap.org`}</code>).
+              Cela transmet votre adresse IP à ce tiers. Cette fonctionnalité est
+              strictement nécessaire à la configuration de votre rayon d&apos;intervention
+              ou de votre zone d&apos;annonce (base légale : exécution du contrat,
+              article 6.1.b RGPD).
             </p>
           </section>
 
