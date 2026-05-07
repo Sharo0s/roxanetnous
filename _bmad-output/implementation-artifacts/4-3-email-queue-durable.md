@@ -1,6 +1,6 @@
 # Story 4.3 : Email queue durable (Vercel Workflow DevKit)
 
-Status: in-progress
+Status: done
 
 <!-- Note : Validation est optionnelle. Lancer `validate-create-story` avant `dev-story` pour un controle qualite. -->
 
