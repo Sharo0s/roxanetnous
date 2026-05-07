@@ -1,6 +1,6 @@
 # Story 3.8 : Notifications admin parrainage robustes
 
-Status: review
+Status: done
 
 <!-- Note: Validation est optionnelle. Lancer `validate-create-story` avant `dev-story` pour un controle qualite. -->
 
