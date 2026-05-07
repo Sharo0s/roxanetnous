@@ -20,7 +20,7 @@
 ## Securite
 - [ ] Generer un vrai CRON_SECRET aleatoire
 - [ ] Generer une vraie ENCRYPTION_KEY aleatoire (64 hex)
-- [ ] Definir ADMIN_NOTIFICATIONS_EMAIL (destinataire des alertes anti-fraude parrainage) sur Vercel
+- [ ] Definir ADMIN_NOTIFICATIONS_EMAIL (destinataire des alertes anti-fraude parrainage) sur Vercel scope production. Garde-fou : `npm run check:env` (lance au build) emet un warning non bloquant si la variable manque en VERCEL_ENV=production. Si absent en prod, les alertes restent visibles dans `/admin/historique` (action_type=parrainage_admin_alert_lost).
 - [ ] Generer PARRAINAGE_INTERNAL_SECRET (`openssl rand -hex 32`) et le definir sur Vercel (preview + prod). Sans cette variable, le webhook Stripe ne peut plus revoquer une validation filleule en cas de detection meme_carte (lance une exception). Story 2.3 code review 2026-05-04.
 - [ ] S'assurer que toutes les variables d'environnement Vercel sont a jour
 

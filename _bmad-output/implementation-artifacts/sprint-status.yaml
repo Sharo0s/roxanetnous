@@ -1,5 +1,5 @@
 # generated: 2026-05-06
-# last_updated: 2026-05-07 (story 3.7 done)
+# last_updated: 2026-05-07 (story 3.8 ready-for-dev)
 # project: roxanetnous
 # project_key: NOKEY
 # tracking_system: file-system
@@ -113,7 +113,7 @@ development_status:
   3-5-notification-automatique-waitlist-a-l-ouverture-departement: done
   3-6-audit-soft-paywall-et-corrections-d-alignement-code-prd: done
   3-7-audit-cookies-scripts-tiers-et-decision-granularite-bandeau-rgpd: done
-  3-8-notifications-admin-parrainage-robustes: backlog
+  3-8-notifications-admin-parrainage-robustes: ready-for-dev
   epic-3-retrospective: optional
 
   # ==========================================================================

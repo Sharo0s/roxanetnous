@@ -270,6 +270,23 @@ components/messages/
 
 ---
 
+## 🔐 Variables d'environnement requises en production
+
+Ces variables doivent être configurées sur Vercel (scope `production`) avant le go-live Bretagne. Le script `npm run check:env` (lancé au build via `vercel.json`) émet un warning non bloquant si l'une d'elles est absente en `VERCEL_ENV=production`.
+
+- `ADMIN_NOTIFICATIONS_EMAIL` — destinataire des alertes anti-fraude parrainage. Si absent, les alertes sont tracées dans `admin_actions_log` (action_type=parrainage_admin_alert_lost) mais aucun email n'est envoyé.
+- `RESEND_API_KEY` — API Resend pour tous les emails transactionnels.
+- `NEXT_PUBLIC_BASE_URL` — URL canonique de production (https://roxanetnous.fr) pour les liens dans les emails.
+- `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` — paywall et webhook subscriptions.
+- `SUPABASE_SERVICE_ROLE_KEY` — server actions admin (validation profils, blacklist, etc.).
+- `CRON_SECRET` — auth des routes `/api/cron/*`.
+- `PARRAINAGE_INTERNAL_SECRET` — auth du helper de révocation validation filleule (story 2.3).
+- `ENCRYPTION_KEY` — chiffrement justificatifs accompagnantes.
+
+Voir aussi `TODO-LAUNCH.md` (checklist détaillée pré-go-live) et `.env.local.example` (template).
+
+---
+
 ## 📞 Besoin d'Aide ?
 
 Si tu es bloqué sur une étape, demande-moi et je t'aiderai à :

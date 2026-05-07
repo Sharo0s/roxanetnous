@@ -716,8 +716,11 @@ export async function sendAdminParrainageFlag(params: {
     // les alertes anti-fraude étaient silencieusement perdues (preview/staging).
     // On persiste maintenant la "missed alert" dans admin_actions_log pour
     // qu'elle apparaisse dans l'UI admin (historique) ET on la log explicitement.
-    console.error(
-      '[sendAdminParrainageFlag] ADMIN_NOTIFICATIONS_EMAIL non défini : alerte anti-fraude perdue.',
+    // Story 3.8 : console.warn (config attendue absente sur preview/staging)
+    // plutôt que console.error réservé aux pannes Resend / DB. Le garde-fou
+    // build (scripts/check-required-env.mjs) signale l'absence en VERCEL_ENV=production.
+    console.warn(
+      '[sendAdminParrainageFlag] ADMIN_NOTIFICATIONS_EMAIL manquant — alerte parrainage non envoyée par email, voir admin_actions_log.',
       { type: params.type, parrainageId: params.parrainageId },
     )
     try {

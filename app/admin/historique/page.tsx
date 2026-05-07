@@ -33,6 +33,7 @@ export default async function AdminHistoriquePage() {
     parrainage_fraude_confirmee: 'Parrainage - fraude confirmée',
     parrainage_ignore_flag: 'Parrainage - flag ignoré',
     parrainage_recompense_appliquee: 'Parrainage - récompense 6 mois appliquée',
+    parrainage_admin_alert_lost: 'Alerte parrainage perdue (email admin manquant)',
   }
 
   return (
