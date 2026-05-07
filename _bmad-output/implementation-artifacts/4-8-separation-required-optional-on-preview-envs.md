@@ -73,7 +73,7 @@ Elle s'appuie sur les decouvertes intermediaires des stories ordre 1 :
    - Si toutes les variables sont presentes : `console.log('OK: all required env vars present (VERCEL_ENV=production).')` + `process.exit(0)`. Format identique a l'actuel.
 
 3. **AC3 — Comportement `VERCEL_ENV === 'preview'` differencie** : Given le script est execute avec `VERCEL_ENV=preview`, when la story est livree, then :
-   - **Si au moins une variable `REQUIRED` est manquante** : `console.warn(...)` pour chaque (format : `WARN (preview): <NAME> is not set. <description>`) + `process.exit(1)` (build preview **ROUGE** — les REQUIRED restent strictement obligatoires meme en preview car sans elles le code applicatif crash au runtime, ex : pas de `RESEND_API_KEY` = pas d'envoi email = test preview email impossible).
+   - **Si au moins une variable `REQUIRED` est manquante** : `console.error(...)` pour chaque (format : `ERROR (preview): <NAME> is not set. <description>`) + `process.exit(1)` (build preview **ROUGE** — les REQUIRED restent strictement obligatoires meme en preview car sans elles le code applicatif crash au runtime, ex : pas de `RESEND_API_KEY` = pas d'envoi email = test preview email impossible). **Note** : libelle `ERROR` (pas `WARN`) aligne avec branche prod, applique en code review 2026-05-07 pour coherence severite vs exit code.
    - **Si seulement des variables `OPTIONAL_ON_PREVIEW` sont manquantes** (et toutes les `REQUIRED` presentes) : **silence total**, aucun log emis, `process.exit(0)` (build preview verte). C'est la regression cible : plus de spam `WARN: NEXT_PUBLIC_SENTRY_DSN is not set` quotidien.
    - **Si toutes presentes** : `console.log('OK: all required env vars present (VERCEL_ENV=preview).')` + `process.exit(0)`.
 
@@ -106,7 +106,7 @@ Elle s'appuie sur les decouvertes intermediaires des stories ordre 1 :
 8. **AC8 — Test manuel documente sur 6 contextes** : Given le script doit etre valide sur ses 4 modes principaux (production missing REQUIRED, production missing OPTIONAL_ON_PREVIEW, preview missing REQUIRED, preview missing OPTIONAL_ON_PREVIEW, preview all present, dev local), when la story est livree, then les **6 invocations suivantes** sont **executees localement** et leur sortie + exit code consignes dans la section « Dev Agent Record > Completion Notes List » de cette story :
    - **(a) production avec REQUIRED manquante** : `unset ADMIN_NOTIFICATIONS_EMAIL ; VERCEL_ENV=production node scripts/check-required-env.mjs ; echo "exit=$?"` -> attendu : `ERROR: ADMIN_NOTIFICATIONS_EMAIL is not set in VERCEL_ENV=production. ...` + `exit=1`.
    - **(b) production avec OPTIONAL_ON_PREVIEW manquante** : `unset NEXT_PUBLIC_SENTRY_DSN ; VERCEL_ENV=production node scripts/check-required-env.mjs ; echo "exit=$?"` -> attendu : `ERROR: NEXT_PUBLIC_SENTRY_DSN is not set in VERCEL_ENV=production. ...` + `exit=1` (cette categorie est aussi bloquante en prod).
-   - **(c) preview avec REQUIRED manquante** : `unset RESEND_API_KEY ; VERCEL_ENV=preview node scripts/check-required-env.mjs ; echo "exit=$?"` -> attendu : `WARN (preview): RESEND_API_KEY is not set. ...` + `exit=1`.
+   - **(c) preview avec REQUIRED manquante** : `unset RESEND_API_KEY ; VERCEL_ENV=preview node scripts/check-required-env.mjs ; echo "exit=$?"` -> attendu : `ERROR (preview): RESEND_API_KEY is not set. ...` + `exit=1` (libelle `ERROR` post-code-review 2026-05-07, coherence severite vs exit code).
    - **(d) preview avec OPTIONAL_ON_PREVIEW manquante** : `env -i VERCEL_ENV=preview ADMIN_NOTIFICATIONS_EMAIL=x RESEND_API_KEY=x NEXT_PUBLIC_BASE_URL=x STRIPE_SECRET_KEY=x STRIPE_WEBHOOK_SECRET=x SUPABASE_SERVICE_ROLE_KEY=x CRON_SECRET=x PARRAINAGE_INTERNAL_SECRET=x ENCRYPTION_KEY=x node scripts/check-required-env.mjs ; echo "exit=$?"` -> attendu : **aucune sortie** + `exit=0` (silence total : 9 REQUIRED presentes, 5 OPTIONAL_ON_PREVIEW absentes, comportement cible).
    - **(e) preview tout present** : `env -i VERCEL_ENV=preview ADMIN_NOTIFICATIONS_EMAIL=x RESEND_API_KEY=x NEXT_PUBLIC_BASE_URL=x STRIPE_SECRET_KEY=x STRIPE_WEBHOOK_SECRET=x SUPABASE_SERVICE_ROLE_KEY=x CRON_SECRET=x PARRAINAGE_INTERNAL_SECRET=x ENCRYPTION_KEY=x NEXT_PUBLIC_SENTRY_DSN=x SENTRY_DSN=x SENTRY_ORG=x SENTRY_PROJECT=x RATE_LIMIT_HASH_SALT=x node scripts/check-required-env.mjs ; echo "exit=$?"` -> attendu : `OK: all required env vars present (VERCEL_ENV=preview).` + `exit=0`.
    - **(f) dev local** : `env -i node scripts/check-required-env.mjs ; echo "exit=$?"` -> attendu : **aucune sortie** + `exit=0` (silence dev local, comportement legacy preserve).
@@ -211,6 +211,34 @@ Elle s'appuie sur les decouvertes intermediaires des stories ordre 1 :
   - [ ] Sub 6.3 : Verifier les logs preview Vercel : aucun WARN sur Sentry/RATE_LIMIT_HASH_SALT (regression cible). Build preview verte. (post-livraison cote Sylvain)
   - [ ] Sub 6.4 : Documenter dans `Completion Notes List` : extrait des logs preview montrant l'absence de WARN (avant/apres comparaison). (post-livraison)
   - [ ] Sub 6.5 : Apres CI verte sur main, commit cloture : `git commit --allow-empty -m "Story 4.8 : statut done apres CI Vercel verte"`. (post-CI)
+
+### Review Findings (2026-05-07, code review adversarial 3 layers)
+
+**Verdict global Acceptance Auditor** : 14/14 ACs PASS sur le fond. Aucun blocker. Implementation aligne litteralement sur l'architecture cible spec lignes 263-328.
+
+**Layers** : Blind Hunter (diff seul) + Edge Case Hunter (diff + repo read access) + Acceptance Auditor (diff + spec). Aucun layer en echec.
+
+**Patches proposes (1)** :
+
+- [x] [Review][Patch] Preview REQUIRED missing : libelle `WARN` incoherent avec `process.exit(1)` [scripts/check-required-env.mjs:58] — applique 2026-05-07, `console.warn` -> `console.error`, libelle `WARN (preview):` -> `ERROR (preview):`. AC3 + AC8(c) + Completion Notes (c) synchronises. Re-test (c) confirme ci-dessous. — Le code emet `console.warn(\`WARN (preview): ...\`)` puis `process.exit(1)` (build rouge). Branche prod a ete durcie en `console.error` + `ERROR:` libelle pour signaler la severite ; la branche preview reste sur `WARN:` alors qu'elle casse aussi la build. Trois reviewers (blind+edge) signalent l'incoherence entre niveau de log (warn) et severite reelle (exit 1 = bloquant). Patch trivial : `console.error(\`ERROR (preview): ${v.name} is not set. ${v.description}\`)`. Coherence avec D2 spec « console.error aligne avec la severite » applicable aussi au cas preview-REQUIRED.
+
+**Defers (8 — pre-existants ou hors scope explicite 4.8)** :
+
+- [x] [Review][Defer] `VERCEL_ENV='development'` (vercel dev) tombe dans branche dev local sans branche dediee [scripts/check-required-env.mjs:40-65] — pre-existant story 3.8, conforme D4 spec « dev local inchange ».
+- [x] [Review][Defer] `SENTRY_AUTH_TOKEN` documente dans `.env.local.example` mais absent du check (sourcemaps non uploadees silencieuses) [scripts/check-required-env.mjs vs .env.local.example:41-45] — adresse explicitement par la note ajoutee `NEXT_STEPS.md:298` « non verifiee par check:env ». Choix conscient documente. Audit dependance vars d'env = story Epic 5+.
+- [x] [Review][Defer] `NEXT_PUBLIC_SUPABASE_URL` + `NEXT_PUBLIC_SUPABASE_ANON_KEY` utilises avec assertion `!` dans `lib/supabase/{client,server,middleware}.ts` mais absents du check [scripts/check-required-env.mjs] — pre-existant 3.8, hors scope explicite (« liste figee a 14 vars » D7).
+- [x] [Review][Defer] `isMissing` accepte placeholders litteraux (`your_random_secret`, `your_supabase_anon_key`) [scripts/check-required-env.mjs:36] — hors scope explicite story 4.8 ligne 38 « Validation de format des valeurs : trop de surface, hors scope ».
+- [x] [Review][Defer] `vercel.json` masque exit code des E2E tests via `(test "$SKIP_E2E_TESTS" = "true" || npm run test:integration)` [vercel.json] — orthogonal 4.8 (heritage story 4.4 stabilisation 7j flag). Si `SKIP_E2E_TESTS=true` leak en prod env, prod deploys silencieux sans tests. A traiter independamment.
+- [x] [Review][Defer] CI GHA `integration-tests.yml` ne lance pas `check:env` (premier signal vars manquantes = build Vercel preview, pas PR check) [.github/workflows/integration-tests.yml] — informational, pre-existant. Acceptable design car redondant avec Vercel build.
+- [x] [Review][Defer] Description `RATE_LIMIT_HASH_SALT` perd la mention « fallback SHA-256 non-sale » dans le code [scripts/check-required-env.mjs:30 vs ancien commentaire 4.1] — contexte deplace dans `NEXT_STEPS.md` section OPTIONAL_ON_PREVIEW (« degradation gracieuse SHA-256 non-sale, acceptable pour debug local »). Pas de regression, juste relocalisation.
+- [x] [Review][Defer] Emoji `🔐` heritage story 3.8 dans heading `NEXT_STEPS.md:273` [NEXT_STEPS.md:273] — pre-existant a 4.8 (introduit 3.8). Regle CLAUDE.md « Pas d'emojis dans le code ni les interfaces » — applicable docs ? Cleanup follow-up.
+- [x] [Review][Defer] Risque rollout : si scope preview Vercel n'a pas les 9 REQUIRED set, mass-red builds preview au merge (regression cible AC3 mais a anticiper) — operationnel, pas un bug code. AC14 documente deja la validation post-merge. Validation `vercel env ls --environment preview` ou dashboard Vercel recommandee avant merge si doute.
+
+**Dismissed (3 — comportement cible confirme par spec)** :
+
+- Preview OPTIONAL missing : silence total au lieu de log positif → conforme verbatim AC3 « **silence total**, aucun log emis » (regression cible voulue contre spam WARN Sentry quotidien).
+- Pas de garde anti-doublon entre REQUIRED et OPTIONAL_ON_PREVIEW → nit, surcharge prematuree pour 14 vars stables.
+- Dev local exit 0 inconditionnel meme si REQUIRED missing → conforme AC4 + D4 spec (« dev local n'a pas vocation a echouer pour vars absentes »).
 
 ## Dev Notes
 
@@ -415,9 +443,9 @@ claude-opus-4-7[1m]
   ERROR: NEXT_PUBLIC_SENTRY_DSN is not set in VERCEL_ENV=production. DSN Sentry expose au client (capture exceptions browser).
   exit=1
   ```
-- **(c) preview avec REQUIRED manquante** (`RESEND_API_KEY` absent) :
+- **(c) preview avec REQUIRED manquante** (`RESEND_API_KEY` absent) — re-execute apres patch code review 2026-05-07 :
   ```
-  WARN (preview): RESEND_API_KEY is not set. API Resend pour emails transactionnels.
+  ERROR (preview): RESEND_API_KEY is not set. API Resend pour emails transactionnels.
   exit=1
   ```
 - **(d) preview avec OPTIONAL_ON_PREVIEW manquantes** (9 REQUIRED set, 5 OPTIONAL_ON_PREVIEW absents) :
@@ -454,6 +482,7 @@ claude-opus-4-7[1m]
 ## Change Log
 
 - 2026-05-07 : Story 4.8 livree (commit livraison). Refactor `scripts/check-required-env.mjs` (separation REQUIRED + OPTIONAL_ON_PREVIEW, exit 1 prod, preview differencie). Documentation `NEXT_STEPS.md` + `TODO-LAUNCH.md` mises a jour. Tests manuels 6 contextes AC8 verts. tsc/lint a11y/axe/build locaux verts. Statut story -> `review` ; sprint-status `4-8-separation-required-optional-on-preview-envs` -> `review`.
+- 2026-05-07 : Code review adversarial 3 layers (Blind Hunter + Edge Case Hunter + Acceptance Auditor). Verdict global : 14/14 ACs PASS sur le fond. 1 patch applique (`scripts/check-required-env.mjs:58` `console.warn` -> `console.error`, libelle `WARN (preview):` -> `ERROR (preview):` pour coherence severite vs exit 1). 8 defers logues dans `deferred-work.md`. 3 dismissed (comportement cible spec). AC3 + AC8(c) + Completion Notes (c) synchronises avec le nouveau libelle. Re-test contexte (c) confirme : sortie `ERROR (preview): RESEND_API_KEY ...` + exit=1. Patch reste uncommitted (commit patch a la charge de Sylvain selon convention projet).
 
 ## DoD a11y
 

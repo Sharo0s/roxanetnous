@@ -55,7 +55,7 @@ if (vercelEnv === 'production') {
 if (vercelEnv === 'preview') {
   if (missingRequired.length > 0) {
     for (const v of missingRequired) {
-      console.warn(`WARN (preview): ${v.name} is not set. ${v.description}`)
+      console.error(`ERROR (preview): ${v.name} is not set. ${v.description}`)
     }
     process.exit(1)
   }
