@@ -1,5 +1,5 @@
 # generated: 2026-05-06
-# last_updated: 2026-05-09 (Stories 4.4 + 4.7 DONE, CI verte 2 runs consecutifs, code review 13 patches applies)
+# last_updated: 2026-05-09 (Stories 4.4 + 4.7 DONE, CI verte 2 runs consecutifs, code review 13 patches applies ; 2026-05-07 story 4.8 livree commit livraison -> statut review pending CI verte)
 # project: roxanetnous
 # project_key: NOKEY
 # tracking_system: file-system
@@ -55,7 +55,7 @@
 #   -> 4.3 email queue -> 4.4 tests metier. Apres ces 5 stories, go-live Bretagne autorise.
 
 generated: 2026-05-06
-last_updated: 2026-05-09
+last_updated: 2026-05-07
 project: roxanetnous
 project_key: NOKEY
 tracking_system: file-system
@@ -152,7 +152,7 @@ development_status:
   # Stories ordre 2 - DIFFEREES (non bloquantes go-live)
   4-5-hardening-ip-spoofing: backlog
   4-6-resorption-as-any-pages-admin: backlog
-  4-8-separation-required-optional-on-preview-envs: backlog
+  4-8-separation-required-optional-on-preview-envs: review
   4-9-validation-escape-html-test-xss-emails: backlog
 
   # Stories conditionnelles (declenchement sur seuil)

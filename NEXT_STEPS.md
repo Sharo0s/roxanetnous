@@ -272,22 +272,30 @@ components/messages/
 
 ## 🔐 Variables d'environnement requises en production
 
-Ces variables doivent être configurées sur Vercel (scope `production`) avant le go-live Bretagne. Le script `npm run check:env` (lancé au build via `vercel.json`) émet un warning non bloquant si l'une d'elles est absente en `VERCEL_ENV=production`.
+Ces variables doivent être configurées sur Vercel avant le go-live Bretagne. Le script `npm run check:env` (lancé au build via `vercel.json`) vérifie leur présence.
 
-- `ADMIN_NOTIFICATIONS_EMAIL` — destinataire des alertes anti-fraude parrainage. Si absent, les alertes sont tracées dans `admin_actions_log` (action_type=parrainage_admin_alert_lost) mais aucun email n'est envoyé.
+**Comportement par environnement** (story 4.8) :
+- **Production** (`VERCEL_ENV=production`) : la build casse (exit 1) si une variable REQUIRED ou OPTIONAL_ON_PREVIEW est absente.
+- **Preview** (`VERCEL_ENV=preview`) : la build casse (exit 1) si une variable REQUIRED est absente. Les OPTIONAL_ON_PREVIEW sont tolérées absentes silencieusement.
+- **Dev local** (sans `VERCEL_ENV`) : silencieux.
+
+### REQUIRED (obligatoires production ET preview)
+
+- `ADMIN_NOTIFICATIONS_EMAIL` — destinataire des alertes anti-fraude parrainage.
 - `RESEND_API_KEY` — API Resend pour tous les emails transactionnels.
-- `NEXT_PUBLIC_BASE_URL` — URL canonique de production (https://roxanetnous.fr) pour les liens dans les emails.
+- `NEXT_PUBLIC_BASE_URL` — URL canonique de production (https://roxanetnous.fr).
 - `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` — paywall et webhook subscriptions.
-- `SUPABASE_SERVICE_ROLE_KEY` — server actions admin (validation profils, blacklist, etc.).
+- `SUPABASE_SERVICE_ROLE_KEY` — server actions admin.
 - `CRON_SECRET` — auth des routes `/api/cron/*`.
 - `PARRAINAGE_INTERNAL_SECRET` — auth du helper de révocation validation filleule (story 2.3).
 - `ENCRYPTION_KEY` — chiffrement justificatifs accompagnantes.
-- `NEXT_PUBLIC_SENTRY_DSN` — DSN Sentry exposé au client (capture exceptions browser). Sans, aucun signal Sentry côté navigateur.
-- `SENTRY_DSN` — DSN Sentry server-side (capture exceptions Node.js + Edge). Peut être identique au DSN public.
-- `SENTRY_ORG` — slug organisation Sentry (upload sourcemaps build-time).
-- `SENTRY_PROJECT` — slug projet Sentry (upload sourcemaps build-time).
-- `SENTRY_AUTH_TOKEN` — token upload sourcemaps (scope `project:releases`). Variable build-time uniquement, à configurer sur Vercel scope production via `vercel env add SENTRY_AUTH_TOKEN production`. Sans, sourcemaps non uploadées et stack traces Sentry restent minifiées (build reste OK).
-- `RATE_LIMIT_HASH_SALT` — sel HMAC pour le hash rate-limit envoyé à Sentry (story 4.1 review D3). Garantit l'irréversibilité du keyHash IPv4. Sans, fallback SHA-256 non-salé (l'IP reste précomputable). Générer avec `openssl rand -hex 32`.
+
+### OPTIONAL_ON_PREVIEW (obligatoires production uniquement)
+
+- `NEXT_PUBLIC_SENTRY_DSN`, `SENTRY_DSN`, `SENTRY_ORG`, `SENTRY_PROJECT` — alerting Sentry transverse (story 4.1). Tolérées absentes en preview pour éviter la création d'un projet Sentry preview-only.
+- `RATE_LIMIT_HASH_SALT` — sel HMAC pour irréversibilité hash IP rate-limit (story 4.1 patch review). Toléré absent en preview (dégradation gracieuse SHA-256 non-salé, acceptable pour debug local).
+
+> **Note `SENTRY_AUTH_TOKEN`** — token upload sourcemaps (scope `project:releases`), variable build-time uniquement, **non vérifiée par `check:env`**. À configurer sur Vercel scope production via `vercel env add SENTRY_AUTH_TOKEN production`. Sans, sourcemaps non uploadées et stack traces Sentry restent minifiées (build reste OK).
 
 Voir aussi `TODO-LAUNCH.md` (checklist détaillée pré-go-live) et `.env.local.example` (template).
 
