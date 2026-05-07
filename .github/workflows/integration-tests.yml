@@ -37,28 +37,28 @@ jobs:
           timeout 60 bash -c 'until curl -sf http://localhost:54321/auth/v1/health; do sleep 1; done'
 
       - name: Capture Supabase keys
-        id: supabase-keys
+        # Les cles sont injectees dans GITHUB_ENV (env-scoped, masque sur jobs)
+        # plutot que GITHUB_OUTPUT (persisted as plaintext step output API-readable).
+        # Add-mask AVANT l'export pour eviter toute fuite dans les logs intermediaires
+        # (review code 2026-05-09 M5).
         run: |
           SERVICE_ROLE_KEY=$(supabase status --output json | jq -r '.SERVICE_ROLE_KEY')
           ANON_KEY=$(supabase status --output json | jq -r '.ANON_KEY')
           echo "::add-mask::$SERVICE_ROLE_KEY"
           echo "::add-mask::$ANON_KEY"
-          echo "service_role_key=$SERVICE_ROLE_KEY" >> "$GITHUB_OUTPUT"
-          echo "anon_key=$ANON_KEY" >> "$GITHUB_OUTPUT"
+          echo "SUPABASE_SERVICE_ROLE_KEY=$SERVICE_ROLE_KEY" >> "$GITHUB_ENV"
+          echo "NEXT_PUBLIC_SUPABASE_ANON_KEY=$ANON_KEY" >> "$GITHUB_ENV"
 
       - name: Apply test seeds
         run: npm run seed:test
         env:
           SUPABASE_URL: http://localhost:54321
-          SUPABASE_SERVICE_ROLE_KEY: ${{ steps.supabase-keys.outputs.service_role_key }}
 
       - name: Run integration tests
         run: npm run test:integration
         env:
           SUPABASE_URL: http://localhost:54321
           NEXT_PUBLIC_SUPABASE_URL: http://localhost:54321
-          SUPABASE_SERVICE_ROLE_KEY: ${{ steps.supabase-keys.outputs.service_role_key }}
-          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ steps.supabase-keys.outputs.anon_key }}
           STRIPE_SECRET_KEY: sk_test_dummy_for_integration_tests
           STRIPE_WEBHOOK_SECRET: whsec_test_secret_for_integration_tests
           PARRAINAGE_INTERNAL_SECRET: parrainage_internal_secret_for_integration_tests

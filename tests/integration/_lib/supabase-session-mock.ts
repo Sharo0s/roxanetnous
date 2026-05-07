@@ -8,6 +8,16 @@ import { createClient } from '@/lib/supabase/server'
 // Pattern : vi.mock('@/lib/supabase/server', ...) est deja installe globalement dans
 // setup.ts. Ce helper centralise la logique de "session simulee" pour eviter la
 // duplication dans chaque test paywall.
+//
+// TRADEOFF DOCUMENTE (review code 2026-05-09 D1) : le Proxy ci-dessous retourne
+// le client SERVICE-ROLE pour `.from()/.rpc()`. Cela bypass les RLS policies. Les
+// tests paywall verifient donc les invariants metier APPLICATIFS (paywall via
+// `hasActiveSubscription`, validation roles via `userData.role`, etc.), PAS les
+// RLS BDD. Les RLS sont supposees correctes (testees indirectement en prod et via
+// les migrations brownfield). Ce choix est explicite : si un bug paywall vient de
+// l'absence d'une RLS, ces tests ne le verront pas. Pour tester les RLS, il
+// faudrait creer une vraie session via auth.signInWithPassword + injection cookies
+// dans next/headers mock — refacto reporte Epic 5+ si bug RLS reel observe.
 export function mockSupabaseSession(userId: string | null): void {
   const adminClient = getAdminClient()
 

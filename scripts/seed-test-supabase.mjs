@@ -29,9 +29,19 @@ if (!SUPABASE_URL || !SERVICE_ROLE_KEY) {
   process.exit(1)
 }
 
-if (!SUPABASE_URL.includes('localhost') && !SUPABASE_URL.includes('127.0.0.1')) {
+// Comparaison stricte sur le hostname pour eviter qu'un domaine type
+// `localhost.evil.com` matche le substring (review code 2026-05-09 H1).
+let supabaseHostname
+try {
+  supabaseHostname = new URL(SUPABASE_URL).hostname
+} catch {
+  console.error(`[seed-test] SUPABASE_URL='${SUPABASE_URL}' n'est pas une URL valide.`)
+  process.exit(1)
+}
+const LOCAL_HOSTS = new Set(['localhost', '127.0.0.1', '[::1]', '::1'])
+if (!LOCAL_HOSTS.has(supabaseHostname)) {
   console.error(
-    `[seed-test] Refus categorique d'executer : SUPABASE_URL='${SUPABASE_URL}' n'est pas local.\n` +
+    `[seed-test] Refus categorique d'executer : SUPABASE_URL hostname='${supabaseHostname}' n'est pas local.\n` +
       'Pattern aligne sur tests/integration/setup.ts (D4 story 4.4).',
   )
   process.exit(1)
@@ -77,11 +87,21 @@ async function reset(supabase, pgClient) {
   // Cleanup waitlist
   await pgClient.query(`DELETE FROM public.waitlist_departements WHERE email LIKE 'seed-waitlist-%@test.local'`)
 
-  // Cleanup auth.users + public.users (cascade) via auth admin
+  // Cleanup auth.users + public.users (cascade) via auth admin.
+  // Try/catch explicite : on ne masque plus les erreurs reelles (review code
+  // 2026-05-09 H7). Continue la boucle si un user est deja supprime, throw
+  // si erreur reseau/auth pour rendre l'echec visible.
   for (const user of SEED_USERS) {
-    const { error } = await supabase.auth.admin.deleteUser(user.id).catch(() => ({ error: null }))
-    if (error && !error.message?.includes('not found')) {
-      console.warn(`[seed-test] Cleanup user ${user.label} : ${error.message}`)
+    try {
+      const { error } = await supabase.auth.admin.deleteUser(user.id)
+      if (error && !error.message?.includes('not found')) {
+        console.warn(`[seed-test] Cleanup user ${user.label} : ${error.message}`)
+      }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err)
+      if (!message.includes('not found') && !message.includes('User not found')) {
+        console.warn(`[seed-test] Cleanup user ${user.label} (throw) : ${message}`)
+      }
     }
   }
 

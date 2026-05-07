@@ -67,15 +67,14 @@ describe('Stripe webhook : customer.subscription.updated -> parrainage bloque me
     // Event customer.subscription.updated. La metadata user_id+parrainage_code
     // est lue par captureParrainageFingerprint (route.ts:332).
     const subId = `sub_test_t2_${Date.now()}`
-    // Pre-seed la subscription en BDD (le handler updated cherche stripe_subscription_id).
-    const supabase = getAdminClient()
-    await supabase.from('subscriptions').insert({
-      user_id: filleule.id,
-      stripe_subscription_id: subId,
-      stripe_customer_id: 'cus_test_t2',
+    // Pre-seed la subscription via createTestSubscription helper pour beneficier
+    // du tracker + cleanupAllFixtures (review code 2026-05-09 H3).
+    const filleuleSub = await createTestSubscription(filleule.id, {
       status: 'active',
-      plan_type: 'mensuel',
+      stripeSubscriptionId: subId,
     })
+    void filleuleSub
+    const supabase = getAdminClient()
 
     const now = Math.floor(Date.now() / 1000)
     const fakeSubscription = {

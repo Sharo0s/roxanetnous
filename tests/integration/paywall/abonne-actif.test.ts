@@ -41,6 +41,7 @@ describe('paywall : abonne actif (T8)', () => {
       .select('id, accompagnante_id')
       .eq('id', result.conversationId!)
       .single()
+    expect(conv).not.toBeNull()
     expect(conv).toMatchObject({ accompagnante_id: auxProfile.id })
   })
 })

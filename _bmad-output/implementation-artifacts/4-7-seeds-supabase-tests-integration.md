@@ -1,6 +1,6 @@
 # Story 4.7 : Sync migrations historiques + seeds Supabase pour tests integration
 
-Status: review
+Status: done (CI verte avec seeds run #25505618623 + code review 2026-05-09 : 13 patches appliques, 9 deferes, 8 dismissed)
 
 <!-- Note : Story repriorisee bloquante go-live ordre 1 le 2026-05-09 suite au blocage CI decouvert au premier run GHA workflow #25502322720 (story 4.4). Scope elargi vs cadrage initial epic-4.md (qui ne couvrait que les seeds) pour adresser la cause racine : 27 migrations historiques 2026-02-16 -> 2026-04-09 sont en prod mais ABSENTES du repo local. -->
 
@@ -74,11 +74,11 @@ Elle s'appuie sur les decouvertes du premier run GHA :
 
 ### AC fonctionnels (debloquer CI 4.4 + cleanup brownfield)
 
-1. **AC1 — 27 migrations historiques recuperees et commitees** : Given le repo `supabase/migrations/` contient actuellement 25 migrations (a partir de `20260418135719_drop_avis_feature.sql`), when la story est livree, then :
-   - **27 nouveaux fichiers** dans `supabase/migrations/` couvrant les versions `20260216135538` -> `20260409212552` (liste exhaustive dans Story body section « Inventaire MCP migrations prod »).
-   - **Contenu identique** au SQL retourne par `mcp__supabase__execute_sql 'SELECT version, name, statements FROM supabase_migrations.schema_migrations WHERE version < ''20260418140024'' ORDER BY version'`. Verification cross-check : `diff <(supabase migration list --remote --output csv) <(supabase migration list --local --output csv)` retourne 0 lignes differentes.
-   - **Aucune modification** du SQL recupere : meme casse, meme ordre des statements, memes commentaires si presents. Si le SQL prod contient des warnings de style, on les conserve (sera traite Epic 5+).
-   - **Total repo apres** : 52 fichiers `.sql` dans `supabase/migrations/` (alignement complet avec prod).
+1. **AC1 — 28 migrations historiques recuperees et commitees** *(amendement review 2026-05-09)* : Given le repo `supabase/migrations/` contient actuellement 25 migrations (a partir de `20260418135719_drop_avis_feature.sql`), when la story est livree, then :
+   - **28 nouveaux fichiers** dans `supabase/migrations/` : 26 versions brownfield `20260216135538` -> `20260409212552` + 2 manquantes ulterieures decouvertes au diff `comm -3` prod vs local : `20260429173822_parrainage_rollback_recompense.sql` et `20260429175012_rate_limit_tracker_deny_all_policy.sql`.
+   - **Contenu identique** au SQL retourne par `mcp__supabase__execute_sql 'SELECT version, name, statements FROM supabase_migrations.schema_migrations WHERE version < ''20260418140024'' ORDER BY version'`. Exception : la migration `rate_limit_tracker_deny_all_policy.sql` a ete durcie avec `DROP POLICY IF EXISTS` avant `CREATE POLICY` pour gerer la collision idempotence avec la migration locale anterieure `20260429170000_rate_limit_tracker.sql` (drift versioning local vs prod : la prod n'a pas cette collision car les versions sont distinctes).
+   - **Aucune modification** du SQL recupere par ailleurs : meme casse, meme ordre des statements, memes commentaires si presents. Si le SQL prod contient des warnings de style, on les conserve (sera traite Epic 5+).
+   - **Total repo apres** : 53 fichiers `.sql` dans `supabase/migrations/` *(amendement review 2026-05-09 : 53 vs 52 prod, drift versioning sur `backfill_parrainage_codes` documente DECISIONS F9 + supabase/README.md ; alignement par nom, pas par version, accepte explicitement)*.
 
 2. **AC2 — `supabase start` reussit sur cluster vierge** : Given le runner GitHub Actions (ubuntu-latest, sans Docker pre-rempli), when le workflow `Integration Tests` execute `supabase start`, then :
    - **Aucune erreur** de type `ERROR: relation "X" does not exist` lors de l'application des 52 migrations en sequence.
@@ -91,15 +91,15 @@ Elle s'appuie sur les decouvertes du premier run GHA :
    - **Duree totale** workflow < 5 minutes (incluant pull Docker images Supabase).
    - **Cleanup BDD** : `SELECT count(*) FROM users WHERE email LIKE 'test-%@test.local'` retourne 0 apres run (verifie via `mcp__supabase__execute_sql` post-run sur staging local — ou simplement via une etape de check final dans le workflow).
 
-4. **AC4 — Dossier `supabase/seeds/` cree avec 4 fichiers** : Given pas de dossier `supabase/seeds/` au moment du cadrage, when la story est livree, then :
-   - **`supabase/seeds/01_users.sql`** : INSERT 5 lignes `users` avec UUID fixes :
-     - `'00000000-0000-0000-0000-000000000001'` admin (`role='admin'`)
+4. **AC4 — Dossier `supabase/seeds/` cree avec 4 fichiers** *(amendement review 2026-05-09 : pattern UPDATE retenu pour 01_users.sql)* : Given pas de dossier `supabase/seeds/` au moment du cadrage, when la story est livree, then :
+   - **`supabase/seeds/01_users.sql`** : **UPDATE** 5 lignes `users` avec UUID fixes (le trigger `handle_new_user` cree deja les rows lors de `auth.admin.createUser` avec UUID custom dans le script seed ; le SQL n'a plus qu'a enrichir role/first_name/last_name) :
+     - `'00000000-0000-0000-0000-000000000001'` admin (`role='admin'` — pas pose par le trigger qui ne supporte que 'accompagnante'/'accompagne')
      - `'00000000-0000-0000-0000-000000000002'` accompagnante validee (`role='accompagnante'`)
      - `'00000000-0000-0000-0000-000000000003'` accompagne sans abonnement (`role='accompagne'`)
-     - `'00000000-0000-0000-0000-000000000004'` marraine (`role='accompagnante'`, code parrainage en `parrainages_codes`)
+     - `'00000000-0000-0000-0000-000000000004'` marraine (`role='accompagnante'`, code parrainage en `parrainages_codes` cree par 02_parrainages.sql)
      - `'00000000-0000-0000-0000-000000000005'` filleule (`role='accompagnante'`)
-     - **Note** : auth.users equivalent doit etre cree via `supabase.auth.admin.createUser` au moment du seed (script wrapper, pas un INSERT SQL direct car auth.users a un trigger handle_new_user qui crash si bypass).
-     - **Alternative** : `seeds/01_users.sql` cree uniquement les rows `public.users` (le trigger `handle_new_user` n'execute pas si on insere directement dans `public.users`). Ajouter `auth.users` via `supabase auth admin create` dans le script `npm run seed:test` (commandes shell composees).
+     - **Pattern** : auth.users + public.users + accompagnantes_profiles/accompagnes_profiles sont crees par le script `scripts/seed-test-supabase.mjs` via `supabase.auth.admin.createUser({ id: 'UUID-fixe', user_metadata: { role, first_name, last_name }, email_confirm: true })`. Le trigger handle_new_user (migration brownfield 20260404134919) genere les rows par cascade. `01_users.sql` ne fait que UPDATE pour les champs metier non auto-poses (role 'admin' notamment).
+     - **Decision documentee DECISIONS.md F9** : INSERT direct dans `public.users` est interdit (collision avec trigger). Pattern UPDATE-only est la convention pour ce projet.
    - **`supabase/seeds/02_parrainages.sql`** : INSERT 1 row `parrainages_codes` (code 'TESTSEED1' pour marraine UUID 4) + 2 rows `parrainages` :
      - 1 parrainage `statut='inscrite'` (marraine 4 + filleule 5)
      - 1 parrainage `statut='bloque'` + `blocage_raison='meme_carte'` (marraine 4 + filleule UUID factice 6)
@@ -155,9 +155,11 @@ Elle s'appuie sur les decouvertes du premier run GHA :
 
 ### AC techniques (qualite et non-regression)
 
-9. **AC9 — `supabase migration list` cross-check** : Given la prod a 52 migrations dans `supabase_migrations.schema_migrations` apres livraison, when la verification est executee, then :
-   - **`supabase migration list`** local : 52 lignes.
-   - **Diff prod vs local** : zero migration manquante d'un cote ou de l'autre. Test : `comm -3 <(supabase migration list --local --output csv | sort) <(supabase migration list --remote --output csv | sort)` retourne 0 lignes.
+9. **AC9 — `supabase migration list` cross-check par nom (versions tolerees)** *(amendement review 2026-05-09)* : Given la prod a 52 migrations dans `supabase_migrations.schema_migrations` apres livraison + le repo local a 53 fichiers (drift versioning sur `backfill_parrainage_codes`), when la verification est executee, then :
+   - **`supabase migration list` local** : 53 lignes.
+   - **Diff prod vs local par NOM (alignement source de verite, pas par version)** : `comm -3 <(supabase_migrations | jq -r '.name' | sort) <(ls supabase/migrations/ | sed 's/^[0-9]*_//; s/.sql$//' | sort)` retourne **au plus 1 difference** (`backfill_parrainage_codes` local vs `backfill_parrainage_codes_for_existing_marraines` prod, contenu equivalent — `ON CONFLICT DO NOTHING` idempotent).
+   - **Diff strict par version** : explicitement NON requis. 27 versions brownfield divergent (versions Supabase Cloud `20260418140024` vs versions custom locales `20260418135719`). Documente dans DECISIONS F9.
+   - **Critere de decision** : tant que `supabase start` reussit en CI sur cluster vierge avec les 53 migrations en sequence, le drift est acceptable. Toute future story BDD doit creer des migrations avec versions strictement supersieures a la derniere existante en local pour eviter d'aggravar le drift.
 
 10. **AC10 — Pas de regression typage strict** : Given la convention projet (`tsconfig.json` strict mode + CLAUDE.md « pas de `as any` introduit »), when la story est livree, then :
     - **Aucun nouveau `as any`** dans le diff `*.ts/*.tsx` (la story est principalement SQL + scripts Node, mais le check standard est applique).
@@ -175,24 +177,27 @@ Elle s'appuie sur les decouvertes du premier run GHA :
     - **`git diff --stat`** ne touche AUCUN fichier `.tsx` cote `components/`, ni `app/(routes)`, ni les pages admin.
     - **DoD a11y** : N/A pour les sections UI mais lint + axe-core obligatoires (cf. AC11).
 
-13. **AC13 — Periphrase des fichiers touches** : Given le scope est borne, when le diff est livre, then **strictement** les fichiers suivants sont attendus :
+13. **AC13 — Periphrase des fichiers touches** *(amendement review 2026-05-09)* : Given le scope est borne, when le diff est livre, then les fichiers suivants sont attendus :
     - **Nouveaux fichiers** :
       - `supabase/migrations/20260216135538_rebuild_schema_tables.sql`
       - `supabase/migrations/20260216135615_rebuild_rls_and_storage.sql`
-      - 25 autres fichiers migrations historiques (versions `20260216145619` -> `20260409212552`).
-      - `supabase/seeds/01_users.sql`
+      - 24 autres fichiers migrations brownfield (versions `20260216145619` -> `20260409212552`).
+      - **+2 migrations rattrapees hors range brownfield strict** *(decouvertes au diff `comm -3` prod vs local)* : `20260429173822_parrainage_rollback_recompense.sql` + `20260429175012_rate_limit_tracker_deny_all_policy.sql` (cette derniere durcie avec `DROP POLICY IF EXISTS`).
+      - `supabase/seeds/01_users.sql` (UPDATE pattern, voir AC4 amende)
       - `supabase/seeds/02_parrainages.sql`
       - `supabase/seeds/03_waitlist.sql`
       - `supabase/seeds/04_subscriptions.sql`
       - `supabase/README.md`
       - `scripts/seed-test-supabase.mjs`
     - **Fichiers modifies** :
-      - `package.json` : ajout 2 scripts `seed:test*`.
-      - `.github/workflows/integration-tests.yml` : ajout step `Apply test seeds`.
+      - `package.json` + `package-lock.json` : ajout 2 scripts `seed:test*` + devDeps `pg` + `@types/pg`.
+      - `.github/workflows/integration-tests.yml` : ajout step `Apply test seeds` + capture ANON_KEY + injection NEXT_PUBLIC_SUPABASE_ANON_KEY + PARRAINAGE_INTERNAL_SECRET.
       - `DECISIONS.md` : ajout section F9.
+      - `tests/integration/_lib/fixtures.ts` : fix createTestUser/Profile cross-story 4.4 (compatibles trigger handle_new_user).
+      - `tests/integration/paywall/admin-bypass.test.ts` : reformule T10 cross-story 4.4 (contrainte XOR).
       - `_bmad-output/implementation-artifacts/sprint-status.yaml` : story 4.7 ready-for-dev -> in-progress -> review.
-      - `_bmad-output/implementation-artifacts/4-7-seeds-supabase-tests-integration.md` : checkboxes Tasks/Subtasks + Dev Agent Record + Change Log + DoD a11y.
-    - **Total estimation** : 36 fichiers nouveaux + 5 fichiers modifies, ~3000 lignes ajoutees (essentiellement SQL recupere).
+      - `_bmad-output/implementation-artifacts/4-7-seeds-supabase-tests-integration.md` : checkboxes Tasks/Subtasks + Dev Agent Record + Change Log + DoD a11y + Review Findings.
+    - **Total realise** : 38 fichiers nouveaux + 7 fichiers modifies, ~3100 lignes ajoutees (essentiellement SQL recupere brownfield).
 
 14. **AC14 — Verifications manuelles documentees dans la PR** : Given la dette est livree mais validee par re-run du workflow GHA, when la story est livree, then la PR contient une section « Verifications manuelles » listant :
     - (a) `supabase migration list --remote` retourne 52 lignes (idem local).
@@ -252,6 +257,24 @@ Elle s'appuie sur les decouvertes du premier run GHA :
   - [x] Subtask 8.1 : Section « Verifications manuelles » preparee dans Completion Notes (run #25504890455 14/14 verts source de verite).
   - [ ] Subtask 8.2 : Apres merge story 4.7 + re-run workflow vert avec seeds : Sylvain configure branch protection rule `Require status checks: integration-tests / integration` sur main (anciennement reportee story 4.4).
   - [ ] Subtask 8.3 : Audit BDD post-run final : `mcp__supabase__execute_sql 'SELECT count(*) FROM users WHERE email LIKE ''test-%@test.local'' OR email LIKE ''seed-%@test.local'''` -> 0 (cleanup robuste apres re-run).
+
+### Review Findings (2026-05-09 — review combinee 4.4 + 4.7, 4 reviewers)
+
+Voir aussi les findings dans `4-4-tests-metier-stripe-webhook-paywall.md` (review combinee).
+
+**Decisions tranchees (2026-05-09) :**
+- [x] [Review][Decision-Resolved] AC1/AC9 drift versioning 53 vs 52 prod — **AMENDE DANS LA SPEC** : AC1 mis a jour (28 migrations + 53 fichiers + drift documente), AC9 mis a jour (cross-check par NOM, pas par version). Cohérence interne spec/livraison restauree. Pas de rebase intrusif des versions locales.
+
+**Patches appliques (2026-05-09) :**
+- [x] [Review][Patch] AC1/AC13 amende : 28 migrations + 2 hors range brownfield (`parrainage_rollback_recompense`, `rate_limit_tracker_deny_all_policy`) — applique story file.
+- [x] [Review][Patch] Garde-fou anti-prod URL parsing strict — applique `scripts/seed-test-supabase.mjs` + `tests/integration/setup.ts` (parseur URL + Set hostname strict).
+- [x] [Review][Patch] `.catch(() => ({ error: null }))` remplace par try/catch explicite — applique `scripts/seed-test-supabase.mjs` (log erreurs reelles).
+- [x] [Review][Patch] AC4 amende : `01_users.sql` UPDATE pattern (trigger handle_new_user) — applique story file.
+
+**Defere (non bloquant) :**
+- [x] [Review][Defer] Pas de transaction wrapping multi-fichiers dans seed script — failure partielle entre 02_parrainages et 03_waitlist laisse rows orphelines. Limite acceptee tant que tests verts. Durcissement Epic 5+.
+- [x] [Review][Defer] Pas de check `data.user.id === user.id` apres `auth.admin.createUser` — versions plus anciennes de supabase-js peuvent ignorer le param `id`. Faux positif probable (versions actuelles supportent), durcissement defensif.
+- [x] [Review][Defer] Pas de retry/wait sur `pgClient.connect` (port 54322) — race possible avec `supabase start` boot. CI runs verts au 2/2 = pas observable. Durcissement si flaky.
 
 ## Dev Notes
 

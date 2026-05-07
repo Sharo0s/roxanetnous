@@ -282,9 +282,19 @@ export async function cleanupAllFixtures(): Promise<void> {
 
   // Balayage final auth.users pour les comptes test- crees (cleanup robust si table users
   // a ete supprimee mais auth.users orphelin).
+  // Wrap dans try/catch : si un user est deja supprime par cascade ou si l'API
+  // throw (network, 500), on continue le cleanup pour les autres
+  // (review code 2026-05-09 H7).
   const authUserIds = tracker.filter((row) => row.table === 'users').map((row) => row.id)
   for (const id of authUserIds) {
-    await supabase.auth.admin.deleteUser(id)
+    try {
+      await supabase.auth.admin.deleteUser(id)
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err)
+      if (!message.includes('not found') && !message.includes('User not found')) {
+        console.warn(`[cleanupAllFixtures] auth.admin.deleteUser ${id} : ${message}`)
+      }
+    }
   }
 
   tracker.length = 0

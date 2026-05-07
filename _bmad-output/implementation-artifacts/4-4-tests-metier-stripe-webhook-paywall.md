@@ -1,6 +1,6 @@
 # Story 4.4 : Tests metier critiques Stripe webhook + paywall
 
-Status: review (phases 1 + 2 livrees 2026-05-09)
+Status: done (CI verte 2 runs consecutifs + code review 2026-05-09 : 13 patches appliques, 9 deferes, 8 dismissed)
 
 <!-- Note : Validation est optionnelle. Lancer `validate-create-story` avant `dev-story` pour un controle qualite. -->
 
@@ -74,17 +74,17 @@ Elle s'appuie sur les fondations existantes :
 
 1. **AC1 — Vitest + helpers d'integration installes** : Given le projet roxanetnous n'a aucune dependance Vitest actuellement (verification `grep "vitest" package.json` -> aucun match), when la story est livree, then :
    - **Dependances `devDependencies`** ajoutees a `package.json` :
-     - `vitest@^3.x` (runner principal).
-     - `@vitest/coverage-v8@^3.x` (couverture optionnelle, voir AC11).
-     - `vite-tsconfig-paths@^5.x` (resolution des alias `@/*` aligne avec `tsconfig.json`).
+     - **`vitest@^4.x`** (runner principal — amendement review 2026-05-09 : initialement v3 dans la spec, livraison v4 latest stable Vitest 4 compatible Node 25 + ESM).
+     - **`@vitest/coverage-v8@^4.x`** (couverture optionnelle, voir AC11).
+     - **Pas de `vite-tsconfig-paths`** (amendement review 2026-05-09 : retire car Vite/Vitest 4 supporte nativement `resolve.tsconfigPaths: true`, pas de plugin requis).
      - **Pas** de `@playwright/test` re-install (deja present pour a11y).
    - **`vitest.config.ts` cree au root** avec :
      ```ts
      import { defineConfig } from 'vitest/config'
-     import tsconfigPaths from 'vite-tsconfig-paths'
 
+     // Pattern Vitest 4 : resolve.tsconfigPaths native, pool top-level (poolOptions deprecie).
      export default defineConfig({
-       plugins: [tsconfigPaths()],
+       resolve: { tsconfigPaths: true },
        test: {
          environment: 'node',
          include: ['tests/integration/**/*.test.ts'],
@@ -92,6 +92,8 @@ Elle s'appuie sur les fondations existantes :
          globals: false,
          testTimeout: 15_000,
          hookTimeout: 30_000,
+         pool: 'forks',
+         fileParallelism: false,
        },
      })
      ```
@@ -140,10 +142,10 @@ Elle s'appuie sur les fondations existantes :
      - (a) Verifier que SELECT sur `messages` (cote utilisateur) retourne les 2 messages historiques (lecture historique OK).
      - (b) Appel `sendMessage(<conv-id>, 'Tentative apres expiration')` -> retour `{ error: 'Abonnement requis pour envoyer un message.' }`.
      - (c) Verifier `count(*)` dans `messages` reste a 2 (aucune insertion).
-   - **T10 — `tests/integration/paywall/admin-bypass.test.ts`** : pre-fixture conversation avec `admin_id` set + `accompagnante_id` + `accompagne_id` set. Utilisateur connecte = l'`accompagne` (sans abonnement actif). Appel `sendMessage(<conv-id>, 'Message vers admin')` -> assertions :
+   - **T10 — `tests/integration/paywall/admin-bypass.test.ts`** : pre-fixture conversation **admin pure** (`accompagnante_id` + `admin_id`, `accompagne_id IS NULL` — contrainte XOR `conversations_participant_xor` decouverte au run GHA #25504550400 impose ce pattern). Utilisateur connecte = l'`accompagnante` SANS abonnement actif (cas FR11quater : validation visio en cours). Appel `sendMessage(<conv-id>, 'Message accompagnante vers admin')` -> assertions :
      - retour `{}` ou `{ success: true }` (pas d'erreur).
-     - row `messages` inseree avec `sender_id = <accompagne-user-id>`.
-     - **Justification** : pattern D1 `messages.ts:240` `if (!isAdmin && adminUserId === null)` -> si `adminUserId !== null`, le paywall est skippe pour preserver le canal de support.
+     - row `messages` inseree avec `sender_id = <accompagnante-user-id>`.
+     - **Justification** : pattern D1 `messages.ts:240` `if (!isAdmin && adminUserId === null)` -> si `adminUserId !== null`, le paywall est skippe pour preserver le canal de support FR11quater (convocation visio + echanges admin avant que l'accompagnante valide son abonnement). **Amendement review 2026-05-09** : la spec initiale decrivait un accompagne sans abonnement parlant a l'admin via une conversation accompagnante<->accompagne avec admin_id set, mais cette combinaison est interdite par la contrainte XOR `conversations_participant_xor`. La conversation admin est exclusive (admin_id XOR accompagne_id), donc le bypass paywall ne peut s'appliquer qu'a l'accompagnante face a l'admin.
 
 4. **AC4 — Helpers Stripe webhook signing** : Given les 5 tests Stripe webhook ont besoin d'un body signe authentique, when la story est livree, then `tests/integration/_lib/stripe-webhook-helper.ts` expose :
    - **`createStripeEvent(type, data)`** : fonction qui retourne un `Stripe.Event` mocke (`id` UUID v4 unique, `created` timestamp courant, `type`, `data: { object: ... }`, `livemode: false`, `api_version: '2026-03-25.dahlia'` aligne sur `lib/stripe.ts:5`).
@@ -270,6 +272,7 @@ Elle s'appuie sur les fondations existantes :
       - `tests/integration/_lib/stripe-webhook-helper.ts` (helpers signing + post).
       - `tests/integration/_lib/fixtures.ts` (helpers BDD fixtures).
       - `tests/integration/_lib/supabase-admin.ts` (client admin Supabase).
+      - `tests/integration/_lib/supabase-session-mock.ts` (helper pattern paywall : Proxy admin client + auth.getUser surcharge — amendement review 2026-05-09 : non liste initialement, ajoute pour T6-T10).
       - `tests/integration/stripe-webhook/checkout-completed-valid.test.ts` (T1).
       - `tests/integration/stripe-webhook/checkout-completed-parrainage-bloque.test.ts` (T2).
       - `tests/integration/stripe-webhook/invoice-payment-failed.test.ts` (T3).
@@ -282,9 +285,9 @@ Elle s'appuie sur les fondations existantes :
       - `tests/integration/paywall/admin-bypass.test.ts` (T10).
       - `.github/workflows/integration-tests.yml` (workflow GHA).
     - **Fichiers modifies** :
-      - `package.json` + `package-lock.json` : ajout `vitest`, `@vitest/coverage-v8`, `vite-tsconfig-paths` en `devDependencies` + 3 scripts npm.
+      - `package.json` + `package-lock.json` : ajout `vitest@^4.x`, `@vitest/coverage-v8@^4.x` en `devDependencies` + 3 scripts npm. **Amendement review 2026-05-09** : pas de `vite-tsconfig-paths` (Vitest 4 le supporte nativement). `tsconfig.json` listé initialement comme modifié mais non touché en pratique (le glob `**/*.ts` existant couvre déjà `tests/integration/**`).
       - `vercel.json` : `buildCommand` etendu avec `npm run test:integration` (gated par `SKIP_E2E_TESTS=true` Vercel env var).
-      - `tsconfig.json` : ajout `tests/integration/**/*.ts` dans `include` (ou `exclude` si on prefere les separer du build Next).
+      - ~~`tsconfig.json`~~ (initialement liste mais non modifie : le glob `**/*.ts` existant couvre `tests/integration/**`).
       - `DECISIONS.md` : ajout section F8 (decision tests integration Vitest).
       - `_bmad-output/implementation-artifacts/sprint-status.yaml` : `4-4-tests-metier-stripe-webhook-paywall` ready-for-dev -> in-progress -> review.
       - `_bmad-output/implementation-artifacts/4-4-tests-metier-stripe-webhook-paywall.md` : checkboxes Tasks/Subtasks + Dev Agent Record + Change Log + DoD a11y.
@@ -369,6 +372,31 @@ Elle s'appuie sur les fondations existantes :
   - [x] Subtask 8.1 : Section « Verifications manuelles » preparee dans Completion Notes ci-dessous (points a-i AC16).
   - [x] Subtask 8.2 : Action manuelle Sylvain consignee : audit Github Actions logs flaky 2026-05-09 -> 2026-05-16. Si flaky > 5 % -> story 4.4.b stabilisation. Echappatoire `workflow_dispatch.inputs.skip='true'` disponible dans `.github/workflows/integration-tests.yml`.
   - [ ] Subtask 8.3 : Audit BDD post-premier-run GHA : `SELECT count(*) FROM users WHERE email LIKE 'test-%@test.local'` -> 0. **A executer apres premier run GHA vert** (Sylvain).
+
+### Review Findings (2026-05-09 — review combinee 4.4 + 4.7, 4 reviewers)
+
+**Decisions tranchees (2026-05-09) :**
+- [x] [Review][Decision-Resolved] Proxy `mockSupabaseSession` bypasse RLS — **TRADEOFF ACCEPTE** : tests verifient invariants metier APPLICATIFS, pas les RLS BDD. Documente dans `tests/integration/_lib/supabase-session-mock.ts` (commentaire D1 explicite) + reporte deferred-work. Refacto possible Epic 5+ si bug RLS reel observe.
+
+**Patches appliques (2026-05-09) :**
+- [x] [Review][Patch] Garde-fou anti-prod URL parsing strict — applique `tests/integration/setup.ts` + `scripts/seed-test-supabase.mjs` (parseur URL + Set hostname strict).
+- [x] [Review][Patch] `clearAllMocks` + reset explicite Resend mock — applique `tests/integration/setup.ts` (export `__resendSendMock` sur globalThis + clear dans beforeEach).
+- [x] [Review][Patch] Subscription orphelin T2 (tracker) — applique `checkout-completed-parrainage-bloque.test.ts` (utilise `createTestSubscription` helper).
+- [x] [Review][Patch] `auth.admin.deleteUser` try/catch — applique `tests/integration/_lib/fixtures.ts` + `scripts/seed-test-supabase.mjs` (try/catch explicite, log si erreur reelle hors "not found").
+- [x] [Review][Patch] AC1 amende Vitest v3 → v4 — applique story file (devDeps + bloc vitest.config inline).
+- [x] [Review][Patch] AC15 amende (`supabase-session-mock.ts` ajoute, `tsconfig.json` raye) — applique story file.
+- [x] [Review][Patch] T10 spec body 4.4 amende (contrainte XOR + accompagnante au lieu d'accompagne) — applique story file.
+- [x] [Review][Patch] `service_role_key` GITHUB_OUTPUT → GITHUB_ENV — applique `.github/workflows/integration-tests.yml`.
+- [x] [Review][Patch] T8 `expect(conv).not.toBeNull()` avant `toMatchObject` — applique `abonne-actif.test.ts`.
+- [x] [Review][Dismiss] T7/T9 strings exactes — **DISMISS** : changement de wording dans `messages.ts` doit casser les tests (sain). `expect.stringContaining` perdrait la precision.
+
+**Defere (non bloquant pour merge actuel) :**
+- [x] [Review][Defer] Vercel build cassable sans `SKIP_E2E_TESTS=true` — pas de guard automatique. Action manuelle Sylvain deja prise. Backstop possible : check:env qui throw si var absente sur Production. Reporte story 4.4.b ou Epic 5+.
+- [x] [Review][Defer] `supabase/setup-cli@v1` + `version: latest` mutable tags — risque supply chain. Pinner sur SHA dans story durcissement post-stabilisation.
+- [x] [Review][Defer] Workflow GHA `Stop Supabase --no-backup` ne capture pas les logs en cas d'echec — debugging flaky difficile. Ajouter `actions/upload-artifact` pour `supabase logs` si flaky pendant 7j stabilisation.
+- [x] [Review][Defer] Tracker module-level non isole entre fichiers Vitest — limite acceptee tant que tests verts. Implementer balayage email LIKE final ou AsyncLocalStorage si flaky.
+- [x] [Review][Defer] Multiples chemins non gardes seed/cleanup (BATCH_LIMIT chunking, BOM, ECONNREFUSED Postgres, FK cascade undefined, retry idempotency seed file partial fail) — Edge Case Hunter 47 findings detailles. Aucun n'a casse les 2 runs CI verts. Durcissement post-stabilisation.
+- [x] [Review][Defer] Sprint-status comment ligne 132 stale (sequencage 4.7 avant 4.2) — cleanup mineur, pas bloquant merge.
 
 ## Dev Notes
 

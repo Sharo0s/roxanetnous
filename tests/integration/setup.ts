@@ -1,17 +1,26 @@
 import { vi, beforeEach } from 'vitest'
 
 // Garde-fou D4 : refus categorique d'executer contre staging/prod.
-// Tout test integration doit cibler Supabase local (localhost:54321 / 127.0.0.1).
+// Tout test integration doit cibler Supabase local (localhost / 127.0.0.1 / [::1]).
+// Comparaison stricte sur le hostname pour eviter qu'un domaine type
+// `localhost.evil.com` matche le substring (review code 2026-05-09 H1).
 const supabaseUrl = process.env.SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL
-if (
-  supabaseUrl &&
-  !supabaseUrl.includes('localhost') &&
-  !supabaseUrl.includes('127.0.0.1')
-) {
-  throw new Error(
-    `[tests/integration] Refus d'executer : SUPABASE_URL='${supabaseUrl}' n'est pas local. ` +
-      'Lancer supabase start et exporter SUPABASE_URL=http://localhost:54321.',
-  )
+if (supabaseUrl) {
+  let hostname: string
+  try {
+    hostname = new URL(supabaseUrl).hostname
+  } catch {
+    throw new Error(
+      `[tests/integration] SUPABASE_URL='${supabaseUrl}' n'est pas une URL valide.`,
+    )
+  }
+  const LOCAL_HOSTS = new Set(['localhost', '127.0.0.1', '[::1]', '::1'])
+  if (!LOCAL_HOSTS.has(hostname)) {
+    throw new Error(
+      `[tests/integration] Refus d'executer : SUPABASE_URL hostname='${hostname}' n'est pas local. ` +
+        'Lancer supabase start et exporter SUPABASE_URL=http://localhost:54321.',
+    )
+  }
 }
 
 // Variables d'environnement de test : valeurs factices coherentes pour le webhook.
@@ -41,10 +50,14 @@ vi.mock('@sentry/nextjs', () => ({
 // Mock Resend SDK : empeche tout appel reseau.
 // Resend est instanciee via `new Resend(key)` dans lib/emails.ts -> on expose
 // une vraie classe (pas vi.fn().mockImplementation, casse en Vitest 4).
+// Le `send` mock est exporte sur globalThis pour permettre un clear explicite
+// dans beforeEach (review code 2026-05-09 H2 : vi.clearAllMocks ne reset pas
+// les vi.fn() crees dans le factory closure de vi.mock).
+const __resendSendMock = vi.fn().mockResolvedValue({ data: { id: 'email_test_id' }, error: null })
+;(globalThis as { __resendSendMock?: typeof __resendSendMock }).__resendSendMock = __resendSendMock
 vi.mock('resend', () => {
-  const send = vi.fn().mockResolvedValue({ data: { id: 'email_test_id' }, error: null })
   class FakeResend {
-    emails = { send }
+    emails = { send: __resendSendMock }
   }
   return { Resend: FakeResend }
 })
@@ -144,6 +157,12 @@ vi.mock('@/lib/supabase/server', async () => {
 })
 
 // Reset des compteurs de mocks entre chaque test (Risque #3 : leak entre tests).
+// Note : vi.clearAllMocks() reset les vi.fn() trackes mais PAS ceux crees dans le
+// factory closure d'un vi.mock(). On clear explicitement le mock Resend
+// (review code 2026-05-09 H2).
 beforeEach(() => {
   vi.clearAllMocks()
+  const sendMock = (globalThis as { __resendSendMock?: ReturnType<typeof vi.fn> })
+    .__resendSendMock
+  sendMock?.mockClear()
 })
