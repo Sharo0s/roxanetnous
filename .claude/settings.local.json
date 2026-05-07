@@ -13,7 +13,9 @@
       "WebFetch(*)",
       "WebSearch(*)",
       "mcp__supabase__*",
-      "mcp__plugin_vercel_vercel__get_deployment"
+      "mcp__plugin_vercel_vercel__get_deployment",
+      "mcp__plugin_vercel_vercel__list_teams",
+      "mcp__vercel__list_deployments"
     ]
   },
   "enableAllProjectMcpServers": true,
