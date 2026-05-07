@@ -84,14 +84,31 @@ export default function PolitiqueConfidentialitePage() {
           <section>
             <h2 className="text-lg font-semibold text-black mb-2">Cookies</h2>
             <p>
-              Ce site utilise uniquement des cookies essentiels au fonctionnement du service :
+              Ce site utilise uniquement un cookie HTTP, strictement nécessaire au fonctionnement
+              du service :
             </p>
             <ul className="list-disc pl-5 mt-2 space-y-1">
-              <li>Cookies d&apos;authentification Supabase (session utilisateur)</li>
-              <li>Préférence cookies (acceptation de la bannière)</li>
+              <li>
+                Cookie d&apos;authentification Supabase
+                (<code className="text-xs">sb-&lt;project-ref&gt;-auth-token</code>) :
+                gère votre session utilisateur lorsque vous êtes connecté
+                (httpOnly, secure, sameSite=lax). Base légale : exécution du contrat
+                (article 6.1.b RGPD).
+              </li>
             </ul>
             <p className="mt-2">
-              Aucun cookie publicitaire, analytique ou de suivi tiers n&apos;est utilisé.
+              Par souci de transparence, nous précisons également qu&apos;une préférence locale
+              (<code className="text-xs">cookies-accepted</code>) est stockée dans le
+              <em> localStorage</em> de votre navigateur pour ne pas réafficher la bannière
+              d&apos;information à chaque visite. Cette donnée reste sur votre appareil et
+              n&apos;est jamais transmise dans une requête HTTP : techniquement, ce
+              n&apos;est pas un cookie.
+            </p>
+            <p className="mt-2">
+              Aucun cookie publicitaire, analytique, de suivi ou de retargeting tiers
+              n&apos;est utilisé sur le domaine roxanetnous. Aucun script tiers de
+              traçage (Google Analytics, Meta Pixel, Vercel Analytics, etc.) n&apos;est
+              chargé côté client.
             </p>
           </section>
 
@@ -101,6 +118,17 @@ export default function PolitiqueConfidentialitePage() {
               Les données peuvent être hébergées en dehors de l&apos;UE via nos prestataires
               (Vercel, Supabase, Stripe). Ces prestataires sont conformes au RGPD et offrent
               des garanties adéquates de protection des données.
+            </p>
+            <p className="mt-2">
+              Sur les pages permettant de configurer une zone géographique (création ou
+              modification d&apos;un profil ou d&apos;une annonce, accessibles uniquement
+              après connexion), une carte interactive charge des tuiles cartographiques
+              depuis OpenStreetMap Foundation
+              (<code className="text-xs">tile.openstreetmap.org</code>). Cela transmet
+              votre adresse IP à ce tiers, qui ne réalise pas de traçage commercial. Cette
+              fonctionnalité est strictement nécessaire à la configuration de votre rayon
+              d&apos;intervention ou de votre zone d&apos;annonce (base légale :
+              exécution du contrat, article 6.1.b RGPD).
             </p>
           </section>
 
@@ -119,7 +147,7 @@ export default function PolitiqueConfidentialitePage() {
               Cette politique peut être mise à jour. La date de dernière modification est indiquée
               ci-dessous. Nous vous informerons de tout changement significatif.
             </p>
-            <p className="mt-2 text-gray-500">Dernière mise à jour : février 2026</p>
+            <p className="mt-2 text-gray-500">Dernière mise à jour : mai 2026</p>
           </section>
         </div>
       </main>

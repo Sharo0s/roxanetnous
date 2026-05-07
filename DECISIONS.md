@@ -127,3 +127,26 @@ Migration support : `20260502120000_departements_ouverts` (table whitelist deja 
 - Pas de calendrier fige : ouverture conditionnelle a l'atteinte de seuils a definir (densite auxiliaires, demande beneficiaires) ou a une decision business.
 
 **Regle :** Toute nouvelle feature touchant la geographie (matching, recherche, annonces, inscription) doit respecter la whitelist `departements_ouverts`. Toute communication publique (landing, marketing, presse) doit mentionner le perimetre Bretagne actuel sans laisser entendre une couverture France entiere.
+
+---
+
+## 2026-05-07 : Granularite bandeau RGPD - bandeau binaire conforme
+
+**Decision :** Le bandeau cookies actuel `components/cookie-banner.tsx` (un seul bouton "Compris", bandeau informatif sans categorisation) est conforme RGPD car **tous les cookies HTTP poses sur le domaine roxanetnous sont strictement essentiels au fonctionnement du service** : (a) cookies de session Supabase (`sb-<project-ref>-auth-token`) = authentification, base legale art. 6.1.b RGPD (execution du contrat). **Aucun autre cookie HTTP applicatif** n'est pose sur notre domaine. La preference d'acceptation du bandeau est stockee en `localStorage` (cle `cookies-accepted`), donc techniquement **pas un cookie HTTP** au sens de la Deliberation CNIL n°2020-091.
+
+**Aucun cookie tiers** (analytics, publicite, tracking, retargeting, session replay) n'est pose sur le domaine roxanetnous. Aucun script tiers de tracking/analytics/CMP n'est charge cote client (verification grep code Section 5 du rapport audit : 0 occurrence sur `app/`, `components/`, `lib/`).
+
+Les **cookies tiers Stripe** poses sur `checkout.stripe.com` lors d'une session de paiement sont sous la responsabilite de Stripe Payments Europe Ltd. (sous-traitant RGPD au sens art. 28, cf. mentions legales). Hors perimetre du bandeau roxanetnous. Le SDK Stripe.js client n'est pas charge sur notre domaine (`@stripe/stripe-js` present en dependance mais 0 import applicatif - dette technique a traiter Epic 4).
+
+Les **tuiles cartographiques OpenStreetMap** chargees par Leaflet sur les pages auxiliaire et beneficiaire authentifiees (5 call-sites au total : 4 auxiliaire + 1 beneficiaire, configuration rayon d'intervention ou zone d'annonce) transmettent l'IP utilisateur a OSM Foundation. Cette transmission est couverte par la base legale art. 6.1.b RGPD (fonction metier essentielle, acces uniquement post-authentification + acceptation CGU). Mention informative ajoutee dans la politique de confidentialite Section "Transferts de donnees".
+
+**Motivation :** Deliberation CNIL n°2020-091 du 17 septembre 2020 (lignes directrices cookies) admet un bandeau cookies purement informatif pour les sites ou tous les cookies poses sont strictement essentiels au fonctionnement OU exemptes au titre de la mesure d'audience. Aucun consentement granulaire requis. Le projet roxanetnous remplit cette condition pre-go-live Bretagne (cf. rapport `_bmad-output/planning-artifacts/audit-cookies-2026-05-07.md`).
+
+**Implications techniques :**
+- `components/cookie-banner.tsx` : libelle ajuste pour refleter factuellement l'inventaire (un cookie HTTP `sb-*-auth-token` Supabase + stockage local non-cookie pour la preference de bandeau).
+- `app/politique-de-confidentialite/page.tsx` : section "Cookies" precisee (un seul cookie HTTP liste, mention separee `localStorage` pour transparence) + section "Transferts de donnees" completee (mention OSM Foundation) + date de mise a jour rafraichie.
+- **Aucun CMP requis** au stade MVP Bretagne. Decision a reconsiderer si introduction future d'analytics, retargeting, ou partenaires tiers a finalite commerciale.
+- **Re-audit DevTools live** sur 3 contextes (landing publique, beneficiaire authentifie, Stripe Checkout) **obligatoire avant ouverture publique du premier departement Bretagne** : verification visuelle des attributs `httpOnly`/`secure`/`sameSite`/expiration des cookies Supabase, confirmation absence cookie cross-domain Stripe au retour annulation checkout. Cet audit code-only ne dispense pas d'une verification live.
+- **Pre-condition** d'introduction d'un nouveau script ou cookie tiers : audit RGPD prealable + classification CNIL + mise a jour de cette decision si la classification est non-essentiel/non-exempte (ouvre alors une story Epic 4 CMP).
+
+**Regle :** Tout nouveau cookie ou script tiers ajoute au projet doit (a) etre classe essentiel/exempte/soumis-a-consentement avant merge, (b) si soumis a consentement, ouvrir une story Epic 4 CMP prealable. Aucun ajout direct de tracking/analytics/retargeting/session-replay sans audit RGPD prealable et mise a jour de cette decision. Voir `_bmad-output/planning-artifacts/audit-cookies-2026-05-07.md`.

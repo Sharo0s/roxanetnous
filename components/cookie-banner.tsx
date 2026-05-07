@@ -23,8 +23,11 @@ export function CookieBanner() {
     <div className="fixed bottom-0 left-0 right-0 bg-white border-t shadow-lg z-50">
       <div className="max-w-4xl mx-auto px-4 py-4 flex flex-col sm:flex-row items-center justify-between gap-4">
         <p className="text-sm text-gray-700">
-          Ce site utilise uniquement des cookies essentiels au fonctionnement du service
-          (authentification, préférences). Aucun cookie publicitaire ou de suivi n&apos;est utilisé.
+          Ce site utilise uniquement un cookie d&apos;authentification Supabase, strictement
+          nécessaire au fonctionnement du service lorsque vous êtes connecté. Une préférence
+          locale est également stockée dans votre navigateur (localStorage) pour ne pas
+          réafficher cette information à chaque visite. Aucun cookie publicitaire, analytique
+          ou de suivi tiers n&apos;est utilisé.
         </p>
         <button
           onClick={handleAccept}
