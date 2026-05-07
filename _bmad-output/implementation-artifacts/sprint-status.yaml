@@ -1,5 +1,5 @@
 # generated: 2026-05-06
-# last_updated: 2026-05-09 (Story 4.4 review + 4.7 in-progress)
+# last_updated: 2026-05-09 (Story 4.4 review + 4.7 review, CI run #25504890455 14/14 verts)
 # project: roxanetnous
 # project_key: NOKEY
 # tracking_system: file-system
@@ -147,7 +147,7 @@ development_status:
   4-3-email-queue-durable: done
   4-4-tests-metier-stripe-webhook-paywall: review
   # 4.7 repriorisee BLOQUANTE go-live (initialement ordre 2)
-  4-7-seeds-supabase-tests-integration: in-progress
+  4-7-seeds-supabase-tests-integration: review
 
   # Stories ordre 2 - DIFFEREES (non bloquantes go-live)
   4-5-hardening-ip-spoofing: backlog

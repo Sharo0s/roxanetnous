@@ -4,7 +4,6 @@ import { mockSupabaseSession } from '@/tests/integration/_lib/supabase-session-m
 import {
   createTestUser,
   createTestAccompagnanteProfile,
-  createTestConversation,
   cleanupAllFixtures,
 } from '@/tests/integration/_lib/fixtures'
 import { getAdminClient } from '@/tests/integration/_lib/supabase-admin'

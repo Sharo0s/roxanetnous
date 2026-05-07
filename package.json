@@ -17,7 +17,9 @@
     "test:supabase": "tsx scripts/test-supabase.ts",
     "test:integration": "vitest run",
     "test:integration:watch": "vitest",
-    "test:integration:coverage": "vitest run --coverage"
+    "test:integration:coverage": "vitest run --coverage",
+    "seed:test": "node scripts/seed-test-supabase.mjs",
+    "seed:test:reset": "node scripts/seed-test-supabase.mjs --reset"
   },
   "keywords": [],
   "author": "",
@@ -50,11 +52,13 @@
     "@eslint/js": "^9.39.4",
     "@playwright/test": "^1.59.1",
     "@types/leaflet": "^1.9.21",
+    "@types/pg": "^8.20.0",
     "@vitest/coverage-v8": "^4.1.5",
     "axe-core": "^4.11.4",
     "eslint": "^9.39.4",
     "eslint-plugin-jsx-a11y": "^6.10.2",
     "eslint-plugin-react-hooks": "^7.1.1",
+    "pg": "^8.20.0",
     "tsx": "^4.21.0",
     "typescript-eslint": "^8.59.1",
     "vitest": "^4.1.5"
