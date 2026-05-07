@@ -1,6 +1,6 @@
 # Story 4.1 : Alerting Sentry transverse + rate-limit `validateCode` parrainage
 
-Status: review
+Status: done
 
 <!-- Note : Validation est optionnelle. Lancer `validate-create-story` avant `dev-story` pour un controle qualite. -->
 
