@@ -1,7 +1,7 @@
 'use server'
 
 import { Resend } from 'resend'
-import { createClient } from '@/lib/supabase/server'
+import { logNotification } from '@/lib/emails'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || 'roxanetnous <onboarding@resend.dev>'
@@ -53,19 +53,16 @@ export async function sendContactMessage(formData: FormData): Promise<{ error?: 
       `,
     })
 
-    const supabase = await createClient({ serviceRole: true })
-    await supabase.from('notifications_log').insert({
+    await logNotification({
       email: CONTACT_EMAIL,
       type: 'contact_form',
       subject: emailSubject,
       status: 'sent',
-      sent_at: new Date().toISOString(),
     })
 
     return { success: true }
   } catch (error) {
-    const supabase = await createClient({ serviceRole: true })
-    await supabase.from('notifications_log').insert({
+    await logNotification({
       email: CONTACT_EMAIL,
       type: 'contact_form',
       subject: emailSubject,

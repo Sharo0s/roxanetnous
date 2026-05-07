@@ -13,24 +13,49 @@ function escapeHtml(str: string): string {
   return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
 }
 
-async function logNotification(params: {
+export type NotificationLogStatus =
+  | 'pending'
+  | 'sent'
+  | 'failed'
+  | 'error'
+  | 'lost'
+  | 'retry-scheduled'
+  | 'retry-exhausted'
+
+export async function logNotification(params: {
   userId?: string
   email: string
   type: string
   subject: string
-  status: 'sent' | 'error' | 'failed'
+  status: NotificationLogStatus
   error?: string
 }) {
-  const supabase = await createClient({ serviceRole: true })
-  await supabase.from('notifications_log').insert({
-    user_id: params.userId || null,
-    email: params.email,
-    type: params.type,
-    subject: params.subject,
-    status: params.status,
-    error: params.error || null,
-    sent_at: params.status === 'sent' ? new Date().toISOString() : null,
-  })
+  // Defense en profondeur : un INSERT qui throw (BDD down, RLS, valeur
+  // invalide) ne doit ni propager dans le try du caller (risque double-log
+  // sent + failed sur le meme envoi) ni provoquer d'unhandled rejection.
+  // Sentry capture l'incident, l'audit BDD est sacrifie au profit de la
+  // disponibilite applicative. Code review story 4.2 D1.
+  try {
+    const supabase = await createClient({ serviceRole: true })
+    await supabase.from('notifications_log').insert({
+      user_id: params.userId || null,
+      email: params.email,
+      type: params.type,
+      subject: params.subject,
+      status: params.status,
+      error: params.error || null,
+      sent_at: params.status === 'sent' ? new Date().toISOString() : null,
+    })
+  } catch (insertError) {
+    Sentry.captureException(insertError, {
+      tags: { flow: 'notifications_log', signal: 'insert_failed', severity: 'warning' },
+      extra: {
+        type: params.type,
+        status: params.status,
+        hasUserId: Boolean(params.userId),
+      },
+    })
+  }
 }
 
 export async function sendWelcomeEmail(params: {
@@ -867,10 +892,9 @@ export async function sendExpirationReminderEmail(params: {
   }
 }
 
-// Email envoye a la filleule quand son parrainage a ete bloque par
-// la detection anti-fraude au moment du paiement. Volontairement
-// generique : ne revele pas la regle violee (meme_carte, meme_email,
-// etc.) pour ne pas aider un fraudeur a contourner le systeme.
+// Email envoye au visiteur waitlist apres inscription pour un departement
+// non-ouvert. userId optionnel : visiteur anonyme -> user_id NULL en BDD
+// (schema story 4.2).
 export async function sendWaitlistConfirmationEmail(params: {
   email: string
   codeDepartement: string
@@ -878,10 +902,6 @@ export async function sendWaitlistConfirmationEmail(params: {
   userId?: string
 }) {
   const subject = `Vous etes sur la waitlist pour ${params.nomDepartement}`
-  // Visiteur anonyme : userId est undefined dans le flow waitlist, alors que
-  // notifications_log.user_id est NOT NULL FK users(id). On ne log pas dans
-  // ce cas (la ligne waitlist_departements est la source de verite).
-  const canLog = Boolean(params.userId)
   try {
     await resend.emails.send({
       from: FROM_EMAIL,
@@ -902,40 +922,31 @@ export async function sendWaitlistConfirmationEmail(params: {
       `,
     })
 
-    if (canLog) {
-      await logNotification({
-        userId: params.userId,
-        email: params.email,
-        type: 'waitlist_confirmation',
-        subject,
-        status: 'sent',
-      })
-    }
+    await logNotification({
+      userId: params.userId,
+      email: params.email,
+      type: 'waitlist_confirmation',
+      subject,
+      status: 'sent',
+    })
   } catch (error) {
-    if (canLog) {
-      await logNotification({
-        userId: params.userId,
-        email: params.email,
-        type: 'waitlist_confirmation',
-        subject,
-        status: 'failed',
-        error: error instanceof Error ? error.message : 'Erreur inconnue',
-      })
-    } else {
-      console.error('[waitlist][email_send_error]', error)
-      Sentry.captureException(error, {
-        tags: { flow: 'email', signal: 'waitlist-confirm-failed', severity: 'warning' },
-        extra: { codeDepartement: params.codeDepartement },
-      })
-    }
+    Sentry.captureException(error, {
+      tags: { flow: 'email', signal: 'waitlist-confirm-failed', severity: 'warning' },
+      extra: { codeDepartement: params.codeDepartement },
+    })
+    await logNotification({
+      userId: params.userId,
+      email: params.email,
+      type: 'waitlist_confirmation',
+      subject,
+      status: 'failed',
+      error: error instanceof Error ? error.message : 'Erreur inconnue',
+    })
   }
 }
 
 // Email envoye a un visiteur waitlist quand son departement est ouvert.
-// Pattern visiteur anonyme : userId est undefined par construction (les
-// lignes waitlist_departements ne sont pas liees a users.id). On skip le
-// logNotification dans ce cas pour eviter le bug latent NOT NULL FK
-// users(id) sur notifications_log (cf. memoire project_logNotification_bug).
+// userId optionnel : visiteur anonyme -> user_id NULL en BDD (schema story 4.2).
 export async function sendWaitlistOpeningNotificationEmail(params: {
   email: string
   codeDepartement: string
@@ -960,7 +971,6 @@ export async function sendWaitlistOpeningNotificationEmail(params: {
     return
   }
   const subject = `Le service est ouvert dans ${nom}`
-  const canLog = Boolean(params.userId)
   // BASE_URL peut avoir un trailing slash en preview Vercel : on neutralise.
   // Code review patch #12.
   const baseClean = (BASE_URL || '').replace(/\/+$/, '')
@@ -997,45 +1007,37 @@ export async function sendWaitlistOpeningNotificationEmail(params: {
           extra: { code: params.codeDepartement, userId: params.userId ?? null },
         },
       )
-      if (canLog) {
-        await logNotification({
-          userId: params.userId,
-          email: params.email,
-          type: 'waitlist_opening',
-          subject,
-          status: 'failed',
-          error: typeof resendError === 'string' ? resendError : JSON.stringify(resendError),
-        })
-      }
-      return
-    }
-
-    if (canLog) {
-      await logNotification({
-        userId: params.userId,
-        email: params.email,
-        type: 'waitlist_opening',
-        subject,
-        status: 'sent',
-      })
-    }
-  } catch (error) {
-    if (canLog) {
       await logNotification({
         userId: params.userId,
         email: params.email,
         type: 'waitlist_opening',
         subject,
         status: 'failed',
-        error: error instanceof Error ? error.message : 'Erreur inconnue',
+        error: typeof resendError === 'string' ? resendError : JSON.stringify(resendError),
       })
-    } else {
-      console.error('[notify-waitlist][email_send_error]', { code: params.codeDepartement, email: params.email, error })
-      Sentry.captureException(error, {
-        tags: { flow: 'email', signal: 'waitlist-opening-failed', severity: 'warning' },
-        extra: { code: params.codeDepartement },
-      })
+      return
     }
+
+    await logNotification({
+      userId: params.userId,
+      email: params.email,
+      type: 'waitlist_opening',
+      subject,
+      status: 'sent',
+    })
+  } catch (error) {
+    Sentry.captureException(error, {
+      tags: { flow: 'email', signal: 'waitlist-opening-failed', severity: 'warning' },
+      extra: { code: params.codeDepartement },
+    })
+    await logNotification({
+      userId: params.userId,
+      email: params.email,
+      type: 'waitlist_opening',
+      subject,
+      status: 'failed',
+      error: error instanceof Error ? error.message : 'Erreur inconnue',
+    })
   }
 }
 

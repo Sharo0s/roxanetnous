@@ -242,3 +242,25 @@ Les **tuiles cartographiques OpenStreetMap** chargees par Leaflet sur les pages 
 - Les flows de mise a jour conditionnelle doivent inclure l'invariant dans le `WHERE` (jamais lire-puis-update separes).
 
 **Regle :** Toute nouvelle table avec exigence d'idempotence doit avoir son UNIQUE INDEX declare en migration. Toute nouvelle server action sur table idempotente doit appliquer le pattern `INSERT ON CONFLICT` ou compare-and-swap. Aucun check-before-insert applicatif autorise sur une table avec contrainte d'unicite metier.
+
+---
+
+## 2026-05-07 : Schema `notifications_log` etendu - `user_id NULLABLE` + `status` etendu sept valeurs (decision F6)
+
+**Decision :** Le schema `public.notifications_log` est modifie de maniere transverse pour accommoder les flows email visiteurs anonymes et les statuts operationnels enrichis :
+
+- **`user_id UUID NULLABLE`** (auparavant `NOT NULL` + FK `users(id)`). La FK est preservee : si non-null, doit pointer vers une row existante. Le `NULL` est autorise pour visiteurs hors-table `users` (waitlist visiteur, formulaire de contact, alertes admin transverses).
+- **CHECK `status` etendu de 3 a 7 valeurs** : `pending` (defaut), `sent` (Resend ok), `failed` (envoi rate, retry possible), `error` (exception applicative pre-Resend), `lost` (config absente, signal perdu), `retry-scheduled` (queue durable story 4.3), `retry-exhausted` (queue durable, 3 retries fail).
+- **`type TEXT libre`** (decision adjacente) : pas de CHECK ni d'ENUM Postgres. Convention de nommage `<flow>_<event>` documentee dans le commentaire SQL de la colonne. Justification : les types metier evoluent rapidement (chaque story produit son type) ; un ENUM exigerait un `ALTER TYPE ADD VALUE` a chaque nouvelle story email -> friction inacceptable.
+
+**Anti-pattern explicitement interdit** : INSERT direct dans `notifications_log` depuis une autre source que le helper centralise `lib/emails.ts:logNotification`. Cela duplique la logique de mapping (`userId -> user_id || null`, `sent_at` conditionnel) et risque de diverger lors d'une evolution future du schema.
+
+**Motivation :** bug latent decouvert review story 3.4 (2026-05-06) puis acte AI-3.1 retro Epic 3 (2026-05-07). Constat empirique avant fix : 50 lignes en BDD au 2026-05-07, toutes `status='sent'` + `user_id NOT NULL`. Aucun chemin error/anonyme n'a jamais ete persiste depuis Epic 1 (echecs silencieux NOT NULL et CHECK). 4 flows etaient impactes (visiteur anonyme waitlist x2, contact form, admin alertes hors users.id) + toutes les branches catch des 17+ helpers email (`status='error'` rejete par CHECK).
+
+**Implications techniques :**
+- Le helper `logNotification` est exporte depuis `lib/emails.ts` et accepte `userId?: string` (undefined autorise). Le mapping en BDD est `params.userId || null`.
+- Le type TS `NotificationLogStatus` est exporte depuis `lib/emails.ts` et utilise par `app/actions/contact.ts`. Tout futur call-site externe doit l'importer plutot que dupliquer l'union.
+- Les statuts `retry-scheduled` et `retry-exhausted` sont introduits par cette story 4.2 mais ne sont pas encore emis par le code applicatif au merge. Story 4.3 (queue durable) sera la premiere a les utiliser via `sendEmailWorkflow`.
+- Migration idempotente via `DROP CONSTRAINT IF EXISTS` + guard `duplicate_object` autour de l'`ADD CONSTRAINT`. Pattern reutilise de `20260506130000_admin_actions_log_target_id_text.sql`.
+
+**Regle :** Toute future fonction email metier doit appeler `logNotification` (helper exporte de `lib/emails.ts`) plutot qu'un INSERT direct. Toute extension du set de statuts `notifications_log.status` doit (a) etendre le CHECK BDD via migration et (b) etendre simultanement le type TS `NotificationLogStatus` pour preserver l'alignement. Tout INSERT direct dans `notifications_log` depuis un autre fichier que `lib/emails.ts` est rejete au code review.
