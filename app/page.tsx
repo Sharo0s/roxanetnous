@@ -387,8 +387,8 @@ export default async function HomePage() {
                   Recommandé
                 </Reveal>
                 <h3 className="font-bold text-xl text-black mb-1">Annuel</h3>
+                <p className="text-2xl font-normal text-black line-through mb-1">59,88 EUR</p>
                 <p className="text-4xl font-bold text-black mb-1 whitespace-nowrap">
-                  <span className="text-2xl font-normal text-black line-through mr-2">59,88 EUR</span>
                   <span className="text-accent">49,99 EUR</span><span className="text-base font-normal text-black"> / an</span>
                 </p>
                 <p className="text-base text-black mb-4">Soit 4,17 EUR / mois. Économisez 17%.</p>
@@ -458,7 +458,7 @@ export default async function HomePage() {
         {/* ===== CONTACT ===== */}
         <section className="px-4 py-16 kraft bg-kraft">
           <Reveal className="max-w-md mx-auto relative z-10">
-            <h2 className="text-3xl font-bold text-center text-white mb-2">Une question ?</h2>
+            <h2 className="text-3xl font-bold text-center text-black mb-2">Une question ?</h2>
             <p className="text-center text-white text-lg mb-6">
               Notre équipe est disponible pour répondre à toutes vos questions.
             </p>
