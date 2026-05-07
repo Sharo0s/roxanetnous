@@ -1,6 +1,6 @@
 # Story 3.7 : Audit cookies/scripts tiers et décision granularité bandeau RGPD
 
-Status: review
+Status: done
 
 <!-- Note: Validation est optionnelle. Lancer `validate-create-story` avant `dev-story` pour un controle qualite. -->
 
