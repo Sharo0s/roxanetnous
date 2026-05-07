@@ -1,5 +1,5 @@
 # generated: 2026-05-06
-# last_updated: 2026-05-09 (Story 4.4 review)
+# last_updated: 2026-05-09 (Story 4.4 review + 4.7 repriorisee bloquante go-live)
 # project: roxanetnous
 # project_key: NOKEY
 # tracking_system: file-system
@@ -130,6 +130,14 @@ development_status:
   # 4 stories ordre 1 BLOQUANTES go-live + 7 stories ordre 2 differees.
   # Toggle admin premier dpt prod conditionne a livraison 4.1, 4.2, 4.3, 4.4 + 4.7 (seeds).
   # Sequencage recommande : 4.1 -> 4.7 -> 4.2 -> 4.3 -> 4.4 -> ordre 2 ou go-live.
+  #
+  # MAJ 2026-05-09 : story 4.7 REPRIORISEE BLOQUANTE go-live ordre 1 suite a decouverte
+  # blocage CI au premier run GHA workflow #25502322720. La migration brownfield
+  # `20260418135719_drop_avis_feature.sql` echoue sur cluster Supabase vierge (table
+  # `signalements` inexistante car Epic 1 livre retroactivement sans migration init).
+  # Tant que 4.7 n'est pas livree (seeds + migration init brownfield), les tests
+  # d'integration backend de 4.4 ne peuvent pas tourner en CI. Code 4.4 reste valide,
+  # `SKIP_E2E_TESTS=true` set dans Vercel env vars pour preserver le build Vercel.
   # ==========================================================================
   epic-4: in-progress
 
@@ -138,11 +146,12 @@ development_status:
   4-2-fix-schema-log-notification-transversal: done
   4-3-email-queue-durable: done
   4-4-tests-metier-stripe-webhook-paywall: review
+  # 4.7 repriorisee BLOQUANTE go-live (initialement ordre 2)
+  4-7-seeds-supabase-tests-integration: ready-for-dev
 
   # Stories ordre 2 - DIFFEREES (non bloquantes go-live)
   4-5-hardening-ip-spoofing: backlog
   4-6-resorption-as-any-pages-admin: backlog
-  4-7-seeds-supabase-tests-integration: backlog
   4-8-separation-required-optional-on-preview-envs: backlog
   4-9-validation-escape-html-test-xss-emails: backlog
 

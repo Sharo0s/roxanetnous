@@ -574,6 +574,15 @@ Suite a la decision pre-implementation de phaser cette story en deux passes : ph
 **Validations BDD reportees au premier run GHA workflow :**
 Les tests T1-T4 et T6-T10 necessitent Supabase local (Docker). Sylvain ayant explicitement choisi de NE PAS lancer Docker localement (memoire feedback enregistree), la validation reelle se fait au premier run du workflow GHA au push. En local, 5/5 tests sans BDD (smoke + T5 sans BDD) restent verts ; 9 tests avec BDD throw `cleanupAllFixtures` -> erreur SUPABASE_URL absent (comportement attendu, garde-fou D4).
 
+**BLOCAGE DECOUVERT au premier run GHA 2026-05-09 (run #25502322720) :**
+- Le step `supabase start` echoue dans le workflow GHA. Cause : la migration `20260418135719_drop_avis_feature.sql` execute `ALTER TABLE public.signalements DROP CONSTRAINT IF EXISTS ...` mais la table `signalements` n'existe pas sur un cluster Supabase vierge.
+- Origine : Epic 1 livre retroactivement avant adoption BMad formelle (cf. sprint-status.yaml lignes 39-41). Le schema initial avec les tables `signalements`, `avis`, `users`, `accompagnantes_profiles`, `accompagnes_profiles`, etc. n'a jamais ete capture dans une migration formelle. Toutes les migrations recentes presument l'existence de ces tables (brownfield).
+- En production : aucun probleme, le schema initial est deja en BDD prod.
+- En CI sur cluster vierge (`supabase start`) : la 1ere migration (`drop_avis_feature`) crash car elle reference des tables qui n'existent pas encore.
+- Code livre cette story 4.4 reste **valide** : T5 + smoke verts en local sans Supabase, code des 9 autres tests revu et type-check propre.
+- **Validation reelle 9/10 tests depend de la livraison story 4.7** (seeds Supabase). Cette story 4.7 etait en backlog ordre 2 (non bloquante go-live) ; elle devient **bloquante go-live de fait** car la garde merge GHA `Require status checks: integration-tests / integration` ne peut pas etre mise en place tant que `supabase start` echoue.
+- **Decision (avec accord Sylvain 2026-05-09)** : story 4.4 reste statut `review` (code livre, validation partielle 5/14 tests verts en local), story 4.7 repriorisee en bloquante go-live + ordre 1 dans sprint-status.yaml. La branch protection rule reste a configurer mais sans gate immediat.
+
 **Verifications manuelles (preparation PR description, AC16) :**
 - (a) Localement : `npm run test:integration` -> 5 verts (smoke + T5) + 9 erreurs garde-fou (T1-T4, T6-T10).
 - (b) Test individuel : `npx vitest run tests/integration/stripe-webhook/invalid-signature.test.ts` -> 3 verts isoles.
@@ -585,11 +594,16 @@ Les tests T1-T4 et T6-T10 necessitent Supabase local (Docker). Sylvain ayant exp
 - (h) Audit BDD apres run GHA : `SELECT count(*) FROM users WHERE email LIKE 'test-%@test.local'` retourne 0 (cleanup OK).
 - (i) `git diff --stat` borne aux fichiers attendus (~18 nouveaux + 5 modifies, alignement AC15 avec ajout `supabase-session-mock.ts`).
 
-**Actions manuelles Sylvain a executer apres merge :**
-1. Vercel dashboard : ajouter `SKIP_E2E_TESTS=true` env var (Production + Preview environments).
-2. GitHub repo settings : configurer branch protection rules `Require status checks: integration-tests / integration` sur `main` apres premier run vert.
-3. Audit Github Actions logs sur 2026-05-09 -> 2026-05-16 (7 jours stabilisation) : si > 5 % flaky -> story 4.4.b. Echappatoire `workflow_dispatch.inputs.skip='true'` disponible.
-4. Audit BDD post-premier-run : `SELECT count(*) FROM users WHERE email LIKE 'test-%@test.local'` -> 0 attendu (cleanup robuste).
+**Actions manuelles Sylvain a executer :**
+1. **DEJA FAIT 2026-05-09** : Vercel dashboard `SKIP_E2E_TESTS=true` env var Production (badge `Sensitive`).
+2. **REPORTE post-livraison story 4.7** : configurer branch protection rules `Require status checks: integration-tests / integration` sur `main`. Tant que `supabase start` echoue en CI, la gate ne peut pas etre activee.
+3. **REPORTE post-livraison story 4.7** : audit Github Actions logs sur 7 jours apres premier run vert. Echappatoire `workflow_dispatch.inputs.skip='true'` deja disponible si besoin.
+4. **REPORTE post-livraison story 4.7** : audit BDD post-premier-run-vert via `SELECT count(*) FROM users WHERE email LIKE 'test-%@test.local'` -> 0 attendu.
+
+**Sequencage revise apres decouverte blocage 2026-05-09 :**
+- Story 4.4 : code livre, statut `review`, 5/14 sous-tests verts en local. Pas de regression introduite (build Vercel preserve via `SKIP_E2E_TESTS=true`).
+- **Story 4.7 (seeds Supabase) repriorisee bloquante go-live + ordre 1** : doit fournir une migration de bootstrap qui cree le schema brownfield (tables `users`, `signalements`, `avis`, `accompagnantes_profiles`, `accompagnes_profiles`, `subscriptions`, `parrainages`, `messages`, `conversations`, `notifications_log`, etc.) AVANT l'execution des migrations recentes. Apres livraison 4.7, re-run du workflow GHA 4.4 valide les 14 tests reels.
+- Go-live Bretagne : conditionne 4.4 (livre) + 4.7 (a livrer) + 4.1, 4.2, 4.3 deja done. Toggle admin premier dpt prod autorise apres 4.7 done + workflow GHA vert.
 
 ### File List
 
