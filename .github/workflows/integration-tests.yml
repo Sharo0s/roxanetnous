@@ -1,0 +1,57 @@
+name: Integration Tests
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      skip:
+        description: 'Skip integration tests (echappatoire stabilisation 7j post-merge)'
+        required: false
+        default: 'false'
+
+jobs:
+  integration:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.inputs.skip != 'true' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Start Supabase local stack
+        run: supabase start
+
+      - name: Wait for Supabase ready
+        run: |
+          timeout 60 bash -c 'until curl -sf http://localhost:54321/auth/v1/health; do sleep 1; done'
+
+      - name: Capture Supabase service role key
+        id: supabase-keys
+        run: |
+          SERVICE_ROLE_KEY=$(supabase status --output json | jq -r '.SERVICE_ROLE_KEY')
+          echo "::add-mask::$SERVICE_ROLE_KEY"
+          echo "service_role_key=$SERVICE_ROLE_KEY" >> "$GITHUB_OUTPUT"
+
+      - name: Run integration tests
+        run: npm run test:integration
+        env:
+          SUPABASE_URL: http://localhost:54321
+          NEXT_PUBLIC_SUPABASE_URL: http://localhost:54321
+          SUPABASE_SERVICE_ROLE_KEY: ${{ steps.supabase-keys.outputs.service_role_key }}
+          STRIPE_SECRET_KEY: sk_test_dummy_for_integration_tests
+          STRIPE_WEBHOOK_SECRET: whsec_test_secret_for_integration_tests
+
+      - name: Stop Supabase
+        if: always()
+        run: supabase stop --no-backup

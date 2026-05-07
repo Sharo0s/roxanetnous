@@ -296,3 +296,37 @@ Les **tuiles cartographiques OpenStreetMap** chargees par Leaflet sur les pages 
 - **INSERT direct dans `notifications_log` depuis le workflow function ou un step custom** : passer par le helper neutre `logNotification` (lib/notifications-log.ts) appele depuis le step. Code review 2026-05-08 P3/P6 : pas de step imbrique pour le INSERT BDD, pas de duplication entre `lib/emails.ts` et le module workflow.
 
 **Regle :** Tout futur flow email differe (Epic 5+) suit le pattern (a) ajouter un nouveau template au type union `SendEmailTemplate`, (b) etendre le step `sendEmailViaResend` avec le rendu HTML correspondant, (c) ajouter une fonction `enqueueXxxEmail` dans `lib/emails.ts` qui inclut le fallback synchrone vers la fonction historique. Migration big-bang explicitement rejetee : la migration des 16 autres helpers email (welcome, validation, parrainage, admin, contact, etc.) reste pilotee par signal Sentry au cas par cas.
+
+## 2026-05-09 : Tests d'integration backend - Vitest + Supabase local + mocking Resend/Sentry/Workflow (decision F8)
+
+**Decision :** Le projet roxanetnous adopte un pattern de tests d'integration backend dedie aux invariants metier critiques (signature webhook Stripe + paywall server actions). Le runner est **Vitest v4** (et non Playwright comme suggere `epic-4.md` AC1). La structure est :
+
+- **`tests/integration/`** : dossier dedie, parallele a `tests/a11y/` (axe-core Playwright). Sous-dossiers `stripe-webhook/` (5 tests AC2), `paywall/` (5 tests AC3), `_lib/` (helpers).
+- **`vitest.config.ts`** au root : `pool: 'forks'`, `fileParallelism: false`, `testTimeout: 15_000`, `setupFiles: ['tests/integration/setup.ts']`. `resolve.tsconfigPaths: true` (plugin natif Vite/Vitest 4).
+- **`tests/integration/setup.ts`** : mocks globaux + garde-fou anti-prod. Refus categorique d'executer si `SUPABASE_URL` ne pointe pas `localhost`/`127.0.0.1`.
+- **CI** : execution dans GitHub Actions (`.github/workflows/integration-tests.yml`) avec `supabase/setup-cli@v1` + `supabase start`. Vercel build skip via `SKIP_E2E_TESTS=true` (pas de Docker dans le runner Vercel). Branch protection rules `Require status checks: integration-tests / integration` sur main (action manuelle Sylvain).
+
+**Motivation :** AI-3.2 retro Epic 3 (« tests metier critiques bloquants go-live Bretagne »). Couverture explicite des 5 cas Stripe (T1 checkout valide, T2 parrainage anti-fraude `meme_carte`, T3 invoice failed, T4 subscription deleted, T5 signature invalide) + 5 cas paywall (T6 visiteur, T7 sans abo, T8 abonne, T9 expire mid-conversation, T10 admin bypass). Filet de securite contre les regressions de la classe « event Stripe perdu = utilisateur sans abonnement malgre carte debitee » et « paywall contourne = perte de revenu ».
+
+**Alternatives rejetees :**
+- **Playwright pour tests integration backend (suggere epic-4.md AC1)** : sur-dimensionne. Les 10 tests n'ont pas besoin de browser. Playwright impose `webServer: { command: 'npm run dev' }` qui ajoute 10-30 s par run. Vitest tourne en process Node natif en quelques secondes. Playwright reste reserve aux tests UI a11y existants (`tests/a11y/`).
+- **Jest** : friction ESM bien connue dans Next.js 16 + `"type": "module"`. Vitest est ESM-native, pas de `babel-jest` ni `--experimental-vm-modules`.
+- **supertest + serveur HTTP demarre via `next start`** : redondant. Un endpoint Next.js App Router est testable en l'important directement (`import { POST } from '@/app/api/webhooks/stripe/route'`) avec un `NextRequest` mocke.
+- **`stripe-mock` Docker container** : ajoute dependance Docker dans le workflow GHA + certains endpoints obsoletes vs api_version `2026-03-25.dahlia`. Mock inline `vi.mock('@/lib/stripe', ...)` retenu (D7).
+- **Tests contre Supabase staging** : risque de pollution staging avec rows de tests, latence reseau 100-300 ms x N queries, tests non-reproductibles si plusieurs PR tournent en parallele. Garde-fou code-level dans `setup.ts`.
+- **Couplage avec story 4.7 (seeds Supabase)** : 4.7 est ordre 2. 4.4 est ordre 1. Bloquer 4.4 sur 4.7 = report go-live. Fixtures inline minimales livrees ; refactor mecanique vers seeds 4.7 quand celle-ci livre (D2).
+
+**Pattern d'integration :**
+- **Helper Stripe webhook (`tests/integration/_lib/stripe-webhook-helper.ts`)** : `createStripeEvent(type, data)` + `signStripeEvent(event, secret)` (utilise `Stripe.webhooks.generateTestHeaderString` reel) + `postWebhookEvent(event)` (NextRequest mocke + appel direct POST handler). Pas de serveur HTTP.
+- **Helper fixtures BDD (`tests/integration/_lib/fixtures.ts`)** : `createTestUser(role)`, `createTestSubscription(userId, opts)`, `createTestAccompagnanteProfile`, `createTestAccompagneProfile`, `createTestConversation`, `createTestMessage`, `createTestParrainage`. Tracker `Array<{ table, id }>` global. `cleanupAllFixtures()` DELETE en ordre FK-safe + balayage `auth.users`.
+- **Helper session paywall (`tests/integration/_lib/supabase-session-mock.ts`)** : `mockSupabaseSession(userId)` surcharge `vi.mocked(createClient)` pour fournir un client admin avec `auth.getUser()` simule. Indispensable pour tester les server actions sans cookies reels.
+- **Mocks globaux** : `@sentry/nextjs` no-op, `resend` (classe `FakeResend`), `@/lib/email-queue.enqueueEmail`, `@/lib/emails.send*` (synchrones du webhook), `@/lib/stripe.{subscriptions,paymentMethods,checkout,customers}`, `next/headers.cookies()`, `@/lib/supabase/server.createClient`. Surcharges per-test via `vi.mocked(...).mockResolvedValueOnce(...)`.
+- **Idempotence cross-tests** : chaque event Stripe genere un `event.id` UUID v4 unique pour eviter collisions sur `stripe_events_processed`.
+
+**Pattern interdit :**
+- **`INSERT/UPDATE/DELETE` direct dans une table BDD prod depuis `tests/integration/`** : tous les tests doivent tourner contre Supabase local (`SUPABASE_URL=http://localhost:54321`). Garde-fou code-level dans `setup.ts` rejete tout autre URL au demarrage.
+- **Lancer un vrai serveur Resend / Workflow / Sentry depuis les tests** : tous les SDK externes doivent rester mockes globalement.
+- **Skipper le cleanup** : `cleanupAllFixtures` doit etre appele dans `afterAll` (et `beforeAll` defense en profondeur) pour eviter les rows orphelines en BDD entre runs.
+- **Modifier le schema BDD via migration depuis les tests** : les tests utilisent les tables existantes telles quelles. Les migrations restent gerees via `supabase/migrations/`.
+
+**Regle :** Toute future story metier introduisant une server action sensible (paywall, signature externe, idempotence cross-system, calcul tarifaire) doit ajouter au moins **un test d'integration** dans `tests/integration/<flow>/`. Le test doit (a) utiliser les helpers existants `createTestUser`/`createTestSubscription` quand applicable, (b) mocker tout SDK externe via les patterns deja en place dans `setup.ts`, (c) cleanup ses fixtures via le tracker global. Le code review rejette toute extension de logique Stripe webhook ou paywall server action sans test d'integration accompagnant.

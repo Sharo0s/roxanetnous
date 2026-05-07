@@ -1,5 +1,5 @@
 {
-  "buildCommand": "npm run check:env && npm run lint:a11y-check && next build",
+  "buildCommand": "npm run check:env && npm run lint:a11y-check && (test \"$SKIP_E2E_TESTS\" = \"true\" || npm run test:integration) && next build",
   "crons": [
     {
       "path": "/api/cron/update-badges",

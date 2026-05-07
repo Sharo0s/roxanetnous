@@ -14,7 +14,10 @@
     "a11y:axe": "playwright test",
     "a11y:axe:baseline": "node scripts/build-axe-baseline.mjs",
     "a11y:axe:check": "node scripts/check-axe-baseline.mjs",
-    "test:supabase": "tsx scripts/test-supabase.ts"
+    "test:supabase": "tsx scripts/test-supabase.ts",
+    "test:integration": "vitest run",
+    "test:integration:watch": "vitest",
+    "test:integration:coverage": "vitest run --coverage"
   },
   "keywords": [],
   "author": "",
@@ -47,11 +50,13 @@
     "@eslint/js": "^9.39.4",
     "@playwright/test": "^1.59.1",
     "@types/leaflet": "^1.9.21",
+    "@vitest/coverage-v8": "^4.1.5",
     "axe-core": "^4.11.4",
     "eslint": "^9.39.4",
     "eslint-plugin-jsx-a11y": "^6.10.2",
     "eslint-plugin-react-hooks": "^7.1.1",
     "tsx": "^4.21.0",
-    "typescript-eslint": "^8.59.1"
+    "typescript-eslint": "^8.59.1",
+    "vitest": "^4.1.5"
   }
 }
