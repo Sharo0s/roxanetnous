@@ -1,5 +1,5 @@
 # generated: 2026-05-06
-# last_updated: 2026-05-09 (Story 4.5 DONE apres CI Vercel verte commit 735ea92 code review patches. Helper lib/get-client-ip.ts greenfield + migration 3 call-sites parrainage/auth/waitlist + tests unitaires Vitest 8 cas U1-U7b + garde-fou npm run check:ip-spoofing avec existsSync allowlist + DECISIONS F10 + Vitest multi-projets integration/unit. Code review 4 patches appliques (P1 dead exclude / P2 existsSync allowlist / P3 test U6 Headers natif / P4 guard empty-string + U7/U7b) + 2 defers loges (IPv6/injection hors scope, AC16 f-i post-deploy preview). Acquit AI-3.5 retro Epic 3.)
+# last_updated: 2026-05-09 (Story 4.6 REVIEW via bmad-dev-story. Variante locale SCP (D5 elargie) : factories Supabase non-typees, cast localise `as unknown as SupabaseClient<Database>` dans 7 pages admin (decision SCP avec Sylvain apres decouverte 48 erreurs TS hors-admin sur 17 fichiers). 8 `\bas any\b` resorbes + 5 `(x: any)` cascades, types locaux `AdminLogDetails`/`RawAnnonceWithProfile` + helper `extractUser`, desambiguisation FK Supabase `users!user_id` sur 4 fichiers. types/supabase.ts MCP-genere ~1700 lignes, scripts/gen-types-supabase.mjs + check-as-any-admin.mjs crees, vercel.json buildCommand etendu, DECISIONS.md F11 ajoutee. Checks verts : tsc 0 erreur, lint 213 warnings (vs baseline 226 beneficiaire), lint:a11y-check 155 baseline OK, a11y:axe:check 0 Critical/Serious, check:as-any-admin + fail-loud OK, build complet OK, test:unit 8/8 OK story 4.5. 16 fichiers touches (vs 18 plan). Acquit AI-3.6 retro Epic 3.)
 # project: roxanetnous
 # project_key: NOKEY
 # tracking_system: file-system
@@ -55,7 +55,7 @@
 #   -> 4.3 email queue -> 4.4 tests metier. Apres ces 5 stories, go-live Bretagne autorise.
 
 generated: 2026-05-06
-last_updated: 2026-05-09 (Story 4.5 DONE apres CI Vercel verte commit 735ea92 code review. Helper lib/get-client-ip.ts + migration 3 call-sites + 8 tests unitaires + garde-fou check:ip-spoofing + DECISIONS F10. 4 patches code review appliques + 2 defers loges. Acquit AI-3.5 retro Epic 3.)
+last_updated: 2026-05-09 (Story 4.9 DONE apres CI Vercel verte commit 3b7f998 (deployment dpl_GV3bFRLkk3RN3kGWh9q4MNUmDzu3 state READY, build 72 s region iad1). Module lib/escape-html.ts cree (single source of truth, 4 remplacements & < > "), migration 2 call-sites dupliques (lib/emails.ts + lib/email-templates.ts), fix XSS chirurgical params.motif x2 (lib/emails.ts:80-81 messages.refuse + messages.a_completer), suite Vitest tests/unit/escape-html.test.ts 10 tests T1-T10 (script tag, event handler, javascript: URI, double-encodage volontaire, unicode, attribute breakout, single quote preserve, empty, no-op, combinaison). Audit grep AC10 : 1 seule fonction escapeHtml dans lib/. Validations locales toutes vertes : tsc 0 erreur, lint 213 warnings (baseline stable), lint:a11y-check 155 stable, a11y:axe:check 0 delta Critical/Serious 7 parcours, test:unit 18/18 (147 ms), build local 4.8s 52 pages. Acquit AI-3.9 retro Epic 3 (deferred review 2.3 du 2026-05-04). Bloquant go-live : non. 5 fichiers commit livraison : 4 code + story.md.)
 project: roxanetnous
 project_key: NOKEY
 tracking_system: file-system
@@ -151,9 +151,9 @@ development_status:
 
   # Stories ordre 2 - DIFFEREES (non bloquantes go-live)
   4-5-hardening-ip-spoofing: done
-  4-6-resorption-as-any-pages-admin: backlog
+  4-6-resorption-as-any-pages-admin: done
   4-8-separation-required-optional-on-preview-envs: done
-  4-9-validation-escape-html-test-xss-emails: backlog
+  4-9-validation-escape-html-test-xss-emails: done
 
   # Stories conditionnelles (declenchement sur seuil)
   4-10-ocr-perfectionnement: conditionnel

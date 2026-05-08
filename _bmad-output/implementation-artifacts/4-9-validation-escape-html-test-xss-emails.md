@@ -1,6 +1,6 @@
 # Story 4.9 : Validation `escapeHtml` test XSS templates email
 
-Status: review
+Status: done
 
 <!-- Note : Story ordre 2 NON BLOQUANTE go-live Bretagne (cf. epic-4.md ligne 59 + 345 « Bloquant go-live : non »). Acquit de la dette AI-3.9 issue de la retro Epic 3 (epic-3-retro-2026-05-07.md) qui elle-meme est l'heritage du `deferred-work.md` review 2.3 du 2026-05-04 : « `escapeHtml` dans `lib/emails.ts` non visible dans le diff -- dependance externe utilisee intensivement, a valider hors review (test XSS dedie sur les templates email) ». La story livre (1) une suite de tests unitaires Vitest sur `escapeHtml` couvrant les vecteurs XSS classiques + (2) un audit grep des interpolations dans les templates email pour detecter les fuites residuelles + (3) un fix chirurgical des fuites residuelles confirmees + (4) une factorisation `escapeHtml` (actuellement DUPLIQUEE dans `lib/emails.ts:14` ET `lib/email-templates.ts:11`) dans un module dedie `lib/escape-html.ts`. -->
 
@@ -180,12 +180,12 @@ Elle s'appuie sur les decouvertes des stories precedentes :
   - [x] Sub 7.6 : `npm run build` -> exit 0, compilation 4.8s, 52 pages statiques.
   - [x] Sub 7.7 : `git status` confirme **4 fichiers** : `lib/escape-html.ts` (nouveau), `lib/emails.ts` (modifie), `lib/email-templates.ts` (modifie), `tests/unit/escape-html.test.ts` (nouveau). `git diff --stat` sur les 2 fichiers modifies : `lib/email-templates.ts | 6 ++----`, `lib/emails.ts | 9 +++------`.
 
-- [ ] **Task 8 — Commit livraison + validation CI** (AC: #14, #15)
-  - [ ] Sub 8.1 : `git add` les 4 fichiers + commit livraison : `git commit -m "Story 4.9 : factorisation escapeHtml + tests XSS + fix params.motif"`.
-  - [ ] Sub 8.2 : `git push` -> trigger CI Vercel.
-  - [ ] Sub 8.3 : Verifier CI Vercel verte (build + tests:unit + tests:integration via SKIP_E2E_TESTS=true heritage 4.4 + lint:a11y-check). Documenter dans Completion Notes List.
-  - [ ] Sub 8.4 : Commit cloture `Story 4.9 : statut done apres CI Vercel verte` apres confirmation CI verte.
-  - [ ] Sub 8.5 : Mettre a jour `sprint-status.yaml` : `4-9-validation-escape-html-test-xss-emails: done`. Met aussi a jour `last_updated`.
+- [x] **Task 8 — Commit livraison + validation CI** (AC: #14, #15)
+  - [x] Sub 8.1 : Commit livraison cree -- commit SHA `3b7f998` avec message "Story 4.9 : factorisation escapeHtml + tests XSS + fix params.motif". 5 fichiers (4 code + story.md).
+  - [x] Sub 8.2 : `git push` OK -> trigger Vercel deployment `dpl_GV3bFRLkk3RN3kGWh9q4MNUmDzu3`.
+  - [x] Sub 8.3 : **CI Vercel verte** -- deployment state **READY**, build 72 s (region iad1, framework nextjs). Aliases prod : roxanetnous.vercel.app, roxanetnous-roxanetnous.vercel.app, roxanetnous-git-main-roxanetnous.vercel.app.
+  - [x] Sub 8.4 : Commit cloture `Story 4.9 : statut done apres CI Vercel verte` (ce commit).
+  - [x] Sub 8.5 : `sprint-status.yaml` -> `4-9-validation-escape-html-test-xss-emails: done` + `last_updated` MAJ.
 
 ## Dev Notes
 
@@ -484,3 +484,4 @@ A renseigner pour toute story avec impact UI (ignorer si pas de changement visue
 |------------|----------|-----------------------------------------------------------------------------|-----------------------|
 | 2026-05-09 | 4.9      | Story creation et cadrage via bmad-create-story                             | Sylvain (PM agent)    |
 | 2026-05-09 | 4.9      | Implementation via bmad-dev-story : module `lib/escape-html.ts`, migration 2 call-sites, fix XSS `params.motif` x2, 10 tests Vitest. Status -> review. | claude-opus-4-7[1m] (Dev agent) |
+| 2026-05-09 | 4.9      | CI Vercel verte sur commit 3b7f998 (deployment dpl_GV3bFRLkk3RN3kGWh9q4MNUmDzu3 state READY, build 72 s). Status -> done. | claude-opus-4-7[1m] (Dev agent) |
