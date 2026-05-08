@@ -7,6 +7,7 @@ import { sendWelcomeEmail } from '@/lib/emails'
 import { stripe } from '@/lib/stripe'
 import { getSubscriptionStatus } from '@/lib/subscription-helpers'
 import { createParrainageRelation } from '@/app/actions/parrainage'
+import { getClientIp } from '@/lib/get-client-ip'
 
 export type AuthResult = {
   error?: string
@@ -91,10 +92,7 @@ export async function signup(formData: FormData): Promise<AuthResult> {
     if (parrainageCode) {
       try {
         const h = await headers()
-        const ip =
-          h.get('x-forwarded-for')?.split(',')[0]?.trim() ||
-          h.get('x-real-ip') ||
-          null
+        const ip = getClientIp(h)
         const result = await createParrainageRelation({
           code: parrainageCode,
           filleuleId: authData.user.id,

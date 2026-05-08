@@ -18,6 +18,7 @@ import {
   type GenerateCodeResult,
 } from '@/lib/parrainage-codes'
 import { hashRateLimitKey } from '@/lib/rate-limit-hash'
+import { getClientIpOrUnknown } from '@/lib/get-client-ip'
 
 // Alphabet 31 chars sans 0/O/1/I/L (lisibilité). Doit rester en sync avec lib/parrainage-codes.ts.
 const CODE_ALPHABET = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'
@@ -327,19 +328,13 @@ export async function validateCode(rawCode: string): Promise<ValidationCodeResul
   const supabaseAdmin = await createClient({ serviceRole: true })
 
   // H12 : check rate-limit avant toute lecture BDD. Key = IP du client ;
-  // si IP indisponible (cas rare en preview/dev), fallback global avec
-  // limite plus stricte pour éviter qu'un attaquant masque son IP.
-  // TODO story 4.5 : remplacer x-forwarded-for par x-vercel-forwarded-for
-  // (hardening IP spoofing). Vercel sanitize en prod, OK pour MVP.
+  // si IP indisponible (cas rare en preview/dev), fallback string 'unknown'.
   // Review 2026-05-07 : rateLimitKey hisse hors du try pour partager le
   // keyHash entre la branche success et le catch RPC error.
   let rateLimitKey: string | null = null
   try {
     const h = await headers()
-    const ip =
-      h.get('x-forwarded-for')?.split(',')[0]?.trim() ||
-      h.get('x-real-ip') ||
-      'unknown'
+    const ip = getClientIpOrUnknown(h)
     rateLimitKey = `validate_code:${ip}`
     const { data: allowed } = await supabaseAdmin.rpc('try_consume_rate_limit', {
       p_key: rateLimitKey,

@@ -1,5 +1,5 @@
 # generated: 2026-05-06
-# last_updated: 2026-05-08 (Story 4.8 DONE apres redeploy prod Vercel verte 2026-05-08 + config 6 vars Sentry/RATE_LIMIT_HASH_SALT scope production. Code review 1 patch applique + 8 defers loges. AC14 valide bout-en-bout : durcissement exit 1 prod a casse la build comme prevu (regression cible), declenchant la configuration manquante Sentry depuis story 4.1.)
+# last_updated: 2026-05-09 (Story 4.5 cadree formellement et passee ready-for-dev. Premiere des 5 stories ordre 2 differees Epic 4. Acquit AI-3.5 retro Epic 3 + TODO `parrainage.ts:332`. Helper `lib/get-client-ip.ts` greenfield + migration 3 call-sites + DECISIONS F10 + garde-fou `npm run check:ip-spoofing`. Story 4.8 DONE apres redeploy prod Vercel verte 2026-05-08 + config 6 vars Sentry/RATE_LIMIT_HASH_SALT scope production. Code review 1 patch applique + 8 defers loges. AC14 valide bout-en-bout : durcissement exit 1 prod a casse la build comme prevu (regression cible), declenchant la configuration manquante Sentry depuis story 4.1.)
 # project: roxanetnous
 # project_key: NOKEY
 # tracking_system: file-system
@@ -55,7 +55,7 @@
 #   -> 4.3 email queue -> 4.4 tests metier. Apres ces 5 stories, go-live Bretagne autorise.
 
 generated: 2026-05-06
-last_updated: 2026-05-08
+last_updated: 2026-05-09 (Story 4.5 review apres dev-story local : helper lib/get-client-ip.ts greenfield + migration 3 call-sites parrainage/auth/waitlist + tests unitaires Vitest 5 cas + garde-fou npm run check:ip-spoofing + DECISIONS F10 + Vitest multi-projets. Acquit AI-3.5 retro Epic 3. Build/lint/lint:a11y-check/a11y:axe:check verts local. Tests integration validation deferee workflow GHA. Reste a executer post-deploy preview : tests manuels rate-limit (f) + waitlist (g) + audit BDD ip_inscription (h).)
 project: roxanetnous
 project_key: NOKEY
 tracking_system: file-system
@@ -150,7 +150,7 @@ development_status:
   4-7-seeds-supabase-tests-integration: done
 
   # Stories ordre 2 - DIFFEREES (non bloquantes go-live)
-  4-5-hardening-ip-spoofing: backlog
+  4-5-hardening-ip-spoofing: review
   4-6-resorption-as-any-pages-admin: backlog
   4-8-separation-required-optional-on-preview-envs: done
   4-9-validation-escape-html-test-xss-emails: backlog

@@ -4,6 +4,7 @@ import { headers } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
 import { getAllDepartements } from '@/lib/departements'
 import { enqueueWaitlistConfirmationEmail } from '@/lib/emails'
+import { getClientIp } from '@/lib/get-client-ip'
 
 export type WaitlistResult = {
   error?: string
@@ -39,10 +40,7 @@ export async function submitWaitlist(formData: FormData): Promise<WaitlistResult
   }
 
   const headersList = await headers()
-  const ip =
-    headersList.get('x-forwarded-for')?.split(',')[0]?.trim() ||
-    headersList.get('x-real-ip') ||
-    null
+  const ip = getClientIp(headersList)
   const userAgent = headersList.get('user-agent')?.slice(0, 500) || null
 
   const supabase = await createClient({ serviceRole: true })
