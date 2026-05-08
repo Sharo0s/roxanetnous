@@ -1,8 +1,10 @@
+import type { SupabaseClient } from '@supabase/supabase-js'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { DIPLOMES, EXPERIENCE_LEVELS, SPECIALITES } from '@/lib/constants'
 import { ValidationActions } from '@/components/admin/validation-actions'
+import type { Database } from '@/types/supabase'
 
 export default async function ValidationDetailPage({
   params,
@@ -15,20 +17,21 @@ export default async function ValidationDetailPage({
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const supabaseAdmin = await createClient({ serviceRole: true })
+  // Story 4.6 (variante locale SCP) : cast localise au point d'appel.
+  const supabaseAdmin = (await createClient({ serviceRole: true })) as unknown as SupabaseClient<Database>
 
   const { data: profile } = await supabaseAdmin
     .from('accompagnantes_profiles')
     .select(`
       *,
-      users:user_id (first_name, last_name, email, phone, created_at)
+      users!user_id (first_name, last_name, email, phone, created_at)
     `)
     .eq('id', id)
     .single()
 
   if (!profile) redirect('/admin')
 
-  const u = profile.users as any
+  const u = profile.users
 
   const diplomeLabels = (profile.diplomes as string[] || []).map(
     (d) => DIPLOMES.find((dp) => dp.value === d)?.label || d

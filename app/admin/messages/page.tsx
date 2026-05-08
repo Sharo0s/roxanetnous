@@ -1,12 +1,15 @@
+import type { SupabaseClient } from '@supabase/supabase-js'
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
+import type { Database } from '@/types/supabase'
 
 export default async function AdminMessagesPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return null
 
-  const supabaseAdmin = await createClient({ serviceRole: true })
+  // Story 4.6 (variante locale SCP) : cast localise au point d'appel.
+  const supabaseAdmin = (await createClient({ serviceRole: true })) as unknown as SupabaseClient<Database>
 
   const { data: conversations } = await supabaseAdmin
     .from('conversations')
@@ -17,7 +20,7 @@ export default async function AdminMessagesPage() {
       admin_id,
       accompagnantes_profiles:accompagnante_id (
         user_id,
-        users:user_id (first_name, last_name, email)
+        users!user_id (first_name, last_name, email)
       )
     `)
     .not('admin_id', 'is', null)
@@ -46,8 +49,8 @@ export default async function AdminMessagesPage() {
         </div>
       ) : (
         <div className="space-y-2">
-          {conversations.map((conv: any) => {
-            const aux = (conv.accompagnantes_profiles as any)?.users
+          {conversations.map((conv) => {
+            const aux = conv.accompagnantes_profiles?.users
             const unread = unreadCounts[conv.id] || 0
             const fullName = `${aux?.first_name || ''} ${aux?.last_name || ''}`.trim() || 'Accompagnante'
             const initials = `${aux?.first_name?.[0] || ''}${aux?.last_name?.[0] || ''}`

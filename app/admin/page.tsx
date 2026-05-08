@@ -1,5 +1,7 @@
+import type { SupabaseClient } from '@supabase/supabase-js'
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
+import type { Database } from '@/types/supabase'
 import {
   getKpis,
   getInscriptionsParMois,
@@ -40,7 +42,8 @@ function formatFeedback(feedback: string | null) {
 }
 
 export default async function AdminDashboard() {
-  const supabaseAdmin = await createClient({ serviceRole: true })
+  // Story 4.6 (variante locale SCP) : cast localise au point d'appel.
+  const supabaseAdmin = (await createClient({ serviceRole: true })) as unknown as SupabaseClient<Database>
 
   const { data: pending } = await supabaseAdmin
     .from('accompagnantes_profiles')
@@ -54,7 +57,7 @@ export default async function AdminDashboard() {
       validation_status,
       created_at,
       user_id,
-      users:user_id (first_name, last_name, email)
+      users!user_id (first_name, last_name, email)
     `)
     .in('validation_status', ['en_attente', 'visio_a_planifier', 'visio_realisee'])
     .order('created_at', { ascending: true })
@@ -96,8 +99,8 @@ export default async function AdminDashboard() {
         <>
           <h2 className="text-lg font-semibold mb-4">Accompagnantes en cours de validation</h2>
           <div className="space-y-3 mb-8">
-            {pending.map((profile: any) => {
-              const u = profile.users as any
+            {pending.map((profile) => {
+              const u = profile.users
               const statusLabels: Record<string, string> = {
                 en_attente: 'En attente',
                 visio_a_planifier: 'En attente de visio',

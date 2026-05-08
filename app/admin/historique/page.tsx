@@ -1,13 +1,68 @@
+import type { SupabaseClient } from '@supabase/supabase-js'
 import { createClient } from '@/lib/supabase/server'
+import type { Database } from '@/types/supabase'
+
+// Story 4.6 : narrowing applicatif pour `admin_actions_log.details: Json | null`.
+// Whitelist des cles connues inserees par les actions admin (cf. app/actions/*.ts +
+// app/api/webhooks/stripe + app/api/cron/confirm-parrainages). Story 4.6 review pass 2
+// patch F1 : ajout des cles parrainage fraude (`flag`, `raison`, `via`, `coupon_id`,
+// `marraine_id`, `filleule_id`) absentes du whitelist initial qui forcaient le fallback
+// JSON sur les rows `parrainage_flag` (truncate mid-UUID -> perte de la valeur `flag`).
+type AdminLogDetails = {
+  motif?: string
+  decision?: string
+  status?: string
+  viewed_at?: string
+  notes?: string
+  notes_admin?: string | null
+  reason?: string
+  planifie_le?: string
+  visio_date?: string
+  deleted_at?: string
+  cancelled_at?: string
+  plan_type?: string
+  current_status?: string | null
+  stripe_subscription_id?: string
+  parrainage_id?: string
+  flag?: string
+  raison?: string
+  via?: string
+  coupon_id?: string
+  marraine_id?: string | null
+  filleule_id?: string | null
+}
+
+const PREFERRED_LIMIT = 200
+const FALLBACK_LIMIT = 200
+
+// Rendu de la cellule "Details" : prefere les cles humainement lisibles, fallback
+// JSON.stringify tronque pour ne pas masquer silencieusement les actions hors whitelist.
+function renderDetails(details: AdminLogDetails | null): string {
+  if (!details || typeof details !== 'object') return ''
+  const preferred =
+    details.motif ||
+    details.decision ||
+    details.status ||
+    details.reason ||
+    details.notes ||
+    details.flag ||
+    details.raison ||
+    details.via
+  if (preferred) return preferred.slice(0, PREFERRED_LIMIT)
+  const fallback = JSON.stringify(details)
+  return fallback === '{}' ? '' : fallback.slice(0, FALLBACK_LIMIT)
+}
 
 export default async function AdminHistoriquePage() {
-  const supabaseAdmin = await createClient({ serviceRole: true })
+  // Story 4.6 (variante locale SCP) : factories Supabase non typees `<Database>`
+  // pour preserver les 17 fichiers hors-admin. Cast localise au point d'appel.
+  const supabaseAdmin = (await createClient({ serviceRole: true })) as unknown as SupabaseClient<Database>
 
   const { data: logs } = await supabaseAdmin
     .from('admin_actions_log')
     .select(`
       id, action_type, target_type, target_id, details, created_at,
-      users:admin_id (first_name, last_name)
+      users!admin_id (first_name, last_name)
     `)
     .order('created_at', { ascending: false })
     .limit(100)
@@ -57,9 +112,12 @@ export default async function AdminHistoriquePage() {
                 </tr>
               </thead>
               <tbody>
-                {logs.map((log: any) => {
-                  const admin = log.users as any
-                  const details = log.details as any
+                {logs.map((log) => {
+                  const admin = log.users
+                  const rawDetails = log.details
+                  const details = (rawDetails && typeof rawDetails === 'object' && !Array.isArray(rawDetails)
+                    ? rawDetails
+                    : null) as AdminLogDetails | null
 
                   return (
                     <tr key={log.id} className="border-b last:border-0 hover:bg-accent/10">
@@ -83,7 +141,7 @@ export default async function AdminHistoriquePage() {
                         {log.target_type}
                       </td>
                       <td className="px-4 py-3 text-gray-400 text-xs max-w-[200px] truncate">
-                        {details?.motif || details?.decision || details?.status || ''}
+                        {renderDetails(details)}
                       </td>
                     </tr>
                   )

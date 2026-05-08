@@ -1,6 +1,31 @@
+import type { SupabaseClient } from '@supabase/supabase-js'
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import { AnnoncesSearchTable } from '@/components/admin/annonces-client'
+import type { Database } from '@/types/supabase'
+
+// Story 4.6 (D7) : cast applicatif chirurgical sur la forme retournee par
+// Supabase pour reconcilier les 2 branches de l'union annonce_aux/annonce_ben.
+// Tolere car (1) reflete fidelement la forme Supabase post-jointure imbriquee,
+// (2) evite un narrow conditionnel verbose, (3) reflete un type concret, pas une elision.
+type RawAnnonceWithProfile = {
+  id: string
+  titre: string
+  ville: string | null
+  code_postal: string | null
+  status: string
+  created_at: string
+  accompagnantes_profiles?: { users: { first_name: string; last_name: string; email: string } | null } | null
+  accompagnes_profiles?: { users: { first_name: string; last_name: string; email: string } | null } | null
+}
+
+function extractUser(
+  annonce: RawAnnonceWithProfile,
+  type: 'accompagnante' | 'accompagne',
+): { first_name: string; last_name: string; email: string } | null {
+  if (type === 'accompagnante') return annonce.accompagnantes_profiles?.users ?? null
+  return annonce.accompagnes_profiles?.users ?? null
+}
 
 export default async function AdminAnnoncesPage({
   searchParams,
@@ -9,7 +34,8 @@ export default async function AdminAnnoncesPage({
 }) {
   const params = await searchParams
 
-  const supabaseAdmin = await createClient({ serviceRole: true })
+  // Story 4.6 (variante locale SCP) : cast localise au point d'appel.
+  const supabaseAdmin = (await createClient({ serviceRole: true })) as unknown as SupabaseClient<Database>
   const type = params.type || 'accompagnante'
 
   // Charger les counts des deux types en parallele
@@ -20,7 +46,7 @@ export default async function AdminAnnoncesPage({
           .select(`
             id, titre, ville, code_postal, status, created_at, published_at, vues, contacts_count,
             accompagnantes_profiles:accompagnante_id (
-              users:user_id (first_name, last_name, email)
+              users!user_id (first_name, last_name, email)
             )
           `)
           .order('created_at', { ascending: false })
@@ -33,7 +59,7 @@ export default async function AdminAnnoncesPage({
           .select(`
             id, titre, ville, code_postal, status, created_at, published_at,
             accompagnes_profiles:accompagne_id (
-              users:user_id (first_name, last_name, email)
+              users!user_id (first_name, last_name, email)
             )
           `)
           .order('created_at', { ascending: false })
@@ -46,16 +72,16 @@ export default async function AdminAnnoncesPage({
   const auxCount = type === 'accompagnante' ? rawAnnonces.length : (auxResult.count ?? 0)
   const benCount = type === 'accompagne' ? rawAnnonces.length : (benResult.count ?? 0)
 
-  // Transformer les donnees pour le composant client
-  const annonces = rawAnnonces.map((annonce: any) => {
-    const profileData = type === 'accompagnante'
-      ? annonce.accompagnantes_profiles
-      : annonce.accompagnes_profiles
-    const u = (profileData as any)?.users
+  // Transformer les donnees pour le composant client. Cast applicatif sur
+  // rawAnnonces : l'inference Supabase produit une union avec la branche
+  // count head:true (forme `{ id }[]`). Le narrow vers RawAnnonceWithProfile[]
+  // reflete la branche reellement utilisee (data:select fluide).
+  const annonces = (rawAnnonces as RawAnnonceWithProfile[]).map((annonce) => {
+    const u = extractUser(annonce, type as 'accompagnante' | 'accompagne')
     return {
       id: annonce.id,
       titre: annonce.titre,
-      ville: annonce.ville,
+      ville: annonce.ville ?? '',
       code_postal: annonce.code_postal,
       status: annonce.status,
       created_at: annonce.created_at,

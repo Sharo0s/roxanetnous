@@ -1,5 +1,7 @@
+import type { SupabaseClient } from '@supabase/supabase-js'
 import { createClient } from '@/lib/supabase/server'
 import { SignalementActions } from '@/components/admin/signalement-actions'
+import type { Database } from '@/types/supabase'
 
 const CIBLE_TYPE_LABELS: Record<string, string> = {
   user: 'Utilisateur',
@@ -16,13 +18,14 @@ const DECISION_LABELS: Record<string, string> = {
 }
 
 export default async function AdminSignalementsPage() {
-  const supabaseAdmin = await createClient({ serviceRole: true })
+  // Story 4.6 (variante locale SCP) : cast localise au point d'appel.
+  const supabaseAdmin = (await createClient({ serviceRole: true })) as unknown as SupabaseClient<Database>
 
   const { data: signalements } = await supabaseAdmin
     .from('signalements')
     .select(`
       *,
-      auteur:auteur_id (first_name, last_name, email)
+      auteur:users!auteur_id (first_name, last_name, email)
     `)
     .order('created_at', { ascending: false })
 
@@ -41,8 +44,8 @@ export default async function AdminSignalementsPage() {
           </div>
         ) : (
           <div className="space-y-3">
-            {signalements.map((sig: any) => {
-              const auteur = sig.auteur as any
+            {signalements.map((sig) => {
+              const auteur = sig.auteur
               return (
                 <div key={sig.id} className="bg-white rounded-xl border p-5 hover:border-accent transition-colors">
                   <div className="flex items-start justify-between">

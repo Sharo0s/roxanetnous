@@ -1,8 +1,10 @@
+import type { SupabaseClient } from '@supabase/supabase-js'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { ChatWindow } from '@/components/messages/chat-window'
 import { markMessagesAsRead } from '@/app/actions/messages'
+import type { Database } from '@/types/supabase'
 
 export default async function AdminConversationPage({
   params,
@@ -14,7 +16,8 @@ export default async function AdminConversationPage({
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const supabaseAdmin = await createClient({ serviceRole: true })
+  // Story 4.6 (variante locale SCP) : cast localise au point d'appel.
+  const supabaseAdmin = (await createClient({ serviceRole: true })) as unknown as SupabaseClient<Database>
 
   const { data: conversation } = await supabaseAdmin
     .from('conversations')
@@ -24,7 +27,7 @@ export default async function AdminConversationPage({
       admin_id,
       accompagnantes_profiles:accompagnante_id (
         user_id,
-        users:user_id (first_name, last_name, email)
+        users!user_id (first_name, last_name, email)
       )
     `)
     .eq('id', id)
@@ -32,7 +35,7 @@ export default async function AdminConversationPage({
 
   if (!conversation || !conversation.admin_id) redirect('/admin/messages')
 
-  const aux = (conversation.accompagnantes_profiles as any)?.users
+  const aux = conversation.accompagnantes_profiles?.users
   const fullName = `${aux?.first_name || ''} ${aux?.last_name || ''}`.trim() || 'Accompagnante'
 
   const { data: messages } = await supabaseAdmin
