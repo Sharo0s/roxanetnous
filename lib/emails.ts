@@ -4,16 +4,13 @@ import * as Sentry from '@sentry/nextjs'
 import { Resend } from 'resend'
 import { createClient } from '@/lib/supabase/server'
 import { enqueueEmail } from '@/lib/email-queue'
+import { escapeHtml } from '@/lib/escape-html'
 import { logNotification } from '@/lib/notifications-log'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 
 const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || 'roxanetnous <onboarding@resend.dev>'
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'
-
-function escapeHtml(str: string): string {
-  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
-}
 
 export async function sendWelcomeEmail(params: {
   email: string
@@ -80,8 +77,8 @@ export async function sendValidationResultEmail(params: {
 
   const messages: Record<string, string> = {
     valide: 'Votre profil accompagnante a été validé par notre équipe. Vous pouvez désormais publier des annonces et être visible dans les recherches.',
-    refuse: `Votre profil accompagnante a été refusé.${params.motif ? ` Motif : ${params.motif}` : ''} Vous pouvez mettre à jour votre profil et le soumettre à nouveau.`,
-    a_completer: `Des informations complémentaires sont nécessaires pour valider votre profil.${params.motif ? ` Détails : ${params.motif}` : ''} Veuillez mettre à jour votre profil.`,
+    refuse: `Votre profil accompagnante a été refusé.${params.motif ? ` Motif : ${escapeHtml(params.motif)}` : ''} Vous pouvez mettre à jour votre profil et le soumettre à nouveau.`,
+    a_completer: `Des informations complémentaires sont nécessaires pour valider votre profil.${params.motif ? ` Détails : ${escapeHtml(params.motif)}` : ''} Veuillez mettre à jour votre profil.`,
   }
 
   try {

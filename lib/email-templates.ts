@@ -6,11 +6,9 @@
 // HTML. Cela evite les contraintes du sandbox workflow function et facilite
 // les tests unitaires futurs (story 4.4).
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'
+import { escapeHtml } from '@/lib/escape-html'
 
-function escapeHtml(str: string): string {
-  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
-}
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'
 
 export function renderWaitlistConfirmationHtml(params: {
   codeDepartement: string
