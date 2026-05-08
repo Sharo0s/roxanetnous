@@ -248,7 +248,7 @@ So that un attaquant ne puisse pas contourner les rate-limits ou empoisonner les
 ## Story 4.6 : Resorption `as any` pages admin
 
 As developpeur du projet,
-I want que les pages admin (`app/admin/parrainages/page.tsx`, `app/admin/parrainages/blacklist/page.tsx`, autres pages admin contenant `as any`) soient typees correctement avec les types Supabase generes,
+I want que les pages admin (`app/admin/page.tsx`, `app/admin/historique/page.tsx`, `app/admin/messages/page.tsx`, `app/admin/messages/[id]/page.tsx`, `app/admin/annonces/page.tsx`, `app/admin/signalements/page.tsx`, `app/admin/validation/[id]/page.tsx`) soient typees correctement avec les types Supabase generes,
 So that les regressions de schema BDD soient detectees a la compilation TypeScript plutot qu'au runtime.
 
 **Acceptance Criteria :**
@@ -261,8 +261,9 @@ So that les regressions de schema BDD soient detectees a la compilation TypeScri
 
 **Notes implementation** :
 - Inventaire prealable : grep `as any` sur `app/admin/` pour cadrer le perimetre.
-- Generation types : `npx supabase gen types typescript --project-id <id> > types/supabase.ts`.
+- Generation types : MCP `supabase__generate_typescript_types` (autoritaire pour ce projet, cf. `.claude/CLAUDE.md`). Pas de CLI Supabase requise.
 - Acquit candidat I de l'Epic 3 + dette deferred Epic 2.
+- **MAJ 2026-05-09** : la mention initiale `parrainages/page.tsx` + `parrainages/blacklist/page.tsx` est obsolete (verification grep 2026-05-09 -> 0 match sur ces 2 fichiers, probablement nettoyes en cours d'Epic 2/3). La story livre les 7 fichiers reels identifies par grep `\bas any\b app/admin/`.
 
 **Bloquant go-live** : non.
 
