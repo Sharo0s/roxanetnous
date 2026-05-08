@@ -1,6 +1,6 @@
 # Story 4.8 : Separation REQUIRED vs OPTIONAL_ON_PREVIEW dans `check-required-env.mjs`
 
-Status: review
+Status: done
 
 <!-- Note : Story ordre 2 NON BLOQUANTE go-live Bretagne (cf. epic-4.md ligne 58 + sprint-status.yaml ligne 156). Acquit de la dette AI-3.8 issue de la retro Epic 3 (epic-3-retro-2026-05-07.md ligne 159). Le pattern productionOnly:true a deja ete partiellement introduit story 4.1 (cf. patch review 2026-05-07 sur scripts/check-required-env.mjs:46-60) — cette story formalise l'API en renommant productionOnly -> OPTIONAL_ON_PREVIEW + en passant le script en exit 1 sur prod si REQUIRED manquant (durcissement par rapport au warn-only actuel). -->
 
@@ -205,12 +205,12 @@ Elle s'appuie sur les decouvertes intermediaires des stories ordre 1 :
   - [x] Sub 5.4 : `npm run build` (avec `.env.local` complet) -> exit 0.
   - [x] Sub 5.5 : `git diff --stat` montre **3 fichiers modifies** : `scripts/check-required-env.mjs`, `NEXT_STEPS.md`, `TODO-LAUNCH.md`.
 
-- [ ] **Task 6 — Commit livraison + validation preview Vercel** (AC: #14, #16)
+- [x] **Task 6 — Commit livraison + validation preview Vercel** (AC: #14, #16)
   - [x] Sub 6.1 : `git add` les 3 fichiers modifies + commit livraison : `git commit -m "Story 4.8 : separation REQUIRED vs OPTIONAL_ON_PREVIEW dans check-required-env"`.
-  - [ ] Sub 6.2 : `git push` -> trigger build preview Vercel. (post-livraison cote Sylvain)
-  - [ ] Sub 6.3 : Verifier les logs preview Vercel : aucun WARN sur Sentry/RATE_LIMIT_HASH_SALT (regression cible). Build preview verte. (post-livraison cote Sylvain)
-  - [ ] Sub 6.4 : Documenter dans `Completion Notes List` : extrait des logs preview montrant l'absence de WARN (avant/apres comparaison). (post-livraison)
-  - [ ] Sub 6.5 : Apres CI verte sur main, commit cloture : `git commit --allow-empty -m "Story 4.8 : statut done apres CI Vercel verte"`. (post-CI)
+  - [x] Sub 6.2 : `git push` (commit livraison c505f78 + commit review patch 8d92456) -> trigger build prod Vercel.
+  - [x] Sub 6.3 : Build prod initialement ERROR (5 vars Sentry/RATE_LIMIT_HASH_SALT non configurees scope production). Configuration des 6 vars Vercel scope Production effectuee 2026-05-08 (NEXT_PUBLIC_SENTRY_DSN, SENTRY_DSN, SENTRY_ORG=roxanetnous, SENTRY_PROJECT=roxanetnous, RATE_LIMIT_HASH_SALT, SENTRY_AUTH_TOKEN). Redeploy 2026-05-08 verifie via MCP Vercel : dpl_6iReah6atXaaZigGa21W3sS6twSs **READY** (vert). Branche prod du script desormais validee bout-en-bout (exit 0 quand toutes vars set, exit 1 verifie manuellement quand absentes).
+  - [x] Sub 6.4 : Documente dans `Completion Notes List` post-Sub6.3 : ERROR initial sur 5 vars OPTIONAL_ON_PREVIEW (regression cible AC2 confirmee), build verte apres config Vercel.
+  - [x] Sub 6.5 : Commit cloture `Story 4.8 : statut done apres CI Vercel verte` execute 2026-05-08.
 
 ### Review Findings (2026-05-07, code review adversarial 3 layers)
 
@@ -471,7 +471,40 @@ claude-opus-4-7[1m]
 - `npm run build` -> exit 0 (next build complet, aucune nouvelle erreur).
 - `git diff --stat` confirme 3 fichiers modifies (`scripts/check-required-env.mjs` 127 lignes diff, `NEXT_STEPS.md` 28 lignes diff, `TODO-LAUNCH.md` 2 lignes diff).
 
-**AC14 — Validation preview Vercel** : action manuelle Sylvain post-merge. A consigner ici apres deploiement preview de la PR (extrait logs build preview montrant l'absence de `WARN: NEXT_PUBLIC_SENTRY_DSN ...` etc.).
+**AC14 — Validation prod Vercel (consignee 2026-05-08)** :
+
+Le projet roxanetnous utilise des deploiements `target: production` directs sur main (pas de preview Vercel separee). La validation AC14 a donc ete faite sur la build production.
+
+**Phase 1 — Build prod ERROR initiale** (regression cible AC2 confirmee) :
+- Deploiement `dpl_Cr6ELWdt8WU76cZY1VfYPawKQBRR` (commit `8d92456`, 2026-05-07) : state ERROR.
+- Logs build (extraits via MCP Vercel) :
+  ```
+  > node scripts/check-required-env.mjs
+  ERROR: NEXT_PUBLIC_SENTRY_DSN is not set in VERCEL_ENV=production. DSN Sentry expose au client (capture exceptions browser).
+  ERROR: SENTRY_DSN is not set in VERCEL_ENV=production. DSN Sentry server-side (peut etre identique au public).
+  ERROR: SENTRY_ORG is not set in VERCEL_ENV=production. Slug organisation Sentry (upload sourcemaps build-time).
+  ERROR: SENTRY_PROJECT is not set in VERCEL_ENV=production. Slug projet Sentry (upload sourcemaps build-time).
+  ERROR: RATE_LIMIT_HASH_SALT is not set in VERCEL_ENV=production. Sel HMAC hash rate-limit Sentry (irreversibilite IP).
+  Error: Command "npm run check:env && ..." exited with 1
+  ```
+- **Comportement strictement conforme AC2** : `console.error` + libelle `ERROR:` + `process.exit(1)` casse la build. Le durcissement story 4.8 fonctionne.
+
+**Phase 2 — Configuration vars Vercel scope Production (2026-05-08)** :
+- Creation projet Sentry `roxanetnous` org slug `roxanetnous` (Data Storage Region : European Union).
+- 6 variables ajoutees scope Production :
+  - `NEXT_PUBLIC_SENTRY_DSN` = `https://c147bf2b...@o4511353445154816.ingest.de.sentry.io/4511354180010064`
+  - `SENTRY_DSN` = idem
+  - `SENTRY_ORG` = `roxanetnous`
+  - `SENTRY_PROJECT` = `roxanetnous`
+  - `RATE_LIMIT_HASH_SALT` = `90e8bd0fa5ce652c91885b74636c0db470d97c89907c55327db3d440d10e45d9` (genere `openssl rand -hex 32`)
+  - `SENTRY_AUTH_TOKEN` = Organization Token Sentry scope `org:ci` (Source Map Upload, Release Creation, Code Mappings) — nom `vercel-roxanetnous-prod`
+
+**Phase 3 — Redeploy READY** :
+- Deploiement `dpl_6iReah6atXaaZigGa21W3sS6twSs` (action: redeploy, originalDeploymentId: `dpl_Cr6ELWdt8WU76cZY1VfYPawKQBRR`, commit `8d92456`, 2026-05-08) : state **READY**.
+- URL prod active : `https://roxanetnous-b12dh1n8d-roxanetnous.vercel.app`.
+- Build prod verte avec les 9 REQUIRED + 5 OPTIONAL_ON_PREVIEW configurees. Comportement story 4.8 valide bout-en-bout en prod reelle.
+
+**Conclusion AC14** : la regression cible (durcissement exit 1 prod sur OPTIONAL_ON_PREVIEW manquantes) a casse la build comme prevu, declenchant la configuration manquante des 6 vars Sentry/RATE_LIMIT_HASH_SALT scope prod (action restee en suspens depuis story 4.1). Story 4.8 a donc rempli son role de garde-fou go-live.
 
 ### File List
 
@@ -482,7 +515,9 @@ claude-opus-4-7[1m]
 ## Change Log
 
 - 2026-05-07 : Story 4.8 livree (commit livraison). Refactor `scripts/check-required-env.mjs` (separation REQUIRED + OPTIONAL_ON_PREVIEW, exit 1 prod, preview differencie). Documentation `NEXT_STEPS.md` + `TODO-LAUNCH.md` mises a jour. Tests manuels 6 contextes AC8 verts. tsc/lint a11y/axe/build locaux verts. Statut story -> `review` ; sprint-status `4-8-separation-required-optional-on-preview-envs` -> `review`.
-- 2026-05-07 : Code review adversarial 3 layers (Blind Hunter + Edge Case Hunter + Acceptance Auditor). Verdict global : 14/14 ACs PASS sur le fond. 1 patch applique (`scripts/check-required-env.mjs:58` `console.warn` -> `console.error`, libelle `WARN (preview):` -> `ERROR (preview):` pour coherence severite vs exit 1). 8 defers logues dans `deferred-work.md`. 3 dismissed (comportement cible spec). AC3 + AC8(c) + Completion Notes (c) synchronises avec le nouveau libelle. Re-test contexte (c) confirme : sortie `ERROR (preview): RESEND_API_KEY ...` + exit=1. Patch reste uncommitted (commit patch a la charge de Sylvain selon convention projet).
+- 2026-05-07 : Code review adversarial 3 layers (Blind Hunter + Edge Case Hunter + Acceptance Auditor). Verdict global : 14/14 ACs PASS sur le fond. 1 patch applique (`scripts/check-required-env.mjs:58` `console.warn` -> `console.error`, libelle `WARN (preview):` -> `ERROR (preview):` pour coherence severite vs exit 1). 8 defers logues dans `deferred-work.md`. 3 dismissed (comportement cible spec). AC3 + AC8(c) + Completion Notes (c) synchronises avec le nouveau libelle. Re-test contexte (c) confirme : sortie `ERROR (preview): RESEND_API_KEY ...` + exit=1.
+- 2026-05-07 : Patch code review committe (`8d92456` + push origin/main).
+- 2026-05-08 : Build prod initialement ERROR (commit `8d92456`, dpl_Cr6ELWdt8WU76cZY1VfYPawKQBRR) sur 5 vars Sentry/RATE_LIMIT_HASH_SALT non configurees scope production Vercel. Regression cible AC2 confirmee : durcissement exit 1 prod fonctionne, casse la build comme prevu. Action manuelle Sylvain : creation projet Sentry `roxanetnous` (EU region, slug roxanetnous) + configuration 6 vars Vercel scope Production (NEXT_PUBLIC_SENTRY_DSN, SENTRY_DSN, SENTRY_ORG, SENTRY_PROJECT, RATE_LIMIT_HASH_SALT, SENTRY_AUTH_TOKEN org:ci scope). Redeploy `dpl_6iReah6atXaaZigGa21W3sS6twSs` state **READY** verifie via MCP Vercel. Statut story -> `done` ; sprint-status `4-8-separation-required-optional-on-preview-envs` -> `done`. Action complementaire restante : creer une action manuelle TODO-LAUNCH.md ou story dediee pour valider que les vars Sentry sont aussi necessaires scope **Preview** (les preview deployments declencheraient ERROR si on en faisait un) — ou passer en `OPTIONAL_ON_PREVIEW` reste correct, decision a prendre Epic 5+.
 
 ## DoD a11y
 
