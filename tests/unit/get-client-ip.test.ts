@@ -1,6 +1,8 @@
 // Story 4.5 : tests unitaires purs pour le helper de detection IP.
 // Pas de Supabase, pas de fixtures, pas de mock Sentry. Vitest seul.
-// AC6 : 5 cas U1-U5 garantissant le contrat anti-spoofing du helper.
+// AC6 : cas U1-U5 garantissant le contrat anti-spoofing du helper.
+// Code review story 4.5 : U6 (Headers natif, lock contrat SDK runtime),
+// U7 (empty-string normalise en absence d'IP, P4 anti-DoS bucket vide).
 
 import { describe, it, expect } from 'vitest'
 import { getClientIp, getClientIpOrUnknown, type RequestHeaders } from '@/lib/get-client-ip'
@@ -33,11 +35,26 @@ describe('getClientIp', () => {
     const h = makeHeaders({ 'x-real-ip': '1.2.3.4', 'x-forwarded-for': '5.6.7.8' })
     expect(getClientIp(h)).toBe('1.2.3.4')
   })
+
+  it('U6 : accepte un Headers natif (lock contrat SDK runtime path)', () => {
+    const h = new Headers([['x-real-ip', '1.2.3.4']])
+    expect(getClientIp(h)).toBe('1.2.3.4')
+  })
+
+  it('U7 : x-real-ip vide normalise en null (anti rate-limit collapse)', () => {
+    const h = makeHeaders({ 'x-real-ip': '' })
+    expect(getClientIp(h)).toBeNull()
+  })
 })
 
 describe('getClientIpOrUnknown', () => {
   it('U3 : retourne "unknown" quand x-real-ip absent', () => {
     const h = makeHeaders({})
+    expect(getClientIpOrUnknown(h)).toBe('unknown')
+  })
+
+  it('U7b : x-real-ip vide retourne "unknown" (pas de bucket waitlist: vide)', () => {
+    const h = makeHeaders({ 'x-real-ip': '' })
     expect(getClientIpOrUnknown(h)).toBe('unknown')
   })
 })

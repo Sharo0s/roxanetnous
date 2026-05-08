@@ -531,6 +531,40 @@ claude-opus-4-7
 | --- | --- | --- | --- |
 | 2026-05-09 | 1.0 | Helper `lib/get-client-ip.ts` (greenfield) + migration 3 call-sites parrainage/auth/waitlist (suppression TODO `parrainage.ts:332`, acquit AI-3.5 retro Epic 3) + tests unitaires Vitest 5 cas U1-U5 + garde-fou `npm run check:ip-spoofing` integre `vercel.json:buildCommand` + DECISIONS.md F10 + Vitest multi-projets `integration`/`unit`. Status -> review. | Amelia (dev agent) |
 
+### Review Findings
+
+Code review adversariale 3 couches (Blind Hunter, Edge Case Hunter, Acceptance Auditor) executee 2026-05-09 sur commit `510bae2`. 13 findings remontes, 7 dismissed (faux positifs invalides par Edge Case verification du SDK), 4 patches, 2 defers.
+
+**Verifications cles invalidant des hypotheses :**
+- `@vercel/functions@3.5.0` `ipAddress()` discriminator runtime (`"headers" in input`) accepte le passage direct `ipAddress(headers)` avec un `RequestHeaders` duck-type. Helper fonctionnel en prod, tests U1-U5 representatifs (Edge Case lecture `node_modules/@vercel/functions/headers.js:58-61`).
+- `vitest@4.1.5` supporte la config inline `projects: [...]` (Edge Case lecture `node_modules/vitest/package.json` + run reel `npx vitest run --project unit` -> 5 PASS).
+
+**Patches appliques (2026-05-09 commit code review) :**
+
+- [x] [Review][Patch] Retirer `--exclude='*.test.ts'` dead config dans `scripts/check-ip-spoofing.mjs` (les tests vivent sous `tests/`, hors `SEARCH_PATHS`). Commentaire d'entete mis a jour. [scripts/check-ip-spoofing.mjs]
+- [x] [Review][Patch] Ajouter `existsSync()` check sur entrees `ALLOWLIST` au demarrage du script (fail-loud si helper renomme/supprime). Exit 2 + message diagnostique. [scripts/check-ip-spoofing.mjs:22-44]
+- [x] [Review][Patch] Test U6 ajoute : `new Headers([['x-real-ip', '1.2.3.4']])` natif locke le contrat SDK runtime path. [tests/unit/get-client-ip.test.ts]
+- [x] [Review][Patch] Guard empty-string ajoute via `resolve()` interne : `ip && ip.length > 0 ? ip : null`. Tests U7 (`getClientIp` -> null) et U7b (`getClientIpOrUnknown` -> 'unknown') ajoutes. [lib/get-client-ip.ts:18-23]
+
+**Validations locales code review (2026-05-09) :**
+- `npm run test:unit` : 8/8 verts en 141 ms (5 originaux U1-U5 + U6 + U7 + U7b).
+- `npm run check:ip-spoofing` : exit 0, garde-fou + existsSync check actifs.
+- `npm run lint` : 0 erreur, 226 warnings baseline preservee.
+- `npm run lint:a11y-check` : 155 violations baseline, 0 regression.
+
+**Defers (pre-existing ou hors scope explicite) :**
+
+- [x] [Review][Defer] Tests IPv6 + header injection `\r\n` non couverts -- defere, hors scope explicite §Hors-scope §2 du spec (no normalization, BDD TEXT et rate-limit key opaques, pas d'exploit BDD via params Supabase parametrises). [tests/unit/get-client-ip.test.ts]
+- [x] [Review][Defer] AC16 (f) rate-limit validateCode preview, (g) waitlist 6 inscriptions preview, (h) audit BDD ip_inscription, (i) ad-hoc x-real-ip non-null preview -- defere par design (executable apres ouverture PR sur deploy preview Vercel, pas blocant review code). [_bmad-output/implementation-artifacts/4-5-hardening-ip-spoofing.md:AC16]
+
+**Dismissed (faux positifs ou non-actionables) :**
+- F1/F2 : `ipAddress(headers)` casserait silencieusement -- invalide, signature SDK supporte (Edge Case verification).
+- F3 : Regression XFF-only en dev/non-Vercel -- intentionnel, comportement documente DECISIONS F10.
+- F6 : `last_updated` redefinie 2 fois dans `sprint-status.yaml` -- ligne 2 est un commentaire `#`, pas une cle YAML.
+- F7 : Suppression commentaire « limite plus stricte » `parrainage.ts` -- aspirational jamais implemente, suppression honnete.
+- F11 : Spec ecrit `ipAddress({ headers })` mais code `ipAddress(headers)` -- l'implementation est correcte, c'est la spec litterale qui etait imprecise (signature SDK accepte les 2 mais le passage direct est plus propre).
+- F12 : `package-lock.json` non visible dans le diff -- exclu volontairement de la construction du diff, present dans le commit (`stat | 1 +`).
+
 ## DoD a11y
 
 A renseigner pour toute story avec impact UI (ignorer si pas de changement visuel/interactif) :

@@ -9,13 +9,14 @@
 // dans son commentaire d'entete documentant le pattern interdit (allowlist).
 //
 // Le check execute un grep recursif sur les sources de production (app/, lib/,
-// scripts/) en excluant les .test.ts (tests unitaires construisent des Headers
-// avec ces noms, comportement attendu).
+// scripts/). Les tests unitaires vivent sous tests/ (hors SEARCH_PATHS) donc
+// aucune exclusion par pattern de fichier n'est necessaire.
 //
 // Pattern aligne sur scripts/check-required-env.mjs (story 4.8) : node mjs +
 // exit code + log clair. Integre au buildCommand Vercel via vercel.json:6.
 
 import { execSync } from 'node:child_process'
+import { existsSync } from 'node:fs'
 
 const FORBIDDEN_PATTERN = 'x-forwarded-for|x-real-ip'
 const SEARCH_PATHS = ['app/', 'lib/', 'scripts/']
@@ -24,12 +25,26 @@ const ALLOWLIST = new Set([
   'scripts/check-ip-spoofing.mjs',
 ])
 
+// Code review story 4.5 P2 : sans cette verification, si un refactor renomme
+// ou supprime un fichier allowliste, le grep ne retourne plus la ligne et le
+// script exit 0 silencieusement (zero match). Fail-loud explicite : echec si
+// une entree d'allowlist pointe vers un fichier inexistant.
+for (const allowlisted of ALLOWLIST) {
+  if (!existsSync(allowlisted)) {
+    console.error(
+      `ERREUR : entree d'allowlist "${allowlisted}" introuvable. ` +
+        'Mettre a jour ALLOWLIST dans scripts/check-ip-spoofing.mjs apres ' +
+        'tout deplacement/suppression du helper IP.',
+    )
+    process.exit(2)
+  }
+}
+
 let stdout = ''
 try {
   stdout = execSync(
     `grep -rEn "${FORBIDDEN_PATTERN}" ` +
       `--include='*.ts' --include='*.tsx' --include='*.mjs' ` +
-      `--exclude='*.test.ts' ` +
       SEARCH_PATHS.join(' '),
     { encoding: 'utf8' },
   )

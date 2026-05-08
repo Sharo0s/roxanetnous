@@ -15,10 +15,20 @@ import { ipAddress } from '@vercel/functions'
 
 export type RequestHeaders = { get(name: string): string | null }
 
+// Code review story 4.5 P4 : `ipAddress()` preserve une valeur vide (`''`)
+// au lieu de la traiter comme nullish. Sans guard, `getClientIpOrUnknown`
+// retournerait `''` -> rate-limit key `waitlist:` (bucket partage anonyme,
+// DoS surface si Vercel emettait jamais un x-real-ip vide). Normalise les
+// valeurs vides en absence d'IP (null / 'unknown').
+function resolve(headers: RequestHeaders): string | null {
+  const ip = ipAddress(headers)
+  return ip && ip.length > 0 ? ip : null
+}
+
 export function getClientIp(headers: RequestHeaders): string | null {
-  return ipAddress(headers) ?? null
+  return resolve(headers)
 }
 
 export function getClientIpOrUnknown(headers: RequestHeaders): string {
-  return ipAddress(headers) ?? 'unknown'
+  return resolve(headers) ?? 'unknown'
 }
