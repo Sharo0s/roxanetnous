@@ -41,14 +41,21 @@ export function SubscriptionPageContent({
     const isTrialing = subscription.status === 'trialing'
     const hasCancelAt = !!subscription.cancelAt
 
+    const statusBadgeClass = isTrialing
+      ? 'bg-[#f0e9e0] text-[#6b5635]'
+      : hasCancelAt
+        ? 'bg-[#fbf0ed] text-[#8a3a2e]'
+        : 'bg-[#faecd9] text-gray-900'
+    const statusBadgeLabel = isTrialing ? 'Essai gratuit' : hasCancelAt ? 'Annulation prévue' : 'Actif'
+
     return (
       <div className="space-y-4">
         {/* Details de l'abonnement */}
-        <div className="bg-white rounded-xl border p-6">
-          <div className="flex items-center gap-3 mb-4">
-            <h3 className="font-semibold text-lg">Détails de l&apos;abonnement</h3>
-            <span className="px-2 py-1 rounded-full text-xs font-medium bg-accent text-black">
-              {isTrialing ? 'Essai gratuit' : hasCancelAt ? 'Annulation prévue' : 'Actif'}
+        <section className="bg-white rounded-2xl border border-[#e8dfd2] p-7">
+          <div className="flex items-center gap-3 mb-5">
+            <h3 className="italic text-xl text-gray-900">Détails de l&apos;abonnement</h3>
+            <span className={`px-2.5 py-0.5 rounded-full text-[10px] uppercase tracking-[0.12em] font-medium ${statusBadgeClass}`}>
+              {statusBadgeLabel}
             </span>
           </div>
 
@@ -83,13 +90,13 @@ export function SubscriptionPageContent({
               </div>
             )}
           </dl>
-        </div>
+        </section>
 
         {/* Moyen de paiement */}
-        <div className="bg-white rounded-xl border p-6">
-          <h3 className="font-semibold text-lg mb-4">Moyen de paiement</h3>
+        <section className="bg-white rounded-2xl border border-[#e8dfd2] p-7">
+          <h3 className="italic text-xl text-gray-900 mb-5">Moyen de paiement</h3>
           {paymentMethod ? (
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between gap-4">
               <div className="text-sm">
                 <p className="text-gray-900 font-medium capitalize">{paymentMethod.brand} **** {paymentMethod.last4}</p>
                 <p className="text-gray-500">Expire {paymentMethod.expMonth.toString().padStart(2, '0')}/{paymentMethod.expYear}</p>
@@ -97,38 +104,38 @@ export function SubscriptionPageContent({
               <form action={createPortalSession}>
                 <button
                   type="submit"
-                  className="px-4 py-2 text-sm font-medium bg-accent text-black rounded-lg btn-hover transition-colors"
+                  className="px-5 py-2 text-sm font-medium bg-accent border border-accent text-black rounded-full hover:bg-kraft hover:border-kraft transition whitespace-nowrap"
                 >
                   Modifier
                 </button>
               </form>
             </div>
           ) : (
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between gap-4">
               <p className="text-sm text-gray-500">Information indisponible</p>
               <form action={createPortalSession}>
                 <button
                   type="submit"
-                  className="px-4 py-2 text-sm font-medium bg-accent text-black rounded-lg btn-hover transition-colors"
+                  className="px-5 py-2 text-sm font-medium bg-accent border border-accent text-black rounded-full hover:bg-kraft hover:border-kraft transition whitespace-nowrap"
                 >
                   Gérer via Stripe
                 </button>
               </form>
             </div>
           )}
-        </div>
+        </section>
 
         {/* Changer de formule (pas en trial, pas en annulation) */}
         {!isTrialing && !hasCancelAt && (
-          <div className="bg-white rounded-xl border p-6">
-            <h3 className="font-semibold text-lg mb-4">Changer de formule</h3>
+          <section className="bg-white rounded-2xl border border-[#e8dfd2] p-7">
+            <h3 className="italic text-xl text-gray-900 mb-5">Changer de formule</h3>
             {switchError && (
-              <p className="text-sm text-red-600 mb-4">
+              <p className="text-sm text-red-700 mb-4">
                 Une erreur est survenue lors du changement de formule. Veuillez réessayer.
               </p>
             )}
             {subscription.planType === 'mensuel' ? (
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between gap-4">
                 <div className="text-sm">
                   <p className="text-gray-900 font-medium">Passer à l&apos;annuel</p>
                   <p className="text-gray-500">La formule annuelle offre un meilleur tarif au mois</p>
@@ -137,14 +144,14 @@ export function SubscriptionPageContent({
                   <input type="hidden" name="plan" value="annuel" />
                   <button
                     type="submit"
-                    className="px-4 py-2.5 text-sm font-medium bg-accent text-black rounded-lg btn-hover transition-colors"
+                    className="px-5 py-2 text-sm font-medium bg-accent border border-accent text-black rounded-full hover:bg-kraft hover:border-kraft transition whitespace-nowrap"
                   >
                     Passer à l&apos;annuel
                   </button>
                 </form>
               </div>
             ) : (
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between gap-4">
                 <div className="text-sm">
                   <p className="text-gray-900 font-medium">Passer au mensuel</p>
                   <p className="text-gray-500">Le tarif mensuel est plus élevé que le tarif annuel rapporté au mois
@@ -154,20 +161,20 @@ export function SubscriptionPageContent({
                   <input type="hidden" name="plan" value="mensuel" />
                   <button
                     type="submit"
-                    className="px-4 py-2.5 text-sm font-medium bg-accent text-black rounded-lg btn-hover transition-colors"
+                    className="px-5 py-2 text-sm font-medium bg-accent border border-accent text-black rounded-full hover:bg-kraft hover:border-kraft transition whitespace-nowrap"
                   >
                     Passer au mensuel
                   </button>
                 </form>
               </div>
             )}
-          </div>
+          </section>
         )}
 
         {/* Reactiver (si annulation prevue) */}
         {hasCancelAt && (
-          <div className="bg-white rounded-xl border p-6">
-            <div className="flex items-center justify-between">
+          <section className="bg-white rounded-2xl border border-[#e8dfd2] p-7">
+            <div className="flex items-center justify-between gap-4">
               <div className="text-sm">
                 <p className="text-gray-900 font-medium">Réactiver mon abonnement</p>
                 <p className="text-gray-500">Annuler la résiliation et conserver votre accès</p>
@@ -175,38 +182,38 @@ export function SubscriptionPageContent({
               <form action={reactivateSubscription}>
                 <button
                   type="submit"
-                  className="px-4 py-2.5 text-sm font-medium bg-accent text-black rounded-lg btn-hover transition-colors"
+                  className="px-5 py-2 text-sm font-medium bg-accent border border-accent text-black rounded-full hover:bg-kraft hover:border-kraft transition whitespace-nowrap"
                 >
                   Réactiver
                 </button>
               </form>
             </div>
-          </div>
+          </section>
         )}
 
         {/* Historique des factures */}
-        <div className="bg-white rounded-xl border p-6">
-          <h3 className="font-semibold text-lg mb-4">Historique des factures</h3>
+        <section className="bg-white rounded-2xl border border-[#e8dfd2] p-7">
+          <h3 className="italic text-xl text-gray-900 mb-5">Historique des factures</h3>
           {invoices && invoices.length > 0 ? (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b">
-                    <th className="text-left py-2 text-gray-500 font-medium">Date</th>
-                    <th className="text-left py-2 text-gray-500 font-medium">Montant</th>
-                    <th className="text-left py-2 text-gray-500 font-medium">Statut</th>
-                    <th className="text-right py-2 text-gray-500 font-medium">Facture</th>
+                  <tr>
+                    <th className="text-left py-2 text-gray-500 font-medium text-[11px] uppercase tracking-[0.08em] border-b border-[#e8dfd2]">Date</th>
+                    <th className="text-left py-2 text-gray-500 font-medium text-[11px] uppercase tracking-[0.08em] border-b border-[#e8dfd2]">Montant</th>
+                    <th className="text-left py-2 text-gray-500 font-medium text-[11px] uppercase tracking-[0.08em] border-b border-[#e8dfd2]">Statut</th>
+                    <th className="text-right py-2 text-gray-500 font-medium text-[11px] uppercase tracking-[0.08em] border-b border-[#e8dfd2]">Facture</th>
                   </tr>
                 </thead>
                 <tbody>
                   {invoices.map((invoice) => (
-                    <tr key={invoice.id} className="border-b last:border-0">
+                    <tr key={invoice.id} className="border-b border-[#f5efe5] last:border-0">
                       <td className="py-3 text-gray-900">
                         {new Date(invoice.date).toLocaleDateString('fr-FR')}
                       </td>
                       <td className="py-3 text-gray-900">{formatAmount(invoice.amount)}</td>
                       <td className="py-3">
-                        <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-accent/20 text-black">
+                        <span className="px-2 py-0.5 rounded-full text-[11px] font-medium bg-[#e0efde] text-[#4d7a47]">
                           Payé
                         </span>
                       </td>
@@ -216,7 +223,7 @@ export function SubscriptionPageContent({
                             href={invoice.pdfUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-sm font-medium text-gray-700 hover:text-black transition-colors"
+                            className="text-sm text-gray-700 hover:text-kraft transition underline"
                           >
                             Télécharger
                           </a>
@@ -230,23 +237,23 @@ export function SubscriptionPageContent({
               </table>
             </div>
           ) : (
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-gray-500 italic">
               {subscription.status === 'trialing'
                 ? 'Aucune facture pendant l\'essai gratuit.'
                 : 'Aucune facture disponible.'}
             </p>
           )}
-        </div>
+        </section>
 
         {/* Resilier (si pas deja en annulation) */}
         {!hasCancelAt && (
-          <div className="flex justify-start">
+          <div className="flex justify-center pt-2">
             <CancelModal subscription={subscription} />
           </div>
         )}
 
         {/* Mentions legales */}
-        <div className="text-xs text-gray-500 space-y-1 pt-4">
+        <div className="text-xs text-gray-500 space-y-1.5 pt-6 leading-relaxed">
           <p>
             Conformément à la législation, vous disposez d&apos;un droit de rétractation de 14 jours à compter de la souscription.
             Pour l&apos;exercer, contactez-nous à{' '}
@@ -261,32 +268,37 @@ export function SubscriptionPageContent({
     )
   }
 
-  // Vue non-abonne (pricing cards) — inchangee
+  // ─── Vue non-abonne (pricing cards) ──────────────────
   return (
     <div className="space-y-4">
       {launch && (
-        <div className="bg-accent text-black rounded-xl p-4 text-center">
-          <p className="font-semibold">Offre de lancement</p>
-          <p className="text-sm text-black/70 mt-1">
-            1 mois offert pour toute inscription sur l&apos;offre de votre choix
+        <div
+          className="rounded-2xl p-5 text-center"
+          style={{ backgroundImage: 'linear-gradient(135deg, #faecd9 0%, #f4d8b9 100%)' }}
+        >
+          <p className="italic text-xl text-gray-900">Offre de lancement</p>
+          <p className="text-sm text-gray-700 mt-1">
+            1 mois offert pour toute inscription
           </p>
         </div>
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Mensuel */}
-        <div className="bg-white rounded-xl border p-6 flex flex-col">
-          <h3 className="font-semibold text-lg mb-1">Mensuel</h3>
+        <div className="bg-white rounded-2xl border border-[#e8dfd2] p-7 flex flex-col">
+          <h3 className="italic text-2xl text-gray-900 mb-3">Mensuel</h3>
           <p className="mb-1">
-            <span className="text-2xl font-bold text-accent">4,99€/mois</span>
+            <span className="italic text-3xl text-gray-900">4,99 €</span>
+            <span className="text-sm text-gray-500 ml-1">/mois</span>
           </p>
-          <ul className="space-y-2 text-sm text-gray-600 mb-6 flex-1">
+          <p className="text-xs text-gray-500 mb-5">Sans engagement</p>
+          <ul className="space-y-2 text-sm text-gray-700 mb-6 flex-1">
             <li className="flex items-start gap-2">
-              <span className="text-black font-bold mt-0.5">-</span>
+              <span className="text-kraft mt-0.5" aria-hidden="true">—</span>
               <span>Sans engagement</span>
             </li>
             <li className="flex items-start gap-2">
-              <span className="text-black font-bold mt-0.5">-</span>
+              <span className="text-kraft mt-0.5" aria-hidden="true">—</span>
               <span>Résiliable à tout moment</span>
             </li>
           </ul>
@@ -294,7 +306,7 @@ export function SubscriptionPageContent({
             <input type="hidden" name="plan" value="mensuel" />
             <button
               type="submit"
-              className="w-full px-4 py-3 border-2 border-accent text-black rounded-lg btn-hover transition text-sm font-medium"
+              className="w-full px-4 py-3 bg-white border border-[#e8dfd2] text-gray-900 rounded-full hover:border-kraft transition text-sm font-medium"
             >
               S&apos;abonner
             </button>
@@ -302,23 +314,24 @@ export function SubscriptionPageContent({
         </div>
 
         {/* Annuel */}
-        <div className="bg-white rounded-xl border-2 border-accent p-6 flex flex-col relative">
-          <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-accent text-black text-xs px-3 py-1 rounded-full font-medium">
+        <div className="bg-white rounded-2xl border border-kraft p-7 flex flex-col relative shadow-[0_8px_24px_-16px_rgba(208,131,99,0.4)]">
+          <div className="absolute -top-2.5 left-1/2 -translate-x-1/2 bg-kraft text-white text-[10px] uppercase tracking-[0.1em] px-3 py-1 rounded-full font-medium">
             1 mois offert
           </div>
-          <h3 className="font-semibold text-lg mb-1">Annuel</h3>
+          <h3 className="italic text-2xl text-gray-900 mb-3">Annuel</h3>
           <p className="mb-1">
-            <span className="text-lg text-gray-400 line-through">59,88€</span>
-            <span className="text-2xl font-bold text-accent ml-2">49,99€/an</span>
+            <span className="text-base text-gray-400 line-through mr-2">59,88 €</span>
+            <span className="italic text-3xl text-gray-900">49,99 €</span>
+            <span className="text-sm text-gray-500 ml-1">/an</span>
           </p>
-          <p className="text-sm text-gray-500 mb-4">soit 4,17 €/mois</p>
-          <ul className="space-y-2 text-sm text-gray-600 mb-6 flex-1">
+          <p className="text-xs text-gray-500 mb-5">soit 4,17 €/mois</p>
+          <ul className="space-y-2 text-sm text-gray-700 mb-6 flex-1">
             <li className="flex items-start gap-2">
-              <span className="text-black font-bold mt-0.5">-</span>
+              <span className="text-kraft mt-0.5" aria-hidden="true">—</span>
               <span>Économisez 17 % sur l&apos;année</span>
             </li>
             <li className="flex items-start gap-2">
-              <span className="text-black font-bold mt-0.5">-</span>
+              <span className="text-kraft mt-0.5" aria-hidden="true">—</span>
               <span>Engagement annuel, paiement unique</span>
             </li>
           </ul>
@@ -326,7 +339,7 @@ export function SubscriptionPageContent({
             <input type="hidden" name="plan" value="annuel" />
             <button
               type="submit"
-              className="w-full px-4 py-3 bg-accent text-black rounded-lg btn-hover transition text-sm font-medium"
+              className="w-full px-4 py-3 bg-accent border border-accent text-black rounded-full hover:bg-kraft hover:border-kraft transition text-sm font-medium"
             >
               S&apos;abonner
             </button>
@@ -335,7 +348,7 @@ export function SubscriptionPageContent({
       </div>
 
       {subscription.status === 'cancelled' && (
-        <p className="text-sm text-gray-500 text-center">
+        <p className="text-sm text-gray-500 text-center italic">
           Votre abonnement précédent a été annulé. Vous pouvez vous réabonner à tout moment.
         </p>
       )}

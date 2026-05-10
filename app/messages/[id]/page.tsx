@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { ChatWindow } from '@/components/messages/chat-window'
 import { markMessagesAsRead } from '@/app/actions/messages'
-import { AccompagnanteHeader } from '@/components/layout/accompagnante-header'
+import { AccompagnanteDashboardHeader } from '@/components/layout/accompagnante-dashboard-header'
 import { AccompagneHeader } from '@/components/layout/accompagne-header'
 import { getUnreadCount } from '@/lib/unread-count'
 import { hasActiveSubscription } from '@/lib/subscription-helpers'
@@ -110,15 +110,17 @@ export default async function ConversationPage({
     ? 'Équipe roxanetnous'
     : `${otherUser?.first_name || ''} ${otherUser?.last_name || ''}`.trim() || 'votre interlocuteur'
 
+  const isAccompagnante = userData.role === 'accompagnante'
+  const otherInitials = `${otherUser?.first_name?.[0] || ''}${otherUser?.last_name?.[0] || ''}`
+
   return (
-    <main id="main-content" tabIndex={-1} className="min-h-screen kraft bg-kraft flex flex-col focus:outline-none">
+    <main id="main-content" tabIndex={-1} className="min-h-screen bg-[#faf7f2] flex flex-col focus:outline-none">
       <h1 className="sr-only">Conversation avec {otherUserNameForHeading}</h1>
-      {userData.role === 'accompagnante' ? (
-        <AccompagnanteHeader
-          userId={user.id}
-          unreadCount={unreadCount}
+      {isAccompagnante ? (
+        <AccompagnanteDashboardHeader
           firstName={userData.first_name}
           lastName={userData.last_name}
+          unreadCount={unreadCount}
           currentPage="messages"
         />
       ) : (
@@ -131,35 +133,56 @@ export default async function ConversationPage({
         />
       )}
 
-      <div className="relative z-10">
-        <div className="max-w-3xl mx-auto px-4 py-3 flex items-center gap-2">
-          <Link href="/messages" className="inline-flex items-center gap-2 px-4 h-[52px] bg-accent text-black rounded-xl text-base font-medium btn-hover transition">
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      {/* Bandeau interlocuteur */}
+      <div className="relative z-10 border-b border-[#e8dfd2] bg-[#faf7f2]">
+        <div className="max-w-3xl mx-auto px-4 py-3 flex items-center gap-3">
+          <Link
+            href="/messages"
+            className="inline-flex items-center gap-1.5 px-4 py-2 bg-white border border-[#e8dfd2] text-gray-700 rounded-full text-sm hover:border-kraft transition"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
             Messages
           </Link>
+
           {isAdminConv ? (
-            <span className="inline-flex items-center gap-3 px-4 h-[52px] bg-black text-white rounded-xl text-base font-medium">
-              <span className="w-9 h-9 rounded-full bg-accent flex items-center justify-center text-xs font-bold text-black">
+            <div className="inline-flex items-center gap-2.5 px-3 py-2 bg-white border border-[#e8dfd2] rounded-full">
+              <span
+                aria-hidden="true"
+                className="w-7 h-7 rounded-full bg-gray-900 text-white flex items-center justify-center text-[10px] font-medium"
+              >
                 RN
               </span>
-              Équipe roxanetnous
-            </span>
+              <span className="text-sm font-medium text-gray-900">Équipe roxanetnous</span>
+            </div>
           ) : otherProfileUrl ? (
-            <Link href={otherProfileUrl} className="inline-flex items-center gap-3 px-4 h-[52px] bg-black text-white rounded-xl text-base font-medium hover:bg-gray-800 transition">
-              <span className="w-9 h-9 rounded-full bg-gray-600 flex items-center justify-center text-sm font-bold text-white">
-                {otherUser?.first_name?.[0]}{otherUser?.last_name?.[0]}
+            <Link
+              href={otherProfileUrl}
+              className="inline-flex items-center gap-2.5 px-3 py-2 bg-white border border-[#e8dfd2] rounded-full hover:border-kraft transition"
+            >
+              <span
+                aria-hidden="true"
+                className="w-7 h-7 rounded-full bg-accent/30 text-gray-900 flex items-center justify-center text-[10px] font-medium"
+              >
+                {otherInitials}
               </span>
-              {otherUser?.first_name} {otherUser?.last_name}
+              <span className="text-sm font-medium text-gray-900">
+                {otherUser?.first_name} {otherUser?.last_name}
+              </span>
             </Link>
           ) : (
-            <span className="inline-flex items-center gap-3 px-4 h-[52px] bg-black text-white rounded-xl text-base font-medium">
-              <span className="w-9 h-9 rounded-full bg-gray-600 flex items-center justify-center text-sm font-bold text-white">
-                {otherUser?.first_name?.[0]}{otherUser?.last_name?.[0]}
+            <div className="inline-flex items-center gap-2.5 px-3 py-2 bg-white border border-[#e8dfd2] rounded-full">
+              <span
+                aria-hidden="true"
+                className="w-7 h-7 rounded-full bg-accent/30 text-gray-900 flex items-center justify-center text-[10px] font-medium"
+              >
+                {otherInitials}
               </span>
-              {otherUser?.first_name} {otherUser?.last_name}
-            </span>
+              <span className="text-sm font-medium text-gray-900">
+                {otherUser?.first_name} {otherUser?.last_name}
+              </span>
+            </div>
           )}
         </div>
       </div>
