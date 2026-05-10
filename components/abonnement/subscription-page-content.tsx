@@ -278,10 +278,8 @@ export function SubscriptionPageContent({
         <div className="bg-white rounded-xl border p-6 flex flex-col">
           <h3 className="font-semibold text-lg mb-1">Mensuel</h3>
           <p className="mb-1">
-            <span className="text-lg text-gray-400 line-through">4,99€</span>
-            <span className="text-2xl font-bold text-accent ml-2">2,99€/mois</span>
+            <span className="text-2xl font-bold text-accent">4,99€/mois</span>
           </p>
-          <p className="text-sm text-gray-500 mb-4">Pendant 1 mois, puis 4,99 €/mois</p>
           <ul className="space-y-2 text-sm text-gray-600 mb-6 flex-1">
             <li className="flex items-start gap-2">
               <span className="text-black font-bold mt-0.5">-</span>
@@ -298,7 +296,7 @@ export function SubscriptionPageContent({
               type="submit"
               className="w-full px-4 py-3 border-2 border-accent text-black rounded-lg btn-hover transition text-sm font-medium"
             >
-              {launch ? 'Essayer gratuitement' : 'S\'abonner'}
+              S&apos;abonner
             </button>
           </form>
         </div>
@@ -330,7 +328,7 @@ export function SubscriptionPageContent({
               type="submit"
               className="w-full px-4 py-3 bg-accent text-black rounded-lg btn-hover transition text-sm font-medium"
             >
-              {launch ? 'Essayer gratuitement' : 'S\'abonner'}
+              S&apos;abonner
             </button>
           </form>
         </div>
