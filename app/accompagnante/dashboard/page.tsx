@@ -203,12 +203,12 @@ export default async function AccompagnanteDashboard() {
               <div className="bg-white rounded-xl border p-6 md:col-span-2">
                 <h2 className="font-semibold text-lg mb-2">Mon abonnement</h2>
                 <p className="text-gray-600 mb-4">
-                  {subscription.cancelAt
-                    ? new Date(subscription.cancelAt).getTime() < Date.now()
-                      ? `Abonnement expiré le ${new Date(subscription.cancelAt).toLocaleDateString('fr-FR')}`
-                      : `Expire le ${new Date(subscription.cancelAt).toLocaleDateString('fr-FR')}`
-                    : subscribed
-                      ? `${subscription.planType === 'annuel' ? 'Annuel' : 'Mensuel'} - Prochaine échéance : ${subscription.currentPeriodEnd ? new Date(subscription.currentPeriodEnd).toLocaleDateString('fr-FR') : '-'}`
+                  {subscribed && !subscription.cancelAt
+                    ? `${subscription.planType === 'annuel' ? 'Annuel' : 'Mensuel'} - Prochaine échéance : ${subscription.currentPeriodEnd ? new Date(subscription.currentPeriodEnd).toLocaleDateString('fr-FR') : '-'}`
+                    : subscription.cancelAt
+                      ? new Date(subscription.cancelAt).getTime() < Date.now()
+                        ? `Abonnement expiré le ${new Date(subscription.cancelAt).toLocaleDateString('fr-FR')}`
+                        : `Expire le ${new Date(subscription.cancelAt).toLocaleDateString('fr-FR')}`
                       : 'Aucun abonnement actif'}
                 </p>
                 <Link
@@ -378,12 +378,12 @@ export default async function AccompagnanteDashboard() {
                   <p className="text-gray-600 mb-4">
                     {subscription.status === 'trialing'
                       ? `Essai gratuit - Fin le ${subscription.trialEnd ? new Date(subscription.trialEnd).toLocaleDateString('fr-FR') : subscription.currentPeriodEnd ? new Date(subscription.currentPeriodEnd).toLocaleDateString('fr-FR') : '-'}`
-                      : subscription.cancelAt
-                        ? new Date(subscription.cancelAt).getTime() < Date.now()
-                          ? `Abonnement expiré le ${new Date(subscription.cancelAt).toLocaleDateString('fr-FR')}`
-                          : `Expire le ${new Date(subscription.cancelAt).toLocaleDateString('fr-FR')}`
-                        : subscribed
-                          ? `${subscription.planType === 'annuel' ? 'Annuel' : 'Mensuel'} - Prochaine échéance : ${subscription.currentPeriodEnd ? new Date(subscription.currentPeriodEnd).toLocaleDateString('fr-FR') : '-'}`
+                      : subscribed && !subscription.cancelAt
+                        ? `${subscription.planType === 'annuel' ? 'Annuel' : 'Mensuel'} - Prochaine échéance : ${subscription.currentPeriodEnd ? new Date(subscription.currentPeriodEnd).toLocaleDateString('fr-FR') : '-'}`
+                        : subscription.cancelAt
+                          ? new Date(subscription.cancelAt).getTime() < Date.now()
+                            ? `Abonnement expiré le ${new Date(subscription.cancelAt).toLocaleDateString('fr-FR')}`
+                            : `Expire le ${new Date(subscription.cancelAt).toLocaleDateString('fr-FR')}`
                           : 'Aucun abonnement actif'}
                   </p>
                   <Link

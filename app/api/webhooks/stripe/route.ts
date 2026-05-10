@@ -536,6 +536,10 @@ export async function POST(request: NextRequest) {
           current_period_start: period.currentPeriodStart,
           current_period_end: period.currentPeriodEnd,
           first_subscription_date: new Date().toISOString(),
+          cancel_at: null,
+          cancelled_at: null,
+          cancel_feedback: null,
+          cancel_comment: null,
         },
         { onConflict: 'user_id' }
       )
