@@ -206,7 +206,9 @@ export default async function AccompagneDashboard() {
               {subscription.status === 'trialing'
                 ? `Essai gratuit - Fin le ${subscription.trialEnd ? new Date(subscription.trialEnd).toLocaleDateString('fr-FR') : subscription.currentPeriodEnd ? new Date(subscription.currentPeriodEnd).toLocaleDateString('fr-FR') : '-'}`
                 : subscription.cancelAt
-                  ? `Expire le ${new Date(subscription.cancelAt).toLocaleDateString('fr-FR')}`
+                  ? new Date(subscription.cancelAt).getTime() < Date.now()
+                    ? `Abonnement expiré le ${new Date(subscription.cancelAt).toLocaleDateString('fr-FR')}`
+                    : `Expire le ${new Date(subscription.cancelAt).toLocaleDateString('fr-FR')}`
                   : subscribed
                     ? `${subscription.planType === 'annuel' ? 'Annuel' : 'Mensuel'} - Prochaine échéance : ${subscription.currentPeriodEnd ? new Date(subscription.currentPeriodEnd).toLocaleDateString('fr-FR') : '-'}`
                     : 'Aucun abonnement actif'}
