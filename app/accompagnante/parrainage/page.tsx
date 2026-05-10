@@ -2,7 +2,8 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { ParrainageView } from '@/components/accompagnante/parrainage-view'
-import { AccompagnanteHeader } from '@/components/layout/accompagnante-header'
+import { AccompagnanteDashboardHeader } from '@/components/layout/accompagnante-dashboard-header'
+import { LogoutButton } from '@/components/auth/logout-button'
 import { getUnreadCount } from '@/lib/unread-count'
 
 type FilleuleStatut = 'inscrite' | 'abonnee' | 'confirme' | 'fraude' | 'bloque'
@@ -73,27 +74,24 @@ export default async function AccompagnanteParrainagePage() {
   const unreadCount = await getUnreadCount(user.id)
 
   return (
-    <main id="main-content" tabIndex={-1} className="min-h-screen kraft bg-kraft focus:outline-none">
-      <AccompagnanteHeader
-        userId={user.id}
-        unreadCount={unreadCount}
+    <main id="main-content" tabIndex={-1} className="min-h-screen bg-[#faf7f2] focus:outline-none">
+      <AccompagnanteDashboardHeader
         firstName={userData.first_name || ''}
         lastName={userData.last_name || ''}
+        unreadCount={unreadCount}
+        currentPage="parrainage"
       />
 
-      <div className="relative z-10 max-w-5xl mx-auto px-4 py-8">
-        <div className="mb-6">
-          <Link
-            href="/accompagnante/dashboard"
-            className="text-sm text-gray-600 hover:text-black transition"
-          >
-            &larr; Retour au tableau de bord
-          </Link>
-          <h1 className="text-3xl font-bold text-black mt-2">Mon parrainage</h1>
-          <p className="text-gray-600 mt-1">
-            Partagez votre code et suivez vos récompenses.
+      <div className="max-w-3xl mx-auto px-4 py-10 md:py-14 relative z-10">
+
+        {/* TITRE EDITORIAL */}
+        <header className="text-center mb-10">
+          <div className="text-xs uppercase tracking-[0.18em] text-kraft mb-2">Mon espace</div>
+          <h1 className="text-3xl md:text-4xl italic text-gray-900 leading-tight">Mon parrainage</h1>
+          <p className="mt-3 text-sm text-gray-600">
+            Partagez votre code, accueillez de nouvelles accompagnantes.
           </p>
-        </div>
+        </header>
 
         <ParrainageView
           code={parrainageRow.code}
@@ -102,6 +100,18 @@ export default async function AccompagnanteParrainagePage() {
           totalRecompenses={parrainageRow.total_recompenses ?? 0}
           filleules={filleules}
         />
+
+        {/* FOOTER coherent avec dashboard */}
+        <div className="mt-16 pt-6 border-t border-[#e8dfd2] flex flex-wrap justify-center items-center gap-x-6 gap-y-2 text-xs text-gray-500">
+          <Link href="/cgu" className="hover:text-gray-800">Aide</Link>
+          <span aria-hidden="true">·</span>
+          <Link href="/politique-de-confidentialite" className="hover:text-gray-800">Confidentialité</Link>
+          <span aria-hidden="true">·</span>
+          <Link href="/cgu" className="hover:text-gray-800">Conditions</Link>
+          <span aria-hidden="true">·</span>
+          <LogoutButton />
+        </div>
+
       </div>
     </main>
   )

@@ -106,75 +106,75 @@ export function ParrainageView({ code, baseUrl, compteur, totalRecompenses, fill
 
   return (
     <div className="space-y-6">
-      {/* Bandeau code + boutons */}
-      <div className="bg-white rounded-xl border p-6">
-        <h2 className="font-semibold text-lg mb-3">Votre code de parrainage</h2>
+      {/* Carte code (centree, valeur en degrade accent) */}
+      <div className="bg-white rounded-2xl border border-[#e8dfd2] p-8 text-center">
+        <div className="text-xs uppercase tracking-[0.14em] text-kraft mb-4">Votre code</div>
         <div
-          className="bg-accent/30 rounded-lg py-6 mb-4 text-center font-bold text-black select-all"
-          style={{ fontSize: '40px', letterSpacing: '6px' }}
+          className="rounded-xl py-6 mb-6 italic text-gray-900 select-all"
+          style={{
+            fontFamily: 'var(--font-heading)',
+            fontSize: '2.4rem',
+            letterSpacing: '0.4rem',
+            backgroundImage: 'linear-gradient(135deg, #faecd9 0%, #f4d8b9 100%)',
+          }}
         >
           {code}
         </div>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-2 justify-center">
           <button
             type="button"
             onClick={() => handleCopy(code, 'code')}
-            className="inline-flex items-center px-4 py-2 bg-accent text-black rounded-lg btn-hover transition text-sm font-medium"
+            className="inline-flex items-center px-5 py-2 bg-accent border border-accent text-black rounded-full hover:bg-kraft hover:border-kraft transition text-sm font-medium"
           >
             {copied === 'code' ? 'Copié' : 'Copier le code'}
           </button>
           <button
             type="button"
             onClick={() => handleCopy(inviteLink, 'link')}
-            className="inline-flex items-center px-4 py-2 bg-white text-black border border-black rounded-lg btn-hover transition text-sm font-medium"
+            className="inline-flex items-center px-5 py-2 bg-white border border-[#e8dfd2] text-gray-900 rounded-full hover:border-kraft transition text-sm"
           >
             {copied === 'link' ? 'Copié' : 'Copier le lien d’invitation'}
           </button>
         </div>
-        <p className="text-sm text-gray-600 mt-4">
+        <p className="text-sm text-gray-600 mt-6 max-w-md mx-auto leading-relaxed">
           Partagez ce code ou ce lien avec une accompagnante de votre réseau.
-          Vous vous portez garante : elle évite la visio et la vérification
-          de documents, et publie ses annonces dès la souscription.
+          Vous vous portez garante : elle évite la visio et publie ses annonces dès la souscription.
         </p>
       </div>
 
-      {/* Bandeau progression vers le palier */}
-      <div className="bg-white rounded-xl border p-6">
-        <div className="flex flex-col items-center text-center mb-5">
-          <p className="text-2xl font-bold text-black">{phrase}</p>
-          {compteur < PALIER && totalRecompenses > 0 && (
-            <p className="text-sm text-gray-600 mt-1">
-              {totalRecompenses} récompense{totalRecompenses > 1 ? 's' : ''} déjà obtenue{totalRecompenses > 1 ? 's' : ''}
-            </p>
-          )}
-        </div>
-
-        <div className="relative h-4 w-full bg-gray-100 rounded-full overflow-hidden mb-2">
+      {/* Carte progression (phrase italic + barre kraft) */}
+      <div className="bg-white rounded-2xl border border-[#e8dfd2] p-8 text-center">
+        <p className="italic text-xl md:text-2xl text-gray-900 leading-snug mb-2">{phrase}</p>
+        {compteur < PALIER && totalRecompenses > 0 && (
+          <p className="text-sm text-gray-600 mb-4">
+            {totalRecompenses} récompense{totalRecompenses > 1 ? 's' : ''} déjà obtenue{totalRecompenses > 1 ? 's' : ''}
+          </p>
+        )}
+        <div className="relative h-1.5 w-full bg-[#f1eade] rounded-full overflow-hidden mt-6 mb-2">
           <div
-            className="absolute inset-y-0 left-0 bg-black rounded-full transition-all duration-500"
+            className="absolute inset-y-0 left-0 bg-kraft rounded-full transition-all duration-500"
             style={{ width: `${progressPercent}%` }}
             aria-hidden="true"
           />
         </div>
-        <div className="text-xs text-gray-600 text-center">
+        <div className="text-xs text-gray-500">
           {compteurClamped} sur {PALIER} filleules validées
         </div>
       </div>
 
-      {/* Liste des filleules avec mini-progression individuelle */}
-      <div className="bg-white rounded-xl border p-6">
-        <h2 className="font-semibold text-lg mb-1">Vos filleules en cours</h2>
-        <p className="text-sm text-gray-500 mb-5">
+      {/* Liste filleules */}
+      <section>
+        <h2 className="text-center italic text-xl text-gray-900 mb-1">Vos filleules en cours</h2>
+        <p className="text-center text-sm text-gray-600 mb-6">
           Une filleule est validée après 30 jours d&apos;abonnement actif.
         </p>
 
         {filleulesAffichables.length === 0 ? (
-          <p className="text-sm text-gray-600">
-            Aucune filleule pour le moment. Partagez votre code pour démarrer
-            votre premier cycle.
+          <p className="text-center text-sm text-gray-500 italic py-6">
+            Aucune filleule pour le moment. Partagez votre code pour démarrer votre premier cycle.
           </p>
         ) : (
-          <ul className="flex flex-col gap-5">
+          <ul className="space-y-2">
             {filleulesAffichables.map((f, idx) => {
               const joursRestants =
                 f.statut === 'abonnee'
@@ -188,38 +188,40 @@ export function ParrainageView({ code, baseUrl, compteur, totalRecompenses, fill
               let label: string
               let percent: number
               let barClass: string
-              let labelClass = 'text-gray-600'
+              let labelClass = 'text-gray-500'
 
               if (f.statut === 'confirme') {
                 label = 'Validée — comptée dans votre cycle'
                 percent = 100
-                barClass = 'bg-black'
-                labelClass = 'text-black font-medium'
+                barClass = 'bg-green-600'
+                labelClass = 'text-green-700 font-medium'
               } else if (f.statut === 'abonnee' && joursEcoules !== null && joursRestants !== null) {
                 label =
                   joursRestants === 0
                     ? 'Validée aujourd’hui'
                     : `Validée dans ${joursRestants} jour${joursRestants > 1 ? 's' : ''}`
                 percent = (joursEcoules / 30) * 100
-                barClass = 'bg-accent'
+                barClass = 'bg-kraft'
               } else {
-                // statut === 'inscrite'
                 label = 'En attente de souscription'
                 percent = 0
-                barClass = 'bg-gray-300'
+                barClass = 'bg-gray-200'
                 labelClass = 'text-gray-400'
               }
 
               return (
-                <li key={`${f.inscriteAt}-${idx}`} className="space-y-1.5">
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-gray-900 font-medium">
+                <li
+                  key={`${f.inscriteAt}-${idx}`}
+                  className="bg-white border border-[#e8dfd2] rounded-xl px-5 py-3"
+                >
+                  <div className="flex items-center justify-between mb-2 gap-4">
+                    <span className="text-sm font-medium text-gray-900 truncate">
                       {formatFilleuleName(f.firstName, f.lastName)}
                     </span>
-                    <span className={`text-xs ${labelClass}`}>{label}</span>
+                    <span className={`text-xs ${labelClass} flex-shrink-0`}>{label}</span>
                   </div>
                   <div
-                    className="relative h-2 w-full bg-gray-100 rounded-full overflow-hidden"
+                    className="relative h-1 w-full bg-[#f1eade] rounded-full overflow-hidden"
                     aria-hidden="true"
                   >
                     <div
@@ -232,21 +234,21 @@ export function ParrainageView({ code, baseUrl, compteur, totalRecompenses, fill
             })}
           </ul>
         )}
-      </div>
+      </section>
 
-      {/* Compteurs synthétiques */}
-      <div className="bg-white rounded-xl border p-6 grid grid-cols-3 gap-4 text-center">
-        <div>
-          <p className="text-2xl font-bold text-black">{filleulesAffichables.length}</p>
-          <p className="text-xs text-gray-600 mt-0.5">Filleules invitées</p>
+      {/* Compteurs synthetiques */}
+      <div className="grid grid-cols-3 gap-3 md:gap-4">
+        <div className="bg-white border border-[#e8dfd2] rounded-xl p-5 text-center">
+          <p className="italic text-3xl text-gray-900">{filleulesAffichables.length}</p>
+          <p className="text-xs text-gray-600 mt-1">filleules invitées</p>
         </div>
-        <div>
-          <p className="text-2xl font-bold text-black">{compteurClamped}</p>
-          <p className="text-xs text-gray-600 mt-0.5">Validées dans ce cycle</p>
+        <div className="bg-white border border-[#e8dfd2] rounded-xl p-5 text-center">
+          <p className="italic text-3xl text-gray-900">{compteurClamped}</p>
+          <p className="text-xs text-gray-600 mt-1">validées ce cycle</p>
         </div>
-        <div>
-          <p className="text-2xl font-bold text-black">{totalRecompenses}</p>
-          <p className="text-xs text-gray-600 mt-0.5">Récompenses gagnées</p>
+        <div className="bg-white border border-[#e8dfd2] rounded-xl p-5 text-center">
+          <p className="italic text-3xl text-gray-900">{totalRecompenses}</p>
+          <p className="text-xs text-gray-600 mt-1">récompense{totalRecompenses > 1 ? 's' : ''} gagnée{totalRecompenses > 1 ? 's' : ''}</p>
         </div>
       </div>
     </div>
