@@ -8,6 +8,7 @@ import { AccompagnanteHeader } from '@/components/layout/accompagnante-header'
 import { AvatarUpload } from '@/components/accompagnante/avatar-upload'
 import { DisponibleToggle } from '@/components/accompagnante/disponible-toggle'
 import { StatusBadge } from '@/components/accompagnante/status-badge'
+import { SPECIALITES } from '@/lib/constants'
 
 export default async function AccompagnanteDashboard() {
   const supabase = await createClient()
@@ -129,7 +130,7 @@ export default async function AccompagnanteDashboard() {
               <div className="flex flex-wrap gap-1.5 mt-2">
                 {(profile.specialites as string[]).map((s) => (
                   <span key={s} className="px-2 py-0.5 rounded-full bg-accent/20 text-xs font-medium text-gray-700">
-                    {s}
+                    {SPECIALITES.find((sp) => sp.value === s)?.label || s}
                   </span>
                 ))}
               </div>
