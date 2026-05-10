@@ -80,10 +80,10 @@ export default async function AccompagnanteProfilPage() {
           </div>
         )}
         {profile.validation_status === 'a_completer' && (
-          <div role="alert" className="mb-6 p-4 rounded-xl border border-red-200 bg-red-50 text-sm">
-            <p className="font-medium text-red-800">Des informations complémentaires sont demandées.</p>
+          <div className="mb-6 p-4 rounded-xl border border-blue-200 bg-blue-50 text-sm">
+            <p className="font-medium text-blue-900">Complétez votre profil pour le soumettre à validation.</p>
             {profile.refus_motif && (
-              <p className="text-red-700 mt-1">Détails : {profile.refus_motif}</p>
+              <p className="text-blue-800 mt-1">Détails : {profile.refus_motif}</p>
             )}
           </div>
         )}

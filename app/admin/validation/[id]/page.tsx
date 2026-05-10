@@ -37,7 +37,7 @@ export default async function ValidationDetailPage({
     (d) => DIPLOMES.find((dp) => dp.value === d)?.label || d
   )
   const experienceLabel = EXPERIENCE_LEVELS.find((e) => e.value === profile.experience)?.label || profile.experience
-  const specialiteLabels = (profile.specialites as string[]).map(
+  const specialiteLabels = (profile.specialites as string[] | null || []).map(
     (s) => SPECIALITES.find((sp) => sp.value === s)?.label || s
   )
 

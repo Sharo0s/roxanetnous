@@ -271,12 +271,26 @@ export default async function AccompagnanteDashboard() {
                 </p>
               </div>
             )}
-            {(profile.validation_status === 'refuse' || profile.validation_status === 'a_completer') && (
+            {profile.validation_status === 'a_completer' && (
+              <div className="p-4 rounded-xl border border-blue-200 bg-blue-50 text-sm">
+                <p className="font-medium text-blue-900">
+                  Bienvenue ! Complétez votre profil pour le soumettre à validation.
+                </p>
+                {profile.refus_motif && (
+                  <p className="text-blue-800 mt-1">{profile.refus_motif}</p>
+                )}
+                <Link
+                  href="/accompagnante/onboarding"
+                  className="inline-flex items-center px-4 py-2 bg-accent text-black rounded-lg btn-hover transition text-sm font-medium mt-3"
+                >
+                  Compléter mon profil
+                </Link>
+              </div>
+            )}
+            {profile.validation_status === 'refuse' && (
               <div role="alert" className="p-4 rounded-xl border border-red-200 bg-red-50 text-sm">
                 <p className="font-medium text-red-800">
-                  {profile.validation_status === 'refuse'
-                    ? 'Votre profil a été refusé. Veuillez corriger les informations demandées.'
-                    : 'Des informations complémentaires sont demandées.'}
+                  Votre profil a été refusé. Veuillez corriger les informations demandées.
                 </p>
                 {profile.refus_motif && (
                   <p className="text-red-700 mt-1">{profile.refus_motif}</p>
