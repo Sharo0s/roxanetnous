@@ -268,7 +268,7 @@ export function SubscriptionPageContent({
         <div className="bg-accent text-black rounded-xl p-4 text-center">
           <p className="font-semibold">Offre de lancement</p>
           <p className="text-sm text-black/70 mt-1">
-            1 mois offert pour les premiers inscrits
+            1 mois offert pour toute inscription sur l&apos;offre de votre choix
           </p>
         </div>
       )}
@@ -283,11 +283,11 @@ export function SubscriptionPageContent({
           <ul className="space-y-2 text-sm text-gray-600 mb-6 flex-1">
             <li className="flex items-start gap-2">
               <span className="text-black font-bold mt-0.5">-</span>
-              <span>Accès complet à la plateforme</span>
+              <span>Sans engagement</span>
             </li>
             <li className="flex items-start gap-2">
               <span className="text-black font-bold mt-0.5">-</span>
-              <span>Annulation à tout moment</span>
+              <span>Résiliable à tout moment</span>
             </li>
           </ul>
           <form action={createCheckoutSession}>
@@ -315,11 +315,11 @@ export function SubscriptionPageContent({
           <ul className="space-y-2 text-sm text-gray-600 mb-6 flex-1">
             <li className="flex items-start gap-2">
               <span className="text-black font-bold mt-0.5">-</span>
-              <span>Accès complet à la plateforme</span>
+              <span>Économisez 17 % sur l&apos;année</span>
             </li>
             <li className="flex items-start gap-2">
               <span className="text-black font-bold mt-0.5">-</span>
-              <span>Meilleur rapport qualité-prix</span>
+              <span>Engagement annuel, paiement unique</span>
             </li>
           </ul>
           <form action={createCheckoutSession}>
