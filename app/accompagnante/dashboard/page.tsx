@@ -354,7 +354,7 @@ export default async function AccompagnanteDashboard() {
                 </div>
 
                 {parrainageCode && (
-                  <div className="bg-white rounded-xl border p-6 md:col-span-2">
+                  <div className="bg-white rounded-xl border p-6">
                     <h2 className="font-semibold text-lg mb-2">Mon parrainage</h2>
                     <p className="text-gray-600 mb-4">
                       {parrainageCompteur > 0 || parrainageTotalRecompenses > 0
