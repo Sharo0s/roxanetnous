@@ -82,10 +82,10 @@ export async function DepartementsOuverts() {
             <span className="text-gray-600">Le service ouvre prochainement.</span>
           </h2>
           <Link
-            href="/waitlist"
+            href="/me-tenir-au-courant"
             className="text-kraft hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-focus-ring rounded-sm"
           >
-            M&apos;inscrire à la waitlist →
+            Me tenir au courant →
           </Link>
         </div>
       </section>
@@ -126,7 +126,7 @@ export async function DepartementsOuverts() {
               </ul>
               <p className="mt-3 pt-3 border-t border-[#e8dfd2] text-base">
                 <Link
-                  href="/waitlist"
+                  href="/me-tenir-au-courant"
                   className="text-kraft hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-focus-ring rounded-sm"
                 >
                   {CTA_WAITLIST_LABEL}
@@ -177,7 +177,7 @@ export async function DepartementsOuverts() {
             ))}
             <p className="text-base pt-3 border-t border-[#e8dfd2]">
               <Link
-                href="/waitlist"
+                href="/me-tenir-au-courant"
                 className="text-kraft hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-focus-ring rounded-sm"
               >
                 {CTA_WAITLIST_LABEL}

@@ -135,10 +135,10 @@ vi.mock('@/lib/emails', () => ({
   sendParrainageRecompense: vi.fn().mockResolvedValue(undefined),
   sendAdminParrainageFlag: vi.fn().mockResolvedValue(undefined),
   sendExpirationReminderEmail: vi.fn().mockResolvedValue(undefined),
-  sendWaitlistConfirmationEmail: vi.fn().mockResolvedValue(undefined),
-  sendWaitlistOpeningNotificationEmail: vi.fn().mockResolvedValue(undefined),
-  enqueueWaitlistConfirmationEmail: vi.fn().mockResolvedValue(undefined),
-  enqueueWaitlistOpeningNotificationEmail: vi.fn().mockResolvedValue(undefined),
+  sendOuvertureConfirmationEmail: vi.fn().mockResolvedValue(undefined),
+  sendOuvertureNotificationEmail: vi.fn().mockResolvedValue(undefined),
+  enqueueOuvertureConfirmationEmail: vi.fn().mockResolvedValue(undefined),
+  enqueueOuvertureNotificationEmail: vi.fn().mockResolvedValue(undefined),
   sendParrainageVerificationEmail: vi.fn().mockResolvedValue(undefined),
 }))
 

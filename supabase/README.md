@@ -23,7 +23,7 @@ Pour recuperer les cles : `supabase status --output json | jq '.SERVICE_ROLE_KEY
 
 - **2026-02-16 -> 2026-04-09** : 27 migrations brownfield Epic 1 (recuperees via Supabase MCP story 4.7 le 2026-05-09 ; le projet a ete livre retroactivement avant adoption BMad formelle, le schema initial n'avait jamais ete capture en migration formelle).
 - **2026-04-18 -> 2026-04-29** : Epic 2 (parrainage + a11y + admin conversations).
-- **2026-05-02 -> 2026-05-07** : Epic 3 (departements_ouverts + waitlist) + Epic 4.2 (notifications_log schema).
+- **2026-05-02 -> 2026-05-07** : Epic 3 (departements_ouverts + waitlist, renommee notifications_ouverture en 2026-05-11) + Epic 4.2 (notifications_log schema).
 
 Drift versioning vs prod connu : la prod utilise des versions Supabase Cloud (`20260418140024_drop_avis_feature`), le repo local utilise un schema custom (`20260418135719_drop_avis_feature`). Les noms et le contenu sont alignes ; le drift est documente dans DECISIONS.md F9.
 
@@ -33,7 +33,7 @@ Drift versioning vs prod connu : la prod utilise des versions Supabase Cloud (`2
 
 - `01_users.sql` : 5 users (admin + accompagnante validee + accompagne + marraine + filleule).
 - `02_parrainages.sql` : code marraine + 1 parrainage en cours + 1 parrainage bloque (anti-fraude `meme_carte`).
-- `03_waitlist.sql` : 5 inscriptions Bretagne (29/22/35/56).
+- `03_notifications_ouverture.sql` : 5 inscriptions Bretagne (29/22/35/56).
 - `04_subscriptions.sql` : 1 active future + 1 active expiree (T8/T9 paywall).
 
 Le script `scripts/seed-test-supabase.mjs` orchestre :
@@ -68,7 +68,7 @@ Le trigger `handle_new_user` cree deja une row `public.users` lors de `auth.admi
 ```sql
 DELETE FROM public.parrainages WHERE id LIKE '00000000-0000-0000-0000-00000000aaa%';
 DELETE FROM public.parrainages_codes WHERE code = 'TESTSEED1';
-DELETE FROM public.waitlist_departements WHERE email LIKE 'seed-waitlist-%@test.local';
+DELETE FROM public.notifications_ouverture WHERE email LIKE 'seed-notif-%@test.local';
 DELETE FROM public.subscriptions WHERE id LIKE '00000000-0000-0000-0000-00000000ccc%';
 -- auth.users : utiliser supabase.auth.admin.deleteUser pour cascade public.users
 ```

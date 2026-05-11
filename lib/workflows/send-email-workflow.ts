@@ -44,16 +44,16 @@ import { FatalError, RetryableError, getStepMetadata } from 'workflow'
 import { Resend } from 'resend'
 import { logNotification } from '@/lib/notifications-log'
 import {
-  buildWaitlistConfirmationSubject,
-  buildWaitlistOpeningSubject,
+  buildOuvertureConfirmationSubject,
+  buildOuvertureNotificationSubject,
   isValidNomDepartement,
-  renderWaitlistConfirmationHtml,
-  renderWaitlistOpeningHtml,
+  renderOuvertureConfirmationHtml,
+  renderOuvertureNotificationHtml,
 } from '@/lib/email-templates'
 
 const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || 'roxanetnous <onboarding@resend.dev>'
 
-export type SendEmailTemplate = 'waitlist_confirmation' | 'waitlist_opening'
+export type SendEmailTemplate = 'ouverture_confirmation' | 'ouverture_notification'
 
 export type SendEmailPayload = {
   template: SendEmailTemplate
@@ -77,9 +77,9 @@ function emailDomain(to: string): string {
 }
 
 function buildSubject(payload: SendEmailPayload): string {
-  return payload.template === 'waitlist_confirmation'
-    ? buildWaitlistConfirmationSubject(payload.variables.nomDepartement)
-    : buildWaitlistOpeningSubject(payload.variables.nomDepartement)
+  return payload.template === 'ouverture_confirmation'
+    ? buildOuvertureConfirmationSubject(payload.variables.nomDepartement)
+    : buildOuvertureNotificationSubject(payload.variables.nomDepartement)
 }
 
 async function persistStatus(params: {
@@ -147,9 +147,9 @@ async function sendEmailViaResend(payload: SendEmailPayload) {
   }
 
   const subject = buildSubject(payload)
-  const html = payload.template === 'waitlist_confirmation'
-    ? renderWaitlistConfirmationHtml(payload.variables)
-    : renderWaitlistOpeningHtml(payload.variables)
+  const html = payload.template === 'ouverture_confirmation'
+    ? renderOuvertureConfirmationHtml(payload.variables)
+    : renderOuvertureNotificationHtml(payload.variables)
 
   const resend = new Resend(process.env.RESEND_API_KEY)
 

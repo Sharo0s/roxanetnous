@@ -10,6 +10,7 @@ const PUBLIC_PATHS = new Set([
   '/mentions-legales',
   '/politique-de-confidentialite',
   '/cgu',
+  '/me-tenir-au-courant',
   '/sitemap.xml',
   '/robots.txt',
 ])

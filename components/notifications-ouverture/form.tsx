@@ -3,22 +3,22 @@
 import { useState } from 'react'
 import { Input } from '@/components/ui/input'
 import type { Departement } from '@/lib/departements'
-import { submitWaitlist, type WaitlistResult } from '@/app/actions/waitlist'
+import { submitNotificationOuverture, type NotificationOuvertureResult } from '@/app/actions/notifications-ouverture'
 
 type Props = {
   initial: { email: string; codeDepartement: string; role: string }
   departements: Departement[]
 }
 
-export function WaitlistForm({ initial, departements }: Props) {
+export function NotificationsOuvertureForm({ initial, departements }: Props) {
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
   const [error, setError] = useState('')
-  const [result, setResult] = useState<WaitlistResult | null>(null)
+  const [result, setResult] = useState<NotificationOuvertureResult | null>(null)
 
   async function handleSubmit(formData: FormData) {
     setStatus('loading')
     setError('')
-    const res = await submitWaitlist(formData)
+    const res = await submitNotificationOuverture(formData)
     if (res.error) {
       setError(res.error)
       setStatus('error')
@@ -41,8 +41,8 @@ export function WaitlistForm({ initial, departements }: Props) {
         </p>
         <p className="text-sm text-black/70">
           {isAlready
-            ? `Vous etes deja sur la waitlist pour ${result.nomDepartement} (${result.codeDepartement}). Nous vous notifierons a l'ouverture.`
-            : `Merci ! Vous etes sur la waitlist pour ${result.nomDepartement} (${result.codeDepartement}). Un email de confirmation vient de partir.`}
+            ? `Vous etes deja inscrit(e) pour ${result.nomDepartement} (${result.codeDepartement}). Nous vous notifierons a l'ouverture.`
+            : `Merci ! Vous serez notifie(e) a l'ouverture pour ${result.nomDepartement} (${result.codeDepartement}). Un email de confirmation vient de partir.`}
         </p>
       </div>
     )
@@ -57,7 +57,7 @@ export function WaitlistForm({ initial, departements }: Props) {
       )}
       <Input
         label="Votre email"
-        id="waitlist-email"
+        id="notif-ouverture-email"
         name="email"
         type="email"
         defaultValue={initial.email}
@@ -65,13 +65,13 @@ export function WaitlistForm({ initial, departements }: Props) {
         autoComplete="email"
       />
       <div className="w-full">
-        <label htmlFor="waitlist-departement" className="block">
+        <label htmlFor="notif-ouverture-departement" className="block">
           <span className="block text-sm font-medium text-black mb-2">
             Departement
             <span className="text-gray-700"> (obligatoire)</span>
           </span>
           <select
-            id="waitlist-departement"
+            id="notif-ouverture-departement"
             name="code_departement"
             required
             defaultValue={initial.codeDepartement}
@@ -87,15 +87,16 @@ export function WaitlistForm({ initial, departements }: Props) {
         </label>
       </div>
       <div className="w-full">
-        <label htmlFor="waitlist-role" className="block">
+        <label htmlFor="notif-ouverture-role" className="block">
           <span className="block text-sm font-medium text-black mb-2">Vous etes...</span>
           <select
-            id="waitlist-role"
+            id="notif-ouverture-role"
             name="role"
+            required
             defaultValue={initial.role}
             className="flex h-10 w-full rounded-lg border border-gray-400 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-focus-ring"
           >
-            <option value="">Sans precision</option>
+            <option value="" disabled>Choisir...</option>
             <option value="accompagnante">Accompagnante de vie (auxiliaire)</option>
             <option value="accompagne">Accompagne ou proche aidant</option>
             <option value="visiteur">Visiteur curieux</option>
@@ -108,7 +109,7 @@ export function WaitlistForm({ initial, departements }: Props) {
         aria-busy={status === 'loading'}
         className="w-full px-4 py-2 rounded-lg text-sm font-medium text-black btn-hover disabled:opacity-50 bg-accent"
       >
-        {status === 'loading' ? 'Envoi en cours...' : 'Rejoindre la waitlist'}
+        {status === 'loading' ? 'Envoi en cours...' : 'Me tenir au courant'}
       </button>
     </form>
   )

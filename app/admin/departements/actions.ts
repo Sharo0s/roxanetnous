@@ -3,7 +3,7 @@
 import { revalidatePath, revalidateTag } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { DEPARTEMENTS_CACHE_TAG } from '@/lib/departements'
-import { notifyWaitlistForCode } from '@/lib/notify-waitlist'
+import { notifyOuvertureForCode } from '@/lib/notify-ouverture'
 
 // Note : revalidateTag exige un profil cacheLife en Next 16.
 // On utilise 'default' pour invalidation au prochain hit ; combine avec
@@ -97,11 +97,11 @@ export async function toggleDepartement(code: string, ouvrir: boolean): Promise<
     console.error('[toggleDepartement][log_error]', { code, ouvrir, err: logErr })
   }
 
-  // Notification waitlist : transition false -> true uniquement (AC4, AC8).
+  // Notification ouverture : transition false -> true uniquement (AC4, AC8).
   // Synchrone : on attend l'envoi dans la meme requete server action.
   if (ouvrir && etaitFerme) {
     try {
-      await notifyWaitlistForCode(code)
+      await notifyOuvertureForCode(code)
     } catch (notifyErr) {
       console.error('[toggleDepartement][notify_error]', { code, err: notifyErr })
     }
@@ -171,13 +171,13 @@ export async function toggleRegion(region: string, ouvrir: boolean): Promise<Tog
     console.error('[toggleRegion][log_error]', { region, ouvrir, err: logErr })
   }
 
-  // Notification waitlist sequentielle pour chaque code passe false -> true
+  // Notification ouverture sequentielle pour chaque code passe false -> true
   // (AC5). Sequentiel pour ne pas burst Resend. Cron retry rattrape ce qui
   // n'aura pas pu etre envoye dans la fenetre 60s server action (R2).
   if (ouvrir) {
     for (const c of codesAvantFermes) {
       try {
-        await notifyWaitlistForCode(c)
+        await notifyOuvertureForCode(c)
       } catch (notifyErr) {
         console.error('[toggleRegion][notify_error]', { code: c, region, err: notifyErr })
       }

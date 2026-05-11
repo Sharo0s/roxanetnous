@@ -1224,7 +1224,7 @@ export type Database = {
           },
         ]
       }
-      waitlist_departements: {
+      notifications_ouverture: {
         Row: {
           code_departement: string
           created_at: string

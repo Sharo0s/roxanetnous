@@ -78,7 +78,7 @@ export function OnboardingClient({ parrainage, departementsOuverts, userEmail }:
     setData((prev) => ({ ...prev, ...partial }))
   }
 
-  function buildWaitlistHref(): string | null {
+  function buildOuvertureHref(): string | null {
     if (!error) return null
     const isZoneError = /departement|territoire/i.test(error)
     if (!isZoneError) return null
@@ -89,10 +89,10 @@ export function OnboardingClient({ parrainage, departementsOuverts, userEmail }:
       code_departement: code,
       role: 'accompagnante',
     })
-    return `/waitlist?${params.toString()}`
+    return `/me-tenir-au-courant?${params.toString()}`
   }
 
-  const waitlistHref = buildWaitlistHref()
+  const ouvertureHref = buildOuvertureHref()
 
   function canProceed(): boolean {
     // Si filleule (parrainee) : meme exigences que la voie manuelle SAUF
@@ -206,13 +206,13 @@ export function OnboardingClient({ parrainage, departementsOuverts, userEmail }:
         {error && (
           <div role="alert" className="mb-4 p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
             <p>{error}</p>
-            {waitlistHref && (
+            {ouvertureHref && (
               <p className="mt-2">
                 <Link
-                  href={waitlistHref}
+                  href={ouvertureHref}
                   className="underline font-medium text-red-700 hover:text-red-900 focus:outline-none focus:ring-2 focus:ring-focus-ring rounded-sm"
                 >
-                  Rejoindre la waitlist pour mon departement
+                  Me tenir au courant pour mon departement
                 </Link>
               </p>
             )}

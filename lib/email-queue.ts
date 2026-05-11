@@ -12,21 +12,21 @@
 // step `logEmailStatusStep('pending')` du workflow function, on a au moins
 // une trace audit cote BDD).
 // Code review 2026-05-08 P9 : pas de Sentry.captureException ici. L'incident
-// queue est deja signale par le caller (enqueueWaitlist*Email) via le tag
+// queue est deja signale par le caller (enqueueOuverture*Email) via le tag
 // `signal:queue-fallback-sync`. Inutile de doubler.
 
 import { start } from 'workflow/api'
 import { logNotification } from '@/lib/notifications-log'
 import { sendEmailWorkflow, type SendEmailPayload } from '@/lib/workflows/send-email-workflow'
 import {
-  buildWaitlistConfirmationSubject,
-  buildWaitlistOpeningSubject,
+  buildOuvertureConfirmationSubject,
+  buildOuvertureNotificationSubject,
 } from '@/lib/email-templates'
 
 function buildSubject(payload: SendEmailPayload): string {
-  return payload.template === 'waitlist_confirmation'
-    ? buildWaitlistConfirmationSubject(payload.variables.nomDepartement)
-    : buildWaitlistOpeningSubject(payload.variables.nomDepartement)
+  return payload.template === 'ouverture_confirmation'
+    ? buildOuvertureConfirmationSubject(payload.variables.nomDepartement)
+    : buildOuvertureNotificationSubject(payload.variables.nomDepartement)
 }
 
 export async function enqueueEmail(payload: SendEmailPayload): Promise<{ runId: string }> {

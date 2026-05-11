@@ -17,7 +17,7 @@ export type RequestHeaders = { get(name: string): string | null }
 
 // Code review story 4.5 P4 : `ipAddress()` preserve une valeur vide (`''`)
 // au lieu de la traiter comme nullish. Sans guard, `getClientIpOrUnknown`
-// retournerait `''` -> rate-limit key `waitlist:` (bucket partage anonyme,
+// retournerait `''` -> rate-limit key `notifications-ouverture:` (bucket partage anonyme,
 // DoS surface si Vercel emettait jamais un x-real-ip vide). Normalise les
 // valeurs vides en absence d'IP (null / 'unknown').
 function resolve(headers: RequestHeaders): string | null {

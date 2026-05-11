@@ -1,8 +1,8 @@
 import * as Sentry from '@sentry/nextjs'
 import { createClient } from '@/lib/supabase/server'
-import { enqueueWaitlistOpeningNotificationEmail } from '@/lib/emails'
+import { enqueueOuvertureNotificationEmail } from '@/lib/emails'
 
-export type NotifyWaitlistResult = {
+export type NotifyOuvertureResult = {
   processed: number
   sent: number
   skipped: number
@@ -11,15 +11,15 @@ export type NotifyWaitlistResult = {
 
 // Cap defensif anti-runaway. Partage avec le cron retry pour eviter le drift
 // (code review patch #17).
-export const NOTIFY_WAITLIST_BATCH_LIMIT = 200
+export const NOTIFY_OUVERTURE_BATCH_LIMIT = 200
 
-// Notifie tous les inscrits waitlist en attente pour un code departement.
+// Notifie tous les inscrits en attente pour un code departement.
 // Idempotent via compare-and-swap atomique sur notified_at.
 // Le swap est applique AVANT l'envoi email (D5 story 3.5) : si Resend echoue,
 // la ligne reste marquee notifiee (trade-off pour eviter le double-envoi en
 // cas d'overlap admin trigger + cron retry). Code review 2026-05-07 a tranche
 // le maintien de D5 (option c) avec ajout d'observabilite.
-export async function notifyWaitlistForCode(code: string): Promise<NotifyWaitlistResult> {
+export async function notifyOuvertureForCode(code: string): Promise<NotifyOuvertureResult> {
   const supabase = await createClient({ serviceRole: true })
 
   const { data: dpt, error: dptErr } = await supabase
@@ -33,27 +33,27 @@ export async function notifyWaitlistForCode(code: string): Promise<NotifyWaitlis
     // dpt inexistant (errors=0, early return silencieux).
     // PGRST116 = "no rows" Supabase, code dpt vraiment inconnu.
     if ((dptErr as { code?: string }).code === 'PGRST116') {
-      console.warn('[notify-waitlist] code dpt inconnu', code)
+      console.warn('[notify-ouverture] code dpt inconnu', code)
       return { processed: 0, sent: 0, skipped: 0, errors: 0 }
     }
-    console.error('[notify-waitlist][dpt_query_error]', { code, err: dptErr })
+    console.error('[notify-ouverture][dpt_query_error]', { code, err: dptErr })
     return { processed: 0, sent: 0, skipped: 0, errors: 1 }
   }
 
   if (!dpt || !dpt.nom) {
-    console.error('[notify-waitlist][dpt_nom_invalide]', { code, dpt })
+    console.error('[notify-ouverture][dpt_nom_invalide]', { code, dpt })
     return { processed: 0, sent: 0, skipped: 0, errors: 1 }
   }
 
   const { data: lignes, error: queryErr } = await supabase
-    .from('waitlist_departements')
+    .from('notifications_ouverture')
     .select('id, email')
     .eq('code_departement', code)
     .is('notified_at', null)
-    .limit(NOTIFY_WAITLIST_BATCH_LIMIT)
+    .limit(NOTIFY_OUVERTURE_BATCH_LIMIT)
 
   if (queryErr) {
-    console.error('[notify-waitlist][query_error]', { code, err: queryErr })
+    console.error('[notify-ouverture][query_error]', { code, err: queryErr })
     return { processed: 0, sent: 0, skipped: 0, errors: 1 }
   }
 
@@ -62,13 +62,13 @@ export async function notifyWaitlistForCode(code: string): Promise<NotifyWaitlis
   // du console.warn en Sentry.captureMessage pour observabilite (tag
   // signal:queue-batch-saturation alerte un afflux anormal — DoS, ouverture
   // massive non planifiee, etc.).
-  if (lignes && lignes.length === NOTIFY_WAITLIST_BATCH_LIMIT) {
-    Sentry.captureMessage('Batch waitlist sature', {
+  if (lignes && lignes.length === NOTIFY_OUVERTURE_BATCH_LIMIT) {
+    Sentry.captureMessage('Batch notifications ouverture sature', {
       level: 'warning',
       tags: { flow: 'email', signal: 'queue-batch-saturation', severity: 'warning' },
       extra: {
         code,
-        limit: NOTIFY_WAITLIST_BATCH_LIMIT,
+        limit: NOTIFY_OUVERTURE_BATCH_LIMIT,
         processed: lignes.length,
         info: 'surplus reporte au prochain cron retry',
       },
@@ -84,14 +84,14 @@ export async function notifyWaitlistForCode(code: string): Promise<NotifyWaitlis
     processed++
 
     const { data: swapped, error: swapErr } = await supabase
-      .from('waitlist_departements')
+      .from('notifications_ouverture')
       .update({ notified_at: new Date().toISOString() })
       .eq('id', row.id)
       .is('notified_at', null)
       .select('id')
 
     if (swapErr) {
-      console.error('[notify-waitlist][swap_error]', { id: row.id, err: swapErr })
+      console.error('[notify-ouverture][swap_error]', { id: row.id, err: swapErr })
       errors++
       continue
     }
@@ -107,18 +107,18 @@ export async function notifyWaitlistForCode(code: string): Promise<NotifyWaitlis
     // le job durable a deja ete persiste OU le fallback synchrone (AC8) a
     // tente l'envoi.
     try {
-      await enqueueWaitlistOpeningNotificationEmail({
+      await enqueueOuvertureNotificationEmail({
         email: row.email,
         codeDepartement: code,
         nomDepartement: dpt.nom,
       })
       sent++
     } catch (sendErr) {
-      console.error('[notify-waitlist][send_error]', { id: row.id, code, err: sendErr })
+      console.error('[notify-ouverture][send_error]', { id: row.id, code, err: sendErr })
       errors++
     }
   }
 
-  console.info('[notify-waitlist] code=' + code + ' processed=' + processed + ' sent=' + sent + ' skipped=' + skipped + ' errors=' + errors)
+  console.info('[notify-ouverture] code=' + code + ' processed=' + processed + ' sent=' + sent + ' skipped=' + skipped + ' errors=' + errors)
   return { processed, sent, skipped, errors }
 }

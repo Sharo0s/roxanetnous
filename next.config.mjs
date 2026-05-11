@@ -12,6 +12,15 @@ const nextConfig = {
       },
     ],
   },
+  async redirects() {
+    return [
+      {
+        source: '/waitlist',
+        destination: '/me-tenir-au-courant',
+        permanent: true,
+      },
+    ]
+  },
 }
 
 // Story 4.3 : enrobage Vercel Workflow DevKit pour activer les directives

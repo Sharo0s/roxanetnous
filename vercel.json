@@ -22,7 +22,7 @@
       "schedule": "0 4 * * *"
     },
     {
-      "path": "/api/cron/notify-waitlist-retry",
+      "path": "/api/cron/notify-ouverture-retry",
       "schedule": "0 5 * * *"
     }
   ]

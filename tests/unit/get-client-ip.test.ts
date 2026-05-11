@@ -53,7 +53,7 @@ describe('getClientIpOrUnknown', () => {
     expect(getClientIpOrUnknown(h)).toBe('unknown')
   })
 
-  it('U7b : x-real-ip vide retourne "unknown" (pas de bucket waitlist: vide)', () => {
+  it('U7b : x-real-ip vide retourne "unknown" (pas de bucket notifications-ouverture: vide)', () => {
     const h = makeHeaders({ 'x-real-ip': '' })
     expect(getClientIpOrUnknown(h)).toBe('unknown')
   })

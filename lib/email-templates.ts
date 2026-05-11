@@ -1,6 +1,6 @@
 // Story 4.3 : helpers HTML purs reutilisables par le step `sendEmailViaResend`
 // (lib/workflows/send-email-workflow.ts) et par les fonctions synchrones
-// `sendWaitlist*Email` de lib/emails.ts (chemin fallback AC8).
+// `sendOuverture*Email` de lib/emails.ts (chemin fallback AC8).
 //
 // Pas d'I/O ni d'effet de bord ici — uniquement de la composition de strings
 // HTML. Cela evite les contraintes du sandbox workflow function et facilite
@@ -10,7 +10,7 @@ import { escapeHtml } from '@/lib/escape-html'
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'
 
-export function renderWaitlistConfirmationHtml(params: {
+export function renderOuvertureConfirmationHtml(params: {
   codeDepartement: string
   nomDepartement: string
 }): string {
@@ -29,7 +29,7 @@ export function renderWaitlistConfirmationHtml(params: {
       `
 }
 
-export function renderWaitlistOpeningHtml(params: {
+export function renderOuvertureNotificationHtml(params: {
   codeDepartement: string
   nomDepartement: string
 }): string {
@@ -55,11 +55,11 @@ export function renderWaitlistOpeningHtml(params: {
       `
 }
 
-export function buildWaitlistConfirmationSubject(nomDepartement: string): string {
-  return `Vous etes sur la waitlist pour ${nomDepartement}`
+export function buildOuvertureConfirmationSubject(nomDepartement: string): string {
+  return `Vous serez notifie(e) a l'ouverture pour ${nomDepartement}`
 }
 
-export function buildWaitlistOpeningSubject(nomDepartement: string): string {
+export function buildOuvertureNotificationSubject(nomDepartement: string): string {
   return `Le service est ouvert dans ${nomDepartement}`
 }
 
