@@ -134,7 +134,7 @@ export default async function HomePage() {
           />
           <div className="relative max-w-6xl mx-auto grid md:grid-cols-[1.1fr_1fr] gap-12 md:gap-16 items-center">
             <div>
-              <span className="inline-block text-[11px] uppercase tracking-[0.2em] text-kraft font-medium mb-3">
+              <span className="inline-block -translate-y-6 text-[11px] uppercase tracking-[0.2em] text-kraft font-medium mb-3">
                 L&apos;accompagnement de vie
               </span>
               <h1 className="text-4xl md:text-5xl lg:text-6xl text-gray-900 italic leading-[1.05] tracking-tight mb-5">
