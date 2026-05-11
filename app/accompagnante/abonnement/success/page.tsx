@@ -42,7 +42,7 @@ export default async function AbonnementSuccessPage({ searchParams }: Props) {
   }
 
   return (
-    <main id="main-content" tabIndex={-1} className="min-h-screen bg-[#faf7f2] flex items-center justify-center focus:outline-none px-4">
+    <main id="main-content" tabIndex={-1} className="min-h-screen bg-[#fefaf8] flex items-center justify-center focus:outline-none px-4">
       <div className="relative z-10 max-w-md mx-auto text-center">
         <div className="text-xs uppercase tracking-[0.18em] text-kraft mb-3">Bienvenue</div>
         <h1 className="text-3xl md:text-4xl italic text-gray-900 leading-tight mb-4">Abonnement activé</h1>

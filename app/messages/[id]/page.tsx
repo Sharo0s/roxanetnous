@@ -114,7 +114,7 @@ export default async function ConversationPage({
   const otherInitials = `${otherUser?.first_name?.[0] || ''}${otherUser?.last_name?.[0] || ''}`
 
   return (
-    <main id="main-content" tabIndex={-1} className="min-h-screen bg-[#faf7f2] flex flex-col focus:outline-none">
+    <main id="main-content" tabIndex={-1} className="min-h-screen bg-[#fefaf8] flex flex-col focus:outline-none">
       <h1 className="sr-only">Conversation avec {otherUserNameForHeading}</h1>
       {isAccompagnante ? (
         <AccompagnanteDashboardHeader

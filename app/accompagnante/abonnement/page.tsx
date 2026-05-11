@@ -49,7 +49,7 @@ export default async function AbonnementAccompagnantePage({
   }
 
   return (
-    <main id="main-content" tabIndex={-1} className="min-h-screen bg-[#faf7f2] focus:outline-none">
+    <main id="main-content" tabIndex={-1} className="min-h-screen bg-[#fefaf8] focus:outline-none">
       <AccompagnanteDashboardHeader
         firstName={userData.first_name}
         lastName={userData.last_name}

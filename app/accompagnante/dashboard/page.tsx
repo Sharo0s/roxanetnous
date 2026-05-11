@@ -10,6 +10,7 @@ import { DisponibleToggle } from '@/components/accompagnante/disponible-toggle'
 import { StatusBadge } from '@/components/accompagnante/status-badge'
 import { LogoutButton } from '@/components/auth/logout-button'
 import { SPECIALITES } from '@/lib/constants'
+import { getCodesPostauxFilterOr } from '@/lib/departements'
 
 export default async function AccompagnanteDashboard() {
   const supabase = await createClient()
@@ -87,6 +88,19 @@ export default async function AccompagnanteDashboard() {
     annoncesPubliees = publiees || 0
   }
 
+  // Nombre de demandes accompagnes publiees dans les departements ouverts
+  // (meme logique que /recherche/demandes). Affichage tuile dynamique.
+  let demandesCount = 0
+  if (profile?.validation_status === 'valide') {
+    const codesFilter = await getCodesPostauxFilterOr()
+    const { count } = await supabase
+      .from('annonces_accompagnes')
+      .select('id', { count: 'exact', head: true })
+      .eq('status', 'publiee')
+      .or(codesFilter)
+    demandesCount = count || 0
+  }
+
   const isProfilIncomplet = !profile || (
     isFilleule
       ? !profile.ville
@@ -105,7 +119,7 @@ export default async function AccompagnanteDashboard() {
         : 'Aucun abonnement actif'
 
   return (
-    <main id="main-content" tabIndex={-1} className="min-h-screen bg-[#faf7f2] focus:outline-none">
+    <main id="main-content" tabIndex={-1} className="min-h-screen bg-[#fefaf8] focus:outline-none">
       <h1 className="sr-only">Tableau de bord</h1>
       <AccompagnanteDashboardHeader
         firstName={userData.first_name}
@@ -133,7 +147,7 @@ export default async function AccompagnanteDashboard() {
                 {profile.validation_status === 'valide' ? (
                   <span className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.14em] font-medium text-kraft">
                     <span className="w-1.5 h-1.5 rounded-full bg-green-600" aria-hidden="true" />
-                    Accompagnante validée
+                    Accompagnant validé
                   </span>
                 ) : (
                   <StatusBadge
@@ -269,7 +283,7 @@ export default async function AccompagnanteDashboard() {
                   Plus qu&apos;une étape : souscrivez votre abonnement
                 </h2>
                 <p className="text-gray-600 mb-4">
-                  Votre marraine se porte garante : pas de visio, pas de
+                  Votre parrain se porte garant : pas de visio, pas de
                   vérification de documents. Souscrivez à un abonnement et
                   vous pourrez publier votre première annonce.
                 </p>
@@ -334,54 +348,95 @@ export default async function AccompagnanteDashboard() {
 
             {profile?.validation_status === 'valide' && subscribed && (
               <>
-                {/* STATS — 3 cercles principaux */}
-                <section aria-label="Activite recente" className="grid grid-cols-3 gap-3 md:gap-6 mb-12 mt-2">
+                {/* STATS — tuiles asymetriques (variante 3) */}
+                <h2 className="text-center italic text-xl text-gray-900 mb-5">Aujourd&apos;hui</h2>
+                <section
+                  aria-label="Activite recente"
+                  className="grid grid-cols-1 md:grid-cols-[1.5fr_1fr] md:grid-rows-2 gap-3 mb-12 mt-2"
+                >
+                  {/* Tuile principale : Demandes (gradient kraft, prend 2 lignes en md) */}
                   <Link
                     href="/recherche/demandes"
-                    className="group flex flex-col items-center text-center"
+                    aria-label={demandesCount > 0 ? `${demandesCount} demandes en attente` : 'Aucune demande en attente'}
+                    className="relative md:row-span-2 rounded-2xl border border-accent p-6 flex flex-col justify-between min-h-[160px] md:min-h-[270px] hover:border-kraft hover:-translate-y-0.5 transition"
+                    style={{ backgroundImage: 'linear-gradient(135deg, #faecd9 0%, #f4d8b9 100%)' }}
                   >
-                    <div className="relative w-20 h-20 md:w-24 md:h-24 rounded-full border border-kraft bg-accent/30 flex items-center justify-center mb-3 group-hover:-translate-y-0.5 transition">
-                      <svg className="w-7 h-7 md:w-8 md:h-8 text-gray-800" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
-                      </svg>
+                    <div>
+                      <div className="text-[11px] uppercase tracking-[0.14em] text-kraft font-medium mb-2">
+                        {demandesCount > 0 ? 'À consulter' : 'Demandes'}
+                      </div>
+                      {demandesCount > 0 ? (
+                        <>
+                          <div className="italic text-5xl md:text-7xl text-gray-900 leading-none mb-2">
+                            {demandesCount}
+                          </div>
+                          <div className="text-sm md:text-base text-gray-700">
+                            demande{demandesCount > 1 ? 's' : ''} en attente
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <div className="italic text-5xl md:text-7xl text-gray-900 leading-none mb-2">
+                            <svg className="w-10 h-10 md:w-14 md:h-14 text-gray-800 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.2} aria-hidden="true">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                            </svg>
+                          </div>
+                          <div className="text-sm md:text-base text-gray-700">
+                            Aucune demande pour le moment
+                          </div>
+                        </>
+                      )}
                     </div>
-                    <span className="text-sm text-gray-700">demandes en attente</span>
+                    <span className="self-end text-kraft text-base mt-4" aria-hidden="true">→</span>
                   </Link>
 
+                  {/* Tuile Messages */}
                   <Link
                     href="/messages"
-                    className="group flex flex-col items-center text-center"
                     aria-label={unreadCount > 0 ? `${unreadCount} messages non lus` : 'Messages'}
+                    className="relative rounded-2xl border border-[#e8dfd2] bg-white p-6 flex flex-col justify-between min-h-[130px] hover:border-kraft hover:-translate-y-0.5 transition"
                   >
-                    <div className="relative w-20 h-20 md:w-24 md:h-24 rounded-full border border-kraft bg-accent/30 flex items-center justify-center mb-3 group-hover:-translate-y-0.5 transition">
-                      {unreadCount > 0 && (
-                        <span className="absolute top-2 right-3 w-2 h-2 rounded-full bg-red-500" aria-hidden="true" />
-                      )}
-                      <span className="italic text-2xl md:text-3xl text-gray-900">
+                    {unreadCount > 0 && (
+                      <span
+                        aria-hidden="true"
+                        className="absolute top-4 right-4 w-2 h-2 rounded-full bg-kraft"
+                      />
+                    )}
+                    <div>
+                      <div className="text-[11px] uppercase tracking-[0.14em] text-kraft font-medium mb-2">
+                        Messages
+                      </div>
+                      <div className="italic text-3xl text-gray-900 leading-none mb-2">
                         {unreadCount}
-                      </span>
+                      </div>
+                      <div className="text-sm text-gray-700">
+                        non lu{unreadCount > 1 ? 's' : ''}
+                      </div>
                     </div>
-                    <span className="text-sm text-gray-700">
-                      message{unreadCount > 1 ? 's' : ''} non lu{unreadCount > 1 ? 's' : ''}
-                    </span>
+                    <span className="self-end text-kraft text-base mt-2" aria-hidden="true">→</span>
                   </Link>
 
+                  {/* Tuile Annonces */}
                   <Link
                     href="/accompagnante/annonces"
-                    className="group flex flex-col items-center text-center"
                     aria-label={`${annoncesPubliees} annonces publiees, ${annoncesCount} au total`}
+                    className="relative rounded-2xl border border-[#e8dfd2] bg-white p-6 flex flex-col justify-between min-h-[130px] hover:border-kraft hover:-translate-y-0.5 transition"
                   >
-                    <div className="relative w-20 h-20 md:w-24 md:h-24 rounded-full border border-kraft bg-accent/30 flex items-center justify-center mb-3 group-hover:-translate-y-0.5 transition">
-                      <span className="italic text-2xl md:text-3xl text-gray-900">
+                    <div>
+                      <div className="text-[11px] uppercase tracking-[0.14em] text-kraft font-medium mb-2">
+                        Annonces
+                      </div>
+                      <div className="italic text-3xl text-gray-900 leading-none mb-2">
                         {annoncesPubliees}
-                      </span>
+                      </div>
+                      <div className="text-sm text-gray-700">
+                        publié{annoncesPubliees > 1 ? 's' : ''}
+                        {annoncesCount !== annoncesPubliees && (
+                          <span className="text-gray-400"> · {annoncesCount} au total</span>
+                        )}
+                      </div>
                     </div>
-                    <span className="text-sm text-gray-700">
-                      annonce{annoncesPubliees > 1 ? 's' : ''} publiée{annoncesPubliees > 1 ? 's' : ''}
-                    </span>
-                    {annoncesCount !== annoncesPubliees && (
-                      <span className="text-xs text-gray-400 mt-0.5">{annoncesCount} au total</span>
-                    )}
+                    <span className="self-end text-kraft text-base mt-2" aria-hidden="true">→</span>
                   </Link>
                 </section>
 

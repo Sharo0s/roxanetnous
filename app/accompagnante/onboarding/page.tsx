@@ -36,7 +36,7 @@ export default async function OnboardingPage() {
     <main
       id="main-content"
       tabIndex={-1}
-      className="min-h-screen bg-[#faf7f2] focus:outline-none"
+      className="min-h-screen bg-[#fefaf8] focus:outline-none"
     >
       <h1 className="sr-only">Onboarding accompagnante</h1>
       <OnboardingClient

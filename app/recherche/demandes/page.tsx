@@ -68,7 +68,7 @@ export default async function DemandesAccompagnesPage({
   const isAccompagnante = userData?.role === 'accompagnante' && !!user
 
   return (
-    <main id="main-content" tabIndex={-1} className="min-h-screen bg-[#faf7f2] focus:outline-none">
+    <main id="main-content" tabIndex={-1} className="min-h-screen bg-[#fefaf8] focus:outline-none">
       {isAccompagnante ? (
         <AccompagnanteDashboardHeader
           firstName={userData!.first_name}

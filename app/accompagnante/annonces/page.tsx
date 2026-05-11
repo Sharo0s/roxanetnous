@@ -40,7 +40,7 @@ export default async function MesAnnoncesAccompagnante() {
     .order('created_at', { ascending: false })
 
   return (
-    <main id="main-content" tabIndex={-1} className="min-h-screen bg-[#faf7f2] focus:outline-none">
+    <main id="main-content" tabIndex={-1} className="min-h-screen bg-[#fefaf8] focus:outline-none">
       <AccompagnanteDashboardHeader
         firstName={userData.first_name}
         lastName={userData.last_name}
@@ -92,7 +92,7 @@ export default async function MesAnnoncesAccompagnante() {
               Aucune annonce pour le moment.
             </h2>
             <p className="text-gray-600 mb-6 max-w-md mx-auto">
-              Créez votre première annonce pour commencer à être visible auprès des accompagnées.
+              Créez votre première annonce pour commencer à être visible auprès des accompagnés.
             </p>
             {subscribed && (
               <Link
@@ -121,7 +121,7 @@ export default async function MesAnnoncesAccompagnante() {
                           aria-hidden="true"
                           className={`w-1.5 h-1.5 rounded-full ${isPubliee ? 'bg-green-600' : 'bg-gray-400'}`}
                         />
-                        {isPubliee ? 'Publiée' : 'Archivée'}
+                        {isPubliee ? 'Publié' : 'Archivé'}
                       </div>
                       <p className="text-gray-900 font-medium mb-2">
                         {annonce.ville}
@@ -135,7 +135,7 @@ export default async function MesAnnoncesAccompagnante() {
                       <div className="flex flex-wrap gap-4 text-xs text-gray-500">
                         <span>{annonce.vues} vues</span>
                         <span>{annonce.contacts_count} contacts</span>
-                        <span>Publiée le {new Date(annonce.published_at || annonce.created_at).toLocaleDateString('fr-FR')}</span>
+                        <span>Publié le {new Date(annonce.published_at || annonce.created_at).toLocaleDateString('fr-FR')}</span>
                       </div>
                     </div>
                     <div className="flex items-center gap-2 flex-shrink-0 flex-wrap">

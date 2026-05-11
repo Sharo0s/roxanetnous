@@ -45,7 +45,7 @@ export default async function AccompagnanteProfilPage() {
   const departementsOuverts = await getCodesDepartementsOuverts()
 
   return (
-    <main id="main-content" tabIndex={-1} className="min-h-screen bg-[#faf7f2] focus:outline-none">
+    <main id="main-content" tabIndex={-1} className="min-h-screen bg-[#fefaf8] focus:outline-none">
       <AccompagnanteDashboardHeader
         firstName={userData.first_name}
         lastName={userData.last_name}
@@ -60,7 +60,7 @@ export default async function AccompagnanteProfilPage() {
           <div className="text-xs uppercase tracking-[0.18em] text-kraft mb-2">Mon espace</div>
           <h1 className="text-3xl md:text-4xl italic text-gray-900 leading-tight">Mon profil</h1>
           <p className="mt-3 text-sm text-gray-600">
-            Tenez vos informations à jour pour rassurer les accompagnées.
+            Tenez vos informations à jour pour rassurer les accompagnés.
           </p>
         </header>
 

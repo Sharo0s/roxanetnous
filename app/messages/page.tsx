@@ -83,7 +83,7 @@ export default async function MessagesPage() {
   const isAccompagnante = userData.role === 'accompagnante'
 
   return (
-    <main id="main-content" tabIndex={-1} className="min-h-screen bg-[#faf7f2] focus:outline-none">
+    <main id="main-content" tabIndex={-1} className="min-h-screen bg-[#fefaf8] focus:outline-none">
       {isAccompagnante ? (
         <AccompagnanteDashboardHeader
           firstName={userData.first_name}
@@ -110,7 +110,7 @@ export default async function MessagesPage() {
           )}
           <h1 className="text-3xl md:text-4xl italic text-gray-900 leading-tight">Messages</h1>
           <p className="mt-3 text-sm text-gray-600">
-            Vos échanges avec les {isAccompagnante ? 'accompagnées' : 'accompagnantes'}.
+            Vos échanges avec les {isAccompagnante ? 'accompagnés' : 'accompagnants'}.
           </p>
         </header>
 
@@ -120,7 +120,7 @@ export default async function MessagesPage() {
             {userData.role === 'accompagne' && (
               <p className="text-sm text-gray-600 mt-2">
                 <Link href="/recherche" className="text-kraft underline hover:text-gray-900">
-                  Rechercher une accompagnante
+                  Rechercher un accompagnant
                 </Link>
               </p>
             )}
@@ -147,7 +147,7 @@ export default async function MessagesPage() {
                 initials = `${u?.first_name?.[0] || ''}${u?.last_name?.[0] || ''}`
               } else {
                 const u = (conv.accompagnantes_profiles as any)?.users
-                displayName = `${u?.first_name || ''} ${u?.last_name || ''}`.trim() || 'Accompagnante'
+                displayName = `${u?.first_name || ''} ${u?.last_name || ''}`.trim() || 'Accompagnant'
                 initials = `${u?.first_name?.[0] || ''}${u?.last_name?.[0] || ''}`
               }
 
