@@ -2,7 +2,7 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { DIPLOMES, EXPERIENCE_LEVELS, SPECIALITES } from '@/lib/constants'
+import { DIPLOMES, SPECIALITES, formatExperienceLabel } from '@/lib/constants'
 import { ValidationActions } from '@/components/admin/validation-actions'
 import type { Database } from '@/types/supabase'
 
@@ -36,7 +36,7 @@ export default async function ValidationDetailPage({
   const diplomeLabels = (profile.diplomes as string[] || []).map(
     (d) => DIPLOMES.find((dp) => dp.value === d)?.label || d
   )
-  const experienceLabel = EXPERIENCE_LEVELS.find((e) => e.value === profile.experience)?.label || profile.experience
+  const experienceLabel = formatExperienceLabel(profile.experience)
   const specialiteLabels = (profile.specialites as string[] | null || []).map(
     (s) => SPECIALITES.find((sp) => sp.value === s)?.label || s
   )

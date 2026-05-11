@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
-import { SPECIALITES, DIPLOMES, EXPERIENCE_LEVELS } from '@/lib/constants'
+import { SPECIALITES, DIPLOMES, formatExperienceLabel } from '@/lib/constants'
 import { SearchFilters } from '@/components/recherche/search-filters'
 import { InfiniteAnnoncesGrid } from '@/components/recherche/infinite-annonces-grid'
 import { getBadges } from '@/lib/badges'
@@ -316,7 +316,7 @@ export default async function RecherchePage({
                 const profile = annonce.accompagnantes_profiles
                 const u = profile?.users
                 const diplomeLabel = (profile?.diplomes as string[] || []).map((d: string) => DIPLOMES.find((dp) => dp.value === d)?.label || d).join(', ')
-                const expLabel = EXPERIENCE_LEVELS.find((e) => e.value === profile?.experience)?.label || profile?.experience
+                const expLabel = formatExperienceLabel(profile?.experience)
                 const specs = (profile?.specialites as string[] || []).slice(0, 3)
 
                 return (

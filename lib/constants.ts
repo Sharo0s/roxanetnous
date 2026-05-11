@@ -17,6 +17,22 @@ export const EXPERIENCE_LEVELS = [
   { value: 'plus_10_ans', label: 'Plus de 10 ans d\'expérience' },
 ] as const
 
+// Mappe les valeurs historiques (seeds antérieurs, variantes orthographiques)
+// vers les valeurs canoniques de EXPERIENCE_LEVELS. Voir nettoyage BDD 2026-05-11.
+const EXPERIENCE_ALIASES: Record<string, typeof EXPERIENCE_LEVELS[number]['value']> = {
+  '3_a_5_ans': '3_10_ans',
+  '5_a_10_ans': '3_10_ans',
+  '3-5_ans': '3_10_ans',
+  'moins_de_3_ans': 'moins_3_ans',
+  'plus_de_10_ans': 'plus_10_ans',
+}
+
+export function formatExperienceLabel(value: string | null | undefined): string {
+  if (!value) return '—'
+  const canonical = EXPERIENCE_ALIASES[value] ?? value
+  return EXPERIENCE_LEVELS.find((e) => e.value === canonical)?.label ?? '—'
+}
+
 export const SPECIALITES = [
   { value: 'aide_toilette', label: 'Aide à la toilette' },
   { value: 'aide_habillage', label: 'Aide à l\'habillage' },

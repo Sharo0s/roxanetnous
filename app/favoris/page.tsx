@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { SPECIALITES, DIPLOMES, EXPERIENCE_LEVELS } from '@/lib/constants'
+import { SPECIALITES, DIPLOMES } from '@/lib/constants'
 import { AccompagnanteDashboardHeader } from '@/components/layout/accompagnante-dashboard-header'
 import { AccompagneDashboardHeader } from '@/components/layout/accompagne-dashboard-header'
 import { getUnreadCount } from '@/lib/unread-count'

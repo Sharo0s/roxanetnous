@@ -3,6 +3,7 @@
 import { useState, useMemo } from 'react'
 import Link from 'next/link'
 import type { AccompagnanteRow, AccompagneRow } from '@/app/admin/utilisateurs/page'
+import { formatExperienceLabel } from '@/lib/constants'
 import { GrantSubscriptionModal } from './grant-subscription-modal'
 
 type Tab = 'accompagnantes' | 'accompagnes' | 'resiliations'
@@ -59,7 +60,6 @@ export function UtilisateursClient({
   enAttenteCount,
   validesCount,
   diplomeLabels,
-  experienceLabels,
   annulations = [],
 }: {
   accompagnantes: AccompagnanteRow[]
@@ -67,7 +67,6 @@ export function UtilisateursClient({
   enAttenteCount: number
   validesCount: number
   diplomeLabels: Record<string, string>
-  experienceLabels: Record<string, string>
   annulations?: AnnulationRow[]
 }) {
   const [tab, setTab] = useState<Tab>('accompagnantes')
@@ -232,7 +231,6 @@ export function UtilisateursClient({
         <AccompagnantesTable
           accompagnantes={filteredAccompagnantes}
           diplomeLabels={diplomeLabels}
-          experienceLabels={experienceLabels}
         />
       ) : tab === 'accompagnes' ? (
         <AccompagnesTable accompagnes={filteredAccompagnes} />
@@ -246,11 +244,9 @@ export function UtilisateursClient({
 function AccompagnantesTable({
   accompagnantes,
   diplomeLabels,
-  experienceLabels,
 }: {
   accompagnantes: AccompagnanteRow[]
   diplomeLabels: Record<string, string>
-  experienceLabels: Record<string, string>
 }) {
   if (accompagnantes.length === 0) {
     return (
@@ -319,7 +315,7 @@ function AccompagnantesTable({
                     )}
                   </td>
                   <td className="px-4 py-3 text-gray-600">
-                    {u.experience ? experienceLabels[u.experience] || u.experience : '-'}
+                    {formatExperienceLabel(u.experience)}
                   </td>
                   <td className="px-4 py-3 text-gray-400">
                     {new Date(u.created_at).toLocaleDateString('fr-FR')}

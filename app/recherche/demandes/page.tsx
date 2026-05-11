@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
-import { SPECIALITES, DIPLOMES, EXPERIENCE_LEVELS } from '@/lib/constants'
+import { SPECIALITES, DIPLOMES, formatExperienceLabel } from '@/lib/constants'
 import { AccompagnanteDashboardHeader } from '@/components/layout/accompagnante-dashboard-header'
 import { LogoutButton } from '@/components/auth/logout-button'
 import { getUnreadCount } from '@/lib/unread-count'
@@ -128,9 +128,7 @@ export default async function DemandesAccompagnesPage({
               const diplomeLabel = annonce.diplome_requis
                 ? DIPLOMES.find((d) => d.value === annonce.diplome_requis)?.label
                 : null
-              const expLabel = annonce.experience_min
-                ? EXPERIENCE_LEVELS.find((e) => e.value === annonce.experience_min)?.label
-                : null
+              const expLabel = annonce.experience_min ? formatExperienceLabel(annonce.experience_min) : null
 
               return (
                 <article

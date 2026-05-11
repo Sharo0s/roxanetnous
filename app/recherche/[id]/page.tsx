@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { SPECIALITES, DIPLOMES, EXPERIENCE_LEVELS, JOURS_SEMAINE, CRENEAUX } from '@/lib/constants'
+import { SPECIALITES, DIPLOMES, JOURS_SEMAINE, CRENEAUX, formatExperienceLabel } from '@/lib/constants'
 import { ContactButton } from '@/components/messages/contact-button'
 import { FavoriButton } from '@/components/recherche/favori-button'
 import { SignalementButton } from '@/components/signalement-button'
@@ -90,7 +90,7 @@ export default async function AnnonceDetailPage({
     : false
 
   const diplomeLabel = (profile?.diplomes as string[] || []).map((d: string) => DIPLOMES.find((dp) => dp.value === d)?.label || d).join(', ')
-  const expLabel = EXPERIENCE_LEVELS.find((e) => e.value === profile?.experience)?.label || profile?.experience
+  const expLabel = formatExperienceLabel(profile?.experience)
   const specLabels = (profile?.specialites as string[] || []).map(
     (s: string) => SPECIALITES.find((sp) => sp.value === s)?.label || s
   )

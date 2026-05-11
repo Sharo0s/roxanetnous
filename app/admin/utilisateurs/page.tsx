@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
-import { DIPLOMES, EXPERIENCE_LEVELS } from '@/lib/constants'
+import { DIPLOMES } from '@/lib/constants'
 import { UtilisateursClient } from '@/components/admin/utilisateurs-client'
 import { getDernieresAnnulations } from '@/lib/admin-stats'
 
@@ -112,7 +112,6 @@ export default async function AdminUtilisateursPage() {
         enAttenteCount={enAttenteCount}
         validesCount={validesCount}
         diplomeLabels={Object.fromEntries(DIPLOMES.map((d) => [d.value, d.label]))}
-        experienceLabels={Object.fromEntries(EXPERIENCE_LEVELS.map((e) => [e.value, e.label]))}
         annulations={annulations}
       />
     </>

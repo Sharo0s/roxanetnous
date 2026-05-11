@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { DIPLOMES, EXPERIENCE_LEVELS, SPECIALITES, JOURS_SEMAINE, CRENEAUX } from '@/lib/constants'
+import { DIPLOMES, SPECIALITES, JOURS_SEMAINE, CRENEAUX, formatExperienceLabel } from '@/lib/constants'
 import { ValidationActions } from '@/components/admin/validation-actions'
 import { DeleteUserButton } from '@/components/admin/delete-user-button'
 import { CancelSubscriptionButton } from '@/components/admin/cancel-subscription-button'
@@ -119,9 +119,7 @@ export default async function AdminUtilisateurDetailPage({
   const diplomeLabels = (auxProfile?.diplomes as string[] || []).map(
     (d: string) => DIPLOMES.find((dp) => dp.value === d)?.label || d
   )
-  const experienceLabel = auxProfile?.experience
-    ? EXPERIENCE_LEVELS.find((e) => e.value === auxProfile.experience)?.label || auxProfile.experience
-    : null
+  const experienceLabel = auxProfile?.experience ? formatExperienceLabel(auxProfile.experience) : null
   const specialiteLabels = (auxProfile?.specialites as string[] || []).map(
     (s: string) => SPECIALITES.find((sp) => sp.value === s)?.label || s
   )

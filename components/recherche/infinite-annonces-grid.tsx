@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react'
 import Link from 'next/link'
-import { SPECIALITES, DIPLOMES, EXPERIENCE_LEVELS } from '@/lib/constants'
+import { SPECIALITES, DIPLOMES, formatExperienceLabel } from '@/lib/constants'
 import { BadgesDisplay } from '@/components/badges-display'
 import { FavoriButton } from '@/components/recherche/favori-button'
 
@@ -63,7 +63,7 @@ export function InfiniteAnnoncesGrid({ annonces, badgesMap, userId, favorisIds =
           const profile = annonce.accompagnantes_profiles
           const u = profile?.users
           const diplomeLabel = (profile?.diplomes as string[] || []).map((d: string) => DIPLOMES.find((dp) => dp.value === d)?.label || d).join(', ')
-          const expLabel = EXPERIENCE_LEVELS.find((e) => e.value === profile?.experience)?.label || profile?.experience
+          const expLabel = formatExperienceLabel(profile?.experience)
           const specs = (profile?.specialites as string[] || []).slice(0, 3)
 
           return (
