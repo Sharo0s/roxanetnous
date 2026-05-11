@@ -105,27 +105,30 @@ export function UtilisateursClient({
   }, [accompagnes, search])
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8">
-      <h2 className="text-2xl font-bold text-gray-900 mb-6">Utilisateurs</h2>
+    <div className="max-w-6xl mx-auto px-4 py-10 md:py-14">
+      <header className="mb-8">
+        <div className="text-xs uppercase tracking-[0.18em] text-kraft mb-2">Espace admin</div>
+        <h2 className="text-3xl md:text-4xl italic text-gray-900 leading-tight">Utilisateurs</h2>
+      </header>
 
       {/* Onglets */}
-      <div className="flex gap-2 mb-6">
+      <div className="flex gap-2 mb-8 flex-wrap">
         <button
           onClick={() => { setTab('accompagnantes'); setStatusFilter('tous') }}
-          className={`px-4 py-2 rounded-lg text-sm font-medium transition btn-hover ${
+          className={`inline-flex items-center px-5 py-2 rounded-full text-sm transition ${
             tab === 'accompagnantes'
-              ? 'bg-accent text-black'
-              : 'bg-white border border-gray-400 text-gray-700 hover:border-accent'
+              ? 'bg-accent border border-accent text-black font-medium'
+              : 'bg-white border border-[#e8dfd2] text-gray-700 hover:border-kraft'
           }`}
         >
-          Accompagnantes ({accompagnantes.length})
+          Accompagnants ({accompagnantes.length})
         </button>
         <button
           onClick={() => { setTab('accompagnes'); setStatusFilter('tous') }}
-          className={`px-4 py-2 rounded-lg text-sm font-medium transition btn-hover ${
+          className={`inline-flex items-center px-5 py-2 rounded-full text-sm transition ${
             tab === 'accompagnes'
-              ? 'bg-accent text-black'
-              : 'bg-white border border-gray-400 text-gray-700 hover:border-accent'
+              ? 'bg-accent border border-accent text-black font-medium'
+              : 'bg-white border border-[#e8dfd2] text-gray-700 hover:border-kraft'
           }`}
         >
           Accompagnés ({accompagnes.length})
@@ -133,10 +136,10 @@ export function UtilisateursClient({
         {annulations.length > 0 && (
           <button
             onClick={() => { setTab('resiliations'); setStatusFilter('tous') }}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition btn-hover ${
+            className={`inline-flex items-center px-5 py-2 rounded-full text-sm transition ${
               tab === 'resiliations'
-                ? 'bg-accent text-black'
-                : 'bg-white border border-gray-400 text-gray-700 hover:border-accent'
+                ? 'bg-accent border border-accent text-black font-medium'
+                : 'bg-white border border-[#e8dfd2] text-gray-700 hover:border-kraft'
             }`}
           >
             Résiliations ({annulations.length})
@@ -146,44 +149,44 @@ export function UtilisateursClient({
 
       {/* KPIs */}
       {tab === 'resiliations' ? null : tab === 'accompagnantes' ? (
-        <div className="grid grid-cols-3 gap-4 mb-6">
+        <div className="grid grid-cols-3 gap-3 md:gap-4 mb-6">
           <button
             onClick={() => setStatusFilter('tous')}
-            className={`bg-white rounded-xl border p-5 text-left transition-colors ${
-              statusFilter === 'tous' ? 'border-accent' : 'hover:border-gray-400'
+            className={`bg-white rounded-2xl border p-5 text-left transition ${
+              statusFilter === 'tous' ? 'border-kraft' : 'border-[#e8dfd2] hover:border-kraft'
             }`}
           >
-            <p className="text-sm text-gray-500">Total</p>
-            <p className="text-3xl font-bold mt-1">{accompagnantes.length}</p>
+            <p className="text-[11px] uppercase tracking-[0.12em] text-kraft font-medium">Total</p>
+            <p className="italic text-3xl text-gray-900 mt-1">{accompagnantes.length}</p>
           </button>
           <button
             onClick={() => setStatusFilter('en_attente')}
-            className={`bg-white rounded-xl border p-5 text-left transition-colors ${
-              statusFilter === 'en_attente' ? 'border-accent' : 'hover:border-gray-400'
+            className={`bg-white rounded-2xl border p-5 text-left transition ${
+              statusFilter === 'en_attente' ? 'border-kraft' : 'border-[#e8dfd2] hover:border-kraft'
             }`}
           >
-            <p className="text-sm text-gray-500">En attente</p>
-            <p className="text-3xl font-bold mt-1">{enAttenteCount}</p>
+            <p className="text-[11px] uppercase tracking-[0.12em] text-kraft font-medium">En attente</p>
+            <p className="italic text-3xl text-gray-900 mt-1">{enAttenteCount}</p>
           </button>
           <button
             onClick={() => setStatusFilter('valide')}
-            className={`bg-white rounded-xl border p-5 text-left transition-colors ${
-              statusFilter === 'valide' ? 'border-accent' : 'hover:border-gray-400'
+            className={`bg-white rounded-2xl border p-5 text-left transition ${
+              statusFilter === 'valide' ? 'border-kraft' : 'border-[#e8dfd2] hover:border-kraft'
             }`}
           >
-            <p className="text-sm text-gray-500">Validés</p>
-            <p className="text-3xl font-bold mt-1">{validesCount}</p>
+            <p className="text-[11px] uppercase tracking-[0.12em] text-kraft font-medium">Validés</p>
+            <p className="italic text-3xl text-gray-900 mt-1">{validesCount}</p>
           </button>
         </div>
       ) : (
-        <div className="grid grid-cols-2 gap-4 mb-6">
-          <div className="bg-white rounded-xl border p-5">
-            <p className="text-sm text-gray-500">Total</p>
-            <p className="text-3xl font-bold mt-1">{accompagnes.length}</p>
+        <div className="grid grid-cols-2 gap-3 md:gap-4 mb-6">
+          <div className="bg-white rounded-2xl border border-[#e8dfd2] p-5">
+            <p className="text-[11px] uppercase tracking-[0.12em] text-kraft font-medium">Total</p>
+            <p className="italic text-3xl text-gray-900 mt-1">{accompagnes.length}</p>
           </div>
-          <div className="bg-white rounded-xl border p-5">
-            <p className="text-sm text-gray-500">Ce mois</p>
-            <p className="text-3xl font-bold mt-1">
+          <div className="bg-white rounded-2xl border border-[#e8dfd2] p-5">
+            <p className="text-[11px] uppercase tracking-[0.12em] text-kraft font-medium">Ce mois</p>
+            <p className="italic text-3xl text-gray-900 mt-1">
               {accompagnes.filter((u) => {
                 const d = new Date(u.created_at)
                 const now = new Date()
@@ -201,21 +204,21 @@ export function UtilisateursClient({
           placeholder="Rechercher par nom, email ou ville..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full px-4 py-2.5 bg-white border border-gray-400 rounded-xl text-sm focus:outline-none focus:border-accent transition-colors"
+          className="w-full px-4 py-2.5 bg-white border border-[#e8dfd2] rounded-full text-sm focus:outline-none focus:border-kraft transition"
         />
       </div>}
 
-      {/* Filtre statut accompagnantes */}
+      {/* Filtre statut accompagnants */}
       {tab === 'accompagnantes' && (
-        <div className="flex gap-2 mb-4 flex-wrap">
+        <div className="flex gap-2 mb-6 flex-wrap">
           {['tous', 'en_attente', 'visio_a_planifier', 'visio_realisee', 'valide', 'refuse', 'a_completer'].map((s) => (
             <button
               key={s}
               onClick={() => setStatusFilter(s)}
-              className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
+              className={`px-3 py-1.5 rounded-full text-xs transition ${
                 statusFilter === s
-                  ? 'bg-accent text-black'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  ? 'bg-accent border border-accent text-black font-medium'
+                  : 'bg-white border border-[#e8dfd2] text-gray-700 hover:border-kraft'
               }`}
             >
               {s === 'tous' ? 'Tous' : VALIDATION_LABELS[s]}
@@ -251,17 +254,17 @@ function AccompagnantesTable({
 }) {
   if (accompagnantes.length === 0) {
     return (
-      <div className="bg-white rounded-xl border p-8 text-center text-gray-500">
-        Aucune accompagnante ne correspond à ces critères.
+      <div className="bg-white rounded-2xl border border-[#e8dfd2] p-10 text-center text-gray-500 italic">
+        Aucun accompagnant ne correspond à ces critères.
       </div>
     )
   }
 
   return (
-    <div className="bg-white rounded-xl border overflow-hidden">
+    <div className="bg-white rounded-2xl border border-[#e8dfd2] overflow-hidden">
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
-          <thead className="bg-accent/20 border-b">
+          <thead className="bg-[#faf7f2] border-b border-[#e8dfd2]">
             <tr>
               <th className="text-left px-4 py-3 font-medium text-gray-500">Nom</th>
               <th className="text-left px-4 py-3 font-medium text-gray-500">Ville</th>
@@ -352,17 +355,17 @@ function AccompagnesTable({
 }) {
   if (accompagnes.length === 0) {
     return (
-      <div className="bg-white rounded-xl border p-8 text-center text-gray-500">
+      <div className="bg-white rounded-2xl border border-[#e8dfd2] p-10 text-center text-gray-500 italic">
         Aucun accompagné ne correspond à ces critères.
       </div>
     )
   }
 
   return (
-    <div className="bg-white rounded-xl border overflow-hidden">
+    <div className="bg-white rounded-2xl border border-[#e8dfd2] overflow-hidden">
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
-          <thead className="bg-accent/20 border-b">
+          <thead className="bg-[#faf7f2] border-b border-[#e8dfd2]">
             <tr>
               <th className="text-left px-4 py-3 font-medium text-gray-500">Nom</th>
               <th className="text-left px-4 py-3 font-medium text-gray-500">Ville</th>
@@ -411,17 +414,17 @@ function AccompagnesTable({
 function ResiliationsPanel({ annulations }: { annulations: AnnulationRow[] }) {
   if (annulations.length === 0) {
     return (
-      <div className="bg-white rounded-xl border p-8 text-center text-gray-500">
+      <div className="bg-white rounded-2xl border border-[#e8dfd2] p-10 text-center text-gray-500 italic">
         Aucune résiliation.
       </div>
     )
   }
 
   return (
-    <div className="bg-white rounded-xl border overflow-hidden">
+    <div className="bg-white rounded-2xl border border-[#e8dfd2] overflow-hidden">
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
-          <thead className="bg-accent/20 border-b">
+          <thead className="bg-[#faf7f2] border-b border-[#e8dfd2]">
             <tr>
               <th className="text-left px-4 py-3 font-medium text-gray-500">Nom</th>
               <th className="text-left px-4 py-3 font-medium text-gray-500">Rôle</th>

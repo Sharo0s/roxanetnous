@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { LogoutButton } from '@/components/auth/logout-button'
+import { AdminNav } from '@/components/admin/admin-nav'
 import Link from 'next/link'
 
 export default async function AdminLayout({
@@ -22,15 +23,19 @@ export default async function AdminLayout({
   if (!userData || userData.role !== 'admin') redirect('/')
 
   return (
-    <main id="main-content" tabIndex={-1} className="min-h-screen kraft bg-kraft focus:outline-none">
-      <header className="relative z-10 bg-white border-b">
-        <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Link href="/admin" className="text-xl font-bold text-black">roxanetnous</Link>
-            <span className="text-xs bg-gray-200 text-gray-700 px-2 py-1 rounded-full font-medium">Admin</span>
+    <main id="main-content" tabIndex={-1} className="min-h-screen bg-[#fefaf8] focus:outline-none">
+
+      {/* HEADER */}
+      <header className="relative z-10 bg-[#faf7f2] border-b border-[#e8dfd2]">
+        <div className="max-w-6xl mx-auto px-4 md:px-6 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Link href="/admin" className="text-lg font-bold text-black">roxanetnous</Link>
+            <span className="inline-flex items-center text-[10px] uppercase tracking-[0.14em] font-medium text-kraft border border-[#e8dfd2] bg-white px-2 py-0.5 rounded-full">
+              Admin
+            </span>
           </div>
-          <div className="flex items-center gap-4">
-            <span className="text-sm text-gray-600">
+          <div className="flex items-center gap-4 text-sm">
+            <span className="text-gray-600 hidden sm:inline">
               {userData.first_name} {userData.last_name}
             </span>
             <LogoutButton />
@@ -38,28 +43,8 @@ export default async function AdminLayout({
         </div>
       </header>
 
-      <nav className="relative z-10 bg-white border-b">
-        <div className="max-w-6xl mx-auto px-4 flex gap-1 overflow-x-auto">
-          {[
-            { href: '/admin', label: 'Tableau de bord' },
-            { href: '/admin/utilisateurs', label: 'Utilisateurs' },
-            { href: '/admin/annonces', label: 'Annonces' },
-            { href: '/admin/messages', label: 'Messages' },
-            { href: '/admin/signalements', label: 'Signalements' },
-            { href: '/admin/parrainages', label: 'Parrainages' },
-            { href: '/admin/departements', label: 'Couverture' },
-            { href: '/admin/historique', label: 'Historique' },
-          ].map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="px-3 py-2.5 text-sm text-gray-600 hover:text-black whitespace-nowrap border-b-2 border-transparent hover:border-accent transition-colors"
-            >
-              {item.label}
-            </Link>
-          ))}
-        </div>
-      </nav>
+      {/* NAV (composant client pour gerer le state actif via usePathname) */}
+      <AdminNav />
 
       <div className="relative z-10">{children}</div>
     </main>

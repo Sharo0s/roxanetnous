@@ -36,7 +36,7 @@ export default async function AdminConversationPage({
   if (!conversation || !conversation.admin_id) redirect('/admin/messages')
 
   const aux = conversation.accompagnantes_profiles?.users
-  const fullName = `${aux?.first_name || ''} ${aux?.last_name || ''}`.trim() || 'Accompagnante'
+  const fullName = `${aux?.first_name || ''} ${aux?.last_name || ''}`.trim() || 'Accompagnant'
 
   const { data: messages } = await supabaseAdmin
     .from('messages')
@@ -49,19 +49,24 @@ export default async function AdminConversationPage({
   return (
     <div className="flex flex-col flex-1">
       <h1 className="sr-only">Conversation admin avec {fullName}</h1>
-      <div className="max-w-3xl mx-auto w-full px-4 py-3 flex items-center gap-2">
-        <Link href="/admin/messages" className="inline-flex items-center gap-2 px-4 h-[52px] bg-accent text-black rounded-xl text-base font-medium btn-hover transition">
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-          </svg>
-          Messages
-        </Link>
-        <span className="inline-flex items-center gap-3 px-4 h-[52px] bg-black text-white rounded-xl text-base font-medium">
-          <span className="w-9 h-9 rounded-full bg-gray-600 flex items-center justify-center text-sm font-bold text-white">
-            {aux?.first_name?.[0]}{aux?.last_name?.[0]}
-          </span>
-          {fullName}
-        </span>
+      <div className="border-b border-[#e8dfd2] bg-[#faf7f2]">
+        <div className="max-w-3xl mx-auto w-full px-4 py-3 flex items-center gap-3">
+          <Link
+            href="/admin/messages"
+            className="inline-flex items-center gap-1.5 px-4 py-2 bg-white border border-[#e8dfd2] text-gray-700 rounded-full text-sm hover:border-kraft transition"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+            Messages
+          </Link>
+          <div className="inline-flex items-center gap-2.5 px-3 py-2 bg-white border border-[#e8dfd2] rounded-full">
+            <span aria-hidden="true" className="w-7 h-7 rounded-full bg-accent/30 text-gray-900 flex items-center justify-center text-[10px] font-medium">
+              {aux?.first_name?.[0]}{aux?.last_name?.[0]}
+            </span>
+            <span className="text-sm font-medium text-gray-900">{fullName}</span>
+          </div>
+        </div>
       </div>
 
       <ChatWindow

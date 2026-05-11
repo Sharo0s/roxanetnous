@@ -37,7 +37,7 @@ export function GrantSubscriptionModal({ userId, userName }: Props) {
     <>
       <button
         onClick={() => setOpen(true)}
-        className="px-3 py-1.5 text-xs font-medium bg-accent text-black rounded-lg hover:bg-accent/80 transition-colors"
+        className="inline-flex items-center px-3 py-1.5 text-xs bg-accent border border-accent text-black rounded-full hover:bg-kraft hover:border-kraft transition"
       >
         Offrir&nbsp;un&nbsp;abonnement
       </button>
@@ -45,7 +45,7 @@ export function GrantSubscriptionModal({ userId, userName }: Props) {
       {open && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           <div className="absolute inset-0 bg-black/50" onClick={handleClose} />
-          <div className="relative bg-white rounded-xl max-w-md w-full mx-4 p-6">
+          <div className="relative bg-white rounded-2xl max-w-md w-full mx-4 p-6 border border-[#e8dfd2]">
             {step === 'choose' && (
               <>
                 <h3 className="text-lg font-semibold text-gray-900 mb-1 text-left">
@@ -59,10 +59,10 @@ export function GrantSubscriptionModal({ userId, userName }: Props) {
                   <button
                     type="button"
                     onClick={() => setPlan('mensuel')}
-                    className={`flex-1 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
+                    className={`flex-1 px-4 py-3 rounded-full text-sm transition ${
                       plan === 'mensuel'
-                        ? 'bg-accent text-black'
-                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                        ? 'bg-accent border border-accent text-black font-medium'
+                        : 'bg-white border border-[#e8dfd2] text-gray-700 hover:border-kraft'
                     }`}
                   >
                     Mensuel
@@ -70,10 +70,10 @@ export function GrantSubscriptionModal({ userId, userName }: Props) {
                   <button
                     type="button"
                     onClick={() => setPlan('annuel')}
-                    className={`flex-1 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
+                    className={`flex-1 px-4 py-3 rounded-full text-sm transition ${
                       plan === 'annuel'
-                        ? 'bg-accent text-black'
-                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                        ? 'bg-accent border border-accent text-black font-medium'
+                        : 'bg-white border border-[#e8dfd2] text-gray-700 hover:border-kraft'
                     }`}
                   >
                     Annuel
@@ -83,13 +83,13 @@ export function GrantSubscriptionModal({ userId, userName }: Props) {
                 <div className="flex gap-3">
                   <button
                     onClick={handleClose}
-                    className="flex-1 px-4 py-2 text-sm border border-gray-400 rounded-lg hover:bg-gray-50 transition-colors"
+                    className="flex-1 px-4 py-2 text-sm border border-[#e8dfd2] rounded-full hover:border-kraft transition"
                   >
                     Annuler
                   </button>
                   <button
                     onClick={handleConfirm}
-                    className="flex-1 px-4 py-2 text-sm font-medium bg-accent text-black rounded-lg hover:bg-accent/80 transition-colors"
+                    className="flex-1 px-4 py-2 text-sm bg-accent border border-accent text-black rounded-full hover:bg-kraft hover:border-kraft transition font-medium"
                   >
                     Confirmer
                   </button>
@@ -115,7 +115,7 @@ export function GrantSubscriptionModal({ userId, userName }: Props) {
                     handleClose()
                     window.location.reload()
                   }}
-                  className="px-4 py-2 text-sm font-medium bg-accent text-black rounded-lg hover:bg-accent/80 transition-colors"
+                  className="px-4 py-2 text-sm bg-accent border border-accent text-black rounded-full hover:bg-kraft hover:border-kraft transition font-medium"
                 >
                   Fermer
                 </button>
@@ -128,7 +128,7 @@ export function GrantSubscriptionModal({ userId, userName }: Props) {
                 <p className="text-sm text-red-600 mb-4">{errorMsg}</p>
                 <button
                   onClick={() => setStep('choose')}
-                  className="px-4 py-2 text-sm font-medium border border-gray-400 rounded-lg hover:bg-gray-50 transition-colors"
+                  className="px-4 py-2 text-sm border border-[#e8dfd2] rounded-full hover:border-kraft transition"
                 >
                   Réessayer
                 </button>

@@ -37,10 +37,10 @@ export function PeriodSelector<T extends { mois: string }>({
       <div className="flex gap-2 mb-4">
         <button
           onClick={() => setPeriod('12m')}
-          className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
+          className={`px-3 py-1.5 text-xs rounded-full transition ${
             period === '12m'
-              ? 'bg-gray-900 text-white'
-              : 'bg-white border text-gray-600 hover:bg-gray-50'
+              ? 'bg-accent border border-accent text-black font-medium'
+              : 'bg-white border border-[#e8dfd2] text-gray-700 hover:border-kraft'
           }`}
         >
           12 derniers mois
@@ -49,10 +49,10 @@ export function PeriodSelector<T extends { mois: string }>({
           <button
             key={y}
             onClick={() => setPeriod(y)}
-            className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
+            className={`px-3 py-1.5 text-xs rounded-full transition ${
               period === y
-                ? 'bg-gray-900 text-white'
-                : 'bg-white border text-gray-600 hover:bg-gray-50'
+                ? 'bg-accent border border-accent text-black font-medium'
+                : 'bg-white border border-[#e8dfd2] text-gray-700 hover:border-kraft'
             }`}
           >
             {y}
@@ -60,10 +60,10 @@ export function PeriodSelector<T extends { mois: string }>({
         ))}
         <button
           onClick={() => setPeriod('all')}
-          className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
+          className={`px-3 py-1.5 text-xs rounded-full transition ${
             period === 'all'
-              ? 'bg-gray-900 text-white'
-              : 'bg-white border text-gray-600 hover:bg-gray-50'
+              ? 'bg-accent border border-accent text-black font-medium'
+              : 'bg-white border border-[#e8dfd2] text-gray-700 hover:border-kraft'
           }`}
         >
           Tout

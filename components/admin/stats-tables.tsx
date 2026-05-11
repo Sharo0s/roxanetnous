@@ -27,7 +27,7 @@ function PeriodButtons({ data, period, setPeriod }: {
 
   const btnClass = (active: boolean) =>
     `px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
-      active ? 'bg-accent text-black' : 'bg-white border text-gray-600 hover:bg-gray-50'
+      active ? 'bg-accent border border-accent text-black' : 'bg-white border border-[#e8dfd2] text-gray-700 hover:border-kraft'
     }`
 
   return (
@@ -61,12 +61,12 @@ export function InscriptionsTable({ data }: {
   return (
     <div>
       <PeriodButtons data={data} period={period} setPeriod={setPeriod} />
-      <div className="bg-white rounded-xl border overflow-hidden">
+      <div className="bg-white rounded-2xl border border-[#e8dfd2] overflow-hidden">
         <table className="w-full text-sm">
-          <thead className="bg-accent/20 border-b">
+          <thead className="bg-[#faf7f2] border-b border-[#e8dfd2]">
             <tr>
               <th className="text-left px-4 py-3 font-medium text-gray-500">Mois</th>
-              <th className="text-right px-4 py-3 font-medium text-gray-500">Accompagnantes</th>
+              <th className="text-right px-4 py-3 font-medium text-gray-500">Accompagnants</th>
               <th className="text-right px-4 py-3 font-medium text-gray-500">Accompagnés</th>
               <th className="text-right px-4 py-3 font-medium text-gray-500">Total</th>
             </tr>
@@ -98,9 +98,9 @@ export function RevenusTable({ data }: {
   return (
     <div>
       <PeriodButtons data={data} period={period} setPeriod={setPeriod} />
-      <div className="bg-white rounded-xl border overflow-hidden">
+      <div className="bg-white rounded-2xl border border-[#e8dfd2] overflow-hidden">
         <table className="w-full text-sm">
-          <thead className="bg-accent/20 border-b">
+          <thead className="bg-[#faf7f2] border-b border-[#e8dfd2]">
             <tr>
               <th className="text-left px-4 py-3 font-medium text-gray-500">Mois</th>
               <th className="text-right px-4 py-3 font-medium text-gray-500">Abonnés</th>
@@ -140,9 +140,9 @@ export function MrrSegmentTable({ data }: { data: MrrSegmentRow[] }) {
   return (
     <div>
       <PeriodButtons data={data} period={period} setPeriod={setPeriod} />
-      <div className="bg-white rounded-xl border overflow-hidden">
+      <div className="bg-white rounded-2xl border border-[#e8dfd2] overflow-hidden">
         <table className="w-full text-sm">
-          <thead className="bg-accent/20 border-b">
+          <thead className="bg-[#faf7f2] border-b border-[#e8dfd2]">
             <tr>
               <th className="text-left px-4 py-3 font-medium text-gray-500">Mois</th>
               <th className="text-right px-4 py-3 font-medium text-gray-500">Acc. Mens.</th>
@@ -193,9 +193,9 @@ export function ActiviteTable({ data }: {
   return (
     <div>
       <PeriodButtons data={data} period={period} setPeriod={setPeriod} />
-      <div className="bg-white rounded-xl border overflow-hidden">
+      <div className="bg-white rounded-2xl border border-[#e8dfd2] overflow-hidden">
         <table className="w-full text-sm">
-          <thead className="bg-accent/20 border-b">
+          <thead className="bg-[#faf7f2] border-b border-[#e8dfd2]">
             <tr>
               <th className="text-left px-4 py-3 font-medium text-gray-500">Mois</th>
               <th className="text-right px-4 py-3 font-medium text-gray-500">Messages</th>
@@ -234,7 +234,7 @@ const FEEDBACK_LABELS: Record<string, string> = {
 }
 
 const ROLE_LABELS: Record<string, string> = {
-  accompagnante: 'Accompagnante',
+  accompagnante: 'Accompagnant',
   accompagne: 'Accompagné',
   admin: 'Administrateur',
 }
@@ -274,7 +274,7 @@ export function ResiliationsTable({ data }: { data: AnnulationRow[] }) {
 
   const btnClass = (active: boolean) =>
     `px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
-      active ? 'bg-accent text-black' : 'bg-white border text-gray-600 hover:bg-gray-50'
+      active ? 'bg-accent border border-accent text-black' : 'bg-white border border-[#e8dfd2] text-gray-700 hover:border-kraft'
     }`
 
   return (
@@ -285,14 +285,14 @@ export function ResiliationsTable({ data }: { data: AnnulationRow[] }) {
         <button onClick={() => setPeriod('12-mois')} className={btnClass(period === '12-mois')}>12 derniers mois</button>
         <button onClick={() => setPeriod('tout')} className={btnClass(period === 'tout')}>Tout</button>
       </div>
-      <div className="bg-white rounded-xl border overflow-hidden">
+      <div className="bg-white rounded-2xl border border-[#e8dfd2] overflow-hidden">
         {filtered.length === 0 ? (
           <div className="p-8 text-center text-gray-500 text-sm">
             Aucune résiliation sur cette période.
           </div>
         ) : (
           <table className="w-full text-sm">
-            <thead className="bg-accent/20 border-b">
+            <thead className="bg-[#faf7f2] border-b border-[#e8dfd2]">
               <tr>
                 <th className="text-left px-4 py-3 font-medium text-gray-500">Date</th>
                 <th className="text-left px-4 py-3 font-medium text-gray-500">Nom</th>

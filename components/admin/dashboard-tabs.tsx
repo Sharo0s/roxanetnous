@@ -18,16 +18,17 @@ export function DashboardTabs({ children }: {
 
   return (
     <div>
-      <div className="flex gap-2 mb-6">
+      <div className="flex gap-2 mb-8 flex-wrap">
         {tabs.map((tab) => (
           <button
             key={tab.id}
             onClick={() => setActive(tab.id)}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition btn-hover ${
+            className={`inline-flex items-center px-5 py-2 rounded-full text-sm transition ${
               active === tab.id
-                ? 'bg-accent text-black'
-                : 'bg-white border border-gray-400 text-gray-700 hover:border-accent'
+                ? 'bg-accent border border-accent text-black font-medium'
+                : 'bg-white border border-[#e8dfd2] text-gray-700 hover:border-kraft'
             }`}
+            aria-current={active === tab.id ? 'page' : undefined}
           >
             {tab.label}
           </button>

@@ -91,22 +91,29 @@ export default async function AdminAnnoncesPage({
   })
 
   return (
-      <div className="max-w-6xl mx-auto px-4 py-8">
-        <h1 className="text-2xl font-bold text-gray-900 mb-6">Gestion des annonces</h1>
+      <div className="max-w-6xl mx-auto px-4 py-10 md:py-14">
+        <header className="mb-8">
+          <div className="text-xs uppercase tracking-[0.18em] text-kraft mb-2">Espace admin</div>
+          <h1 className="text-3xl md:text-4xl italic text-gray-900 leading-tight">Gestion des annonces</h1>
+        </header>
 
-        <div className="flex gap-2 mb-6">
+        <div className="flex gap-2 mb-6 flex-wrap">
           <Link
             href="/admin/annonces?type=accompagnante"
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition btn-hover ${
-              type === 'accompagnante' ? 'bg-accent text-black' : 'bg-white border border-gray-400 text-gray-700 hover:border-accent'
+            className={`inline-flex items-center px-5 py-2 rounded-full text-sm font-medium transition ${
+              type === 'accompagnante'
+                ? 'bg-accent border border-accent text-black'
+                : 'bg-white border border-[#e8dfd2] text-gray-700 hover:border-kraft'
             }`}
           >
-            Accompagnantes ({auxCount})
+            Accompagnants ({auxCount})
           </Link>
           <Link
             href="/admin/annonces?type=accompagne"
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition btn-hover ${
-              type === 'accompagne' ? 'bg-accent text-black' : 'bg-white border border-gray-400 text-gray-700 hover:border-accent'
+            className={`inline-flex items-center px-5 py-2 rounded-full text-sm font-medium transition ${
+              type === 'accompagne'
+                ? 'bg-accent border border-accent text-black'
+                : 'bg-white border border-[#e8dfd2] text-gray-700 hover:border-kraft'
             }`}
           >
             Accompagnés ({benCount})

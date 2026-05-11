@@ -66,7 +66,7 @@ export function ParrainageBlacklistActions({ parrainageId, hasFlag, isBlocked }:
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
           rows={2}
-          className="w-full rounded-lg border border-gray-400 bg-white px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-black resize-none mb-2"
+          className="w-full rounded-xl border border-[#e8dfd2] bg-white px-2 py-1.5 text-sm focus:outline-none focus:border-kraft focus:ring-1 focus:ring-kraft resize-none mb-2 transition"
         />
         <div className="flex gap-2">
           <Button size="sm" onClick={handleSubmit} disabled={loading}>

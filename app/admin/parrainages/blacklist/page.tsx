@@ -97,28 +97,29 @@ export default async function AdminParrainagesBlacklistPage({
   }
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8">
-      <div className="flex items-center justify-between mb-6">
+    <div className="max-w-6xl mx-auto px-4 py-10 md:py-14">
+      <header className="flex items-end justify-between mb-8 gap-4 flex-wrap">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Blacklist et flags</h1>
-          <p className="text-sm text-gray-500 mt-1">
+          <div className="text-xs uppercase tracking-[0.18em] text-kraft mb-2">Espace admin</div>
+          <h1 className="text-3xl md:text-4xl italic text-gray-900 leading-tight">Blacklist et flags</h1>
+          <p className="text-sm text-gray-600 mt-2">
             Parrainages bloqués, frauduleux ou avec une suspicion à examiner.
           </p>
         </div>
         <Link
           href="/admin/parrainages"
-          className="text-sm font-medium text-black hover:underline"
+          className="text-sm text-kraft hover:text-gray-900 transition"
         >
-          Vue d&apos;ensemble
+          ← Vue d&apos;ensemble
         </Link>
-      </div>
+      </header>
 
       {rows.length === 0 ? (
-        <div className="bg-white rounded-xl border p-8 text-center text-gray-500">
+        <div className="bg-white rounded-2xl border border-[#e8dfd2] p-10 text-center text-gray-500 italic">
           Aucun parrainage suspect ou bloqué.
         </div>
       ) : (
-        <div className="bg-white rounded-xl border overflow-hidden">
+        <div className="bg-white rounded-2xl border border-[#e8dfd2] overflow-hidden">
           <table className="w-full text-sm">
             <thead className="bg-accent/20 border-b">
               <tr>

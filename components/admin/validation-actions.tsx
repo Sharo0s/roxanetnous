@@ -108,13 +108,13 @@ export function ValidationActions({ profileId, status }: Props) {
 
       {action === 'valide' && (
         <p className="text-sm text-gray-600 mb-4">
-          Ce profil sera marqué comme validé. L&apos;accompagnante pourra accéder à la plateforme.
+          Ce profil sera marqué comme validé. L&apos;accompagnant pourra accéder à la plateforme.
         </p>
       )}
 
       {action === 'visio_a_planifier' && (
         <p className="text-sm text-gray-600 mb-4">
-          Un email de convocation visio sera envoyé à l&apos;accompagnante. Le statut passera à « En attente de visio ».
+          Un email de convocation visio sera envoyé à l&apos;accompagnant. Le statut passera à « En attente de visio ».
         </p>
       )}
 
@@ -128,7 +128,7 @@ export function ValidationActions({ profileId, status }: Props) {
               type="datetime-local"
               value={visioDate}
               onChange={(e) => setVisioDate(e.target.value)}
-              className="w-full rounded-lg border border-gray-400 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
+              className="w-full rounded-xl border border-[#e8dfd2] bg-white px-3 py-2 text-sm focus:outline-none focus:border-kraft focus:ring-1 focus:ring-kraft transition"
             />
           </div>
           <div>
@@ -140,7 +140,7 @@ export function ValidationActions({ profileId, status }: Props) {
               onChange={(e) => setVisioNotes(e.target.value)}
               placeholder="Impressions, points notables, éléments à retenir..."
               rows={4}
-              className="w-full rounded-lg border border-gray-400 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black resize-none"
+              className="w-full rounded-xl border border-[#e8dfd2] bg-white px-3 py-2 text-sm focus:outline-none focus:border-kraft focus:ring-1 focus:ring-kraft transition resize-none"
             />
           </div>
         </div>
@@ -160,7 +160,7 @@ export function ValidationActions({ profileId, status }: Props) {
                 : 'Précisez les documents ou informations manquants...'
             }
             rows={4}
-            className="w-full rounded-lg border border-gray-400 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black resize-none"
+            className="w-full rounded-xl border border-[#e8dfd2] bg-white px-3 py-2 text-sm focus:outline-none focus:border-kraft focus:ring-1 focus:ring-kraft transition resize-none"
           />
         </div>
       )}

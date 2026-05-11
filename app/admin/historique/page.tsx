@@ -92,15 +92,18 @@ export default async function AdminHistoriquePage() {
   }
 
   return (
-      <div className="max-w-6xl mx-auto px-4 py-8">
-        <h1 className="text-2xl font-bold text-gray-900 mb-6">Historique des actions</h1>
+      <div className="max-w-6xl mx-auto px-4 py-10 md:py-14">
+        <header className="mb-8">
+          <div className="text-xs uppercase tracking-[0.18em] text-kraft mb-2">Espace admin</div>
+          <h1 className="text-3xl md:text-4xl italic text-gray-900 leading-tight">Historique des actions</h1>
+        </header>
 
         {!logs || logs.length === 0 ? (
-          <div className="bg-white rounded-xl border p-8 text-center text-gray-500">
+          <div className="bg-white rounded-2xl border border-[#e8dfd2] p-10 text-center text-gray-500 italic">
             Aucune action enregistrée.
           </div>
         ) : (
-          <div className="bg-white rounded-xl border overflow-hidden">
+          <div className="bg-white rounded-2xl border border-[#e8dfd2] overflow-hidden">
             <table className="w-full text-sm">
               <thead className="bg-accent/20 border-b">
                 <tr>

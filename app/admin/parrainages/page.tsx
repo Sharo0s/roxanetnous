@@ -123,18 +123,21 @@ export default async function AdminParrainagesPage({
   }
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Parrainages</h1>
+    <div className="max-w-6xl mx-auto px-4 py-10 md:py-14">
+      <header className="flex items-end justify-between mb-8 gap-4 flex-wrap">
+        <div>
+          <div className="text-xs uppercase tracking-[0.18em] text-kraft mb-2">Espace admin</div>
+          <h1 className="text-3xl md:text-4xl italic text-gray-900 leading-tight">Parrainages</h1>
+        </div>
         <Link
           href="/admin/parrainages/blacklist"
-          className="text-sm font-medium text-black hover:underline"
+          className="text-sm text-kraft hover:text-gray-900 transition"
         >
-          Blacklist et flags
+          Blacklist et flags →
         </Link>
-      </div>
+      </header>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-6">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-8">
         {(
           [
             ['inscrite', 'Inscrits'],
@@ -145,9 +148,9 @@ export default async function AdminParrainagesPage({
             ['flag_suspicion', 'Flags actifs'],
           ] as const
         ).map(([key, label]) => (
-          <div key={key} className="bg-white rounded-xl border p-4">
-            <p className="text-xs text-gray-500">{label}</p>
-            <p className="text-2xl font-bold text-black mt-1">{counters[key] ?? 0}</p>
+          <div key={key} className="bg-white rounded-2xl border border-[#e8dfd2] p-4">
+            <p className="text-[11px] uppercase tracking-[0.12em] text-kraft font-medium">{label}</p>
+            <p className="italic text-3xl text-gray-900 mt-1">{counters[key] ?? 0}</p>
           </div>
         ))}
       </div>
@@ -155,7 +158,7 @@ export default async function AdminParrainagesPage({
       <div className="flex items-center gap-2 mb-4 flex-wrap">
         <Link
           href={buildHref({ statut: '', page: '1' })}
-          className={`px-3 py-1.5 text-xs rounded-full border ${!statutFilter ? 'bg-black text-white border-black' : 'bg-white text-gray-700 border-gray-400 hover:border-black'}`}
+          className={`px-3 py-1.5 text-xs rounded-full border ${!statutFilter ? 'bg-accent text-black border-accent' : 'bg-white text-gray-700 border-[#e8dfd2] hover:border-kraft'}`}
         >
           Tous
         </Link>
@@ -163,25 +166,25 @@ export default async function AdminParrainagesPage({
           <Link
             key={s}
             href={buildHref({ statut: s, page: '1' })}
-            className={`px-3 py-1.5 text-xs rounded-full border ${statutFilter === s ? 'bg-black text-white border-black' : 'bg-white text-gray-700 border-gray-400 hover:border-black'}`}
+            className={`px-3 py-1.5 text-xs rounded-full border ${statutFilter === s ? 'bg-accent text-black border-accent' : 'bg-white text-gray-700 border-[#e8dfd2] hover:border-kraft'}`}
           >
             {STATUT_LABELS[s] || s}
           </Link>
         ))}
         <Link
           href={buildHref({ flag: flagOnly ? '' : '1', page: '1' })}
-          className={`px-3 py-1.5 text-xs rounded-full border ${flagOnly ? 'bg-black text-white border-black' : 'bg-white text-gray-700 border-gray-400 hover:border-black'}`}
+          className={`px-3 py-1.5 text-xs rounded-full border ${flagOnly ? 'bg-accent text-black border-accent' : 'bg-white text-gray-700 border-[#e8dfd2] hover:border-kraft'}`}
         >
           Avec flag
         </Link>
       </div>
 
       {!rows || rows.length === 0 ? (
-        <div className="bg-white rounded-xl border p-8 text-center text-gray-500">
+        <div className="bg-white rounded-2xl border border-[#e8dfd2] p-10 text-center text-gray-500 italic">
           Aucun parrainage à afficher.
         </div>
       ) : (
-        <div className="bg-white rounded-xl border overflow-hidden">
+        <div className="bg-white rounded-2xl border border-[#e8dfd2] overflow-hidden">
           <table className="w-full text-sm">
             <thead className="bg-accent/20 border-b">
               <tr>

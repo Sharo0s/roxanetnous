@@ -87,18 +87,23 @@ export default async function AdminDashboard() {
   const moisEnCours = activite.length > 0 ? activite[activite.length - 1] : null
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">Tableau de bord</h1>
+    <div className="max-w-6xl mx-auto px-4 py-10 md:py-14">
+
+      {/* TITRE EDITORIAL */}
+      <header className="mb-10">
+        <div className="text-xs uppercase tracking-[0.18em] text-kraft mb-2">Espace admin</div>
+        <h1 className="text-3xl md:text-4xl italic text-gray-900 leading-tight">Tableau de bord</h1>
+      </header>
 
       {/* Queue de validation - compact quand vide */}
       {!pending || pending.length === 0 ? (
-        <div className="bg-white rounded-lg border px-4 py-3 text-sm text-gray-500 mb-6">
-          Aucune accompagnante en cours de validation.
+        <div className="bg-white rounded-2xl border border-[#e8dfd2] px-5 py-4 text-sm text-gray-500 mb-8 italic">
+          Aucun accompagnant en cours de validation.
         </div>
       ) : (
         <>
-          <h2 className="text-lg font-semibold mb-4">Accompagnantes en cours de validation</h2>
-          <div className="space-y-3 mb-8">
+          <h2 className="italic text-xl text-gray-900 mb-4">Accompagnants en cours de validation</h2>
+          <div className="space-y-3 mb-10">
             {pending.map((profile) => {
               const u = profile.users
               const statusLabels: Record<string, string> = {
@@ -107,7 +112,7 @@ export default async function AdminDashboard() {
                 visio_realisee: 'Visio réalisée',
               }
               const statusStyles: Record<string, string> = {
-                en_attente: 'bg-gray-200 text-gray-700',
+                en_attente: 'bg-gray-100 text-gray-700',
                 visio_a_planifier: 'bg-blue-50 text-blue-800 border border-blue-200',
                 visio_realisee: 'bg-amber-50 text-amber-800 border border-amber-200',
               }
@@ -115,26 +120,26 @@ export default async function AdminDashboard() {
                 <Link
                   key={profile.id}
                   href={`/admin/validation/${profile.id}`}
-                  className="block bg-white rounded-xl border p-5 hover:border-accent hover:shadow-lg hover:-translate-y-1 transition-all duration-200"
+                  className="block bg-white rounded-2xl border border-[#e8dfd2] p-5 hover:border-kraft hover:-translate-y-0.5 transition"
                 >
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <div className="flex items-center gap-2">
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
                         <p className="font-medium text-gray-900">
                           {u?.first_name} {u?.last_name}
                         </p>
-                        <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${statusStyles[profile.validation_status] || 'bg-gray-100 text-gray-600'}`}>
+                        <span className={`px-2 py-0.5 rounded-full text-[11px] font-medium ${statusStyles[profile.validation_status] || 'bg-gray-100 text-gray-600'}`}>
                           {statusLabels[profile.validation_status] || profile.validation_status}
                         </span>
                       </div>
-                      <p className="text-sm text-gray-500 mt-0.5">
+                      <p className="text-sm text-gray-500 mt-0.5 truncate">
                         {u?.email}
                       </p>
                       <p className="text-sm text-gray-500 mt-1">
                         {profile.ville} ({profile.code_postal}) — {(profile.diplomes as string[] || []).join(', ')} — {profile.experience}
                       </p>
                     </div>
-                    <div className="text-sm text-gray-400">
+                    <div className="text-xs text-gray-400 flex-shrink-0">
                       {new Date(profile.created_at).toLocaleDateString('fr-FR')}
                     </div>
                   </div>
@@ -147,9 +152,10 @@ export default async function AdminDashboard() {
 
       {/* Signalements */}
       {(signalementsCount || 0) > 0 && (
-        <Link href="/admin/signalements" className="block bg-white rounded-xl border p-5 hover:border-accent hover:shadow-lg hover:-translate-y-1 transition-all duration-200 mb-8">
-          <p className="text-sm text-gray-500">Signalements en attente</p>
-          <p className="text-3xl font-bold mt-1">{signalementsCount}</p>
+        <Link href="/admin/signalements" className="block bg-white rounded-2xl border border-[#e8dfd2] p-5 hover:border-kraft hover:-translate-y-0.5 transition mb-10">
+          <p className="text-xs uppercase tracking-[0.14em] text-kraft font-medium mb-2">Signalements</p>
+          <p className="italic text-3xl text-gray-900">{signalementsCount}</p>
+          <p className="text-sm text-gray-600 mt-1">en attente de traitement</p>
         </Link>
       )}
 
@@ -160,25 +166,25 @@ export default async function AdminDashboard() {
             <>
               {/* KPI Cards */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-                <div className="bg-white rounded-xl border p-5">
+                <div className="bg-white rounded-2xl border border-[#e8dfd2] p-5">
                   <p className="text-sm text-gray-500">Revenu mensuel récurrent</p>
-                  <p className="text-3xl font-bold mt-1">{formatEur(kpis.mrr)}</p>
+                  <p className="italic text-3xl text-gray-900 mt-1">{formatEur(kpis.mrr)}</p>
                 </div>
-                <div className="bg-white rounded-xl border p-5">
+                <div className="bg-white rounded-2xl border border-[#e8dfd2] p-5">
                   <p className="text-sm text-gray-500">Utilisateurs actifs (30 derniers jours)</p>
-                  <p className="text-3xl font-bold mt-1">{kpis.actifs30j}</p>
+                  <p className="italic text-3xl text-gray-900 mt-1">{kpis.actifs30j}</p>
                   <p className="text-xs text-gray-400 mt-1">sur {kpis.totalUsers} inscrits au total</p>
                 </div>
-                <div className="bg-white rounded-xl border p-5">
+                <div className="bg-white rounded-2xl border border-[#e8dfd2] p-5">
                   <p className="text-sm text-gray-500">Taux de conversion (inscrits vers abonnés)</p>
-                  <p className={`text-3xl font-bold mt-1 ${kpis.tauxConversion >= 80 ? 'text-green-700' : kpis.tauxConversion >= 50 ? 'text-amber-600' : 'text-red-600'}`}>
+                  <p className={`italic text-3xl mt-1 ${kpis.tauxConversion >= 80 ? 'text-green-700' : kpis.tauxConversion >= 50 ? 'text-amber-600' : 'text-red-600'}`}>
                     {kpis.tauxConversion.toFixed(1)}%
                   </p>
                   <p className="text-xs text-gray-400 mt-1">{kpis.abonnesActifs} abonnés sur {kpis.totalUsers} inscrits</p>
                 </div>
-                <div className="bg-white rounded-xl border p-5">
+                <div className="bg-white rounded-2xl border border-[#e8dfd2] p-5">
                   <p className="text-sm text-gray-500">Taux de résiliation (ce mois)</p>
-                  <p className={`text-3xl font-bold mt-1 ${kpis.churn <= 2 ? 'text-green-700' : kpis.churn <= 5 ? 'text-amber-600' : 'text-red-600'}`}>
+                  <p className={`italic text-3xl mt-1 ${kpis.churn <= 2 ? 'text-green-700' : kpis.churn <= 5 ? 'text-amber-600' : 'text-red-600'}`}>
                     {kpis.churn.toFixed(1)}%
                   </p>
                   <p className="text-xs text-gray-400 mt-1">
@@ -188,10 +194,10 @@ export default async function AdminDashboard() {
               </div>
 
               {/* Repartition utilisateurs */}
-              <div className="bg-white rounded-xl border p-5 mb-8">
+              <div className="bg-white rounded-2xl border border-[#e8dfd2] p-5 mb-8">
                 <h4 className="font-medium text-gray-700 text-sm mb-3">Répartition des utilisateurs</h4>
                 <div className="flex items-center gap-4 mb-2">
-                  <span className="text-sm text-gray-600 w-28">Accompagnantes</span>
+                  <span className="text-sm text-gray-600 w-28">Accompagnants</span>
                   <div className="flex-1 bg-gray-100 rounded-full h-6 overflow-hidden">
                     <div
                       className="bg-accent h-full rounded-full"
@@ -215,13 +221,13 @@ export default async function AdminDashboard() {
               {/* Activite du mois en cours */}
               {moisEnCours && (
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="bg-white rounded-xl border p-5">
+                  <div className="bg-white rounded-2xl border border-[#e8dfd2] p-5">
                     <p className="text-sm text-gray-500">Messages envoyés ce mois</p>
-                    <p className="text-3xl font-bold mt-1">{moisEnCours.messages}</p>
+                    <p className="italic text-3xl text-gray-900 mt-1">{moisEnCours.messages}</p>
                   </div>
-                  <div className="bg-white rounded-xl border p-5">
+                  <div className="bg-white rounded-2xl border border-[#e8dfd2] p-5">
                     <p className="text-sm text-gray-500">Nouvelles conversations ce mois</p>
-                    <p className="text-3xl font-bold mt-1">{moisEnCours.conversations}</p>
+                    <p className="italic text-3xl text-gray-900 mt-1">{moisEnCours.conversations}</p>
                   </div>
                 </div>
               )}
@@ -236,32 +242,32 @@ export default async function AdminDashboard() {
             <>
               {/* Essai gratuit vs Payants + Churn */}
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
-                <div className="bg-white rounded-xl border p-5">
+                <div className="bg-white rounded-2xl border border-[#e8dfd2] p-5">
                   <p className="text-sm text-gray-500">En essai gratuit</p>
-                  <p className="text-3xl font-bold mt-1">{mrrDetail.essaiGratuit}</p>
+                  <p className="italic text-3xl text-gray-900 mt-1">{mrrDetail.essaiGratuit}</p>
                   <div className="text-xs text-gray-400 mt-1 space-y-0.5">
-                    <p>{mrrDetail.essaiAccompagnantes} accompagnante{mrrDetail.essaiAccompagnantes > 1 ? 's' : ''}</p>
+                    <p>{mrrDetail.essaiAccompagnantes} accompagnant{mrrDetail.essaiAccompagnantes > 1 ? 's' : ''}</p>
                     <p>{mrrDetail.essaiAccompagnes} accompagné{mrrDetail.essaiAccompagnes > 1 ? 's' : ''}</p>
                   </div>
                 </div>
-                <div className="bg-white rounded-xl border p-5">
+                <div className="bg-white rounded-2xl border border-[#e8dfd2] p-5">
                   <p className="text-sm text-gray-500">Payants</p>
-                  <p className="text-3xl font-bold mt-1">{mrrDetail.payants}</p>
+                  <p className="italic text-3xl text-gray-900 mt-1">{mrrDetail.payants}</p>
                   <div className="text-xs text-gray-400 mt-1 space-y-0.5">
-                    <p>{mrrDetail.segments.accompagnante_mensuel.count + mrrDetail.segments.accompagnante_annuel.count} accompagnantes ({mrrDetail.segments.accompagnante_mensuel.count} mens. / {mrrDetail.segments.accompagnante_annuel.count} ann.)</p>
+                    <p>{mrrDetail.segments.accompagnante_mensuel.count + mrrDetail.segments.accompagnante_annuel.count} accompagnants ({mrrDetail.segments.accompagnante_mensuel.count} mens. / {mrrDetail.segments.accompagnante_annuel.count} ann.)</p>
                     <p>{mrrDetail.segments.accompagne_mensuel.count + mrrDetail.segments.accompagne_annuel.count} accompagnés ({mrrDetail.segments.accompagne_mensuel.count} mens. / {mrrDetail.segments.accompagne_annuel.count} ann.)</p>
                   </div>
                 </div>
-                <div className="bg-white rounded-xl border p-5">
+                <div className="bg-white rounded-2xl border border-[#e8dfd2] p-5">
                   <p className="text-sm text-gray-500">Résiliations ce mois</p>
-                  <p className={`text-3xl font-bold mt-1 ${churn.taux <= 2 ? 'text-green-700' : churn.taux <= 5 ? 'text-amber-600' : 'text-red-600'}`}>
+                  <p className={`italic text-3xl mt-1 ${churn.taux <= 2 ? 'text-green-700' : churn.taux <= 5 ? 'text-amber-600' : 'text-red-600'}`}>
                     {churn.taux.toFixed(1)}%
                   </p>
                   <div className="text-xs text-gray-400 mt-1 space-y-0.5">
                     <p>{churn.annulations} annulation{churn.annulations > 1 ? 's' : ''} / {churn.abonnesDebutMois} abonné{churn.abonnesDebutMois > 1 ? 's' : ''} début de mois</p>
                     {churn.annulations > 0 && (
                       <>
-                        <p>{churn.annulAccompagnantes} accompagnante{churn.annulAccompagnantes > 1 ? 's' : ''}, {churn.annulAccompagnes} accompagné{churn.annulAccompagnes > 1 ? 's' : ''}</p>
+                        <p>{churn.annulAccompagnantes} accompagnant{churn.annulAccompagnantes > 1 ? 's' : ''}, {churn.annulAccompagnes} accompagné{churn.annulAccompagnes > 1 ? 's' : ''}</p>
                         <p>{churn.annulMensuel} mens., {churn.annulAnnuel} ann.</p>
                       </>
                     )}

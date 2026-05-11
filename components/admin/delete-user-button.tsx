@@ -23,7 +23,7 @@ export function DeleteUserButton({ userId, userName }: { userId: string; userNam
     return (
       <button
         onClick={() => setConfirming(true)}
-        className="px-4 py-2 text-sm font-medium text-red-600 border border-red-300 rounded-lg hover:bg-red-50 transition-colors"
+        className="inline-flex items-center px-4 py-2 text-sm text-red-700 border border-red-200 rounded-full hover:bg-red-50 transition"
       >
         Supprimer cet utilisateur
       </button>
@@ -31,7 +31,7 @@ export function DeleteUserButton({ userId, userName }: { userId: string; userNam
   }
 
   return (
-    <div className="bg-red-50 border border-red-200 rounded-xl p-4">
+    <div className="bg-red-50 border border-red-200 rounded-2xl p-5">
       <p className="text-sm text-red-800 mb-3">
         Supprimer définitivement <strong>{userName}</strong> ? Cette action est irréversible.
         L'abonnement Stripe sera annulé et toutes les données seront supprimées.
@@ -43,14 +43,14 @@ export function DeleteUserButton({ userId, userName }: { userId: string; userNam
         <button
           onClick={handleDelete}
           disabled={loading}
-          className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50"
+          className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-full hover:bg-red-700 transition disabled:opacity-50"
         >
           {loading ? 'Suppression...' : 'Confirmer la suppression'}
         </button>
         <button
           onClick={() => { setConfirming(false); setError(null) }}
           disabled={loading}
-          className="px-4 py-2 text-sm font-medium border border-gray-400 rounded-lg hover:bg-white transition-colors disabled:opacity-50"
+          className="px-4 py-2 text-sm border border-[#e8dfd2] bg-white rounded-full hover:border-kraft transition disabled:opacity-50"
         >
           Annuler
         </button>

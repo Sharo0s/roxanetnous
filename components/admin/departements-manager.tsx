@@ -143,10 +143,10 @@ export function DepartementsManager({ regions }: Props) {
         const estDepliee = depliees.has(region.nom)
 
         return (
-          <div key={region.nom} className="bg-white border rounded-xl overflow-hidden">
+          <div key={region.nom} className="bg-white border border-[#e8dfd2] rounded-2xl overflow-hidden">
             <div
-              className={`flex items-center justify-between px-4 py-3 bg-gray-50 ${
-                estDepliee ? 'border-b' : ''
+              className={`flex items-center justify-between px-4 py-3 bg-[#faf7f2] ${
+                estDepliee ? 'border-b border-[#e8dfd2]' : ''
               }`}
             >
               <button
@@ -190,10 +190,10 @@ export function DepartementsManager({ regions }: Props) {
                 type="button"
                 onClick={() => handleToggleRegion(region.nom, e !== 'tous')}
                 disabled={enCours.has(`r:${region.nom}`)}
-                className={`text-xs px-3 py-1.5 rounded-lg border font-medium transition-colors ml-3 ${
+                className={`text-xs px-3 py-1.5 rounded-full border transition ml-3 ${
                   e === 'tous'
-                    ? 'border-gray-400 text-gray-700 hover:bg-gray-100'
-                    : 'border-black bg-black text-white hover:bg-gray-800'
+                    ? 'border-[#e8dfd2] text-gray-700 hover:border-kraft'
+                    : 'border-accent bg-accent text-black hover:bg-kraft hover:border-kraft'
                 } disabled:opacity-50 disabled:cursor-not-allowed`}
               >
                 {e === 'tous' ? 'Tout fermer' : 'Tout ouvrir'}
@@ -207,7 +207,7 @@ export function DepartementsManager({ regions }: Props) {
                 return (
                   <li
                     key={d.code}
-                    className="flex items-center justify-between px-4 py-2.5 hover:bg-gray-50"
+                    className="flex items-center justify-between px-4 py-2.5 hover:bg-[#faf7f2] transition"
                   >
                     <div className="flex items-center gap-3">
                       <span className="font-mono text-sm text-gray-500 w-8">{d.code}</span>

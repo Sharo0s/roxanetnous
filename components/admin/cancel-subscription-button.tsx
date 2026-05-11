@@ -39,7 +39,7 @@ export function CancelSubscriptionButton({
     return (
       <button
         onClick={() => setConfirming(true)}
-        className="px-4 py-2 text-sm font-medium border border-gray-400 text-gray-700 rounded-lg hover:border-gray-400 transition-colors"
+        className="inline-flex items-center px-4 py-2 text-sm border border-[#e8dfd2] text-gray-700 rounded-full hover:border-kraft transition"
       >
         Annuler l&apos;abonnement
       </button>
@@ -47,7 +47,7 @@ export function CancelSubscriptionButton({
   }
 
   return (
-    <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 mt-4">
+    <div className="bg-[#faf7f2] border border-[#e8dfd2] rounded-2xl p-5 mt-4">
       <p className="text-sm text-gray-700 mb-3">
         Êtes-vous sûr de vouloir annuler l&apos;abonnement de <strong>{userName}</strong> ?
         L&apos;accès restera actif jusqu&apos;à la fin de la période en cours.
@@ -59,14 +59,14 @@ export function CancelSubscriptionButton({
         <button
           onClick={handleCancel}
           disabled={loading}
-          className="px-4 py-2 text-sm font-medium text-white bg-gray-800 rounded-lg hover:bg-gray-900 transition-colors disabled:opacity-50"
+          className="px-4 py-2 text-sm font-medium text-white bg-gray-900 rounded-full hover:bg-gray-800 transition disabled:opacity-50"
         >
           {loading ? 'Annulation...' : 'Confirmer l\'annulation'}
         </button>
         <button
           onClick={() => { setConfirming(false); setError(null) }}
           disabled={loading}
-          className="px-4 py-2 text-sm font-medium border border-gray-400 rounded-lg hover:bg-white transition-colors disabled:opacity-50"
+          className="px-4 py-2 text-sm border border-[#e8dfd2] bg-white rounded-full hover:border-kraft transition disabled:opacity-50"
         >
           Annuler
         </button>

@@ -27,7 +27,7 @@ export function AdminAnnonceActions({ annonceId, currentStatus, type }: Props) {
       {currentStatus === 'publiee' && (
         <button
           onClick={() => handleAction('suspendue')}
-          className="px-2 py-1 text-xs border border-gray-400 rounded hover:border-accent transition btn-hover"
+          className="inline-flex items-center px-3 py-1 text-xs border border-[#e8dfd2] rounded-full hover:border-kraft transition"
         >
           Suspendre
         </button>
@@ -35,7 +35,7 @@ export function AdminAnnonceActions({ annonceId, currentStatus, type }: Props) {
       {currentStatus === 'suspendue' && (
         <button
           onClick={() => handleAction('publiee')}
-          className="px-2 py-1 text-xs border border-gray-400 rounded hover:border-accent transition btn-hover"
+          className="inline-flex items-center px-3 py-1 text-xs border border-[#e8dfd2] rounded-full hover:border-kraft transition"
         >
           Republier
         </button>
@@ -51,7 +51,7 @@ export function AdminAnnonceActions({ annonceId, currentStatus, type }: Props) {
       {currentStatus === 'archivee' && (
         <button
           onClick={() => handleAction('publiee')}
-          className="px-2 py-1 text-xs border border-gray-400 rounded hover:border-accent transition btn-hover"
+          className="inline-flex items-center px-3 py-1 text-xs border border-[#e8dfd2] rounded-full hover:border-kraft transition"
         >
           Republier
         </button>

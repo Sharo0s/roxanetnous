@@ -90,20 +90,21 @@ export default async function ValidationDetailPage({
   })
 
   return (
-      <div className="max-w-4xl mx-auto px-4 py-8">
-        <div className="flex items-center justify-between mb-6">
+      <div className="max-w-4xl mx-auto px-4 py-10 md:py-14">
+        <header className="flex items-end justify-between mb-8 gap-4 flex-wrap">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">
+            <div className="text-xs uppercase tracking-[0.18em] text-kraft mb-2">Validation accompagnant</div>
+            <h1 className="text-3xl md:text-4xl italic text-gray-900 leading-tight">
               {u?.first_name} {u?.last_name}
             </h1>
-            <p className="text-gray-500">{u?.email}</p>
+            <p className="text-sm text-gray-600 mt-2">{u?.email}</p>
           </div>
           <StatusBadge status={profile.validation_status} />
-        </div>
+        </header>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Informations personnelles */}
-          <div className="bg-white rounded-xl border p-6">
+          <div className="bg-white rounded-2xl border border-[#e8dfd2] p-6">
             <h2 className="font-semibold mb-4">Informations personnelles</h2>
             <dl className="space-y-3 text-sm">
               <div>
@@ -130,7 +131,7 @@ export default async function ValidationDetailPage({
           </div>
 
           {/* Profil professionnel */}
-          <div className="bg-white rounded-xl border p-6">
+          <div className="bg-white rounded-2xl border border-[#e8dfd2] p-6">
             <h2 className="font-semibold mb-4">Profil professionnel</h2>
             <dl className="space-y-3 text-sm">
               <div>
@@ -159,7 +160,7 @@ export default async function ValidationDetailPage({
           </div>
 
           {/* Specialites */}
-          <div className="bg-white rounded-xl border p-6">
+          <div className="bg-white rounded-2xl border border-[#e8dfd2] p-6">
             <h2 className="font-semibold mb-4">Spécialités ({specialiteLabels.length})</h2>
             <div className="flex flex-wrap gap-2">
               {specialiteLabels.map((label, i) => (
@@ -171,7 +172,7 @@ export default async function ValidationDetailPage({
           </div>
 
           {/* Description */}
-          <div className="bg-white rounded-xl border p-6">
+          <div className="bg-white rounded-2xl border border-[#e8dfd2] p-6">
             <h2 className="font-semibold mb-4">Description</h2>
             {profile.description ? (
               <p className="text-sm text-gray-700 whitespace-pre-wrap">{profile.description}</p>
@@ -181,7 +182,7 @@ export default async function ValidationDetailPage({
           </div>
 
           {/* Justificatifs */}
-          <div className="bg-white rounded-xl border p-6 md:col-span-2">
+          <div className="bg-white rounded-2xl border border-[#e8dfd2] p-6 md:col-span-2">
             <h2 className="font-semibold mb-4">Justificatifs</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               <div>
@@ -255,7 +256,7 @@ export default async function ValidationDetailPage({
 
         {/* Bloc visio realisee */}
         {profile.visio_date && (
-          <div className="mt-8 bg-white rounded-xl border p-6">
+          <div className="mt-8 bg-white rounded-2xl border border-[#e8dfd2] p-6">
             <h2 className="font-semibold mb-3">Visio de validation</h2>
             <dl className="space-y-2 text-sm">
               <div className="flex gap-2">
