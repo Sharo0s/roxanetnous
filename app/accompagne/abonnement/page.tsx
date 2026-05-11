@@ -1,8 +1,10 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+import Link from 'next/link'
 import { getSubscriptionStatus, getPaymentMethod, getInvoices, getSubscriptionAmount } from '@/lib/subscription-helpers'
 import { SubscriptionPageContent } from '@/components/abonnement/subscription-page-content'
-import { AccompagneHeader } from '@/components/layout/accompagne-header'
+import { AccompagneDashboardHeader } from '@/components/layout/accompagne-dashboard-header'
+import { LogoutButton } from '@/components/auth/logout-button'
 import { getUnreadCount } from '@/lib/unread-count'
 
 export default async function AbonnementAccompagnePage({
@@ -29,7 +31,6 @@ export default async function AbonnementAccompagnePage({
     getUnreadCount(user.id),
   ])
 
-  // Fetch Stripe data in parallel (only if subscription has relevant IDs)
   let paymentMethod = null
   let invoices: Awaited<ReturnType<typeof getInvoices>> = []
   let amount = null
@@ -47,17 +48,26 @@ export default async function AbonnementAccompagnePage({
   }
 
   return (
-    <main id="main-content" tabIndex={-1} className="min-h-screen kraft bg-kraft focus:outline-none">
-      <AccompagneHeader
-        userId={user.id}
-        unreadCount={unreadCount}
+    <main id="main-content" tabIndex={-1} className="min-h-screen bg-[#fefaf8] focus:outline-none">
+      <AccompagneDashboardHeader
         firstName={userData.first_name}
         lastName={userData.last_name}
+        unreadCount={unreadCount}
         currentPage="abonnement"
       />
 
-      <div className="relative z-10 max-w-2xl mx-auto px-4 py-8">
-        <h1 className="text-2xl font-bold text-gray-900 mb-6">Mon abonnement</h1>
+      <div className="max-w-2xl mx-auto px-4 py-10 md:py-14 relative z-10">
+
+        <header className="text-center mb-10">
+          <div className="text-xs uppercase tracking-[0.18em] text-kraft mb-2">Votre espace</div>
+          <h1 className="text-3xl md:text-4xl italic text-gray-900 leading-tight">Mon abonnement</h1>
+          <p className="mt-3 text-sm text-gray-600">
+            {subscription.active
+              ? 'Gérez votre formule et vos paiements.'
+              : 'Choisissez la formule qui vous correspond.'}
+          </p>
+        </header>
+
         <SubscriptionPageContent
           subscription={subscription}
           paymentMethod={paymentMethod}
@@ -66,6 +76,17 @@ export default async function AbonnementAccompagnePage({
           amount={amount}
           searchParams={params}
         />
+
+        <div className="mt-16 pt-6 border-t border-[#e8dfd2] flex flex-wrap justify-center items-center gap-x-6 gap-y-2 text-xs text-gray-500">
+          <Link href="/cgu" className="hover:text-gray-800">Aide</Link>
+          <span aria-hidden="true">·</span>
+          <Link href="/politique-de-confidentialite" className="hover:text-gray-800">Confidentialité</Link>
+          <span aria-hidden="true">·</span>
+          <Link href="/cgu" className="hover:text-gray-800">Conditions</Link>
+          <span aria-hidden="true">·</span>
+          <LogoutButton />
+        </div>
+
       </div>
     </main>
   )

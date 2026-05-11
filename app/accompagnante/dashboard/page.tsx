@@ -129,19 +129,28 @@ export default async function AccompagnanteDashboard() {
 
       <div className="max-w-3xl mx-auto px-4 py-10 md:py-14 relative z-10">
 
-        {/* HERO : portrait + identite */}
-        <section className="flex flex-col md:flex-row items-center md:items-start gap-6 md:gap-8 mb-8">
-          <div className="flex-shrink-0">
-            <DashboardPortrait
-              currentUrl={userData.avatar_url}
-              firstName={userData.first_name || ''}
-              lastName={userData.last_name || ''}
-            />
-          </div>
-          <div className="flex-1 min-w-0 text-center md:text-left">
-            <h2 className="text-3xl md:text-4xl text-gray-900 italic mb-2 leading-tight">
-              {userData.first_name} {userData.last_name}
-            </h2>
+        {/* HERO : carte foyer + portrait + identite */}
+        <section className="relative overflow-hidden bg-white rounded-2xl border border-[#e8dfd2] p-6 md:p-7 mb-8">
+          <span
+            aria-hidden="true"
+            className="pointer-events-none absolute top-0 right-0 w-[180px] h-[180px]"
+            style={{ background: 'radial-gradient(circle at top right, #faecd9 0%, transparent 70%)' }}
+          />
+          <div className="relative flex flex-col md:flex-row items-center md:items-start gap-6 md:gap-8">
+            <div className="flex-shrink-0">
+              <DashboardPortrait
+                currentUrl={userData.avatar_url}
+                firstName={userData.first_name || ''}
+                lastName={userData.last_name || ''}
+              />
+            </div>
+            <div className="flex-1 min-w-0 text-center md:text-left">
+              <span className="inline-block text-[11px] uppercase tracking-[0.18em] text-kraft font-medium mb-1.5">
+                Bonjour
+              </span>
+              <h2 className="text-3xl md:text-4xl text-gray-900 italic mb-2 leading-tight">
+                {userData.first_name} {userData.last_name}
+              </h2>
             {profile && (
               <div className="mb-3 flex justify-center md:justify-start">
                 {profile.validation_status === 'valide' ? (
@@ -175,6 +184,7 @@ export default async function AccompagnanteDashboard() {
                 ))}
               </div>
             )}
+            </div>
           </div>
         </section>
 

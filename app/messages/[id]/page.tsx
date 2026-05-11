@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { ChatWindow } from '@/components/messages/chat-window'
 import { markMessagesAsRead } from '@/app/actions/messages'
 import { AccompagnanteDashboardHeader } from '@/components/layout/accompagnante-dashboard-header'
-import { AccompagneHeader } from '@/components/layout/accompagne-header'
+import { AccompagneDashboardHeader } from '@/components/layout/accompagne-dashboard-header'
 import { getUnreadCount } from '@/lib/unread-count'
 import { hasActiveSubscription } from '@/lib/subscription-helpers'
 
@@ -124,11 +124,10 @@ export default async function ConversationPage({
           currentPage="messages"
         />
       ) : (
-        <AccompagneHeader
-          userId={user.id}
-          unreadCount={unreadCount}
+        <AccompagneDashboardHeader
           firstName={userData.first_name}
           lastName={userData.last_name}
+          unreadCount={unreadCount}
           currentPage="messages"
         />
       )}

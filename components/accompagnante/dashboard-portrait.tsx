@@ -8,9 +8,10 @@ type Props = {
   currentUrl: string | null
   firstName: string
   lastName: string
+  size?: 'lg' | 'sm'
 }
 
-export function DashboardPortrait({ currentUrl, firstName, lastName }: Props) {
+export function DashboardPortrait({ currentUrl, firstName, lastName, size = 'lg' }: Props) {
   const [preview, setPreview] = useState<string | null>(currentUrl)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -52,7 +53,12 @@ export function DashboardPortrait({ currentUrl, firstName, lastName }: Props) {
         onClick={() => inputRef.current?.click()}
         disabled={loading}
         aria-label="Modifier la photo de profil"
-        className="relative w-[160px] h-[200px] md:w-[180px] md:h-[220px] rounded overflow-hidden flex-shrink-0 shadow-[0_14px_40px_-16px_rgba(0,0,0,0.22)] hover:shadow-[0_18px_44px_-14px_rgba(0,0,0,0.28)] transition group"
+        style={size === 'sm' ? { width: 88, height: 112 } : undefined}
+        className={`relative ${
+          size === 'sm'
+            ? 'rounded-xl'
+            : 'w-[160px] h-[200px] md:w-[180px] md:h-[220px] rounded-2xl'
+        } overflow-hidden flex-shrink-0 shadow-[0_14px_40px_-16px_rgba(0,0,0,0.22)] hover:shadow-[0_18px_44px_-14px_rgba(0,0,0,0.28)] transition group`}
       >
         {preview ? (
           <img
@@ -65,15 +71,18 @@ export function DashboardPortrait({ currentUrl, firstName, lastName }: Props) {
             className="w-full h-full flex items-center justify-center"
             style={{ backgroundImage: 'linear-gradient(135deg, #F4C8A3 0%, #d3a387 100%)' }}
           >
-            <span className="italic text-white/85" style={{ fontFamily: 'var(--font-heading)', fontSize: '5rem' }}>
+            <span
+              className="italic text-white/85"
+              style={{ fontFamily: 'var(--font-heading)', fontSize: size === 'sm' ? '2.4rem' : '5rem' }}
+            >
               {initial}
             </span>
           </span>
         )}
 
         {/* Bouton edit toujours visible (petite pastille en bas a droite) */}
-        <span className="absolute bottom-2 right-2 w-8 h-8 rounded-full bg-white/95 group-hover:bg-white flex items-center justify-center text-gray-700 transition">
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8} aria-hidden="true">
+        <span className={`absolute ${size === 'sm' ? 'bottom-1.5 right-1.5 w-6 h-6' : 'bottom-2 right-2 w-8 h-8'} rounded-full bg-white/95 group-hover:bg-white flex items-center justify-center text-gray-700 transition`}>
+          <svg className={size === 'sm' ? 'w-3 h-3' : 'w-4 h-4'} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8} aria-hidden="true">
             <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
           </svg>
         </span>
