@@ -3,8 +3,8 @@ import Link from 'next/link'
 import { redirect } from 'next/navigation'
 
 const STATUT_LABELS: Record<string, string> = {
-  inscrite: 'Inscrite',
-  abonnee: 'Abonnée',
+  inscrite: 'Inscrit',
+  abonnee: 'Abonné',
   confirme: 'Confirmé',
   bloque: 'Bloqué',
   fraude: 'Fraude',
@@ -137,8 +137,8 @@ export default async function AdminParrainagesPage({
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-6">
         {(
           [
-            ['inscrite', 'Inscrites'],
-            ['abonnee', 'Abonnées'],
+            ['inscrite', 'Inscrits'],
+            ['abonnee', 'Abonnés'],
             ['confirme', 'Confirmés'],
             ['bloque', 'Bloqués'],
             ['fraude', 'Fraude'],

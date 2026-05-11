@@ -263,7 +263,7 @@ export default async function AnnonceDetailPage({
               <div className="bg-white rounded-xl border p-6">
                 <h2 className="font-semibold mb-3">Intéressé ?</h2>
                 <p className="text-sm text-gray-600 mb-4">
-                  Connectez-vous pour contacter cette accompagnante.
+                  Connectez-vous pour contacter cet accompagnant.
                 </p>
                 <Link
                   href="/register"

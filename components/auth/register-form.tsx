@@ -37,9 +37,9 @@ const PARRAINAGE_ERRORS: Record<
     'Caractères invalides : seuls les chiffres 2-9 et lettres A-Z (sans 0, O, 1, I, L) sont autorisés.',
   unknown_code: 'Ce code de parrainage est inconnu.',
   marraine_not_validated:
-    'La marraine associée à ce code n\'est pas encore validée.',
+    'Le parrain associé à ce code n\'est pas encore validé.',
   marraine_subscription_inactive:
-    'Le compte de votre marraine est inactif (abonnement suspendu ou en attente de paiement). Demandez-lui de régulariser sa situation, puis réessayez avec son code.',
+    'Le compte de votre parrain est inactif (abonnement suspendu ou en attente de paiement). Demandez-lui de régulariser sa situation, puis réessayez avec son code.',
   rate_limited:
     'Trop de tentatives de validation depuis votre adresse. Patientez quelques minutes avant de réessayer.',
 }
@@ -324,7 +324,7 @@ export function RegisterForm() {
                   Code valide{parrainageState.marraineFirstName
                     ? ` (parrainage par ${parrainageState.marraineFirstName})`
                     : ''}
-                  . Votre marraine se porte garante — vous publierez vos annonces dès la souscription.
+                  . Votre parrain se porte garant — vous publierez vos annonces dès la souscription.
                 </p>
               )}
               {parrainageState.status === 'invalid' && (
@@ -333,7 +333,7 @@ export function RegisterForm() {
                 </p>
               )}
               <p className="mt-2 text-xs text-gray-500">
-                Si une accompagnante validée vous a transmis un code, saisissez-le ici. Sa garantie remplace la visio et la vérification de documents : vous publierez vos annonces dès la souscription.
+                Si un accompagnant validé vous a transmis un code, saisissez-le ici. Sa garantie remplace la visio et la vérification de documents : vous publierez vos annonces dès la souscription.
               </p>
             </div>
 

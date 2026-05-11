@@ -48,7 +48,7 @@ export default async function HomePage() {
     '@type': 'WebApplication',
     name: 'roxanetnous',
     url: process.env.NEXT_PUBLIC_BASE_URL || 'https://roxanetnous.fr',
-    description: 'Plateforme de mise en relation entre accompagnantes de vie vérifiées et accompagnés.',
+    description: 'Plateforme de mise en relation entre accompagnants de vie vérifiées et accompagnés.',
     applicationCategory: 'HealthApplication',
     operatingSystem: 'Web',
     offers: [
@@ -119,10 +119,10 @@ export default async function HomePage() {
                 {((accompagnantesCount || 0) > 0 || (accompagnesCount || 0) > 0 || villesUniques.size > 0) && (
                   <div className="flex gap-8 justify-center pt-10">
                     {(accompagnantesCount || 0) > 0 && (
-                      <AnimatedCounter end={accompagnantesCount || 0} label={`accompagnant(e)${(accompagnantesCount || 0) > 1 ? 's' : ''} vérifié(e)${(accompagnantesCount || 0) > 1 ? 's' : ''}`} />
+                      <AnimatedCounter end={accompagnantesCount || 0} label={`accompagnant${(accompagnantesCount || 0) > 1 ? 's' : ''} vérifié${(accompagnantesCount || 0) > 1 ? 's' : ''}`} />
                     )}
                     {(accompagnesCount || 0) > 0 && (
-                      <AnimatedCounter end={accompagnesCount || 0} label={`accompagné(e)${(accompagnesCount || 0) > 1 ? 's' : ''}`} />
+                      <AnimatedCounter end={accompagnesCount || 0} label={`accompagné${(accompagnesCount || 0) > 1 ? 's' : ''}`} />
                     )}
                     {villesUniques.size > 0 && (
                       <AnimatedCounter end={villesUniques.size} label={`ville${villesUniques.size > 1 ? 's' : ''}`} />
@@ -148,7 +148,7 @@ export default async function HomePage() {
           </svg>
           <Reveal className="max-w-5xl mx-auto px-4 py-8 flex flex-col items-center gap-4 text-center md:flex-row md:justify-between md:text-left">
             <p className="text-lg font-medium text-black tracking-wide font-heading italic">
-              Notre communauté de mise en relation entre accompagnants et accompagné(e)s
+              Notre communauté de mise en relation entre accompagnants et accompagnés
             </p>
             <Link href="/recherche" className="rounded-full px-7 py-3 font-semibold bg-black text-white btn-hover whitespace-nowrap text-lg shrink-0">
               Consulter les annonces
@@ -255,9 +255,9 @@ export default async function HomePage() {
             </h2>
             <div className="space-y-0">
               {[
-                { step: '1', title: 'Inscription', desc: "Créez votre compte en tant qu'accompagnant(e) ou accompagné(e).." },
-                { step: '2', title: 'Justificatifs', desc: "Accompagnant(e)s : déposez vos diplômes et pièce d'identité. Accompagné(e)s : décrivez votre besoin." },
-                { step: '3', title: 'Validation', desc: 'Notre équipe vérifie manuellement chaque profil accompagnant(e). Sous 48h.' },
+                { step: '1', title: 'Inscription', desc: "Créez votre compte en tant qu'accompagnant ou accompagné.." },
+                { step: '2', title: 'Justificatifs', desc: "Accompagnants : déposez vos diplômes et pièce d'identité. Accompagnés : décrivez votre besoin." },
+                { step: '3', title: 'Validation', desc: 'Notre équipe vérifie manuellement chaque profil accompagnant. Sous 48h.' },
                 { step: '4', title: 'Mise en relation', desc: 'Publiez votre annonce, nous vous recommandons les profils les plus compatibles. Premiers contacts en quelques jours.' },
               ].map((item, i) => (
                 <Reveal key={item.step} delay={i * 120} className="flex gap-6 items-start">
@@ -307,9 +307,9 @@ export default async function HomePage() {
               </Reveal>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8 flex-1">
               <Reveal className="border-2 border-accent rounded-xl p-8">
-                <h3 className="font-bold text-2xl text-black mb-6">Accompagnant(e)s</h3>
+                <h3 className="font-bold text-2xl text-black mb-6">Accompagnants</h3>
                 <ul className="space-y-4 text-base text-black">
-                  {['Profil vérifié qui inspire confiance', 'Visibilité directe auprès des accompagné(e)s', 'Profils recommandés selon vos compétences', 'Pas de commission. Vous fixez vos conditions.'].map((text) => (
+                  {['Profil vérifié qui inspire confiance', 'Visibilité directe auprès des accompagnés', 'Profils recommandés selon vos compétences', 'Pas de commission. Vous fixez vos conditions.'].map((text) => (
                     <li key={text} className="flex gap-3">
                       <span className="shrink-0 w-5 h-5 rounded-full flex items-center justify-center bg-accent">
                         <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="black" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
@@ -322,13 +322,13 @@ export default async function HomePage() {
                   href="/register?role=accompagnante"
                   className="block text-center mt-8 px-4 py-3 rounded-lg text-sm font-medium text-black btn-hover bg-accent"
                 >
-                  Créer mon profil accompagnant(e)
+                  Créer mon profil accompagnant
                 </Link>
               </Reveal>
               <Reveal delay={100} className="border-2 border-accent rounded-xl p-8">
-                <h3 className="font-bold text-2xl text-black mb-6">Accompagné(e)s et proches</h3>
+                <h3 className="font-bold text-2xl text-black mb-6">Accompagnés et proches</h3>
                 <ul className="space-y-4 text-base text-black">
-                  {['Tous les profils vérifiés manuellement', 'Recherche par spécialité, localisation, expérience', 'Les profils que nous vous recommandons', 'Chaque auxiliaire rencontrée et validée'].map((text) => (
+                  {['Tous les profils vérifiés manuellement', 'Recherche par spécialité, localisation, expérience', 'Les profils que nous vous recommandons', 'Chaque auxiliaire rencontré et validé'].map((text) => (
                     <li key={text} className="flex gap-3">
                       <span className="shrink-0 w-5 h-5 rounded-full flex items-center justify-center bg-accent">
                         <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="black" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
@@ -341,7 +341,7 @@ export default async function HomePage() {
                   href="/register?role=accompagne"
                   className="block text-center mt-8 px-4 py-3 rounded-lg text-sm font-medium text-black btn-hover bg-accent"
                 >
-                  Trouver un(e) accompagnant(e)
+                  Trouver un accompagnant
                 </Link>
               </Reveal>
               </div>
@@ -367,7 +367,7 @@ export default async function HomePage() {
             )}
             <h2 className="text-3xl font-bold text-center text-black mb-2">Tarif unique, simple</h2>
             <p className="text-center text-base text-black mb-10">
-              Même prix pour les accompagnant(e)s et les accompagné(e)s.            </p>
+              Même prix pour les accompagnants et les accompagnés.            </p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto">
               <Reveal className="border border-accent rounded-xl p-6 bg-white flex flex-col">
                 <h3 className="font-bold text-xl text-black mb-1">Mensuel</h3>
@@ -422,11 +422,11 @@ export default async function HomePage() {
               </Reveal>
               <div className="grid grid-cols-1 gap-4 items-start flex-1">
               {[
-                { q: 'Comment fonctionne la vérification des profils ?', a: "Chaque accompagnant(e) doit déposer ses diplômes et sa pièce d'identité. Notre équipe vérifie manuellement ces documents avant d'activer le profil." },
+                { q: 'Comment fonctionne la vérification des profils ?', a: "Chaque accompagnant doit déposer ses diplômes et sa pièce d'identité. Notre équipe vérifie manuellement ces documents avant d'activer le profil." },
                 { q: "Combien coûte l'abonnement ?", a: "L'abonnement mensuel est à 4,99 EUR/mois sans engagement. L'abonnement annuel est à 49,99 EUR/an, soit une économie de 17%." },
                 { q: 'Comment fonctionnent les recommandations de profils ?', a: 'Nous analysons 5 critères (spécialités, localisation, expérience, diplôme, disponibilités) pour vous recommander les profils les plus compatibles.' },
                 { q: 'Puis-je utiliser la plateforme sans abonnement ?', a: "Vous pouvez consulter les annonces publiées sans abonnement. L'abonnement est requis pour publier des annonces et accéder aux profils que nous vous recommandons." },
-                { q: 'Comment contacter un(e) accompagnant(e) ?', a: "Une fois inscrit en tant qu'accompagné(e), vous pouvez envoyer un message via la messagerie intégrée à partir de la fiche de l'accompagnant(e)." },
+                { q: 'Comment contacter un accompagnant ?', a: "Une fois inscrit en tant qu'accompagné, vous pouvez envoyer un message via la messagerie intégrée à partir de la fiche de l'accompagnant." },
                 { q: 'Comment supprimer mon compte ?', a: 'Vous pouvez supprimer votre compte depuis les paramètres de votre espace personnel. Toutes vos données seront supprimées conformément au RGPD.' },
               ].map((faq, i) => (
                 <Reveal as="span" key={i} delay={i * 60} className="block">

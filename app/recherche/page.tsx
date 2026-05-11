@@ -14,8 +14,8 @@ import { getCodesPostauxFilterOr } from '@/lib/departements'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Rechercher un(e) accompagnant(e) de vie',
-  description: 'Trouvez une accompagnante de vie vérifiée près de chez vous. Filtrez par spécialité, localisation et expérience.',
+  title: 'Rechercher un accompagnant de vie',
+  description: 'Trouvez un accompagnant de vie vérifié près de chez vous. Filtrez par spécialité, localisation et expérience.',
 }
 
 type SearchParams = {
@@ -278,7 +278,7 @@ export default async function RecherchePage({
           <div className="mt-6 mb-8">
             <div className="flex items-center justify-between mb-4">
               <div>
-                <h2 className="text-lg font-semibold text-gray-900">Les accompagnantes que nous vous recommandons</h2>
+                <h2 className="text-lg font-semibold text-gray-900">Les accompagnants que nous vous recommandons</h2>
                 {allBenAnnonces.length > 1 ? (
                   <form className="flex items-center gap-2 mt-1">
                     <label htmlFor="recherche-annonce-reference" className="text-xs text-gray-500">Annonce de référence :</label>

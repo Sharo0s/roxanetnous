@@ -39,9 +39,9 @@ type Props = {
 const PALIER = 5
 
 const STATUT_LABELS: Record<FilleuleStatut, string> = {
-  inscrite: 'Inscrite',
-  abonnee: 'Abonnée',
-  confirme: 'Confirmée',
+  inscrite: 'Inscrit',
+  abonnee: 'Abonné',
+  confirme: 'Confirmé',
   fraude: '',
   bloque: '',
 }
@@ -97,9 +97,9 @@ export function ParrainageView({ code, baseUrl, compteur, totalRecompenses, fill
   } else if (compteur === 0 && totalRecompenses > 0) {
     phrase = `Vous avez déjà reçu ${totalRecompenses} récompense${totalRecompenses > 1 ? 's' : ''}, lancez un nouveau cycle`
   } else if (restant === 1) {
-    phrase = 'Plus qu’une filleule pour 6 mois offerts'
+    phrase = 'Plus qu’un filleul pour 6 mois offerts'
   } else {
-    phrase = `Plus que ${restant} filleules pour 6 mois offerts`
+    phrase = `Plus que ${restant} filleuls pour 6 mois offerts`
   }
 
   const filleulesAffichables = filleules.filter((f) => f.statut !== 'fraude' && f.statut !== 'bloque')
@@ -138,7 +138,7 @@ export function ParrainageView({ code, baseUrl, compteur, totalRecompenses, fill
         </div>
         <p className="text-sm text-gray-600 mt-6 max-w-md mx-auto leading-relaxed">
           Partagez ce code ou ce lien avec une accompagnante de votre réseau.
-          Vous vous portez garante : elle évite la visio et publie ses annonces dès la souscription.
+          Vous vous portez garant : il évite la visio et publie ses annonces dès la souscription.
         </p>
       </div>
 
@@ -158,20 +158,20 @@ export function ParrainageView({ code, baseUrl, compteur, totalRecompenses, fill
           />
         </div>
         <div className="text-xs text-gray-500">
-          {compteurClamped} sur {PALIER} filleules validées
+          {compteurClamped} sur {PALIER} filleuls validés
         </div>
       </div>
 
       {/* Liste filleules */}
       <section>
-        <h2 className="text-center italic text-xl text-gray-900 mb-1">Vos filleules en cours</h2>
+        <h2 className="text-center italic text-xl text-gray-900 mb-1">Vos filleuls en cours</h2>
         <p className="text-center text-sm text-gray-600 mb-6">
-          Une filleule est validée après 30 jours d&apos;abonnement actif.
+          Un filleul est validé après 30 jours d&apos;abonnement actif.
         </p>
 
         {filleulesAffichables.length === 0 ? (
           <p className="text-center text-sm text-gray-500 italic py-6">
-            Aucune filleule pour le moment. Partagez votre code pour démarrer votre premier cycle.
+            Aucun filleul pour le moment. Partagez votre code pour démarrer votre premier cycle.
           </p>
         ) : (
           <ul className="space-y-2">
@@ -191,15 +191,15 @@ export function ParrainageView({ code, baseUrl, compteur, totalRecompenses, fill
               let labelClass = 'text-gray-500'
 
               if (f.statut === 'confirme') {
-                label = 'Validée — comptée dans votre cycle'
+                label = 'Validé — compté dans votre cycle'
                 percent = 100
                 barClass = 'bg-green-600'
                 labelClass = 'text-green-700 font-medium'
               } else if (f.statut === 'abonnee' && joursEcoules !== null && joursRestants !== null) {
                 label =
                   joursRestants === 0
-                    ? 'Validée aujourd’hui'
-                    : `Validée dans ${joursRestants} jour${joursRestants > 1 ? 's' : ''}`
+                    ? 'Validé aujourd’hui'
+                    : `Validé dans ${joursRestants} jour${joursRestants > 1 ? 's' : ''}`
                 percent = (joursEcoules / 30) * 100
                 barClass = 'bg-kraft'
               } else {
@@ -240,11 +240,11 @@ export function ParrainageView({ code, baseUrl, compteur, totalRecompenses, fill
       <div className="grid grid-cols-3 gap-3 md:gap-4">
         <div className="bg-white border border-[#e8dfd2] rounded-xl p-5 text-center">
           <p className="italic text-3xl text-gray-900">{filleulesAffichables.length}</p>
-          <p className="text-xs text-gray-600 mt-1">filleules invitées</p>
+          <p className="text-xs text-gray-600 mt-1">filleuls invités</p>
         </div>
         <div className="bg-white border border-[#e8dfd2] rounded-xl p-5 text-center">
           <p className="italic text-3xl text-gray-900">{compteurClamped}</p>
-          <p className="text-xs text-gray-600 mt-1">validées ce cycle</p>
+          <p className="text-xs text-gray-600 mt-1">validés ce cycle</p>
         </div>
         <div className="bg-white border border-[#e8dfd2] rounded-xl p-5 text-center">
           <p className="italic text-3xl text-gray-900">{totalRecompenses}</p>

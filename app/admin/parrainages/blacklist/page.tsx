@@ -3,8 +3,8 @@ import Link from 'next/link'
 import { ParrainageBlacklistActions } from '@/components/admin/parrainage-blacklist-actions'
 
 const STATUT_LABELS: Record<string, string> = {
-  inscrite: 'Inscrite',
-  abonnee: 'Abonnée',
+  inscrite: 'Inscrit',
+  abonnee: 'Abonné',
   confirme: 'Confirmé',
   bloque: 'Bloqué',
   fraude: 'Fraude',

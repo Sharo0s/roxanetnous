@@ -45,15 +45,15 @@ export default function AccessibilitePage() {
               </li>
               <li>
                 <code>axe-core</code> via Playwright : 0 violation Critical/Serious sur 7
-                parcours audités (landing, recherche, login proxy onboarding accompagnante,
-                messagerie, inscription accompagnante, login proxy inscription, suppression
+                parcours audités (landing, recherche, login proxy onboarding accompagnant,
+                messagerie, inscription accompagnant, login proxy inscription, suppression
                 RGPD).
               </li>
             </ul>
             <p className="mt-2">Tests manuels narratifs :</p>
             <ul className="list-disc pl-5 mt-2 space-y-1">
               <li>
-                VoiceOver macOS sur la messagerie, l&apos;onboarding accompagnante et les
+                VoiceOver macOS sur la messagerie, l&apos;onboarding accompagnant et les
                 formulaires d&apos;inscription (3 échantillons documentés Lot B).
               </li>
             </ul>
