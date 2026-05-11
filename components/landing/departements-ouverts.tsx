@@ -6,39 +6,38 @@ type Presentation =
   | { kind: 'mono'; region: string; departements: Departement[] }
   | { kind: 'multi'; groups: Array<{ region: string; departements: Departement[] }> }
 
-// Map preposition + article par region pour rendre "Disponible <prefix> <region>"
+// Map préposition + article par région pour rendre "Disponible <prefix> <region>"
 // grammaticalement correct ("en Bretagne", "dans les Pays de la Loire", etc.).
-// Couvre les 13 regions metropolitaines + 5 DROM. Fallback "en" si region inconnue.
+// Couvre les 13 régions métropolitaines + 5 DROM. Fallback "en" si région inconnue.
+// NB : les clés doivent correspondre exactement aux valeurs stockées en BDD
+// (table departements_ouverts.region). Les noms ont été accentués en prod
+// 2026-05-11 via MCP. Si une nouvelle région est ajoutée, mettre à jour le map
+// et la BDD en parallèle, sinon le fallback `??` renverra "en" par défaut.
 const PREFIXE_REGION: Record<string, string> = {
-  'Auvergne-Rhone-Alpes': 'en',
-  'Bourgogne-Franche-Comte': 'en',
+  'Auvergne-Rhône-Alpes': 'en',
+  'Bourgogne-Franche-Comté': 'en',
   'Bretagne': 'en',
   'Centre-Val de Loire': 'dans le',
   'Corse': 'en',
   'Grand Est': 'dans le',
-  'Guadeloupe': 'en',
-  'Guyane': 'en',
   'Hauts-de-France': 'dans les',
-  'Ile-de-France': 'en',
-  'La Reunion': 'a',
-  'Martinique': 'en',
-  'Mayotte': 'a',
+  'Île-de-France': 'en',
   'Normandie': 'en',
   'Nouvelle-Aquitaine': 'en',
   'Occitanie': 'en',
   'Pays de la Loire': 'dans les',
-  'Provence-Alpes-Cote d\'Azur': 'en',
+  'Provence-Alpes-Côte d\'Azur': 'en',
 }
 
 function prefixeRegion(region: string): string {
   return PREFIXE_REGION[region] ?? 'en'
 }
 
-const CTA_WAITLIST_LABEL = 'Mon departement n\'est pas dans la liste — me prevenir a l\'ouverture'
+const CTA_WAITLIST_LABEL = 'Mon département n\'est pas encore couvert ? Me tenir au courant'
 
-// Regle D1 : si la whitelist contient exactement {Bretagne, Pays de la Loire}
-// et que les codes Pays de la Loire ouverts sont uniquement '44', on presente
-// l'ensemble comme une seule region "Bretagne" (Bretagne historique pre-1955).
+// Règle D1 : si la whitelist contient exactement {Bretagne, Pays de la Loire}
+// et que les codes Pays de la Loire ouverts sont uniquement '44', on présente
+// l'ensemble comme une seule région "Bretagne" (Bretagne historique pré-1955).
 function buildPresentation(deps: Departement[]): Presentation {
   if (deps.length === 0) return { kind: 'empty' }
 

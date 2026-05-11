@@ -43,8 +43,8 @@ export async function getCodesDepartementsOuverts(): Promise<string[]> {
   return ouverts.map((d) => d.code)
 }
 
-// Construit une chaine PostgREST `.or()` filtrant code_postal sur les 2
-// premiers chars (code departement). 2A et 2B sont mappes a code_postal LIKE
+// Construit une chaîne PostgREST `.or()` filtrant code_postal sur les 2
+// premiers chars (code département). 2A et 2B sont mappés à code_postal LIKE
 // '20%' (codes postaux corses 20xxx). Liste vide -> filtre qui ne match jamais.
 export function buildCodesPostauxFilterOr(codesDepartements: string[]): string {
   if (codesDepartements.length === 0) {
@@ -98,5 +98,5 @@ export async function getMessageRestriction(): Promise<string> {
         ? `${regions[0]} et ${regions[1]}`
         : `${regions.slice(0, -1).join(', ')} et ${regions[regions.length - 1]}`
 
-  return `Roxane et Nous est actuellement disponible uniquement en ${regionsTxt} (departements ${codes.join(', ')}). D'autres territoires ouvriront prochainement.`
+  return `Roxane et Nous est actuellement disponible uniquement en ${regionsTxt} (départements ${codes.join(', ')}). D'autres territoires ouvriront prochainement.`
 }
