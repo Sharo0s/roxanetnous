@@ -95,7 +95,6 @@ export async function autoriserException(
   }
 
   revalidatePath('/admin/parrainages')
-  revalidatePath('/admin/parrainages/blacklist')
   return {}
 }
 
@@ -247,7 +246,6 @@ export async function confirmerFraude(
   }
 
   revalidatePath('/admin/parrainages')
-  revalidatePath('/admin/parrainages/blacklist')
   return {}
 }
 
@@ -275,6 +273,5 @@ export async function ignorerFlag(
   })
 
   revalidatePath('/admin/parrainages')
-  revalidatePath('/admin/parrainages/blacklist')
   return {}
 }

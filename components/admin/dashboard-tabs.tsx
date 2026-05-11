@@ -3,7 +3,6 @@
 import { useState } from 'react'
 
 const tabs = [
-  { id: 'overview', label: 'Vue d\'ensemble' },
   { id: 'inscriptions', label: 'Inscriptions' },
   { id: 'revenus', label: 'Revenus' },
   { id: 'activite', label: 'Activité' },
@@ -14,7 +13,7 @@ type TabId = (typeof tabs)[number]['id']
 export function DashboardTabs({ children }: {
   children: Record<TabId, React.ReactNode>
 }) {
-  const [active, setActive] = useState<TabId>('overview')
+  const [active, setActive] = useState<TabId>('inscriptions')
 
   return (
     <div>

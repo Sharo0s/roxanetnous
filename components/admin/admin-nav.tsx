@@ -11,6 +11,8 @@ const LINKS = [
   { href: '/admin/signalements', label: 'Signalements' },
   { href: '/admin/parrainages', label: 'Parrainages' },
   { href: '/admin/departements', label: 'Couverture' },
+  { href: '/admin/inscrits-hors-zone', label: 'Hors zone' },
+  { href: '/admin/statistiques', label: 'Statistiques' },
   { href: '/admin/historique', label: 'Historique' },
 ]
 
@@ -23,7 +25,7 @@ export function AdminNav() {
   const pathname = usePathname() || ''
   return (
     <nav aria-label="Navigation admin" className="relative z-10 bg-[#faf7f2] border-b border-[#e8dfd2]">
-      <div className="max-w-6xl mx-auto px-4 md:px-6 flex gap-7 overflow-x-auto text-sm">
+      <div className="max-w-6xl mx-auto px-4 md:px-6 flex gap-5 md:gap-6 overflow-x-auto overflow-y-hidden text-sm">
         {LINKS.map((item) => {
           const active = isActive(pathname, item.href)
           return (

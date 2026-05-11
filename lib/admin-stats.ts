@@ -406,6 +406,101 @@ export async function getChurn() {
   }
 }
 
+export async function getWaitlistStats() {
+  const supabase = await getAdmin()
+
+  const { count: total } = await supabase
+    .from('notifications_ouverture')
+    .select('id', { count: 'exact', head: true })
+    .is('notified_at', null)
+
+  const { data: rows } = await supabase
+    .from('notifications_ouverture')
+    .select('code_departement')
+    .is('notified_at', null)
+
+  const counts = new Map<string, number>()
+  for (const r of rows || []) {
+    const code = r.code_departement
+    if (!code) continue
+    counts.set(code, (counts.get(code) || 0) + 1)
+  }
+  const top3 = Array.from(counts.entries())
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 3)
+    .map(([code, count]) => ({ code, count }))
+
+  return { total: total || 0, top3 }
+}
+
+export async function getParrainagesStats() {
+  const supabase = await getAdmin()
+
+  const [confirme, enCours, flag, blacklist] = await Promise.all([
+    supabase
+      .from('parrainages')
+      .select('id', { count: 'exact', head: true })
+      .eq('statut', 'confirme'),
+    supabase
+      .from('parrainages')
+      .select('id', { count: 'exact', head: true })
+      .in('statut', ['inscrite', 'abonnee']),
+    supabase
+      .from('parrainages')
+      .select('id', { count: 'exact', head: true })
+      .not('flag_suspicion', 'is', null)
+      .not('statut', 'in', '(bloque,fraude)'),
+    supabase
+      .from('parrainages')
+      .select('id', { count: 'exact', head: true })
+      .in('statut', ['bloque', 'fraude']),
+  ])
+
+  return {
+    aboutis: confirme.count || 0,
+    enCours: enCours.count || 0,
+    flagActifs: flag.count || 0,
+    blacklist: blacklist.count || 0,
+  }
+}
+
+export async function getActiviteMois() {
+  const supabase = await getAdmin()
+
+  const firstOfMonth = new Date()
+  firstOfMonth.setDate(1)
+  firstOfMonth.setHours(0, 0, 0, 0)
+
+  const [{ count: messages }, { count: conversations }] = await Promise.all([
+    supabase
+      .from('messages')
+      .select('id', { count: 'exact', head: true })
+      .gte('created_at', firstOfMonth.toISOString()),
+    supabase
+      .from('conversations')
+      .select('id', { count: 'exact', head: true })
+      .gte('created_at', firstOfMonth.toISOString()),
+  ])
+
+  return {
+    messages: messages || 0,
+    conversations: conversations || 0,
+  }
+}
+
+export async function getDerniereActionAdmin() {
+  const supabase = await getAdmin()
+
+  const { data } = await supabase
+    .from('admin_actions_log')
+    .select('created_at')
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+
+  return data?.created_at ?? null
+}
+
 export async function getDernieresAnnulations() {
   const supabase = await getAdmin()
 
