@@ -256,7 +256,7 @@ export default async function RecherchePage({
             <Link href="/" className="text-base font-bold text-black">
               roxanetnous
             </Link>
-            <Link href="/login" className="inline-flex items-center px-4 py-2 rounded-full border border-[#e8dfd2] text-gray-900 hover:border-kraft transition text-sm font-medium">
+            <Link href="/login" className="inline-flex items-center px-4 py-2 rounded-full bg-accent border border-accent text-black hover:bg-kraft hover:border-kraft hover:text-white transition text-sm font-medium">
               Connexion
             </Link>
           </div>

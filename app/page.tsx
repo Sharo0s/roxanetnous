@@ -109,14 +109,14 @@ export default async function HomePage() {
             <Link href="#faq" className="text-gray-600 hover:text-gray-900">FAQ</Link>
             <Link
               href="/login"
-              className="inline-flex items-center px-4 py-2 rounded-full border border-[#e8dfd2] text-gray-900 hover:border-kraft transition text-sm font-medium"
+              className="inline-flex items-center px-4 py-2 rounded-full bg-accent border border-accent text-black hover:bg-kraft hover:border-kraft hover:text-white transition text-sm font-medium"
             >
               Connexion
             </Link>
           </nav>
           <Link
             href="/login"
-            className="md:hidden inline-flex items-center px-3 py-1.5 rounded-full border border-[#e8dfd2] text-gray-900 hover:border-kraft transition text-xs font-medium"
+            className="md:hidden inline-flex items-center px-3 py-1.5 rounded-full bg-accent border border-accent text-black hover:bg-kraft hover:border-kraft hover:text-white transition text-xs font-medium"
           >
             Connexion
           </Link>
