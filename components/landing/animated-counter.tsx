@@ -44,14 +44,14 @@ export function AnimatedCounter({ end, label, duration = 5000 }: Props) {
   }, [end, duration])
 
   return (
-    <div ref={ref} className="flex flex-col items-center gap-1">
+    <div ref={ref} className="flex flex-col items-start gap-0.5">
       <span
-        className={`text-4xl md:text-5xl font-black text-black tabular-nums transition-transform duration-300 ${done ? 'scale-110' : ''}`}
+        style={{ fontFamily: 'var(--font-heading)' }}
+        className={`text-3xl md:text-4xl italic text-gray-900 tabular-nums leading-none transition-transform duration-300 ${done ? 'scale-105' : ''}`}
       >
         {count.toLocaleString('fr-FR')}
       </span>
-      <div className="w-8 h-1 rounded-full bg-accent" />
-      <span className="text-xs text-black font-bold mt-0.5 tracking-wide uppercase">{label}</span>
+      <span className="text-xs text-gray-500 mt-1">{label}</span>
     </div>
   )
 }

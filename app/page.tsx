@@ -70,11 +70,12 @@ export default async function HomePage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-[#fefaf8]">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
+
       {/* ===== BANDEAU OFFRE ===== */}
       {launchOfferActive && (
         <div className="overflow-hidden bg-black">
@@ -87,160 +88,237 @@ export default async function HomePage() {
           </div>
         </div>
       )}
+
+      {/* ===== HEADER ===== */}
+      <header className="bg-[#faf7f2] border-b border-[#e8dfd2] sticky top-0 z-50">
+        <div className="max-w-6xl mx-auto px-4 md:px-6 py-3 flex items-center justify-between">
+          <Link href="/" className="inline-flex items-center gap-2 text-base font-bold text-black">
+            <Image
+              src="/logo-transparent.png"
+              alt=""
+              width={100}
+              height={100}
+              priority
+              className="w-[100px] h-[100px] object-contain"
+            />
+            <span>roxanetnous</span>
+          </Link>
+          <nav aria-label="Navigation principale" className="hidden md:flex items-center gap-6 text-sm">
+            <Link href="#comment" className="text-gray-600 hover:text-gray-900">Comment ça marche</Link>
+            <Link href="#tarifs" className="text-gray-600 hover:text-gray-900">Tarifs</Link>
+            <Link href="#faq" className="text-gray-600 hover:text-gray-900">FAQ</Link>
+            <Link
+              href="/login"
+              className="inline-flex items-center px-4 py-2 rounded-full border border-[#e8dfd2] text-gray-900 hover:border-kraft transition text-sm font-medium"
+            >
+              Connexion
+            </Link>
+          </nav>
+          <Link
+            href="/login"
+            className="md:hidden inline-flex items-center px-3 py-1.5 rounded-full border border-[#e8dfd2] text-gray-900 hover:border-kraft transition text-xs font-medium"
+          >
+            Connexion
+          </Link>
+        </div>
+      </header>
+
       <main id="main-content" tabIndex={-1} className="flex-1 focus:outline-none">
+
         {/* ===== HERO ===== */}
-        <section className="px-4 py-16 md:py-24 kraft bg-kraft">
-          <div className="max-w-7xl mx-auto relative z-10">
-            <div className="flex flex-col md:flex-row items-center gap-10 md:gap-16">
-              <div className="flex-1 text-center space-y-5">
-                <h1 className="sr-only">roxanetnous</h1>
-                <Image
-                  src="/logo-transparent.png"
-                  alt="roxanetnous"
-                  width={480}
-                  height={160}
-                  priority
-                  className="h-auto w-64 md:w-80 mx-auto"
-                />
-
-                <p className="text-2xl text-white leading-relaxed text-center font-heading italic">
-                  Donne vie à ton quotidien
-                </p>
-
-                <div className="flex gap-4 justify-center pt-4">
-                  <Link
-                    href="/login"
-                    className="px-6 py-3 rounded-lg font-semibold text-sm text-black btn-hover bg-accent"
-                  >
-                    Inscription / Connexion
-                  </Link>
+        <section className="relative overflow-hidden bg-[#fefaf8] px-4 py-12 md:py-20">
+          <span
+            aria-hidden="true"
+            className="pointer-events-none absolute -top-24 -right-32 w-[600px] h-[600px]"
+            style={{ background: 'radial-gradient(circle, #faecd9 0%, transparent 65%)' }}
+          />
+          <div className="relative max-w-6xl mx-auto grid md:grid-cols-[1.1fr_1fr] gap-12 md:gap-16 items-center">
+            <div>
+              <span className="inline-block text-[11px] uppercase tracking-[0.2em] text-kraft font-medium mb-3">
+                L&apos;accompagnement de vie
+              </span>
+              <h1 className="text-4xl md:text-5xl lg:text-6xl text-gray-900 italic leading-[1.05] tracking-tight mb-5">
+                L&apos;accompagnement, entre nous.
+              </h1>
+              <p className="text-base md:text-lg text-gray-600 leading-relaxed max-w-lg mb-7">
+                Une communauté de mise en relation entre accompagnants vérifiés et personnes accompagnées. Sans intermédiaire, sans commission.
+              </p>
+              <div className="flex flex-wrap gap-3 mb-9">
+                <Link
+                  href="/register"
+                  className="inline-flex items-center px-5 py-2.5 rounded-full bg-accent border border-accent text-black hover:bg-kraft hover:border-kraft hover:text-white transition text-sm font-medium"
+                >
+                  Créer mon profil
+                </Link>
+                <Link
+                  href="/recherche"
+                  className="inline-flex items-center px-5 py-2.5 rounded-full bg-white border border-[#e8dfd2] text-gray-900 hover:border-kraft transition text-sm font-medium"
+                >
+                  Consulter les annonces
+                </Link>
+              </div>
+              {((accompagnantesCount || 0) > 0 || (accompagnesCount || 0) > 0 || villesUniques.size > 0) && (
+                <div className="flex flex-wrap gap-8">
+                  {(accompagnantesCount || 0) > 0 && (
+                    <AnimatedCounter end={accompagnantesCount || 0} label={`accompagnant${(accompagnantesCount || 0) > 1 ? 's' : ''}`} />
+                  )}
+                  {(accompagnesCount || 0) > 0 && (
+                    <AnimatedCounter end={accompagnesCount || 0} label={`accompagné${(accompagnesCount || 0) > 1 ? 's' : ''}`} />
+                  )}
+                  {villesUniques.size > 0 && (
+                    <AnimatedCounter end={villesUniques.size} label={`ville${villesUniques.size > 1 ? 's' : ''}`} />
+                  )}
                 </div>
+              )}
+            </div>
 
-                {((accompagnantesCount || 0) > 0 || (accompagnesCount || 0) > 0 || villesUniques.size > 0) && (
-                  <div className="flex gap-8 justify-center pt-10">
-                    {(accompagnantesCount || 0) > 0 && (
-                      <AnimatedCounter end={accompagnantesCount || 0} label={`accompagnant${(accompagnantesCount || 0) > 1 ? 's' : ''} vérifié${(accompagnantesCount || 0) > 1 ? 's' : ''}`} />
-                    )}
-                    {(accompagnesCount || 0) > 0 && (
-                      <AnimatedCounter end={accompagnesCount || 0} label={`accompagné${(accompagnesCount || 0) > 1 ? 's' : ''}`} />
-                    )}
-                    {villesUniques.size > 0 && (
-                      <AnimatedCounter end={villesUniques.size} label={`ville${villesUniques.size > 1 ? 's' : ''}`} />
-                    )}
-                  </div>
-                )}
-              </div>
-
-              <div className="hidden md:block w-full md:basis-1/2 md:flex-[0.2]">
-                <HeroCarte villes={villesCoords} />
-              </div>
+            <div className="hidden md:block w-full">
+              <HeroCarte villes={villesCoords} />
             </div>
           </div>
         </section>
 
-        {/* ===== DEPARTEMENTS OUVERTS (story 3.3, FR48) ===== */}
+        {/* ===== STRIP DEPARTEMENTS OUVERTS ===== */}
         <DepartementsOuverts />
 
-        {/* ===== BANDE COMMUNAUTE ===== */}
-        <section className="bg-accent relative">
-          <svg viewBox="0 0 1440 60" preserveAspectRatio="none" className="absolute top-0 left-0 w-full h-8 md:h-12 -translate-y-full">
-            <path d="M0,60 Q240,20 480,50 T960,50 T1440,50 L1440,60 L0,60 Z" fill="#F4C8A3" />
-          </svg>
-          <Reveal className="max-w-5xl mx-auto px-4 py-8 flex flex-col items-center gap-4 text-center md:flex-row md:justify-between md:text-left">
-            <p className="text-lg font-medium text-black tracking-wide font-heading italic">
-              Notre communauté de mise en relation entre accompagnants et accompagnés
-            </p>
-            <Link href="/recherche" className="rounded-full px-7 py-3 font-semibold bg-black text-white btn-hover whitespace-nowrap text-lg shrink-0">
-              Consulter les annonces
-            </Link>
-          </Reveal>
-          <svg viewBox="0 0 1440 60" preserveAspectRatio="none" className="absolute bottom-0 left-0 w-full h-8 md:h-12 translate-y-full">
-            <path d="M0,0 C360,40 720,-20 1080,20 T1440,0 L1440,60 L0,60 Z" fill="#F4C8A3" />
-          </svg>
+        {/* ===== STORY ROXANE ===== */}
+        <section className="px-4 py-16 md:py-20 bg-[#faf7f2]">
+          <div className="max-w-4xl mx-auto">
+            <Reveal>
+              <div className="relative overflow-hidden bg-white rounded-2xl border border-[#e8dfd2] p-7 md:p-10">
+                <span
+                  aria-hidden="true"
+                  className="pointer-events-none absolute top-0 right-0 w-[280px] h-[280px]"
+                  style={{ background: 'radial-gradient(circle at top right, #faecd9 0%, transparent 70%)' }}
+                />
+                <div className="relative grid md:grid-cols-[280px_1fr] gap-8 md:gap-10 items-start">
+                  <div className="w-full aspect-[4/5] rounded-2xl overflow-hidden shadow-[0_18px_40px_-18px_rgba(0,0,0,0.25)] max-w-[260px] mx-auto md:mx-0">
+                    <Image
+                      src="/roxane-portrait.svg"
+                      alt="Roxane, aide médico-psychologique"
+                      width={1080}
+                      height={1350}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div>
+                    <span className="inline-block text-[11px] uppercase tracking-[0.2em] text-kraft font-medium mb-3">
+                      Notre histoire
+                    </span>
+                    <h2 className="text-3xl md:text-4xl text-gray-900 italic leading-tight mb-4">
+                      Ici, c&apos;est un lieu.
+                    </h2>
+                    <p className="text-gray-600 leading-relaxed mb-3">
+                      Roxanetnous a pour mission de créer une communauté, un endroit unique dédié à la recherche d&apos;accompagnement entre particuliers. Ensemble.
+                    </p>
+                    <p className="text-gray-600 leading-relaxed mb-3">
+                      Je suis Roxane, aide médico-psychologique, j&apos;exerce mon métier avec passion depuis une dizaine d&apos;années.
+                    </p>
+                    <p className="text-gray-600 leading-relaxed mb-3">
+                      Aujourd&apos;hui, je fais un constat : la difficulté, en tant qu&apos;accompagné ou accompagnant, à trouver son accompagnement. Où, quoi, qui, comment chercher ?{' '}
+                      <strong className="font-medium text-gray-900">C&apos;est ici.</strong>
+                    </p>
+                    <p className="italic text-kraft mt-5">Roxane</p>
+                  </div>
+                </div>
+              </div>
+            </Reveal>
+          </div>
         </section>
 
-        {/* ===== PRESENTATION ===== */}
-        <section className="px-4 py-16 md:py-24 kraft bg-kraft relative">
-          <div className="max-w-5xl mx-auto relative z-10">
-            <div className="flex flex-col md:flex-row items-center gap-10 md:gap-16">
-              <Reveal variant="blur" className="flex-1 w-full">
-                <Image
-                  src="/IMG-7294675.png"
-                  alt="Roxane, aide médico-psychologique"
-                  width={1200}
-                  height={1600}
-                  className="h-auto w-full rounded-lg"
-                />
+        {/* ===== POUR QUI ===== */}
+        <section className="px-4 py-16 md:py-20 bg-[#fefaf8]">
+          <div className="max-w-6xl mx-auto">
+            <Reveal>
+              <div className="text-center mb-10">
+                <span className="inline-block text-[11px] uppercase tracking-[0.2em] text-kraft font-medium mb-3">
+                  Pour vous
+                </span>
+                <h2 className="text-3xl md:text-4xl text-gray-900 italic leading-tight mb-3">
+                  Pour qui
+                </h2>
+                <p className="text-gray-600 max-w-md mx-auto">
+                  Deux espaces dédiés, une seule communauté.
+                </p>
+              </div>
+            </Reveal>
+
+            <div className="grid md:grid-cols-[1.5fr_1fr] gap-4 md:gap-4">
+              <Reveal>
+                <Link
+                  href="/register?role=accompagnante"
+                  className="group bg-white rounded-2xl border border-accent overflow-hidden flex flex-col h-full hover:border-kraft transition"
+                >
+                  <div className="aspect-[16/10] overflow-hidden">
+                    <Image
+                      src="/pour-qui.svg"
+                      alt=""
+                      width={1080}
+                      height={675}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div className="p-7 md:p-8 bg-gradient-to-b from-white to-[#faecd9]">
+                    <span className="inline-block text-[11px] uppercase tracking-[0.18em] text-kraft font-medium mb-2">
+                      Côté accompagnants
+                    </span>
+                    <h3 className="text-2xl md:text-3xl text-gray-900 italic mb-4 leading-tight">
+                      Faites-vous connaître, gardez la main.
+                    </h3>
+                    <ul className="space-y-1.5 text-gray-700 mb-4">
+                      {[
+                        'Profil vérifié qui inspire confiance',
+                        'Visibilité directe auprès des accompagnés',
+                        'Profils recommandés selon vos compétences',
+                        'Pas de commission. Vous fixez vos conditions.',
+                      ].map((t) => (
+                        <li key={t} className="flex gap-2 text-sm">
+                          <span className="text-kraft font-bold" aria-hidden="true">·</span>
+                          <span>{t}</span>
+                        </li>
+                      ))}
+                    </ul>
+                    <span className="inline-flex items-center gap-1 text-sm text-kraft font-medium">
+                      Créer mon profil <span aria-hidden="true">→</span>
+                    </span>
+                  </div>
+                </Link>
               </Reveal>
-              <div className="flex-1 text-white space-y-4">
-                <Reveal as="span" className="block">
-                  <h2 className="text-3xl md:text-4xl font-bold text-black">Ici, c&apos;est un lieu</h2>
-                </Reveal>
-                <Reveal as="span" delay={80} className="block relative">
-                  <svg
-                    aria-hidden="true"
-                    viewBox="0 0 24 24"
-                    className="w-6 h-6 text-accent fill-current absolute -left-9 top-1"
+
+              <div className="grid gap-4">
+                <Reveal delay={80}>
+                  <Link
+                    href="/register?role=accompagne"
+                    className="block bg-white rounded-2xl border border-[#e8dfd2] p-7 hover:border-kraft transition h-full"
                   >
-                    <path d="M12 2l2.39 7.36H22l-6.19 4.5L18.2 21 12 16.5 5.8 21l2.39-7.14L2 9.36h7.61L12 2z" />
-                  </svg>
-                  <p className="text-lg leading-relaxed">
-                    Roxanetnous a pour mission de créer une communauté, un endroit unique dédié à la recherche d&apos;accompagnement entre particuliers. Ensemble&nbsp;.
-                    <svg
-                      aria-hidden="true"
-                      viewBox="0 0 24 24"
-                      className="inline-block w-5 h-5 ml-1 -mt-1 text-accent fill-current align-middle"
-                    >
-                      <circle cx="12" cy="12" r="4" />
-                      <g stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                        <line x1="12" y1="2" x2="12" y2="5" />
-                        <line x1="12" y1="19" x2="12" y2="22" />
-                        <line x1="2" y1="12" x2="5" y2="12" />
-                        <line x1="19" y1="12" x2="22" y2="12" />
-                        <line x1="4.22" y1="4.22" x2="6.34" y2="6.34" />
-                        <line x1="17.66" y1="17.66" x2="19.78" y2="19.78" />
-                        <line x1="4.22" y1="19.78" x2="6.34" y2="17.66" />
-                        <line x1="17.66" y1="6.34" x2="19.78" y2="4.22" />
-                      </g>
-                    </svg>
-                  </p>
+                    <span className="inline-block text-[11px] uppercase tracking-[0.18em] text-kraft font-medium mb-2">
+                      Accompagnés
+                    </span>
+                    <h3 className="text-xl text-gray-900 italic mb-2">Trouver son accompagnant</h3>
+                    <p className="text-sm text-gray-600 leading-relaxed mb-3">
+                      Profils vérifiés manuellement, recherche fine et recommandations adaptées.
+                    </p>
+                    <span className="inline-flex items-center gap-1 text-sm text-kraft font-medium">
+                      Découvrir <span aria-hidden="true">→</span>
+                    </span>
+                  </Link>
                 </Reveal>
-                <Reveal as="span" delay={160} className="block">
-                  <p className="text-lg leading-relaxed">
-                    Je suis Roxane, aide médico-psychologique, j&apos;exerce mon métier avec passion depuis une dizaine d&apos;années.
-                  </p>
-                </Reveal>
-                <Reveal as="span" delay={240} className="block">
-                  <p className="text-lg leading-relaxed">
-                    Aujourd&apos;hui, je fais un constat : celui de la difficulté en tant qu&apos;accompagné ou accompagnant à trouver son accompagnement.
-                  </p>
-                </Reveal>
-                <Reveal as="span" delay={320} className="block">
-                  <p className="text-lg leading-relaxed italic">
-                    Où, quoi, qui, comment chercher ?
-                  </p>
-                </Reveal>
-                <Reveal as="span" delay={400} className="block">
-                  <p className="text-lg leading-relaxed font-semibold">
-                    C&apos;est ici.
-                  </p>
-                </Reveal>
-                <Reveal as="span" delay={480} className="block">
-                  <p className="text-lg leading-relaxed">
-                    Parlons de nous, pour nous faciliter l&apos;accès à demain.
-                  </p>
-                </Reveal>
-                <Reveal as="span" delay={560} className="block">
-                  <p className="text-lg leading-relaxed italic mt-8">
-                    &laquo;&nbsp;Notre avenir de l&apos;accompagnement à domicile et à la vie sociale. Nous sommes âgés, nous sommes en situation de handicap. Créons, nous, ensemble l&apos;avenir que nous souhaitons.&nbsp;&raquo;
-                    <svg
-                      aria-hidden="true"
-                      viewBox="0 0 24 24"
-                      className="inline-block w-5 h-5 ml-2 -mt-1 text-accent fill-current align-middle"
-                    >
-                      <path d="M12 21s-7-4.534-9.5-9.034C1.04 9.04 2.5 5 6.5 5c2 0 3.5 1.5 4.5 3 1-1.5 2.5-3 4.5-3 4 0 5.46 4.04 4 6.966C19 16.466 12 21 12 21z" />
-                    </svg>
-                  </p>
+                <Reveal delay={160}>
+                  <Link
+                    href="/register?role=accompagne"
+                    className="block bg-white rounded-2xl border border-[#e8dfd2] p-7 hover:border-kraft transition h-full"
+                  >
+                    <span className="inline-block text-[11px] uppercase tracking-[0.18em] text-kraft font-medium mb-2">
+                      Proches
+                    </span>
+                    <h3 className="text-xl text-gray-900 italic mb-2">Aider un proche</h3>
+                    <p className="text-sm text-gray-600 leading-relaxed mb-3">
+                      Vous accompagnez un parent ou un proche dans sa recherche ? Inscrivez-vous pour lui.
+                    </p>
+                    <span className="inline-flex items-center gap-1 text-sm text-kraft font-medium">
+                      En savoir plus <span aria-hidden="true">→</span>
+                    </span>
+                  </Link>
                 </Reveal>
               </div>
             </div>
@@ -248,222 +326,183 @@ export default async function HomePage() {
         </section>
 
         {/* ===== COMMENT CA MARCHE ===== */}
-        <section className="px-4 pt-16 pb-24 md:pb-28 kraft bg-kraft relative">
-          <div className="max-w-3xl mx-auto relative z-10">
-            <h2 className="text-3xl font-bold text-center text-black mb-12">
-              Comment ça marche RoxanetNous
-            </h2>
-            <div className="space-y-0">
+        <section id="comment" className="px-4 py-16 md:py-20 bg-[#faf7f2]">
+          <div className="max-w-3xl mx-auto">
+            <Reveal>
+              <div className="text-center mb-10">
+                <span className="inline-block text-[11px] uppercase tracking-[0.2em] text-kraft font-medium mb-3">
+                  Étape par étape
+                </span>
+                <h2 className="text-3xl md:text-4xl text-gray-900 italic leading-tight mb-3">
+                  Comment ça marche
+                </h2>
+                <p className="text-gray-600 max-w-md mx-auto">
+                  Quatre étapes, et la mise en relation se fait.
+                </p>
+              </div>
+            </Reveal>
+            <div>
               {[
-                { step: '1', title: 'Inscription', desc: "Créez votre compte en tant qu'accompagnant ou accompagné.." },
-                { step: '2', title: 'Justificatifs', desc: "Accompagnants : déposez vos diplômes et pièce d'identité. Accompagnés : décrivez votre besoin." },
-                { step: '3', title: 'Validation', desc: 'Notre équipe vérifie manuellement chaque profil accompagnant. Sous 48h.' },
-                { step: '4', title: 'Mise en relation', desc: 'Publiez votre annonce, nous vous recommandons les profils les plus compatibles. Premiers contacts en quelques jours.' },
-              ].map((item, i) => (
-                <Reveal key={item.step} delay={i * 120} className="flex gap-6 items-start">
-                  <div className="flex flex-col items-center">
-                    <div className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm shrink-0 text-black bg-accent">
-                      {item.step}
+                { n: '01', t: 'Inscription', d: "Créez votre compte en tant qu'accompagnant ou accompagné." },
+                { n: '02', t: 'Justificatifs', d: "Accompagnants : déposez vos diplômes et pièce d'identité. Accompagnés : décrivez votre besoin." },
+                { n: '03', t: 'Validation', d: 'Notre équipe vérifie manuellement chaque profil accompagnant, sous 48h.' },
+                { n: '04', t: 'Mise en relation', d: 'Publiez votre annonce, nous vous recommandons les profils les plus compatibles. Premiers contacts en quelques jours.' },
+              ].map((s, i) => (
+                <Reveal key={s.n} delay={i * 80}>
+                  <div className="grid grid-cols-[60px_1fr] md:grid-cols-[80px_1fr] gap-4 md:gap-6 items-start py-6 border-b border-[#e8dfd2] last:border-b-0">
+                    <div className="italic text-3xl md:text-4xl text-kraft leading-none">{s.n}</div>
+                    <div>
+                      <h3 className="text-lg md:text-xl text-gray-900 italic mb-1.5">{s.t}</h3>
+                      <p className="text-sm md:text-base text-gray-600 leading-relaxed">{s.d}</p>
                     </div>
-                    {i < 3 && <div className="w-px h-16 bg-accent/40" />}
-                  </div>
-                  <div className="pb-10">
-                    <h3 className="font-bold text-xl text-black">{item.title}</h3>
-                    <p className="text-base mt-1 text-white flex items-start gap-2">
-                      <svg
-                        aria-hidden="true"
-                        viewBox="0 0 24 24"
-                        className="w-4 h-4 shrink-0 mt-1 text-accent fill-current"
-                      >
-                        <path d="M12 2l2.39 7.36H22l-6.19 4.5L18.2 21 12 16.5 5.8 21l2.39-7.14L2 9.36h7.61L12 2z" />
-                      </svg>
-                      <span>{item.desc}</span>
-                    </p>
                   </div>
                 </Reveal>
               ))}
             </div>
           </div>
-          <svg viewBox="0 0 1440 60" preserveAspectRatio="none" className="absolute bottom-0 left-0 w-full h-8 md:h-12 z-[2]">
-            <path d="M0,30 Q360,60 720,30 T1440,30 L1440,60 L0,60 Z" fill="white" />
-          </svg>
         </section>
 
-        {/* ===== POUR QUI ===== */}
-        <section className="px-4 py-16 bg-white">
-          <div className="max-w-6xl mx-auto">
-            <h2 className="text-3xl font-bold text-center text-black mb-10">
-              Pour qui ?
-            </h2>
-            <div className="flex flex-col md:flex-row gap-8 items-start">
-              <Reveal variant="blur" className="w-full md:w-2/5 shrink-0">
-                <Image
-                  src="/IMG-9432645.png"
-                  alt="Pour qui ?"
-                  width={1200}
-                  height={1600}
-                  className="h-auto w-full rounded-lg"
-                />
-              </Reveal>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 flex-1">
-              <Reveal className="border-2 border-accent rounded-xl p-8">
-                <h3 className="font-bold text-2xl text-black mb-6">Accompagnants</h3>
-                <ul className="space-y-4 text-base text-black">
-                  {['Profil vérifié qui inspire confiance', 'Visibilité directe auprès des accompagnés', 'Profils recommandés selon vos compétences', 'Pas de commission. Vous fixez vos conditions.'].map((text) => (
-                    <li key={text} className="flex gap-3">
-                      <span className="shrink-0 w-5 h-5 rounded-full flex items-center justify-center bg-accent">
-                        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="black" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
-                      </span>
-                      {text}
-                    </li>
-                  ))}
-                </ul>
-                <Link
-                  href="/register?role=accompagnante"
-                  className="block text-center mt-8 px-4 py-3 rounded-lg text-sm font-medium text-black btn-hover bg-accent"
-                >
-                  Créer mon profil accompagnant
-                </Link>
-              </Reveal>
-              <Reveal delay={100} className="border-2 border-accent rounded-xl p-8">
-                <h3 className="font-bold text-2xl text-black mb-6">Accompagnés et proches</h3>
-                <ul className="space-y-4 text-base text-black">
-                  {['Tous les profils vérifiés manuellement', 'Recherche par spécialité, localisation, expérience', 'Les profils que nous vous recommandons', 'Chaque auxiliaire rencontré et validé'].map((text) => (
-                    <li key={text} className="flex gap-3">
-                      <span className="shrink-0 w-5 h-5 rounded-full flex items-center justify-center bg-accent">
-                        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="black" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
-                      </span>
-                      {text}
-                    </li>
-                  ))}
-                </ul>
-                <Link
-                  href="/register?role=accompagne"
-                  className="block text-center mt-8 px-4 py-3 rounded-lg text-sm font-medium text-black btn-hover bg-accent"
-                >
-                  Trouver un accompagnant
-                </Link>
-              </Reveal>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <svg viewBox="0 0 1440 60" preserveAspectRatio="none" className="w-full h-8 md:h-12 block -mb-px bg-white">
-          <defs><pattern id="kraft-wave-3" patternUnits="userSpaceOnUse" width="256" height="256"><image href="/kraft-noise.png" width="256" height="256" /></pattern></defs>
-          <path d="M0,30 Q240,0 480,30 T960,30 T1440,30 L1440,60 L0,60 Z" fill="#d3a387" />
-          <path d="M0,30 Q240,0 480,30 T960,30 T1440,30 L1440,60 L0,60 Z" fill="url(#kraft-wave-3)" opacity="0.35" style={{ mixBlendMode: 'multiply' }} />
-        </svg>
-
-        {/* ===== OFFRES ===== */}
-        <section className="px-4 pt-16 pb-24 md:pb-28 kraft bg-kraft relative">
-          <div className="max-w-4xl mx-auto relative z-10">
-            {launchOfferActive && (
-              <div className="bg-accent text-black text-center py-3 px-6 rounded-xl mb-6 max-w-2xl mx-auto">
-                <p className="text-xl font-bold">
-                  Offre de lancement : 1 mois offert pour toute inscription sur l&apos;offre de votre choix !
+        {/* ===== TARIFS ===== */}
+        <section id="tarifs" className="px-4 py-16 md:py-20 bg-[#fefaf8]">
+          <div className="max-w-3xl mx-auto">
+            <Reveal>
+              <div className="text-center mb-10">
+                <span className="inline-block text-[11px] uppercase tracking-[0.2em] text-kraft font-medium mb-3">
+                  Tarifs
+                </span>
+                <h2 className="text-3xl md:text-4xl text-gray-900 italic leading-tight mb-3">
+                  Un tarif unique, simple
+                </h2>
+                <p className="text-gray-600 max-w-md mx-auto">
+                  Même prix pour les accompagnants et les accompagnés.
                 </p>
+              </div>
+            </Reveal>
+            {launchOfferActive && (
+              <div className="bg-accent/30 border border-accent text-gray-900 text-center py-2.5 px-5 rounded-full max-w-md mx-auto mb-6 text-sm">
+                Offre de lancement : <strong className="font-medium">1 mois offert</strong> pour toute inscription.
               </div>
             )}
-            <h2 className="text-3xl font-bold text-center text-black mb-2">Tarif unique, simple</h2>
-            <p className="text-center text-base text-black mb-10">
-              Même prix pour les accompagnants et les accompagnés.            </p>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto">
-              <Reveal className="border border-accent rounded-xl p-6 bg-white flex flex-col">
-                <h3 className="font-bold text-xl text-black mb-1">Mensuel</h3>
-                <p className="text-4xl font-bold mb-1">
-                  <span className="text-accent">4,99 EUR</span><span className="text-base font-normal text-black"> / mois</span>
-                </p>
-                <p className="text-base text-black mb-4">Sans engagement, résiliable à tout moment.</p>
-                <Link
-                  href="/register"
-                  className="block text-center px-4 py-2 rounded-lg text-sm font-medium text-black btn-hover mt-auto bg-accent"
-                >
-                  Commencer
-                </Link>
+            <div className="grid md:grid-cols-2 gap-4 max-w-2xl mx-auto">
+              <Reveal>
+                <div className="bg-white rounded-2xl border border-[#e8dfd2] p-7 text-center h-full flex flex-col">
+                  <h3 className="text-xl text-gray-900 italic mb-2">Mensuel</h3>
+                  <p className="text-3xl md:text-4xl italic text-gray-900 mb-1">
+                    4,99€
+                    <span className="text-sm font-normal text-gray-500 not-italic"> / mois</span>
+                  </p>
+                  <p className="text-sm text-gray-600 mb-5">Sans engagement, résiliable à tout moment.</p>
+                  <Link
+                    href="/register"
+                    className="mt-auto inline-flex items-center justify-center px-5 py-2.5 rounded-full bg-white border border-[#e8dfd2] text-gray-900 hover:border-kraft transition text-sm font-medium"
+                  >
+                    Commencer
+                  </Link>
+                </div>
               </Reveal>
-              <Reveal delay={100} className="border-2 border-accent rounded-xl p-6 bg-white relative flex flex-col">
-                <Reveal as="span" delay={400} variant="blur" className="absolute -top-3 left-1/2 -translate-x-1/2 text-xs px-3 py-1 rounded-full font-medium text-black bg-accent">
-                  Recommandé
-                </Reveal>
-                <h3 className="font-bold text-xl text-black mb-1">Annuel</h3>
-                <p className="text-2xl font-normal text-black line-through mb-1">59,88 EUR</p>
-                <p className="text-4xl font-bold text-black mb-1 whitespace-nowrap">
-                  <span className="text-accent">49,99 EUR</span><span className="text-base font-normal text-black"> / an</span>
-                </p>
-                <p className="text-base text-black mb-4">Soit 4,17 EUR / mois. Économisez 17%.</p>
-                <Link
-                  href="/register"
-                  className="block text-center px-4 py-2 rounded-lg text-sm font-medium text-black btn-hover mt-auto bg-accent"
-                >
-                  Commencer
-                </Link>
+              <Reveal delay={80}>
+                <div className="relative bg-gradient-to-b from-white to-[#faecd9] rounded-2xl border border-kraft p-7 text-center h-full flex flex-col">
+                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-kraft text-white text-[10px] uppercase tracking-[0.14em] font-medium px-3 py-1 rounded-full">
+                    Recommandé
+                  </span>
+                  <h3 className="text-xl text-gray-900 italic mb-2">Annuel</h3>
+                  <p className="text-gray-400 line-through text-sm mb-1">59,88€</p>
+                  <p className="text-3xl md:text-4xl italic text-gray-900 mb-1">
+                    49,99€
+                    <span className="text-sm font-normal text-gray-500 not-italic"> / an</span>
+                  </p>
+                  <p className="text-sm text-gray-600 mb-5">Soit 4,17€/mois. Économisez 17%.</p>
+                  <Link
+                    href="/register"
+                    className="mt-auto inline-flex items-center justify-center px-5 py-2.5 rounded-full bg-accent border border-accent text-black hover:bg-kraft hover:border-kraft hover:text-white transition text-sm font-medium"
+                  >
+                    Commencer
+                  </Link>
+                </div>
               </Reveal>
             </div>
           </div>
-          <svg viewBox="0 0 1440 60" preserveAspectRatio="none" className="absolute bottom-0 left-0 w-full h-8 md:h-12 z-[2]">
-            <path d="M0,30 Q360,60 720,30 T1440,30 L1440,60 L0,60 Z" fill="white" />
-          </svg>
         </section>
 
         {/* ===== FAQ ===== */}
-        <section className="px-4 py-16 bg-white">
+        <section id="faq" className="px-4 py-16 md:py-20 bg-[#faf7f2]">
           <div className="max-w-6xl mx-auto">
-            <h2 className="text-3xl font-bold text-center text-black mb-10">Questions fréquentes</h2>
-            <div className="flex flex-col md:flex-row gap-8 items-start">
-              <Reveal variant="blur" className="w-full md:w-2/5 shrink-0 md:sticky md:top-8">
-                <Image
-                  src="/IMG-6482896.png"
-                  alt="Questions fréquentes"
-                  width={1200}
-                  height={1600}
-                  className="h-auto w-full rounded-lg"
-                />
+            <Reveal>
+              <div className="text-center mb-10">
+                <span className="inline-block text-[11px] uppercase tracking-[0.2em] text-kraft font-medium mb-3">
+                  Questions
+                </span>
+                <h2 className="text-3xl md:text-4xl text-gray-900 italic leading-tight">
+                  Questions fréquentes
+                </h2>
+              </div>
+            </Reveal>
+            <div className="grid md:grid-cols-[minmax(280px,_360px)_1fr] gap-8 md:gap-12 items-start">
+              <Reveal>
+                <div className="md:sticky md:top-24 aspect-[3/4] max-w-[320px] mx-auto md:mx-0 rounded-2xl overflow-hidden shadow-[0_18px_40px_-18px_rgba(0,0,0,0.22)]">
+                  <Image
+                    src="/faq.svg"
+                    alt=""
+                    width={1080}
+                    height={1440}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
               </Reveal>
-              <div className="grid grid-cols-1 gap-4 items-start flex-1">
-              {[
-                { q: 'Comment fonctionne la vérification des profils ?', a: "Chaque accompagnant doit déposer ses diplômes et sa pièce d'identité. Notre équipe vérifie manuellement ces documents avant d'activer le profil." },
-                { q: "Combien coûte l'abonnement ?", a: "L'abonnement mensuel est à 4,99 EUR/mois sans engagement. L'abonnement annuel est à 49,99 EUR/an, soit une économie de 17%." },
-                { q: 'Comment fonctionnent les recommandations de profils ?', a: 'Nous analysons 5 critères (spécialités, localisation, expérience, diplôme, disponibilités) pour vous recommander les profils les plus compatibles.' },
-                { q: 'Puis-je utiliser la plateforme sans abonnement ?', a: "Vous pouvez consulter les annonces publiées sans abonnement. L'abonnement est requis pour publier des annonces et accéder aux profils que nous vous recommandons." },
-                { q: 'Comment contacter un accompagnant ?', a: "Une fois inscrit en tant qu'accompagné, vous pouvez envoyer un message via la messagerie intégrée à partir de la fiche de l'accompagnant." },
-                { q: 'Comment supprimer mon compte ?', a: 'Vous pouvez supprimer votre compte depuis les paramètres de votre espace personnel. Toutes vos données seront supprimées conformément au RGPD.' },
-              ].map((faq, i) => (
-                <Reveal as="span" key={i} delay={i * 60} className="block">
-                <details className="group rounded-xl bg-white p-5 border border-accent">
-                  <summary className="cursor-pointer flex gap-4 items-start">
-                    <div className="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm shrink-0 text-black bg-accent">
-                      {i + 1}
-                    </div>
-                    <span className="font-semibold text-black pt-1 text-lg">{faq.q}</span>
-                    <svg className="w-5 h-5 shrink-0 ml-auto mt-1.5 transition-transform group-open:rotate-45" fill="none" viewBox="0 0 24 24" stroke="#FFB06E" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-                    </svg>
-                  </summary>
-                  <p className="text-base text-black pt-3 pl-12">{faq.a}</p>
-                </details>
-                </Reveal>
-              ))}
+              <div className="grid gap-3">
+                {[
+                  { q: 'Comment fonctionne la vérification des profils ?', a: "Chaque accompagnant doit déposer ses diplômes et sa pièce d'identité. Notre équipe vérifie manuellement ces documents avant d'activer le profil." },
+                  { q: "Combien coûte l'abonnement ?", a: "L'abonnement mensuel est à 4,99€/mois sans engagement. L'abonnement annuel est à 49,99€/an, soit une économie de 17%." },
+                  { q: 'Comment fonctionnent les recommandations de profils ?', a: 'Nous analysons 5 critères (spécialités, localisation, expérience, diplôme, disponibilités) pour vous recommander les profils les plus compatibles.' },
+                  { q: 'Puis-je utiliser la plateforme sans abonnement ?', a: "Vous pouvez consulter les annonces publiées sans abonnement. L'abonnement est requis pour publier des annonces et accéder aux profils que nous vous recommandons." },
+                  { q: 'Comment contacter un accompagnant ?', a: "Une fois inscrit en tant qu'accompagné, vous pouvez envoyer un message via la messagerie intégrée à partir de la fiche de l'accompagnant." },
+                  { q: 'Comment supprimer mon compte ?', a: 'Vous pouvez supprimer votre compte depuis les paramètres de votre espace personnel. Toutes vos données seront supprimées conformément au RGPD.' },
+                ].map((faq, i) => (
+                  <Reveal key={i} delay={i * 60}>
+                    <details className="group bg-white rounded-2xl border border-[#e8dfd2] px-5 py-4 hover:border-kraft transition">
+                      <summary className="cursor-pointer flex items-center justify-between gap-4 list-none">
+                        <span className="italic text-base md:text-lg text-gray-900">{faq.q}</span>
+                        <span
+                          aria-hidden="true"
+                          className="text-kraft text-2xl leading-none transition-transform group-open:rotate-45 flex-shrink-0"
+                        >
+                          +
+                        </span>
+                      </summary>
+                      <p className="text-sm md:text-base text-gray-600 mt-3 leading-relaxed">{faq.a}</p>
+                    </details>
+                  </Reveal>
+                ))}
               </div>
             </div>
           </div>
         </section>
 
-        <svg viewBox="0 0 1440 60" preserveAspectRatio="none" className="w-full h-8 md:h-12 block -mb-px bg-white">
-          <defs><pattern id="kraft-wave-5" patternUnits="userSpaceOnUse" width="256" height="256"><image href="/kraft-noise.png" width="256" height="256" /></pattern></defs>
-          <path d="M0,30 Q240,0 480,30 T960,30 T1440,30 L1440,60 L0,60 Z" fill="#d3a387" />
-          <path d="M0,30 Q240,0 480,30 T960,30 T1440,30 L1440,60 L0,60 Z" fill="url(#kraft-wave-5)" opacity="0.35" style={{ mixBlendMode: 'multiply' }} />
-        </svg>
-
         {/* ===== CONTACT ===== */}
-        <section className="px-4 py-16 kraft bg-kraft">
-          <Reveal className="max-w-md mx-auto relative z-10">
-            <h2 className="text-3xl font-bold text-center text-black mb-2">Une question ?</h2>
-            <p className="text-center text-white text-lg mb-6">
-              Notre équipe est disponible pour répondre à toutes vos questions.
-            </p>
-            <ContactForm />
-          </Reveal>
+        <section className="px-4 py-16 md:py-20 bg-[#fefaf8]">
+          <div className="max-w-2xl mx-auto">
+            <Reveal>
+              <div className="relative overflow-hidden bg-white rounded-2xl border border-[#e8dfd2] p-8 md:p-10">
+                <span
+                  aria-hidden="true"
+                  className="pointer-events-none absolute top-0 right-0 w-[260px] h-[260px]"
+                  style={{ background: 'radial-gradient(circle at top right, #faecd9 0%, transparent 70%)' }}
+                />
+                <div className="relative text-center">
+                  <span className="inline-block text-[11px] uppercase tracking-[0.2em] text-kraft font-medium mb-3">
+                    Contact
+                  </span>
+                  <h2 className="text-3xl md:text-4xl text-gray-900 italic leading-tight mb-3">
+                    Une question ?
+                  </h2>
+                  <p className="text-gray-600 mb-6 max-w-md mx-auto">
+                    Notre équipe vous répond sous 48h ouvrées.
+                  </p>
+                  <ContactForm />
+                </div>
+              </div>
+            </Reveal>
+          </div>
         </section>
       </main>
       <Footer />

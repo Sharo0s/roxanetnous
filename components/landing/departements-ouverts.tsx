@@ -1,6 +1,5 @@
 import Link from 'next/link'
 import { getDepartementsOuverts, type Departement } from '@/lib/departements'
-import { Reveal } from '@/components/landing/reveal'
 
 type Presentation =
   | { kind: 'empty' }
@@ -74,23 +73,22 @@ export async function DepartementsOuverts() {
 
   if (presentation.kind === 'empty') {
     return (
-      <section className="px-4 py-12 md:py-16 kraft bg-kraft" aria-labelledby="departements-ouverts-heading">
-        <Reveal className="max-w-2xl mx-auto text-center relative z-10">
-          <h2 id="departements-ouverts-heading" className="text-2xl md:text-3xl font-bold text-black mb-3">
-            Lancement imminent
+      <section
+        className="px-4 py-5 md:py-6 bg-[#faf7f2] border-y border-[#e8dfd2]"
+        aria-labelledby="departements-ouverts-heading"
+      >
+        <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-3 text-sm">
+          <h2 id="departements-ouverts-heading" className="text-gray-700">
+            <span className="uppercase tracking-[0.18em] text-xs text-kraft font-medium mr-2">Lancement imminent</span>
+            <span className="text-gray-600">Le service ouvre prochainement.</span>
           </h2>
-          <p className="text-base text-black mb-6">
-            Le service ouvre prochainement. Laissez-nous votre email pour etre informe de l&apos;ouverture dans votre departement.
-          </p>
-          <p>
-            <Link
-              href="/waitlist"
-              className="underline font-medium text-black hover:text-accent focus:outline-none focus:ring-2 focus:ring-focus-ring rounded-sm"
-            >
-              M&apos;inscrire a la waitlist
-            </Link>
-          </p>
-        </Reveal>
+          <Link
+            href="/waitlist"
+            className="text-kraft hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-focus-ring rounded-sm"
+          >
+            M&apos;inscrire à la waitlist →
+          </Link>
+        </div>
       </section>
     )
   }
@@ -98,69 +96,97 @@ export async function DepartementsOuverts() {
   if (presentation.kind === 'mono') {
     const total = presentation.departements.length
     return (
-      <section className="px-4 py-12 md:py-16 kraft bg-kraft" aria-labelledby="departements-ouverts-heading">
-        <Reveal className="max-w-4xl mx-auto text-center relative z-10">
-          <h2 id="departements-ouverts-heading" className="text-2xl md:text-3xl font-bold text-black mb-2">
-            Disponible {prefixeRegion(presentation.region)} {presentation.region}
-          </h2>
-          <p className="text-base text-black mb-6">
-            {total} departement{total > 1 ? 's' : ''} actuellement couvert{total > 1 ? 's' : ''}.
-          </p>
-          <ul className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-base text-black mb-6">
-            {presentation.departements.map((d) => (
-              <li key={d.code}>
-                <span className="font-medium">{d.nom}</span>{' '}
-                <span className="text-black/75">({d.code})</span>
-              </li>
-            ))}
-          </ul>
-          <p>
-            <Link
-              href="/waitlist"
-              className="underline font-medium text-black hover:text-accent focus:outline-none focus:ring-2 focus:ring-focus-ring rounded-sm"
+      <section
+        className="px-4 py-5 md:py-6 bg-[#faf7f2] border-y border-[#e8dfd2]"
+        aria-labelledby="departements-ouverts-heading"
+      >
+        <div className="max-w-5xl mx-auto">
+          <details className="group">
+            <summary
+              aria-label={`Voir la couverture : ${total} département${total > 1 ? 's' : ''} ouvert${total > 1 ? 's' : ''} ${prefixeRegion(presentation.region)} ${presentation.region}`}
+              className="cursor-pointer list-none flex flex-col md:flex-row items-start md:items-center justify-between gap-3"
             >
-              {CTA_WAITLIST_LABEL}
-            </Link>
-          </p>
-        </Reveal>
+              <h2 id="departements-ouverts-heading" className="text-sm text-gray-700">
+                <span className="uppercase tracking-[0.18em] text-xs text-kraft font-medium">Disponible {prefixeRegion(presentation.region)} {presentation.region}</span>
+                <span className="italic text-gray-900 ml-2 text-base">{total}</span>
+                <span className="text-gray-500 ml-1">département{total > 1 ? 's' : ''} ouvert{total > 1 ? 's' : ''}</span>
+              </h2>
+              <span className="text-sm text-kraft hover:text-gray-900">
+                <span className="group-open:hidden">Voir la couverture →</span>
+                <span className="hidden group-open:inline">Masquer ↑</span>
+              </span>
+            </summary>
+            <div className="mt-3 pt-3 border-t border-[#e8dfd2]">
+              <ul className="flex flex-wrap gap-x-5 gap-y-1.5 text-sm text-gray-700">
+                {presentation.departements.map((d) => (
+                  <li key={d.code}>
+                    <span className="font-medium">{d.nom}</span>{' '}
+                    <span className="text-gray-400">({d.code})</span>
+                  </li>
+                ))}
+              </ul>
+              <p className="mt-3 pt-3 border-t border-[#e8dfd2] text-sm">
+                <Link
+                  href="/waitlist"
+                  className="text-kraft hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-focus-ring rounded-sm"
+                >
+                  {CTA_WAITLIST_LABEL} →
+                </Link>
+              </p>
+            </div>
+          </details>
+        </div>
       </section>
     )
   }
 
   const totalDepartements = presentation.groups.reduce((acc, g) => acc + g.departements.length, 0)
   return (
-    <section className="px-4 py-12 md:py-16 kraft bg-kraft" aria-labelledby="departements-ouverts-heading">
-      <Reveal className="max-w-4xl mx-auto text-center relative z-10">
-        <h2 id="departements-ouverts-heading" className="text-2xl md:text-3xl font-bold text-black mb-2">
-          Disponible actuellement
-        </h2>
-        <p className="text-base text-black mb-6">
-          {totalDepartements} departement{totalDepartements > 1 ? 's' : ''} dans {presentation.groups.length} region{presentation.groups.length > 1 ? 's' : ''}.
-        </p>
-        <div className="space-y-6">
-          {presentation.groups.map((g) => (
-            <div key={g.region}>
-              <h3 className="text-xl font-semibold text-black mb-2">{g.region}</h3>
-              <ul className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-base text-black">
-                {g.departements.map((d) => (
-                  <li key={d.code}>
-                    <span className="font-medium">{d.nom}</span>{' '}
-                    <span className="text-black/75">({d.code})</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
-        <p className="mt-6">
-          <Link
-            href="/waitlist"
-            className="underline font-medium text-black hover:text-accent focus:outline-none focus:ring-2 focus:ring-focus-ring rounded-sm"
+    <section
+      className="px-4 py-5 md:py-6 bg-[#faf7f2] border-y border-[#e8dfd2]"
+      aria-labelledby="departements-ouverts-heading"
+    >
+      <div className="max-w-5xl mx-auto">
+        <details className="group">
+          <summary
+            aria-label={`Voir le détail de la couverture : ${totalDepartements} départements dans ${presentation.groups.length} régions`}
+            className="cursor-pointer list-none flex flex-col md:flex-row items-start md:items-center justify-between gap-3"
           >
-            Mon departement n&apos;est pas dans la liste — me prevenir a l&apos;ouverture
-          </Link>
-        </p>
-      </Reveal>
+            <h2 id="departements-ouverts-heading" className="text-sm text-gray-700">
+              <span className="uppercase tracking-[0.18em] text-xs text-kraft font-medium">Couverture</span>
+              <span className="italic text-gray-900 ml-2 text-base">{totalDepartements}</span>
+              <span className="text-gray-500 ml-1">départements · {presentation.groups.length} régions</span>
+            </h2>
+            <span className="text-sm text-kraft hover:text-gray-900">
+              <span className="group-open:hidden">Voir le détail →</span>
+              <span className="hidden group-open:inline">Masquer ↑</span>
+            </span>
+          </summary>
+          <div className="mt-3 pt-3 border-t border-[#e8dfd2] space-y-4">
+            {presentation.groups.map((g) => (
+              <div key={g.region}>
+                <h3 className="text-xs uppercase tracking-[0.14em] text-kraft font-medium mb-1.5">{g.region}</h3>
+                <ul className="flex flex-wrap gap-x-5 gap-y-1.5 text-sm text-gray-700">
+                  {g.departements.map((d) => (
+                    <li key={d.code}>
+                      <span className="font-medium">{d.nom}</span>{' '}
+                      <span className="text-gray-400">({d.code})</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+            <p className="text-sm pt-3 border-t border-[#e8dfd2]">
+              <Link
+                href="/waitlist"
+                className="text-kraft hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-focus-ring rounded-sm"
+              >
+                {CTA_WAITLIST_LABEL} →
+              </Link>
+            </p>
+          </div>
+        </details>
+      </div>
     </section>
   )
 }
