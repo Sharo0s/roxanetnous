@@ -14,6 +14,9 @@ export type AuthResult = {
   success?: boolean
 }
 
+const SIGNUP_ALLOWED_ROLES = ['accompagnante', 'accompagne'] as const
+type SignupRole = (typeof SIGNUP_ALLOWED_ROLES)[number]
+
 export async function signup(formData: FormData): Promise<AuthResult> {
   const supabase = await createClient()
 
@@ -21,11 +24,18 @@ export async function signup(formData: FormData): Promise<AuthResult> {
   const password = formData.get('password') as string
   const firstName = formData.get('firstName') as string
   const lastName = formData.get('lastName') as string
-  const role = formData.get('role') as 'accompagnante' | 'accompagne'
+  const rawRole = formData.get('role')
 
-  if (!email || !password || !firstName || !lastName || !role) {
+  if (!email || !password || !firstName || !lastName || !rawRole) {
     return { error: 'Tous les champs sont requis.' }
   }
+
+  // Validation runtime du rôle : interdit toute valeur hors whitelist
+  // (notamment 'admin'), sinon le trigger BDD inserterait role='admin'.
+  if (typeof rawRole !== 'string' || !SIGNUP_ALLOWED_ROLES.includes(rawRole as SignupRole)) {
+    return { error: 'Rôle invalide.' }
+  }
+  const role = rawRole as SignupRole
 
   if (password.length < 8) {
     return { error: 'Le mot de passe doit contenir au moins 8 caractères.' }
