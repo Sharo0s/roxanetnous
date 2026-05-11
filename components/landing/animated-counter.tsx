@@ -44,13 +44,14 @@ export function AnimatedCounter({ end, label, duration = 5000 }: Props) {
   }, [end, duration])
 
   return (
-    <div ref={ref} className="flex flex-col items-start gap-0.5">
+    <div ref={ref} className="flex flex-col items-center gap-0.5">
       <span
         style={{ fontFamily: 'var(--font-heading)' }}
         className={`text-3xl md:text-4xl italic text-gray-900 tabular-nums leading-none transition-transform duration-300 ${done ? 'scale-105' : ''}`}
       >
         {count.toLocaleString('fr-FR')}
       </span>
+      <span aria-hidden="true" className="block h-px w-8 bg-gray-300 mt-2" />
       <span className="text-xs text-gray-500 mt-1">{label}</span>
     </div>
   )
