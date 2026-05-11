@@ -14,7 +14,7 @@ export function createStripeEvent<T = unknown>(
   return {
     id: `evt_test_${randomUUID()}`,
     object: 'event',
-    api_version: '2026-03-25.dahlia',
+    api_version: '2026-04-22.dahlia',
     created: Math.floor(Date.now() / 1000),
     data: { object: dataObject as Stripe.Event.Data['object'] },
     livemode: false,
