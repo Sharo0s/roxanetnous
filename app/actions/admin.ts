@@ -526,9 +526,15 @@ export async function adminDeleteUser(userId: string): Promise<{ error?: string 
   redirect('/admin/utilisateurs')
 }
 
+export type GrantSubscriptionMode =
+  | { kind: 'mensuel' }
+  | { kind: 'annuel' }
+  | { kind: 'lifetime' }
+  | { kind: 'custom'; durationMonths: number }
+
 export async function adminGrantSubscription(
   userId: string,
-  planType: 'mensuel' | 'annuel'
+  mode: GrantSubscriptionMode,
 ): Promise<{ error?: string; success?: boolean }> {
   const supabase = await createClient()
   const { data: { user: adminUser } } = await supabase.auth.getUser()
@@ -567,6 +573,31 @@ export async function adminGrantSubscription(
     return { error: 'Cet utilisateur a déjà un abonnement actif.' }
   }
 
+  // Derive le plan Stripe sous-jacent et l'eventuelle date d'arret automatique.
+  // - lifetime : plan annuel + coupon forever -> renouvellement gratuit chaque annee
+  // - custom : choix mensuel/annuel selon duree + cancel_at calcule
+  // - mensuel/annuel : comportement original
+  let planType: 'mensuel' | 'annuel'
+  let cancelAt: number | null = null
+  let durationMonths: number | null = null
+
+  if (mode.kind === 'lifetime') {
+    planType = 'annuel'
+  } else if (mode.kind === 'custom') {
+    if (!Number.isInteger(mode.durationMonths) || mode.durationMonths < 1 || mode.durationMonths > 36) {
+      return { error: 'Durée personnalisée invalide (1 à 36 mois).' }
+    }
+    durationMonths = mode.durationMonths
+    // Si la duree depasse 12 mois, on prend un plan annuel pour limiter les
+    // renouvellements internes Stripe. Sinon mensuel.
+    planType = mode.durationMonths >= 12 ? 'annuel' : 'mensuel'
+    const cancelAtDate = new Date()
+    cancelAtDate.setMonth(cancelAtDate.getMonth() + mode.durationMonths)
+    cancelAt = Math.floor(cancelAtDate.getTime() / 1000)
+  } else {
+    planType = mode.kind
+  }
+
   const priceId = (await import('@/lib/stripe')).getStripePriceId(role, planType)
   if (!priceId) return { error: 'Prix introuvable pour ce plan.' }
 
@@ -582,8 +613,7 @@ export async function adminGrantSubscription(
       customerId = customer.id
     }
 
-    // Creer un coupon 100% pour abonnement offert par admin
-    // Stripe limite coupon.name à 40 caractères, donc on tronque.
+    // Coupon 100% forever pour ne facturer aucun renouvellement.
     const couponName = (`Offert par admin - ${targetUser.email}`).slice(0, 40)
     const coupon = await stripe.coupons.create({
       percent_off: 100,
@@ -591,19 +621,25 @@ export async function adminGrantSubscription(
       name: couponName,
     })
 
-    // Creer l'abonnement Stripe avec coupon 100%
     const subscription = await stripe.subscriptions.create({
       customer: customerId,
       items: [{ price: priceId }],
       discounts: [{ coupon: coupon.id }],
-      metadata: { user_id: userId, role, plan: planType, granted_by_admin: adminUser.id },
+      ...(cancelAt ? { cancel_at: cancelAt } : {}),
+      metadata: {
+        user_id: userId,
+        role,
+        plan: planType,
+        granted_by_admin: adminUser.id,
+        grant_mode: mode.kind,
+        ...(durationMonths ? { grant_duration_months: String(durationMonths) } : {}),
+      },
     })
 
     const item = subscription.items.data[0]
     const currentPeriodStart = item ? new Date(item.current_period_start * 1000).toISOString() : null
     const currentPeriodEnd = item ? new Date(item.current_period_end * 1000).toISOString() : null
 
-    // Upsert dans Supabase (meme logique que le webhook)
     await supabaseAdmin.from('subscriptions').upsert(
       {
         user_id: userId,
@@ -619,13 +655,18 @@ export async function adminGrantSubscription(
       { onConflict: 'user_id' }
     )
 
-    // Logger l'action admin
     await supabaseAdmin.from('admin_actions_log').insert({
       admin_id: adminUser.id,
       action_type: 'grant_subscription',
       target_type: 'subscription',
       target_id: userId,
-      details: { plan_type: planType, stripe_subscription_id: subscription.id },
+      details: {
+        plan_type: planType,
+        grant_mode: mode.kind,
+        duration_months: durationMonths,
+        cancel_at: cancelAt,
+        stripe_subscription_id: subscription.id,
+      },
     })
 
     return { success: true }
