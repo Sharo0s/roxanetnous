@@ -6,8 +6,8 @@ import { InfiniteAnnoncesGrid } from '@/components/recherche/infinite-annonces-g
 import { getBadges } from '@/lib/badges'
 import { BadgesDisplay } from '@/components/badges-display'
 import { FavoriButton } from '@/components/recherche/favori-button'
-import { AccompagnanteHeader } from '@/components/layout/accompagnante-header'
-import { AccompagneHeader } from '@/components/layout/accompagne-header'
+import { AccompagnanteDashboardHeader } from '@/components/layout/accompagnante-dashboard-header'
+import { AccompagneDashboardHeader } from '@/components/layout/accompagne-dashboard-header'
 import { getUnreadCount } from '@/lib/unread-count'
 import { calculateMatchScore } from '@/lib/matching'
 import { getCodesPostauxFilterOr } from '@/lib/departements'
@@ -235,38 +235,43 @@ export default async function RecherchePage({
   const unreadCount = user ? await getUnreadCount(user.id) : 0
 
   return (
-    <main id="main-content" tabIndex={-1} className="min-h-screen kraft bg-kraft focus:outline-none">
+    <main id="main-content" tabIndex={-1} className="min-h-screen bg-[#fefaf8] focus:outline-none">
       {userData?.role === 'accompagnante' && user ? (
-        <AccompagnanteHeader
-          userId={user.id}
-          unreadCount={unreadCount}
+        <AccompagnanteDashboardHeader
           firstName={userData.first_name}
           lastName={userData.last_name}
+          unreadCount={unreadCount}
           currentPage="other"
         />
       ) : userData?.role === 'accompagne' && user ? (
-        <AccompagneHeader
-          userId={user.id}
-          unreadCount={unreadCount}
+        <AccompagneDashboardHeader
           firstName={userData.first_name}
           lastName={userData.last_name}
-          currentPage="other"
+          unreadCount={unreadCount}
+          currentPage="recherche"
         />
       ) : (
-        <header className="bg-white border-b relative z-10">
+        <header className="bg-[#faf7f2] border-b border-[#e8dfd2] relative z-10">
           <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
-            <Link href="/" className="text-xl font-bold text-black">
+            <Link href="/" className="text-base font-bold text-black">
               roxanetnous
             </Link>
-            <Link href="/login" className="text-sm px-4 py-2 bg-accent text-black rounded-lg btn-hover transition font-medium">
+            <Link href="/login" className="inline-flex items-center px-4 py-2 rounded-full border border-[#e8dfd2] text-gray-900 hover:border-kraft transition text-sm font-medium">
               Connexion
             </Link>
           </div>
         </header>
       )}
 
-      <div className="max-w-6xl mx-auto px-4 py-8 relative z-10">
-        <h1 className="text-2xl font-bold text-gray-900 mb-6">Trouver un(e) accompagnant(e) de vie</h1>
+      <div className="max-w-6xl mx-auto px-4 py-10 md:py-14 relative z-10">
+        <header className="text-center mb-8">
+          <span className="inline-block text-[11px] uppercase tracking-[0.18em] text-kraft font-medium mb-2">
+            Recherche
+          </span>
+          <h1 className="text-3xl md:text-4xl italic text-gray-900 leading-tight">
+            Trouver un accompagnant
+          </h1>
+        </header>
 
         <SearchFilters
           currentVille={params.ville || ''}

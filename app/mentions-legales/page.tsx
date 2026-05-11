@@ -3,13 +3,20 @@ import { Footer } from '@/components/footer'
 
 export default function MentionsLegalesPage() {
   return (
-    <div className="min-h-screen flex flex-col kraft bg-kraft">
-      <main id="main-content" tabIndex={-1} className="flex-1 max-w-3xl mx-auto px-4 py-12 relative z-10 focus:outline-none">
-        <Link href="/" className="text-sm text-black/50 hover:text-black transition">
-          Retour à l&apos;accueil
+    <div className="min-h-screen flex flex-col bg-[#fefaf8]">
+      <main id="main-content" tabIndex={-1} className="flex-1 max-w-3xl mx-auto px-4 py-12 md:py-16 relative z-10 focus:outline-none">
+        <Link href="/" className="inline-flex items-center gap-1.5 text-sm text-gray-600 hover:text-gray-900 transition mb-6">
+          <span aria-hidden="true">←</span> Retour à l&apos;accueil
         </Link>
 
-        <h1 className="text-3xl font-bold text-black mt-6 mb-8">Mentions légales</h1>
+        <header className="text-center mb-10">
+          <span className="inline-block text-[11px] uppercase tracking-[0.18em] text-kraft font-medium mb-2">
+            Légal
+          </span>
+          <h1 className="text-3xl md:text-4xl italic text-gray-900 leading-tight">
+            Mentions légales
+          </h1>
+        </header>
 
         <div className="space-y-8 text-gray-700 text-sm leading-relaxed">
           <section>

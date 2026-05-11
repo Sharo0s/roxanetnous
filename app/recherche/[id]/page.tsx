@@ -7,8 +7,8 @@ import { FavoriButton } from '@/components/recherche/favori-button'
 import { SignalementButton } from '@/components/signalement-button'
 import { getBadges } from '@/lib/badges'
 import { BadgesDisplay } from '@/components/badges-display'
-import { AccompagnanteHeader } from '@/components/layout/accompagnante-header'
-import { AccompagneHeader } from '@/components/layout/accompagne-header'
+import { AccompagnanteDashboardHeader } from '@/components/layout/accompagnante-dashboard-header'
+import { AccompagneDashboardHeader } from '@/components/layout/accompagne-dashboard-header'
 import { getUnreadCount } from '@/lib/unread-count'
 import { isDepartementOuvert } from '@/lib/departements'
 import { hasActiveSubscription } from '@/lib/subscription-helpers'
@@ -98,30 +98,28 @@ export default async function AnnonceDetailPage({
   const dispos = (annonce.disponibilites || profile?.disponibilites || {}) as Record<string, string[]>
 
   return (
-    <main id="main-content" tabIndex={-1} className="min-h-screen kraft bg-kraft focus:outline-none">
+    <main id="main-content" tabIndex={-1} className="min-h-screen bg-[#fefaf8] focus:outline-none">
       {userData?.role === 'accompagnante' && user ? (
-        <AccompagnanteHeader
-          userId={user.id}
-          unreadCount={unreadCount}
+        <AccompagnanteDashboardHeader
           firstName={userData.first_name}
           lastName={userData.last_name}
+          unreadCount={unreadCount}
           currentPage="other"
         />
       ) : userData?.role === 'accompagne' && user ? (
-        <AccompagneHeader
-          userId={user.id}
-          unreadCount={unreadCount}
+        <AccompagneDashboardHeader
           firstName={userData.first_name}
           lastName={userData.last_name}
-          currentPage="other"
+          unreadCount={unreadCount}
+          currentPage="recherche"
         />
       ) : (
-        <header className="bg-white border-b">
+        <header className="bg-[#faf7f2] border-b border-[#e8dfd2]">
           <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
-            <Link href="/" className="text-xl font-bold text-black">
+            <Link href="/" className="text-base font-bold text-black">
               roxanetnous
             </Link>
-            <Link href="/recherche" className="text-sm text-gray-500 hover:text-black">
+            <Link href="/recherche" className="text-sm text-gray-600 hover:text-gray-900">
               Retour à la recherche
             </Link>
           </div>

@@ -18,12 +18,19 @@ export default async function WaitlistPage({ searchParams }: { searchParams: Sea
     : ''
 
   return (
-    <main id="main-content" tabIndex={-1} className="min-h-screen kraft bg-kraft focus:outline-none">
+    <main id="main-content" tabIndex={-1} className="min-h-screen bg-[#fefaf8] focus:outline-none">
       <div className="max-w-2xl mx-auto px-4 py-12 md:py-16">
-        <h1 className="text-3xl md:text-4xl font-bold text-black mb-3">M&apos;inscrire a la waitlist</h1>
-        <p className="text-base text-black mb-8">
-          Indiquez votre email et le departement ou vous souhaitez utiliser roxanetnous. Nous vous enverrons un email a l&apos;ouverture du service.
-        </p>
+        <header className="text-center mb-10">
+          <span className="inline-block text-[11px] uppercase tracking-[0.18em] text-kraft font-medium mb-2">
+            Waitlist
+          </span>
+          <h1 className="text-3xl md:text-4xl italic text-gray-900 leading-tight mb-3">
+            M&apos;inscrire à la waitlist
+          </h1>
+          <p className="text-gray-600 text-sm md:text-base max-w-lg mx-auto">
+            Indiquez votre email et le département où vous souhaitez utiliser roxanetnous. Nous vous enverrons un email à l&apos;ouverture du service.
+          </p>
+        </header>
         <WaitlistForm
           initial={{
             email: params.email ?? '',

@@ -2,8 +2,8 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { SPECIALITES, DIPLOMES, EXPERIENCE_LEVELS } from '@/lib/constants'
-import { AccompagnanteHeader } from '@/components/layout/accompagnante-header'
-import { AccompagneHeader } from '@/components/layout/accompagne-header'
+import { AccompagnanteDashboardHeader } from '@/components/layout/accompagnante-dashboard-header'
+import { AccompagneDashboardHeader } from '@/components/layout/accompagne-dashboard-header'
 import { getUnreadCount } from '@/lib/unread-count'
 
 export default async function FavorisPage() {
@@ -45,33 +45,36 @@ export default async function FavorisPage() {
   const unreadCount = await getUnreadCount(user.id)
 
   return (
-    <main id="main-content" tabIndex={-1} className="min-h-screen kraft bg-kraft focus:outline-none">
+    <main id="main-content" tabIndex={-1} className="min-h-screen bg-[#fefaf8] focus:outline-none">
       {userData.role === 'accompagnante' ? (
-        <AccompagnanteHeader
-          userId={user.id}
-          unreadCount={unreadCount}
+        <AccompagnanteDashboardHeader
           firstName={userData.first_name}
           lastName={userData.last_name}
+          unreadCount={unreadCount}
           currentPage="other"
         />
       ) : (
-        <AccompagneHeader
-          userId={user.id}
-          unreadCount={unreadCount}
+        <AccompagneDashboardHeader
           firstName={userData.first_name}
           lastName={userData.last_name}
-          currentPage="other"
+          unreadCount={unreadCount}
+          currentPage="favoris"
         />
       )}
 
-      <div className="max-w-5xl mx-auto px-4 py-8 relative z-10">
-        <h1 className="text-2xl font-bold text-gray-900 mb-6">Mes favoris</h1>
+      <div className="max-w-5xl mx-auto px-4 py-10 md:py-14 relative z-10">
+        <header className="text-center mb-8">
+          <span className="inline-block text-[11px] uppercase tracking-[0.18em] text-kraft font-medium mb-2">
+            {userData.role === 'accompagnante' ? 'Mon espace' : 'Votre espace'}
+          </span>
+          <h1 className="text-3xl md:text-4xl italic text-gray-900 leading-tight">Mes favoris</h1>
+        </header>
 
         {!favoris || favoris.length === 0 ? (
-          <div className="bg-white rounded-xl border p-8 text-center">
-            <p className="text-gray-500 mb-4">Aucun favori pour le moment.</p>
-            <Link href="/recherche" className="text-sm text-black underline">
-              Rechercher des accompagnantes
+          <div className="bg-white rounded-2xl border border-[#e8dfd2] p-12 text-center">
+            <p className="text-gray-600 mb-4">Aucun favori pour le moment.</p>
+            <Link href="/recherche" className="inline-flex items-center gap-1 text-sm text-kraft hover:text-gray-900">
+              Rechercher un accompagnant <span aria-hidden="true">→</span>
             </Link>
           </div>
         ) : (
@@ -87,7 +90,7 @@ export default async function FavorisPage() {
                   <Link
                     key={fav.id}
                     href={`/recherche/${annonce.id}`}
-                    className="bg-white rounded-xl border p-5 hover:border-accent transition block"
+                    className="bg-white rounded-2xl border border-[#e8dfd2] p-5 hover:border-kraft transition block"
                   >
                     <div className="flex items-center gap-3 mb-3">
                       <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-sm font-bold text-gray-600">
@@ -120,7 +123,7 @@ export default async function FavorisPage() {
                 )
 
                 return (
-                  <div key={fav.id} className="bg-white rounded-xl border p-5">
+                  <div key={fav.id} className="bg-white rounded-2xl border border-[#e8dfd2] p-5">
                     <h3 className="font-semibold text-gray-900 mb-1 line-clamp-1">{annonce.titre}</h3>
                     <p className="text-sm text-gray-500 mb-2">
                       {annonce.ville} {annonce.code_postal && `(${annonce.code_postal})`}
