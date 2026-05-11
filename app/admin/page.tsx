@@ -110,7 +110,7 @@ export default async function AdminDashboard() {
         <div className="text-xs uppercase tracking-[0.18em] text-kraft mb-2">Espace admin</div>
         <h1 className="text-3xl md:text-4xl italic text-gray-900 leading-tight">Tableau de bord</h1>
         <p className="text-sm text-gray-600 mt-3">
-          À gauche, ce qui demande une décision. À droite, l&apos;état du foyer. Tout est cliquable.
+          À gauche, ce qui demande une décision. À droite, l&apos;état de RoxanetNous. Tout est cliquable.
         </p>
       </header>
 
