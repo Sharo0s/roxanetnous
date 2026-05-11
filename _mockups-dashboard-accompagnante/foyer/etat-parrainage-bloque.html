@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Foyer — parrainage bloqué (anti-fraude)</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="_shared.css">
+</head>
+<body>
+
+<header class="app-header">
+  <div class="app-header-inner">
+    <a href="#" class="logo">roxanetnous</a>
+    <nav class="nav-desktop">
+      <a href="#" class="active">Accueil</a>
+      <a href="#">Messages</a>
+      <a href="#">Profil</a>
+      <a href="#">Abonnement</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+
+  <section class="hero">
+    <div class="portrait" data-initials="M"></div>
+    <div class="hero-info">
+      <h1 class="hero-name">Marie Dubois</h1>
+      <div class="status-badge attente">Vérification supplémentaire</div>
+      <p class="hero-location">Rennes &middot; sur 30 km</p>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <div class="banner warning">
+    <h3>Vérification supplémentaire en cours.</h3>
+    <p>Votre paiement a bien été reçu et votre abonnement est actif. En revanche, notre système a relevé un signal qui nécessite une vérification manuelle avant la publication de votre profil.</p>
+    <p>Un administrateur examinera votre dossier sous <strong>48h ouvrées</strong>. Si vous pensez qu'il s'agit d'une erreur, écrivez à <a href="mailto:roxanetnous@outlook.com">roxanetnous@outlook.com</a>.</p>
+  </div>
+
+  <!-- ACCÈS LIMITÉ : messages, profil, abonnement uniquement -->
+  <section class="secondary-section" style="margin-top: 2rem;">
+    <h2 class="section-title">Ce que vous pouvez faire en attendant</h2>
+    <div class="secondary-grid">
+
+      <a href="#" class="secondary-card">
+        <h3>Messages</h3>
+        <div class="value">Échangez avec l'équipe pour résoudre la vérification.</div>
+        <span class="arrow">Ouvrir →</span>
+      </a>
+
+      <a href="#" class="secondary-card">
+        <h3>Mon profil</h3>
+        <div class="value">Consultez et modifiez vos informations professionnelles.</div>
+        <span class="arrow">Modifier →</span>
+      </a>
+
+      <a href="#" class="secondary-card">
+        <h3>Mon abonnement</h3>
+        <div class="value">
+          Mensuel · actif
+          <br>
+          <span style="color: var(--ink-faint); font-size: 0.85rem;">Annulable à tout moment</span>
+        </div>
+        <span class="arrow">Gérer →</span>
+      </a>
+
+    </div>
+  </section>
+
+  <div class="footer-meta">
+    <a href="#">Aide</a><span>·</span><a href="#">Se déconnecter</a>
+  </div>
+
+</main>
+</body>
+</html>

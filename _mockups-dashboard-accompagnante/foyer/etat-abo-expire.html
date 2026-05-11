@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Foyer — abonnement expiré</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="_shared.css">
+</head>
+<body>
+
+<header class="app-header">
+  <div class="app-header-inner">
+    <a href="#" class="logo">roxanetnous</a>
+    <nav class="nav-desktop">
+      <a href="#" class="active">Accueil</a>
+      <a href="#">Messages</a>
+      <a href="#">Profil</a>
+      <a href="#">Abonnement</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+
+  <section class="hero">
+    <div class="portrait" data-initials="M"></div>
+    <div class="hero-info">
+      <h1 class="hero-name">Marie Dubois</h1>
+      <div class="status-badge attente">Abonnement expiré</div>
+      <p class="hero-location">Rennes &middot; sur 30 km</p>
+    </div>
+  </section>
+
+  <div class="presence-wrap">
+    <a href="#" class="presence offline">
+      <span class="dot"></span>
+      <span>Profil non visible</span>
+    </a>
+  </div>
+
+  <div class="banner alert">
+    <h3>Votre abonnement a expiré le 8 mai.</h3>
+    <p>Vos annonces sont en sommeil et votre profil n'apparaît plus aux accompagnées. Réactivez votre abonnement pour reprendre là où vous vous étiez arrêtée.</p>
+    <a href="#" style="display: inline-block; margin-top: 0.5rem; padding: 0.7rem 1.5rem; background: var(--ink); color: white; border-radius: 999px; text-decoration: none; font-size: 0.92rem;">Réactiver mon abonnement</a>
+  </div>
+
+  <section class="secondary-section" style="margin-top: 2.5rem;">
+    <h2 class="section-title">Mon espace</h2>
+    <div class="secondary-grid">
+      <a href="#" class="secondary-card">
+        <h3>Mon profil</h3>
+        <div class="value">Vos informations restent enregistrées.</div>
+        <span class="arrow">Modifier →</span>
+      </a>
+      <a href="#" class="secondary-card">
+        <h3>Messages</h3>
+        <div class="value">Historique de vos conversations.</div>
+        <span class="arrow">Consulter →</span>
+      </a>
+      <a href="#" class="secondary-card">
+        <h3>Mon parrainage</h3>
+        <div class="value">
+          <strong style="color: var(--ink); font-weight: 500;">2 / 5</strong> parrainages confirmés
+          <div class="progress-dots">
+            <span class="progress-dot filled"></span>
+            <span class="progress-dot filled"></span>
+            <span class="progress-dot"></span>
+            <span class="progress-dot"></span>
+            <span class="progress-dot"></span>
+          </div>
+        </div>
+        <span class="arrow">Voir mon code →</span>
+      </a>
+    </div>
+  </section>
+
+  <div class="footer-meta">
+    <a href="#">Aide</a><span>·</span><a href="#">Se déconnecter</a>
+  </div>
+
+</main>
+</body>
+</html>

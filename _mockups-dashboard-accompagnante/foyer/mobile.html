@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Foyer — vue mobile</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="_shared.css">
+<style>
+  body { background: #e8dfd2; padding: 2rem 0; }
+  .phone {
+    width: 390px;
+    max-width: 100%;
+    margin: 0 auto;
+    background: var(--paper);
+    border-radius: 32px;
+    overflow: hidden;
+    box-shadow: 0 20px 60px -20px rgba(0,0,0,0.3);
+    border: 1px solid rgba(0,0,0,0.08);
+  }
+  .phone main {
+    padding: 2rem 1.25rem 3rem;
+    max-width: 100%;
+  }
+  .phone .app-header { position: relative; }
+  .phone .app-header-inner { padding: 0.9rem 1.25rem; }
+  .phone .nav-desktop a:not(.active) { display: none; }
+  .phone .hero {
+    flex-direction: column;
+    text-align: center;
+    gap: 1.25rem;
+    margin-bottom: 1.5rem;
+  }
+  .phone .hero-info { text-align: center; }
+  .phone .hero-location, .phone .tags { justify-content: center; }
+  .phone .tags { display: inline-flex; }
+  .phone .portrait { width: 130px; height: 160px; }
+  .phone .portrait::after { font-size: 2.8rem; }
+  .phone .hero-name { font-size: 1.7rem; }
+  .phone .stats { gap: 0.5rem; }
+  .phone .stat-circle { width: 72px; height: 72px; font-size: 1.7rem; }
+  .phone .stat-label { font-size: 0.75rem; }
+  .phone .secondary-grid { grid-template-columns: 1fr; }
+  .phone .divider { margin: 2rem auto; }
+</style>
+</head>
+<body>
+
+<div class="phone">
+
+<header class="app-header">
+  <div class="app-header-inner">
+    <a href="#" class="logo">roxanetnous</a>
+    <span style="font-size: 1.3rem; color: var(--ink-soft);">☰</span>
+  </div>
+</header>
+
+<main>
+
+  <section class="hero">
+    <div class="portrait" data-initials="M">
+      <button class="portrait-edit" aria-label="Modifier la photo">✎</button>
+    </div>
+    <div class="hero-info">
+      <h1 class="hero-name">Marie Dubois</h1>
+      <div class="status-badge validee">Accompagnante validée</div>
+      <p class="hero-location">Rennes &middot; sur 30 km</p>
+      <div class="tags">
+        <span class="tag">Allaitement</span>
+        <span class="tag">Post-partum</span>
+      </div>
+    </div>
+  </section>
+
+  <div class="presence-wrap">
+    <a href="#" class="presence online">
+      <span class="dot"></span>
+      <span>Disponible</span>
+    </a>
+  </div>
+
+  <div class="stats">
+    <a href="#" class="stat">
+      <div class="stat-circle has-activity">
+        <span class="badge-dot"></span>
+        3
+      </div>
+      <div class="stat-label">demandes</div>
+    </a>
+    <a href="#" class="stat">
+      <div class="stat-circle has-activity">
+        <span class="badge-dot"></span>
+        2
+      </div>
+      <div class="stat-label">messages</div>
+    </a>
+    <a href="#" class="stat">
+      <div class="stat-circle">4</div>
+      <div class="stat-label">annonces</div>
+    </a>
+  </div>
+
+  <section class="secondary-section">
+    <h2 class="section-title">Mon espace</h2>
+    <div class="secondary-grid">
+      <a href="#" class="secondary-card">
+        <h3>Mon profil</h3>
+        <div class="value">Informations, photos, diplômes.</div>
+        <span class="arrow">Modifier →</span>
+      </a>
+      <a href="#" class="secondary-card">
+        <h3>Mon parrainage</h3>
+        <div class="value">
+          <strong style="color: var(--ink); font-weight: 500;">2 / 5</strong> parrainages confirmés.
+          <div class="progress-dots">
+            <span class="progress-dot filled"></span>
+            <span class="progress-dot filled"></span>
+            <span class="progress-dot"></span>
+            <span class="progress-dot"></span>
+            <span class="progress-dot"></span>
+          </div>
+        </div>
+        <span class="arrow">Voir mon code →</span>
+      </a>
+      <a href="#" class="secondary-card">
+        <h3>Mon abonnement</h3>
+        <div class="value">
+          Mensuel · actif
+          <br>
+          <span style="color: var(--ink-faint); font-size: 0.85rem;">Prochaine échéance : 12 juin</span>
+        </div>
+        <span class="arrow">Gérer →</span>
+      </a>
+    </div>
+  </section>
+
+  <div class="footer-meta">
+    <a href="#">Aide</a><span>·</span><a href="#">Se déconnecter</a>
+  </div>
+
+</main>
+
+</div>
+
+</body>
+</html>

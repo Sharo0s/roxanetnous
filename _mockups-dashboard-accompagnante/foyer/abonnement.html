@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Abonnement — style « foyer »</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="_shared.css">
+<style>
+  body { background: #faf7f2; }
+  .page-header { margin-bottom: 3rem; text-align: center; }
+  .page-header .eyebrow {
+    font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.18em;
+    color: var(--kraft); margin-bottom: 0.5rem;
+  }
+  .page-header h1 {
+    font-family: 'Playfair Display', serif; font-style: italic;
+    font-weight: 400; font-size: 2.5rem; line-height: 1.15; color: var(--ink);
+  }
+  .page-header .subtitle { margin-top: 0.75rem; color: var(--ink-soft); font-size: 0.95rem; }
+
+  .section-card {
+    background: white; border: 1px solid var(--line);
+    border-radius: 16px; padding: 1.75rem; margin-bottom: 1rem;
+  }
+  .section-title {
+    font-family: 'Playfair Display', serif; font-style: italic;
+    font-size: 1.2rem; color: var(--ink); margin-bottom: 1rem;
+    display: flex; align-items: center; gap: 0.75rem;
+  }
+  .badge-status {
+    font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.12em;
+    padding: 0.2rem 0.7rem; border-radius: 999px;
+    background: var(--accent-soft); color: var(--ink); font-weight: 500;
+  }
+  .badge-status.trial { background: #f0e9e0; color: #6b5635; }
+  .badge-status.cancel { background: #fbf0ed; color: #8a3a2e; }
+
+  dl { display: grid; gap: 0.75rem; }
+  .row { display: flex; justify-content: space-between; font-size: 0.92rem; }
+  .row dt { color: var(--ink-soft); }
+  .row dd { color: var(--ink); font-weight: 500; }
+
+  .action-row {
+    display: flex; justify-content: space-between; align-items: center; gap: 1rem;
+  }
+  .action-row-info { font-size: 0.92rem; }
+  .action-row-info strong { color: var(--ink); display: block; font-weight: 500; margin-bottom: 0.15rem; }
+  .action-row-info span { color: var(--ink-soft); font-size: 0.85rem; }
+
+  .btn {
+    padding: 0.6rem 1.3rem; border-radius: 999px; font-size: 0.88rem;
+    cursor: pointer; transition: all 0.2s; text-decoration: none;
+    display: inline-flex; align-items: center; gap: 0.3rem; border: 1px solid var(--line);
+    background: white; color: var(--ink); white-space: nowrap;
+  }
+  .btn:hover { border-color: var(--kraft); }
+  .btn.primary {
+    background: var(--accent); border-color: var(--accent); font-weight: 500;
+  }
+  .btn.primary:hover { background: var(--kraft); border-color: var(--kraft); }
+  .btn.ghost-danger { color: #8a3a2e; }
+  .btn.ghost-danger:hover { border-color: #8a3a2e; background: #fbf0ed; }
+
+  /* Pricing cards */
+  .pricing {
+    display: grid; grid-template-columns: repeat(2, 1fr);
+    gap: 1rem; margin-bottom: 2rem;
+  }
+  .pricing-card {
+    background: white; border: 1px solid var(--line);
+    border-radius: 16px; padding: 2rem 1.75rem;
+    display: flex; flex-direction: column; position: relative;
+  }
+  .pricing-card.featured {
+    border-color: var(--kraft); border-width: 1px;
+    box-shadow: 0 8px 24px -16px rgba(208, 131, 99, 0.4);
+  }
+  .pricing-ribbon {
+    position: absolute; top: -10px; left: 50%; transform: translateX(-50%);
+    background: var(--kraft); color: white; font-size: 0.7rem;
+    text-transform: uppercase; letter-spacing: 0.1em;
+    padding: 0.25rem 0.8rem; border-radius: 999px;
+  }
+  .pricing-card h3 {
+    font-family: 'Playfair Display', serif; font-style: italic;
+    font-size: 1.5rem; margin-bottom: 0.75rem;
+  }
+  .price-current {
+    font-family: 'Playfair Display', serif; font-style: italic;
+    font-size: 2rem; color: var(--ink);
+  }
+  .price-strike {
+    text-decoration: line-through; color: var(--ink-faint);
+    font-size: 1rem; margin-right: 0.5rem;
+  }
+  .price-meta {
+    color: var(--ink-soft); font-size: 0.82rem; margin-bottom: 1.25rem;
+  }
+  .pricing-features {
+    list-style: none; padding: 0; margin: 0 0 1.5rem;
+    flex: 1;
+  }
+  .pricing-features li {
+    display: flex; gap: 0.5rem; font-size: 0.92rem;
+    color: var(--ink-soft); margin-bottom: 0.5rem; align-items: flex-start;
+  }
+  .pricing-features li::before {
+    content: "—"; color: var(--kraft); flex-shrink: 0;
+  }
+
+  .launch-banner {
+    background: linear-gradient(135deg, #faecd9 0%, #f4d8b9 100%);
+    border-radius: 12px; padding: 1.25rem; text-align: center; margin-bottom: 1.5rem;
+  }
+  .launch-banner strong { font-family: 'Playfair Display', serif; font-style: italic; font-size: 1.15rem; }
+
+  /* Factures */
+  table { width: 100%; font-size: 0.9rem; }
+  th { text-align: left; color: var(--ink-soft); font-weight: 500; padding: 0.5rem 0; border-bottom: 1px solid var(--line); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.06em; }
+  td { padding: 0.75rem 0; border-bottom: 1px solid #f5efe5; }
+  td:last-child { text-align: right; }
+  .invoice-pill {
+    background: #e0efde; color: #4d7a47; padding: 0.15rem 0.6rem;
+    border-radius: 999px; font-size: 0.72rem; font-weight: 500;
+  }
+
+  .mentions {
+    font-size: 0.78rem; color: var(--ink-faint); line-height: 1.6;
+    margin: 2rem 0 1rem;
+  }
+  .mentions a { color: var(--ink-soft); }
+</style>
+</head>
+<body>
+
+<header class="app-header">
+  <div class="app-header-inner">
+    <a href="#" class="logo">roxanetnous</a>
+    <nav class="nav-desktop">
+      <a href="#">Accueil</a>
+      <a href="#">Annonces</a>
+      <a href="#">Demandes</a>
+      <a href="#">Messages <span class="nav-badge">2</span></a>
+      <a href="#">Profil</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+
+  <div class="page-header">
+    <div class="eyebrow">Mon espace</div>
+    <h1>Mon abonnement</h1>
+    <p class="subtitle">Gérez votre formule et vos paiements.</p>
+  </div>
+
+  <!-- Vue ABONNEE -->
+  <div class="section-card">
+    <div class="section-title">
+      Détails de l'abonnement
+      <span class="badge-status">Actif</span>
+    </div>
+    <dl>
+      <div class="row"><dt>Formule</dt><dd>Mensuel</dd></div>
+      <div class="row"><dt>Montant</dt><dd>4,99 EUR / mois</dd></div>
+      <div class="row"><dt>Prochaine échéance</dt><dd>12 juin 2026</dd></div>
+    </dl>
+  </div>
+
+  <div class="section-card">
+    <div class="section-title">Moyen de paiement</div>
+    <div class="action-row">
+      <div class="action-row-info">
+        <strong>Visa **** 4242</strong>
+        <span>Expire 09/2028</span>
+      </div>
+      <button class="btn primary">Modifier</button>
+    </div>
+  </div>
+
+  <div class="section-card">
+    <div class="section-title">Changer de formule</div>
+    <div class="action-row">
+      <div class="action-row-info">
+        <strong>Passer à l'annuel</strong>
+        <span>La formule annuelle offre un meilleur tarif au mois</span>
+      </div>
+      <button class="btn primary">Passer à l'annuel</button>
+    </div>
+  </div>
+
+  <div class="section-card">
+    <div class="section-title">Historique des factures</div>
+    <table>
+      <thead>
+        <tr><th>Date</th><th>Montant</th><th>Statut</th><th>Facture</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>12 mai 2026</td><td>4,99 EUR</td><td><span class="invoice-pill">Payé</span></td><td><a href="#">Télécharger</a></td></tr>
+        <tr><td>12 avril 2026</td><td>4,99 EUR</td><td><span class="invoice-pill">Payé</span></td><td><a href="#">Télécharger</a></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div style="margin-top: 1.5rem;">
+    <button class="btn ghost-danger">Résilier mon abonnement</button>
+  </div>
+
+  <p class="mentions">
+    Conformément à la législation, vous disposez d'un droit de rétractation de 14 jours à compter de la souscription.
+    Pour l'exercer, contactez-nous à <a href="#">roxanetnous@outlook.com</a>.<br>
+    Consultez nos <a href="#">Conditions Générales d'Utilisation</a>.
+  </p>
+
+  <!-- ─────────────── VUE NON-ABONNEE ─────────────── -->
+  <hr style="margin: 4rem 0; border: none; border-top: 1px dashed var(--line);">
+
+  <h2 style="text-align: center; font-family: 'Playfair Display', serif; font-style: italic; font-size: 1.5rem; margin-bottom: 1.5rem; color: var(--ink);">
+    Variante : non abonnée
+  </h2>
+
+  <div class="launch-banner">
+    <strong>Offre de lancement</strong>
+    <p style="font-size: 0.88rem; color: var(--ink-soft); margin-top: 0.35rem;">1 mois offert pour toute inscription</p>
+  </div>
+
+  <div class="pricing">
+    <div class="pricing-card">
+      <h3>Mensuel</h3>
+      <p><span class="price-current">4,99€</span> <span class="price-meta" style="display: inline;">/mois</span></p>
+      <p class="price-meta">Sans engagement</p>
+      <ul class="pricing-features">
+        <li>Sans engagement</li>
+        <li>Résiliable à tout moment</li>
+      </ul>
+      <button class="btn primary" style="width: 100%; justify-content: center; padding: 0.85rem;">S'abonner</button>
+    </div>
+
+    <div class="pricing-card featured">
+      <span class="pricing-ribbon">1 mois offert</span>
+      <h3>Annuel</h3>
+      <p>
+        <span class="price-strike">59,88€</span>
+        <span class="price-current">49,99€</span>
+        <span class="price-meta" style="display: inline;">/an</span>
+      </p>
+      <p class="price-meta">soit 4,17 €/mois</p>
+      <ul class="pricing-features">
+        <li>Économisez 17 % sur l'année</li>
+        <li>Engagement annuel, paiement unique</li>
+      </ul>
+      <button class="btn primary" style="width: 100%; justify-content: center; padding: 0.85rem;">S'abonner</button>
+    </div>
+  </div>
+
+  <div class="footer-meta">
+    <a href="#">Aide</a><span>·</span><a href="#">Confidentialité</a><span>·</span><a href="#">Conditions</a><span>·</span><a href="#">Se déconnecter</a>
+  </div>
+
+</main>
+
+</body>
+</html>

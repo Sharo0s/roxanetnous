@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Foyer — validée sans abonnement</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="_shared.css">
+</head>
+<body>
+
+<header class="app-header">
+  <div class="app-header-inner">
+    <a href="#" class="logo">roxanetnous</a>
+    <nav class="nav-desktop">
+      <a href="#" class="active">Accueil</a>
+      <a href="#">Annonces</a>
+      <a href="#">Demandes</a>
+      <a href="#">Messages</a>
+      <a href="#">Profil</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+
+  <section class="hero">
+    <div class="portrait" data-initials="M"></div>
+    <div class="hero-info">
+      <h1 class="hero-name">Marie Dubois</h1>
+      <div class="status-badge validee">Accompagnante validée</div>
+      <p class="hero-location">Rennes &middot; sur 30 km</p>
+      <div class="tags">
+        <span class="tag">Allaitement</span>
+        <span class="tag">Post-partum</span>
+        <span class="tag">Portage</span>
+      </div>
+    </div>
+  </section>
+
+  <div class="presence-wrap">
+    <a href="#" class="presence offline">
+      <span class="dot"></span>
+      <span>Non visible — abonnement requis</span>
+    </a>
+  </div>
+
+  <!-- BANNER ABO -->
+  <div class="banner success">
+    <h3>Activez votre profil.</h3>
+    <p>Votre profil est validé. Pour apparaître auprès des accompagnées et publier vos annonces, souscrivez un abonnement.</p>
+    <div style="display: flex; gap: 1rem; align-items: center; margin-top: 0.75rem;">
+      <a href="#" style="padding: 0.7rem 1.5rem; background: var(--ink); color: white; border-radius: 999px; text-decoration: none; font-size: 0.92rem;">Voir les offres</a>
+      <span style="color: var(--ink-soft); font-size: 0.88rem;">À partir de 4,99 € / mois</span>
+    </div>
+  </div>
+
+  <!-- Stats désactivées pour clarté visuelle -->
+  <div class="stats" style="opacity: 0.45; pointer-events: none; margin-top: 3rem;">
+    <div class="stat">
+      <div class="stat-circle">0</div>
+      <div class="stat-label">demandes</div>
+    </div>
+    <div class="stat">
+      <div class="stat-circle">0</div>
+      <div class="stat-label">messages</div>
+    </div>
+    <div class="stat">
+      <div class="stat-circle">0</div>
+      <div class="stat-label">annonces</div>
+    </div>
+  </div>
+
+  <div class="footer-meta">
+    <a href="#">Aide</a><span>·</span><a href="#">Se déconnecter</a>
+  </div>
+
+</main>
+</body>
+</html>

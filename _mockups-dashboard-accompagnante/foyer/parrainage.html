@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Parrainage — style « foyer »</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="_shared.css">
+<style>
+  body { background: #faf7f2; }
+
+  .page-header {
+    margin-bottom: 3rem;
+    text-align: center;
+  }
+  .page-header .eyebrow {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--kraft);
+    margin-bottom: 0.5rem;
+  }
+  .page-header h1 {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-weight: 400;
+    font-size: 2.5rem;
+    line-height: 1.15;
+    color: var(--ink);
+  }
+  .page-header .subtitle {
+    margin-top: 0.75rem;
+    color: var(--ink-soft);
+    font-size: 0.95rem;
+  }
+
+  /* Carte code de parrainage : grand affichage central */
+  .code-card {
+    background: white;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    text-align: center;
+  }
+  .code-label {
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--kraft);
+    margin-bottom: 1rem;
+  }
+  .code-value {
+    background: linear-gradient(135deg, #faecd9 0%, #f4d8b9 100%);
+    border-radius: 10px;
+    padding: 1.5rem 1rem;
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 2.4rem;
+    letter-spacing: 0.4rem;
+    color: var(--ink);
+    margin-bottom: 1.5rem;
+  }
+  .code-actions {
+    display: flex;
+    gap: 0.6rem;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .btn-soft {
+    padding: 0.65rem 1.3rem;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: white;
+    font-size: 0.88rem;
+    color: var(--ink);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-soft:hover { border-color: var(--kraft); }
+  .btn-soft.primary {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+  .btn-soft.primary:hover { background: var(--kraft); border-color: var(--kraft); }
+  .code-card .help {
+    color: var(--ink-soft);
+    font-size: 0.88rem;
+    margin-top: 1.5rem;
+    max-width: 480px;
+    margin-left: auto;
+    margin-right: auto;
+    line-height: 1.6;
+  }
+
+  /* Carte progression principale */
+  .progress-card {
+    background: white;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    text-align: center;
+  }
+  .progress-phrase {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 1.5rem;
+    color: var(--ink);
+    margin-bottom: 0.5rem;
+    line-height: 1.3;
+  }
+  .progress-meta {
+    color: var(--ink-soft);
+    font-size: 0.88rem;
+    margin-bottom: 1.5rem;
+  }
+  .progress-bar {
+    height: 6px;
+    background: #f1eade;
+    border-radius: 999px;
+    overflow: hidden;
+    margin-bottom: 0.5rem;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    background: var(--kraft);
+    border-radius: 999px;
+  }
+  .progress-counter {
+    font-size: 0.78rem;
+    color: var(--ink-faint);
+  }
+
+  /* Filleules */
+  .filleules-section {
+    margin-bottom: 2rem;
+  }
+  .filleules-section h2 {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 1.3rem;
+    text-align: center;
+    margin-bottom: 0.5rem;
+  }
+  .filleules-section .desc {
+    color: var(--ink-soft);
+    font-size: 0.88rem;
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+  .filleule-row {
+    background: white;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 1rem 1.25rem;
+    margin-bottom: 0.6rem;
+  }
+  .filleule-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+  }
+  .filleule-name {
+    font-weight: 500;
+    color: var(--ink);
+    font-size: 0.95rem;
+  }
+  .filleule-status {
+    font-size: 0.78rem;
+    color: var(--ink-soft);
+  }
+  .filleule-status.confirme { color: var(--success); font-weight: 500; }
+  .filleule-bar {
+    height: 3px;
+    background: #f1eade;
+    border-radius: 999px;
+    overflow: hidden;
+  }
+  .filleule-bar-fill { height: 100%; border-radius: 999px; }
+  .filleule-bar-fill.confirme { background: var(--success); }
+  .filleule-bar-fill.abonnee { background: var(--kraft); }
+  .filleule-bar-fill.inscrite { background: var(--line); }
+
+  .empty-state {
+    text-align: center;
+    color: var(--ink-soft);
+    font-size: 0.92rem;
+    font-style: italic;
+    padding: 2rem 1rem;
+  }
+
+  /* Compteurs synthétiques en bas */
+  .summary-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+  .summary-stat {
+    background: white;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 1.25rem 1rem;
+    text-align: center;
+  }
+  .summary-stat .num {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 2rem;
+    color: var(--ink);
+    margin-bottom: 0.25rem;
+  }
+  .summary-stat .lbl {
+    font-size: 0.78rem;
+    color: var(--ink-soft);
+  }
+</style>
+</head>
+<body>
+
+<header class="app-header">
+  <div class="app-header-inner">
+    <a href="#" class="logo">roxanetnous</a>
+    <nav class="nav-desktop">
+      <a href="#">Accueil</a>
+      <a href="#">Annonces</a>
+      <a href="#">Demandes</a>
+      <a href="#">Messages <span class="nav-badge">2</span></a>
+      <a href="#">Profil</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+
+  <div class="page-header">
+    <div class="eyebrow">Mon espace</div>
+    <h1>Mon parrainage</h1>
+    <p class="subtitle">Partagez votre code, accueillez de nouvelles accompagnantes.</p>
+  </div>
+
+  <!-- Carte code -->
+  <div class="code-card">
+    <div class="code-label">Votre code</div>
+    <div class="code-value">MARIE-2K9X</div>
+    <div class="code-actions">
+      <button class="btn-soft primary">Copier le code</button>
+      <button class="btn-soft">Copier le lien d'invitation</button>
+    </div>
+    <p class="help">
+      Partagez ce code ou ce lien avec une accompagnante de votre réseau.
+      Vous vous portez garante : elle évite la visio et publie ses annonces dès la souscription.
+    </p>
+  </div>
+
+  <!-- Progression principale -->
+  <div class="progress-card">
+    <p class="progress-phrase">Plus que 3 filleules pour 6 mois offerts</p>
+    <p class="progress-meta">1 récompense déjà obtenue</p>
+    <div class="progress-bar">
+      <div class="progress-bar-fill" style="width: 40%;"></div>
+    </div>
+    <div class="progress-counter">2 sur 5 filleules validées</div>
+  </div>
+
+  <!-- Liste filleules -->
+  <div class="filleules-section">
+    <h2>Vos filleules en cours</h2>
+    <p class="desc">Une filleule est validée après 30 jours d'abonnement actif.</p>
+
+    <div class="filleule-row">
+      <div class="filleule-top">
+        <span class="filleule-name">Sophie.D</span>
+        <span class="filleule-status confirme">Validée — comptée dans votre cycle</span>
+      </div>
+      <div class="filleule-bar"><div class="filleule-bar-fill confirme" style="width: 100%;"></div></div>
+    </div>
+
+    <div class="filleule-row">
+      <div class="filleule-top">
+        <span class="filleule-name">Camille.L</span>
+        <span class="filleule-status">Validée dans 12 jours</span>
+      </div>
+      <div class="filleule-bar"><div class="filleule-bar-fill abonnee" style="width: 60%;"></div></div>
+    </div>
+
+    <div class="filleule-row">
+      <div class="filleule-top">
+        <span class="filleule-name">Léa.M</span>
+        <span class="filleule-status">En attente de souscription</span>
+      </div>
+      <div class="filleule-bar"><div class="filleule-bar-fill inscrite" style="width: 0%;"></div></div>
+    </div>
+  </div>
+
+  <!-- Compteurs synthétiques -->
+  <div class="summary-stats">
+    <div class="summary-stat">
+      <div class="num">3</div>
+      <div class="lbl">filleules invitées</div>
+    </div>
+    <div class="summary-stat">
+      <div class="num">2</div>
+      <div class="lbl">validées ce cycle</div>
+    </div>
+    <div class="summary-stat">
+      <div class="num">1</div>
+      <div class="lbl">récompense gagnée</div>
+    </div>
+  </div>
+
+  <!-- Footer cohérent dashboard -->
+  <div class="footer-meta">
+    <a href="#">Aide</a>
+    <span>·</span>
+    <a href="#">Confidentialité</a>
+    <span>·</span>
+    <a href="#">Conditions</a>
+    <span>·</span>
+    <a href="#">Se déconnecter</a>
+  </div>
+
+</main>
+
+</body>
+</html>

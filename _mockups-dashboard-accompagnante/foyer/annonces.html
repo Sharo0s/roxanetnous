@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Annonces — style « foyer »</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="_shared.css">
+<style>
+  body { background: #faf7f2; }
+  main { max-width: 980px; }
+
+  .page-header {
+    margin-bottom: 2.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+  .page-header-text { flex: 1; min-width: 280px; }
+  .page-header .eyebrow {
+    font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.18em;
+    color: var(--kraft); margin-bottom: 0.5rem;
+  }
+  .page-header h1 {
+    font-family: 'Playfair Display', serif; font-style: italic;
+    font-weight: 400; font-size: 2.5rem; line-height: 1.15; color: var(--ink);
+  }
+  .page-header .subtitle { margin-top: 0.5rem; color: var(--ink-soft); font-size: 0.95rem; }
+
+  .btn {
+    padding: 0.65rem 1.3rem; border-radius: 999px; font-size: 0.88rem;
+    cursor: pointer; transition: all 0.2s; text-decoration: none;
+    display: inline-flex; align-items: center; gap: 0.4rem; border: 1px solid var(--line);
+    background: white; color: var(--ink); white-space: nowrap;
+  }
+  .btn:hover { border-color: var(--kraft); }
+  .btn.primary { background: var(--accent); border-color: var(--accent); font-weight: 500; }
+  .btn.primary:hover { background: var(--kraft); border-color: var(--kraft); }
+  .btn.danger:hover { border-color: #a13f33; color: #a13f33; background: #fbf0ed; }
+  .btn.small { padding: 0.4rem 0.9rem; font-size: 0.82rem; }
+
+  /* Annonce row */
+  .annonce-row {
+    background: white;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 1.5rem 1.75rem;
+    margin-bottom: 0.85rem;
+    transition: all 0.2s;
+  }
+  .annonce-row:hover { border-color: var(--kraft); }
+
+  .annonce-top {
+    display: flex; justify-content: space-between; gap: 1.5rem;
+    align-items: flex-start;
+  }
+  .annonce-info { flex: 1; min-width: 0; }
+
+  .annonce-status {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.12em;
+    font-weight: 500; margin-bottom: 0.5rem;
+  }
+  .annonce-status.publiee { color: #4d7a47; }
+  .annonce-status.publiee::before {
+    content: ""; width: 6px; height: 6px; border-radius: 50%;
+    background: #4d7a47;
+  }
+  .annonce-status.archivee { color: var(--ink-faint); }
+  .annonce-status.archivee::before {
+    content: ""; width: 6px; height: 6px; border-radius: 50%;
+    background: var(--ink-faint);
+  }
+
+  .annonce-location {
+    color: var(--ink); font-size: 1rem; font-weight: 500; margin-bottom: 0.5rem;
+  }
+  .annonce-location .km {
+    color: var(--ink-soft); font-weight: 400; font-size: 0.9rem;
+  }
+  .annonce-description {
+    color: var(--ink-soft); font-size: 0.93rem; line-height: 1.6;
+    margin-bottom: 1rem; max-width: 60ch;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .annonce-meta {
+    display: flex; gap: 1.5rem; font-size: 0.78rem; color: var(--ink-faint);
+  }
+  .annonce-actions {
+    display: flex; gap: 0.4rem; flex-shrink: 0;
+  }
+
+  /* Empty state */
+  .empty-state {
+    background: white;
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    padding: 4rem 2rem;
+    text-align: center;
+  }
+  .empty-state h2 {
+    font-family: 'Playfair Display', serif; font-style: italic;
+    font-size: 1.6rem; color: var(--ink); margin-bottom: 0.75rem;
+  }
+  .empty-state p {
+    color: var(--ink-soft); margin-bottom: 1.75rem;
+    max-width: 400px; margin-left: auto; margin-right: auto;
+  }
+
+  /* Paywall banner */
+  .paywall-banner {
+    background: white;
+    border: 1px solid var(--kraft);
+    border-radius: 16px;
+    padding: 1.5rem 1.75rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+  }
+  .paywall-banner .info { font-size: 0.95rem; }
+  .paywall-banner h2 {
+    font-family: 'Playfair Display', serif; font-style: italic;
+    font-size: 1.2rem; color: var(--ink); margin-bottom: 0.25rem;
+  }
+  .paywall-banner p { color: var(--ink-soft); font-size: 0.88rem; }
+</style>
+</head>
+<body>
+
+<header class="app-header">
+  <div class="app-header-inner">
+    <a href="#" class="logo">roxanetnous</a>
+    <nav class="nav-desktop">
+      <a href="#">Accueil</a>
+      <a href="#" class="active">Annonces</a>
+      <a href="#">Demandes</a>
+      <a href="#">Messages <span class="nav-badge">2</span></a>
+      <a href="#">Profil</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+
+  <div class="page-header">
+    <div class="page-header-text">
+      <div class="eyebrow">Mon espace</div>
+      <h1>Mes annonces</h1>
+      <p class="subtitle">Publiez et gérez vos offres d'accompagnement.</p>
+    </div>
+    <a href="#" class="btn primary">+ Nouvelle annonce</a>
+  </div>
+
+  <!-- Paywall (variante non-abonné) -->
+  <!--
+  <div class="paywall-banner">
+    <div class="info">
+      <h2>Abonnement requis</h2>
+      <p>Souscrivez un abonnement pour publier vos annonces.</p>
+    </div>
+    <a href="#" class="btn primary">Voir les offres</a>
+  </div>
+  -->
+
+  <!-- Liste annonces -->
+  <div class="annonce-row">
+    <div class="annonce-top">
+      <div class="annonce-info">
+        <div class="annonce-status publiee">Publiée</div>
+        <p class="annonce-location">Rennes <span class="km">— Rayon 30 km</span></p>
+        <p class="annonce-description">
+          Accompagnement post-partum bienveillant et personnalisé. Allaitement, portage, sommeil de bébé,
+          retour à soi. Je propose des séances à domicile ou en visio selon vos besoins.
+        </p>
+        <div class="annonce-meta">
+          <span>142 vues</span>
+          <span>8 contacts</span>
+          <span>Publiée le 28 avril 2026</span>
+        </div>
+      </div>
+      <div class="annonce-actions">
+        <a href="#" class="btn small">Modifier</a>
+        <button class="btn small">Archiver</button>
+        <button class="btn small danger">Supprimer</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="annonce-row">
+    <div class="annonce-top">
+      <div class="annonce-info">
+        <div class="annonce-status archivee">Archivée</div>
+        <p class="annonce-location">Nantes <span class="km">— Rayon 20 km</span></p>
+        <p class="annonce-description">
+          Accompagnement à la parentalité, ateliers de portage en petits groupes.
+        </p>
+        <div class="annonce-meta">
+          <span>56 vues</span>
+          <span>3 contacts</span>
+          <span>Publiée le 12 mars 2026</span>
+        </div>
+      </div>
+      <div class="annonce-actions">
+        <a href="#" class="btn small">Modifier</a>
+        <button class="btn small">Publier</button>
+        <button class="btn small danger">Supprimer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─────────────── Variante : empty state ─────────────── -->
+  <hr style="margin: 4rem 0 2rem; border: none; border-top: 1px dashed var(--line);">
+
+  <h2 style="text-align: center; font-family: 'Playfair Display', serif; font-style: italic; font-size: 1.3rem; color: var(--ink); margin-bottom: 1.5rem;">
+    Variante : aucune annonce
+  </h2>
+
+  <div class="empty-state">
+    <h2>Aucune annonce pour le moment.</h2>
+    <p>Créez votre première annonce pour commencer à être visible auprès des accompagnées.</p>
+    <a href="#" class="btn primary">Créer ma première annonce</a>
+  </div>
+
+  <div class="footer-meta">
+    <a href="#">Aide</a><span>·</span><a href="#">Confidentialité</a><span>·</span><a href="#">Conditions</a><span>·</span><a href="#">Se déconnecter</a>
+  </div>
+
+</main>
+
+</body>
+</html>

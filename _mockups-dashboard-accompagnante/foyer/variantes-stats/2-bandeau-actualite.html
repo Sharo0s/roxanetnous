@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Variante 2 — Bandeau actualité</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="_base.css">
+<style>
+  .news-banner {
+    background: white;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 2rem 2rem 1.75rem;
+    margin-bottom: 1rem;
+    overflow: hidden;
+    position: relative;
+  }
+  .news-banner::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0; height: 3px;
+    background: linear-gradient(90deg, var(--kraft) 0%, var(--accent) 100%);
+  }
+
+  .news-headline {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 1.6rem;
+    color: var(--ink);
+    margin-bottom: 0.4rem;
+    line-height: 1.25;
+  }
+  .news-lede {
+    color: var(--ink-soft);
+    font-size: 0.95rem;
+    margin-bottom: 1.5rem;
+    max-width: 56ch;
+  }
+
+  .news-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.6rem 1.4rem;
+    background: var(--ink);
+    color: white;
+    border-radius: 999px;
+    text-decoration: none;
+    font-size: 0.88rem;
+    transition: all 0.2s;
+  }
+  .news-cta:hover {
+    background: var(--kraft-dark);
+  }
+
+  .news-meta {
+    display: flex;
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--line);
+    font-size: 0.85rem;
+  }
+  .news-meta-item {
+    color: var(--ink-soft);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+  .news-meta-item:hover {
+    color: var(--ink);
+  }
+  .news-meta-item strong {
+    color: var(--ink);
+    font-weight: 500;
+  }
+  .news-meta-dot {
+    width: 5px; height: 5px; border-radius: 50%;
+    background: var(--kraft);
+    display: inline-block;
+  }
+</style>
+</head>
+<body>
+
+<header class="app-header">
+  <div class="app-header-inner">
+    <a href="#" class="logo">roxanetnous</a>
+    <nav class="nav-desktop">
+      <a href="#" class="active">Accueil</a>
+      <a href="#">Annonces</a>
+      <a href="#">Demandes</a>
+      <a href="#">Messages <span class="nav-badge">2</span></a>
+      <a href="#">Profil</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+
+  <section class="hero">
+    <div class="portrait"></div>
+    <div class="hero-info">
+      <h1 class="hero-name">Marie Dubois</h1>
+      <div class="status-badge">Accompagnante validée</div>
+      <p class="hero-location">Rennes &middot; sur 30 km</p>
+      <div class="tags">
+        <span class="tag">Allaitement</span>
+        <span class="tag">Post-partum</span>
+        <span class="tag">Portage</span>
+      </div>
+    </div>
+  </section>
+
+  <div class="presence-wrap">
+    <div class="presence">
+      <span class="dot"></span>
+      <span>Disponible</span>
+    </div>
+  </div>
+
+  <!-- ─── VARIANTE 2 : BANDEAU ACTUALITE ─── -->
+  <div class="variant-marker">Variante 2</div>
+  <h2 class="variant-title">Une nouvelle accompagnée vous cherche</h2>
+
+  <div class="news-banner">
+    <h3 class="news-headline">3 demandes vous attendent à proximité.</h3>
+    <p class="news-lede">
+      Trois personnes ont publié une recherche d'accompagnement dans votre rayon
+      cette semaine. La plus récente a été postée hier soir, à 8&nbsp;km de chez vous.
+    </p>
+    <a href="#" class="news-cta">Consulter les demandes →</a>
+
+    <div class="news-meta">
+      <a href="#" class="news-meta-item">
+        <span class="news-meta-dot"></span>
+        <strong>2 messages</strong> non lus
+      </a>
+      <a href="#" class="news-meta-item">
+        <strong>1 annonce</strong> publiée
+      </a>
+      <span class="news-meta-item" style="margin-left: auto;">
+        142 vues cette semaine
+      </span>
+    </div>
+  </div>
+
+  <section class="secondary-section">
+    <h2 class="section-title">Mon espace</h2>
+    <div class="secondary-grid">
+      <div class="secondary-card">
+        <h3>Mon profil</h3>
+        <div class="value">Informations professionnelles, photos, diplômes.</div>
+      </div>
+      <div class="secondary-card">
+        <h3>Mon parrainage</h3>
+        <div class="value">2 / 5 parrainages confirmés.</div>
+      </div>
+      <div class="secondary-card">
+        <h3>Mon abonnement</h3>
+        <div class="value">Mensuel · actif</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="footer-meta">
+    <a href="#">Aide</a><span>·</span>
+    <a href="#">Confidentialité</a><span>·</span>
+    <a href="#">Conditions</a><span>·</span>
+    <a href="#">Se déconnecter</a>
+  </div>
+
+</main>
+
+</body>
+</html>

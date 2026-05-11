@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Foyer — état nominal (validée + abonnée)</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="_shared.css">
+</head>
+<body>
+
+<header class="app-header">
+  <div class="app-header-inner">
+    <a href="#" class="logo">roxanetnous</a>
+    <nav class="nav-desktop">
+      <a href="#" class="active">Accueil</a>
+      <a href="#">Annonces</a>
+      <a href="#">Demandes</a>
+      <a href="#">Messages <span class="nav-badge">2</span></a>
+      <a href="#">Profil</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="portrait" data-initials="M">
+      <button class="portrait-edit" aria-label="Modifier la photo">✎</button>
+    </div>
+    <div class="hero-info">
+      <h1 class="hero-name">Marie Dubois</h1>
+      <div class="status-badge validee">Accompagnante validée</div>
+      <p class="hero-location">
+        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"/>
+          <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"/>
+        </svg>
+        Rennes &middot; sur 30 km
+      </p>
+      <div class="tags">
+        <span class="tag">Allaitement</span>
+        <span class="tag">Post-partum</span>
+        <span class="tag">Portage</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRÉSENCE -->
+  <div class="presence-wrap">
+    <a href="#" class="presence online">
+      <span class="dot"></span>
+      <span>Disponible</span>
+      <em>· modifier</em>
+    </a>
+  </div>
+
+  <!-- STATS PRINCIPALES -->
+  <div class="stats">
+    <a href="#" class="stat" aria-label="3 demandes en attente">
+      <div class="stat-circle has-activity">
+        <span class="badge-dot" aria-hidden="true"></span>
+        3
+      </div>
+      <div class="stat-label">demandes en attente</div>
+    </a>
+    <a href="#" class="stat" aria-label="2 messages non lus">
+      <div class="stat-circle has-activity">
+        <span class="badge-dot" aria-hidden="true"></span>
+        2
+      </div>
+      <div class="stat-label">messages non lus</div>
+    </a>
+    <a href="#" class="stat" aria-label="4 annonces publiées">
+      <div class="stat-circle">4</div>
+      <div class="stat-label">annonces publiées<span class="stat-sublabel">5 au total</span></div>
+    </a>
+  </div>
+
+  <!-- SECONDAIRE : profil, parrainage, abonnement -->
+  <section class="secondary-section">
+    <h2 class="section-title">Mon espace</h2>
+    <div class="secondary-grid">
+
+      <a href="#" class="secondary-card">
+        <h3>Mon profil</h3>
+        <div class="value">Informations professionnelles, photos, diplômes et description.</div>
+        <span class="arrow">Modifier →</span>
+      </a>
+
+      <a href="#" class="secondary-card">
+        <h3>Mon parrainage</h3>
+        <div class="value">
+          <strong style="color: var(--ink); font-weight: 500;">2 / 5</strong> parrainages confirmés.
+          <div class="progress-dots" aria-hidden="true">
+            <span class="progress-dot filled"></span>
+            <span class="progress-dot filled"></span>
+            <span class="progress-dot"></span>
+            <span class="progress-dot"></span>
+            <span class="progress-dot"></span>
+          </div>
+          6 mois offerts à 5 parrainages.
+        </div>
+        <span class="arrow">Voir mon code →</span>
+      </a>
+
+      <a href="#" class="secondary-card">
+        <h3>Mon abonnement</h3>
+        <div class="value">
+          Mensuel · actif
+          <br>
+          <span style="color: var(--ink-faint); font-size: 0.85rem;">Prochaine échéance : 12 juin 2026</span>
+        </div>
+        <span class="arrow">Gérer →</span>
+      </a>
+
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <div class="footer-meta">
+    <a href="#">Aide</a>
+    <span>·</span>
+    <a href="#">Confidentialité</a>
+    <span>·</span>
+    <a href="#">Conditions</a>
+    <span>·</span>
+    <a href="#">Se déconnecter</a>
+  </div>
+
+</main>
+
+</body>
+</html>

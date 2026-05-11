@@ -31,8 +31,12 @@ Critere flaky : run echoue sur un commit qui a ensuite passe vert sans modificat
 
 ### Jour 1 — 2026-05-10
 
-- [ ] Audit runs : ___ total / ___ success / ___ failure
-- [ ] Flaky observe : oui/non (si oui, run ID + cause)
+- [x] Audit runs : 1 total / 1 success / 0 failure
+- [x] Flaky observe : non
+- **Run heartbeat manuel** : `25633979881` 2026-05-10 16:34 UTC (success en ~3 min, SHA `3036588a2f9ffb1dd0a7a911f5bcc1cccd24d397` = HEAD main post-retro Epic 4). Tous les steps verts dont `Apply test seeds` et `Run integration tests`.
+- **Observation methodologique** : le workflow `integration-tests.yml` se declenche uniquement sur `pull_request` (branches main) ou `workflow_dispatch` manuel. Les commits Epic 4 ont ete pousses directement sur main sans PR (`gh pr list --state all` -> 0 PR), donc aucune execution automatique. Strategie d'audit retenue : **heartbeat manuel jours 1/3/5/7** via `gh workflow run integration-tests.yml --ref main` pour produire 4 points de mesure independants sur la fenetre.
+- Prochain heartbeat : Jour 3 = 2026-05-12.
+- Derniere baseline reference : run `25507176496` 2026-05-07 16:00 UTC (success) sur SHA `6beac3a4969d839ff755eb72712993c6c07a5917`.
 
 ### Jour 2 — 2026-05-11
 

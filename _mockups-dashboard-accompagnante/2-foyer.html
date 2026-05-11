@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Mockup 2 — Le foyer</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --accent: #F4C8A3;
+    --kraft: #d3a387;
+    --ink: #2a2520;
+    --ink-soft: #6b6258;
+    --paper: #faf7f2;
+    --line: #e8dfd2;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    font-weight: 300;
+  }
+  header {
+    border-bottom: 1px solid var(--line);
+    padding: 1.25rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .logo {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 1.4rem;
+  }
+  .user-menu {
+    font-size: 0.9rem;
+    color: var(--ink-soft);
+  }
+  main {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 4.5rem 2rem 6rem;
+    text-align: center;
+  }
+
+  .hero {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 3rem;
+    margin-bottom: 2.5rem;
+    text-align: left;
+  }
+  .portrait {
+    width: 180px;
+    height: 220px;
+    border-radius: 4px;
+    background-image: linear-gradient(135deg, var(--accent) 0%, var(--kraft) 100%);
+    background-size: cover;
+    position: relative;
+    box-shadow: 0 12px 40px -12px rgba(0,0,0,0.18);
+    flex-shrink: 0;
+  }
+  .portrait::after {
+    content: "M";
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    color: rgba(255,255,255,0.7);
+    font-size: 4rem;
+  }
+  .hero-info h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    font-weight: 400;
+    line-height: 1.2;
+    margin-bottom: 0.5rem;
+  }
+  .hero-info .badge {
+    display: inline-block;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--kraft);
+    margin-bottom: 0.75rem;
+  }
+  .hero-info .location {
+    color: var(--ink-soft);
+    font-size: 0.98rem;
+  }
+
+  .presence {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.6rem 1.4rem;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    font-size: 0.92rem;
+    background: white;
+    margin-bottom: 4.5rem;
+  }
+  .presence .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #7fb37a;
+  }
+
+  .divider {
+    width: 40px;
+    height: 1px;
+    background: var(--kraft);
+    margin: 0 auto 4rem;
+  }
+
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+    margin-bottom: 5rem;
+  }
+  .stat-card {
+    text-align: center;
+  }
+  .stat-circle {
+    width: 88px;
+    height: 88px;
+    border: 1px solid var(--line);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+    font-family: 'Playfair Display', serif;
+    font-size: 2.2rem;
+    color: var(--ink);
+    background: white;
+    transition: all 0.2s;
+    cursor: pointer;
+  }
+  .stat-circle:hover {
+    border-color: var(--kraft);
+    background: var(--accent);
+  }
+  .stat-label {
+    font-size: 0.88rem;
+    color: var(--ink-soft);
+    text-transform: lowercase;
+    letter-spacing: 0.02em;
+  }
+
+  .cta {
+    display: inline-block;
+    margin-bottom: 5rem;
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 1.15rem;
+    color: var(--ink);
+    border-bottom: 1px solid var(--kraft);
+    padding-bottom: 4px;
+    text-decoration: none;
+  }
+
+  .footer-nav {
+    border-top: 1px solid var(--line);
+    padding-top: 2rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 2rem;
+    justify-content: center;
+    font-size: 0.92rem;
+  }
+  .footer-nav a {
+    color: var(--ink-soft);
+    text-decoration: none;
+  }
+  .footer-nav a:hover { color: var(--ink); }
+  .footer-nav .sep { color: var(--line); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">roxanetnous</div>
+  <div class="user-menu">Marie ▾</div>
+</header>
+
+<main>
+
+  <div class="hero">
+    <div class="portrait"></div>
+    <div class="hero-info">
+      <h1>Marie Dubois</h1>
+      <div class="badge">Accompagnante validée</div>
+      <div class="location">Rennes &middot; 30 km</div>
+    </div>
+  </div>
+
+  <div class="presence">
+    <span class="dot"></span>
+    <span>Disponible aujourd'hui</span>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="stats">
+    <div class="stat-card">
+      <div class="stat-circle">3</div>
+      <div class="stat-label">demandes en attente</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-circle">2</div>
+      <div class="stat-label">messages non lus</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-circle">4</div>
+      <div class="stat-label">annonces publiées</div>
+    </div>
+  </div>
+
+  <a href="#" class="cta">Voir mes accompagnées →</a>
+
+  <nav class="footer-nav">
+    <a href="#">Profil</a><span class="sep">·</span>
+    <a href="#">Abonnement</a><span class="sep">·</span>
+    <a href="#">Parrainage</a>
+  </nav>
+
+</main>
+
+</body>
+</html>

@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Le foyer — exploration complète</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  body {
+    font-family: 'Inter', sans-serif;
+    background: #faf7f2;
+    color: #1f1a14;
+    font-weight: 300;
+    margin: 0;
+    padding: 4rem 2rem;
+    line-height: 1.65;
+  }
+  .container { max-width: 760px; margin: 0 auto; }
+  h1 {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-weight: 400;
+    font-size: 2.4rem;
+    margin: 0 0 0.5rem;
+    letter-spacing: -0.015em;
+  }
+  .lede {
+    color: #6b6258;
+    margin-bottom: 3rem;
+    font-size: 1rem;
+  }
+  .group { margin-bottom: 3rem; }
+  .group-title {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-weight: 400;
+    font-size: 1.35rem;
+    margin-bottom: 0.5rem;
+  }
+  .group-desc {
+    color: #6b6258;
+    font-size: 0.93rem;
+    margin-bottom: 1.25rem;
+  }
+  .list { display: grid; gap: 0.65rem; }
+  a.card {
+    border: 1px solid #e8dfd2;
+    background: white;
+    border-radius: 10px;
+    padding: 1rem 1.4rem;
+    text-decoration: none;
+    color: inherit;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+  a.card:hover {
+    border-color: #d3a387;
+    transform: translateX(2px);
+  }
+  a.card .label {
+    font-size: 1rem;
+  }
+  a.card .meta {
+    font-size: 0.8rem;
+    color: #6b6258;
+    text-align: right;
+    flex-shrink: 0;
+  }
+  .pill {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    margin-right: 0.4rem;
+    font-weight: 500;
+  }
+  .pill.ok { background: #e0efde; color: #4d7a47; }
+  .pill.warn { background: #fdf0d5; color: #8a6420; }
+  .pill.alert { background: #fbe1dc; color: #8a3a2e; }
+  .pill.info { background: #e0e9ef; color: #3e5a6d; }
+  .back {
+    display: inline-block;
+    margin-bottom: 1.5rem;
+    color: #6b6258;
+    text-decoration: none;
+    font-size: 0.88rem;
+  }
+  .back:hover { color: #1f1a14; }
+</style>
+</head>
+<body>
+<div class="container">
+  <a href="../index.html" class="back">← Retour aux 3 directions</a>
+  <h1>Le foyer — exploration complète</h1>
+  <p class="lede">Tous les états du dashboard accompagnante, couvrant l'ensemble des fonctions du dashboard actuel : validation, présence, abonnement, parrainage, anti-fraude.</p>
+
+  <div class="group">
+    <div class="group-title">État nominal</div>
+    <div class="group-desc">La vue principale d'une accompagnante validée et abonnée.</div>
+    <div class="list">
+      <a class="card" href="ecran-complet.html">
+        <span class="label"><span class="pill ok">référence</span> Dashboard complet</span>
+        <span class="meta">validée · abonnée<br>3 demandes · 2 messages · 4 annonces</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="group">
+    <div class="group-title">États de validation</div>
+    <div class="group-desc">Le statut <code>validation_status</code> et le cas filleule (bypass visio).</div>
+    <div class="list">
+      <a class="card" href="etat-profil-incomplet.html">
+        <span class="label"><span class="pill warn">en_attente</span> Profil incomplet</span>
+        <span class="meta">pas de ville / pas de diplôme</span>
+      </a>
+      <a class="card" href="etat-filleule-sans-abo.html">
+        <span class="label"><span class="pill warn">en_attente</span> Filleule sans abonnement</span>
+        <span class="meta">bypass visio · garante</span>
+      </a>
+      <a class="card" href="etat-visio.html">
+        <span class="label"><span class="pill info">visio_a_planifier</span> Visio à planifier</span>
+        <span class="meta">dossier revu</span>
+      </a>
+      <a class="card" href="etat-refuse.html">
+        <span class="label"><span class="pill alert">refuse / a_completer</span> Profil à corriger</span>
+        <span class="meta">avec motif de refus</span>
+      </a>
+      <a class="card" href="etat-parrainage-bloque.html">
+        <span class="label"><span class="pill warn">anti-fraude</span> Parrainage bloqué</span>
+        <span class="meta">accès limité · 3 cartes</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="group">
+    <div class="group-title">États d'abonnement</div>
+    <div class="group-desc">Comment le dashboard change selon le statut Stripe.</div>
+    <div class="list">
+      <a class="card" href="etat-valide-sans-abo.html">
+        <span class="label"><span class="pill alert">aucun abo</span> Validée sans abonnement</span>
+        <span class="meta">profil masqué · CTA souscrire</span>
+      </a>
+      <a class="card" href="etat-essai-gratuit.html">
+        <span class="label"><span class="pill info">trialing</span> Essai gratuit</span>
+        <span class="meta">14 jours restants · barre de progression</span>
+      </a>
+      <a class="card" href="etat-abo-expire.html">
+        <span class="label"><span class="pill alert">expired</span> Abonnement expiré</span>
+        <span class="meta">annonces en sommeil · CTA réactiver</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="group">
+    <div class="group-title">États de présence</div>
+    <div class="group-desc">Le pill central change selon le toggle disponibilité.</div>
+    <div class="list">
+      <a class="card" href="etat-pause.html">
+        <span class="label"><span class="pill warn">indisponible</span> En pause programmée</span>
+        <span class="meta">jusqu'au 18 mai · stats à zéro</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="group">
+    <div class="group-title">Responsive</div>
+    <div class="group-desc">Vue mobile 390px avec adaptation portrait + stats compactes.</div>
+    <div class="list">
+      <a class="card" href="mobile.html">
+        <span class="label">Vue mobile</span>
+        <span class="meta">390px · empilé</span>
+      </a>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

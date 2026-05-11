@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Variante 3 + fond #fefaf8</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="_base.css">
+<style>
+  /* SURCHARGE FOND : #fefaf8 (plus clair que #faf7f2) */
+  :root {
+    --paper: #fefaf8;
+  }
+  body { background: #fefaf8; }
+  .app-header { background: #fefaf8; }
+
+  .tiles {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr;
+    grid-template-rows: auto auto;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+
+  .tile {
+    background: white;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 1.5rem;
+    text-decoration: none;
+    color: inherit;
+    transition: all 0.2s;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 130px;
+    position: relative;
+    overflow: hidden;
+  }
+  .tile:hover {
+    border-color: var(--kraft);
+    transform: translateY(-2px);
+  }
+
+  /* Tile principale "demandes" : prend toute la colonne de gauche, 2 lignes */
+  .tile.primary {
+    grid-row: span 2;
+    background: linear-gradient(135deg, #faecd9 0%, #f4d8b9 100%);
+    border-color: var(--accent);
+    min-height: 270px;
+  }
+  .tile.primary .tile-number {
+    font-size: 4.5rem;
+  }
+  .tile.primary .tile-label {
+    font-size: 1rem;
+  }
+
+  .tile-eyebrow {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--kraft);
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+  }
+  .tile-number {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 3rem;
+    color: var(--ink);
+    line-height: 1;
+    margin-bottom: 0.5rem;
+  }
+  .tile-label {
+    font-size: 0.88rem;
+    color: var(--ink-soft);
+  }
+  .tile-arrow {
+    align-self: flex-end;
+    color: var(--kraft);
+    font-size: 1rem;
+  }
+
+  .tile-dot {
+    position: absolute;
+    top: 1rem; right: 1rem;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--alert);
+  }
+
+  @media (max-width: 640px) {
+    .tiles {
+      grid-template-columns: 1fr;
+      grid-template-rows: auto auto auto;
+    }
+    .tile.primary {
+      grid-row: span 1;
+      min-height: 160px;
+    }
+    .tile.primary .tile-number { font-size: 3rem; }
+  }
+</style>
+</head>
+<body>
+
+<header class="app-header">
+  <div class="app-header-inner">
+    <a href="#" class="logo">roxanetnous</a>
+    <nav class="nav-desktop">
+      <a href="#" class="active">Accueil</a>
+      <a href="#">Annonces</a>
+      <a href="#">Demandes</a>
+      <a href="#">Messages <span class="nav-badge">2</span></a>
+      <a href="#">Profil</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+
+  <section class="hero">
+    <div class="portrait"></div>
+    <div class="hero-info">
+      <h1 class="hero-name">Marie Dubois</h1>
+      <div class="status-badge">Accompagnante validée</div>
+      <p class="hero-location">Rennes &middot; sur 30 km</p>
+      <div class="tags">
+        <span class="tag">Allaitement</span>
+        <span class="tag">Post-partum</span>
+        <span class="tag">Portage</span>
+      </div>
+    </div>
+  </section>
+
+  <div class="presence-wrap">
+    <div class="presence">
+      <span class="dot"></span>
+      <span>Disponible</span>
+    </div>
+  </div>
+
+  <h2 style="text-align: center; font-family: 'Playfair Display', serif; font-style: italic; font-size: 1.4rem; color: var(--ink); margin-bottom: 2rem;">Aujourd'hui</h2>
+
+  <div class="tiles">
+    <a href="#" class="tile primary">
+      <div>
+        <div class="tile-eyebrow">À consulter</div>
+        <div class="tile-number">3</div>
+        <div class="tile-label">demandes en attente à proximité</div>
+      </div>
+      <span class="tile-arrow" aria-hidden="true">→</span>
+    </a>
+
+    <a href="#" class="tile">
+      <span class="tile-dot" aria-hidden="true"></span>
+      <div>
+        <div class="tile-eyebrow">Messages</div>
+        <div class="tile-number">2</div>
+        <div class="tile-label">non lus</div>
+      </div>
+      <span class="tile-arrow" aria-hidden="true">→</span>
+    </a>
+
+    <a href="#" class="tile">
+      <div>
+        <div class="tile-eyebrow">Annonces</div>
+        <div class="tile-number">1</div>
+        <div class="tile-label">publiée · 142 vues</div>
+      </div>
+      <span class="tile-arrow" aria-hidden="true">→</span>
+    </a>
+  </div>
+
+  <section class="secondary-section">
+    <h2 class="section-title">Mon espace</h2>
+    <div class="secondary-grid">
+      <div class="secondary-card">
+        <h3>Mon profil</h3>
+        <div class="value">Informations professionnelles, photos, diplômes.</div>
+      </div>
+      <div class="secondary-card">
+        <h3>Mon parrainage</h3>
+        <div class="value">2 / 5 parrainages confirmés.</div>
+      </div>
+      <div class="secondary-card">
+        <h3>Mon abonnement</h3>
+        <div class="value">Mensuel · actif</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="footer-meta">
+    <a href="#">Aide</a><span>·</span>
+    <a href="#">Confidentialité</a><span>·</span>
+    <a href="#">Conditions</a><span>·</span>
+    <a href="#">Se déconnecter</a>
+  </div>
+
+</main>
+
+</body>
+</html>

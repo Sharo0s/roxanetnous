@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Landing A - editorial sobre</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="_shared.css">
+<style>
+  /* HERO A : centre, minimaliste */
+  .hero-a {
+    padding: 5.5rem 2rem 4rem;
+    text-align: center;
+    background: var(--paper);
+  }
+  .hero-a .eyebrow { margin-bottom: 1.25rem; }
+  .hero-a h1 {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-weight: 400;
+    font-size: clamp(2.8rem, 6vw, 4.2rem);
+    line-height: 1;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+    margin-bottom: 1.25rem;
+    max-width: 780px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .hero-a .baseline {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    color: var(--kraft);
+    font-size: 1.2rem;
+    margin-bottom: 2.5rem;
+  }
+  .hero-a .ctas { display: flex; gap: 0.75rem; justify-content: center; margin-bottom: 3rem; flex-wrap: wrap; }
+  .hero-a .stats-row { justify-content: center; }
+
+  /* MAP DECORATIVE - sobre */
+  .map-strip {
+    background: var(--paper-warm);
+    padding: 2.5rem 2rem;
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+  }
+  .map-strip .row {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2rem;
+    flex-wrap: wrap;
+  }
+  .map-strip .label {
+    font-size: 0.82rem;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--kraft);
+    font-weight: 500;
+  }
+  .map-strip .num {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 1.5rem;
+    margin-left: 0.4rem;
+  }
+
+  /* STORY ROXANE - carte foyer large */
+  .story-a .card-foyer {
+    padding: 3rem 3rem;
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 3rem;
+    align-items: start;
+  }
+  .story-a .portrait {
+    width: 100%;
+    aspect-ratio: 4/5;
+    background-image: linear-gradient(135deg, var(--accent) 0%, var(--kraft) 100%);
+    border-radius: 12px;
+    box-shadow: 0 18px 40px -18px rgba(0,0,0,0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 4rem;
+  }
+  .story-a h2 {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    line-height: 1.2;
+  }
+  .story-a p {
+    color: var(--ink-soft);
+    font-size: 1.02rem;
+    line-height: 1.7;
+    margin-bottom: 0.85rem;
+  }
+  .story-a .quote {
+    font-style: italic;
+    color: var(--ink);
+    border-left: 2px solid var(--kraft);
+    padding-left: 1rem;
+    margin-top: 1.5rem;
+  }
+  @media (max-width: 720px) {
+    .story-a .card-foyer { grid-template-columns: 1fr; padding: 2rem; }
+    .story-a .portrait { max-width: 220px; margin: 0 auto; }
+  }
+
+  /* COMMENT CA MARCHE */
+  .steps {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    margin-top: 2.5rem;
+  }
+  .step {
+    background: white;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 1.75rem 1.5rem;
+    text-align: left;
+    transition: all 0.2s;
+  }
+  .step:hover { border-color: var(--kraft); transform: translateY(-2px); }
+  .step .num {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    color: var(--kraft);
+    font-size: 1.4rem;
+    display: block;
+    margin-bottom: 0.5rem;
+  }
+  .step h3 {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-weight: 400;
+    font-size: 1.2rem;
+    margin-bottom: 0.5rem;
+  }
+  .step p { color: var(--ink-soft); font-size: 0.92rem; line-height: 1.55; }
+  @media (max-width: 720px) { .steps { grid-template-columns: 1fr; } }
+
+  /* POUR QUI - 2 cartes */
+  .pour-qui {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+    margin-top: 2.5rem;
+  }
+  .pour-qui .card-foyer h3 {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 1.6rem;
+    margin-bottom: 1rem;
+  }
+  .pour-qui ul { list-style: none; margin-bottom: 1.5rem; }
+  .pour-qui li {
+    display: flex;
+    gap: 0.6rem;
+    padding: 0.4rem 0;
+    color: var(--ink-soft);
+    font-size: 0.95rem;
+  }
+  .pour-qui li::before {
+    content: "—";
+    color: var(--kraft);
+    flex-shrink: 0;
+  }
+  @media (max-width: 720px) { .pour-qui { grid-template-columns: 1fr; } }
+
+  /* TARIFS */
+  .tarifs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+    margin-top: 2.5rem;
+    max-width: 720px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .tarif {
+    background: white;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 2rem 1.75rem;
+    text-align: center;
+    position: relative;
+  }
+  .tarif.featured {
+    border: 1px solid var(--kraft);
+    background: linear-gradient(180deg, var(--white) 0%, var(--accent-soft) 100%);
+  }
+  .tarif h3 {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 1.4rem;
+    margin-bottom: 0.5rem;
+  }
+  .tarif .price {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.6rem;
+    color: var(--ink);
+    margin-bottom: 0.25rem;
+  }
+  .tarif .price small {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.95rem;
+    color: var(--ink-soft);
+  }
+  .tarif .strike { color: var(--ink-faint); text-decoration: line-through; font-size: 0.9rem; margin-bottom: 0.25rem; }
+  .tarif .desc { color: var(--ink-soft); font-size: 0.88rem; margin-bottom: 1.25rem; }
+  .tarif .badge-reco {
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--kraft);
+    color: white;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    padding: 0.3rem 0.8rem;
+    border-radius: 999px;
+  }
+  @media (max-width: 720px) { .tarifs { grid-template-columns: 1fr; } }
+
+  /* FAQ accordion */
+  .faq-list { margin-top: 2rem; }
+  .faq {
+    border-bottom: 1px solid var(--line);
+    padding: 1.1rem 0;
+  }
+  .faq summary {
+    cursor: pointer;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 1.1rem;
+    color: var(--ink);
+  }
+  .faq summary::after { content: "+"; color: var(--kraft); font-size: 1.4rem; }
+  .faq[open] summary::after { content: "−"; }
+  .faq p {
+    color: var(--ink-soft);
+    margin-top: 0.75rem;
+    font-size: 0.95rem;
+    line-height: 1.6;
+  }
+
+  /* SECTION-TITLE centre commun */
+  .center { text-align: center; }
+  .center .lead { margin-left: auto; margin-right: auto; }
+</style>
+</head>
+<body>
+
+<!-- BANDEAU OFFRE -->
+<div class="bandeau-offre">
+  Offre de lancement — 1 mois offert pour les premiers inscrits
+</div>
+
+<header class="app-header">
+  <div class="app-header-inner">
+    <a href="#" class="logo">roxanetnous</a>
+    <nav class="nav-public">
+      <a href="#">Comment ça marche</a>
+      <a href="#">Tarifs</a>
+      <a href="#">FAQ</a>
+      <a href="#" class="btn btn-ghost" style="padding: 0.55rem 1.15rem;">Connexion</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+
+  <!-- HERO -->
+  <section class="hero-a">
+    <span class="eyebrow">L'accompagnement de vie</span>
+    <h1>L'accompagnement, entre nous.</h1>
+    <p class="baseline">Donne vie à ton quotidien.</p>
+    <div class="ctas">
+      <a href="#" class="btn btn-primary">Créer mon profil</a>
+      <a href="#" class="btn btn-ghost">Consulter les annonces</a>
+    </div>
+    <div class="stats-row">
+      <div class="stat-item">
+        <div class="num">42</div>
+        <div class="label">accompagnants vérifiés</div>
+      </div>
+      <div class="stat-item">
+        <div class="num">18</div>
+        <div class="label">accompagnés</div>
+      </div>
+      <div class="stat-item">
+        <div class="num">12</div>
+        <div class="label">villes</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STRIP DEPARTEMENTS OUVERTS -->
+  <section class="map-strip">
+    <div class="row">
+      <div>
+        <span class="label">Bretagne</span>
+        <span class="num">4</span>
+        <span style="color: var(--ink-soft); margin-left: 0.3rem;">départements ouverts</span>
+      </div>
+      <a href="#" style="color: var(--kraft); font-size: 0.92rem;">Voir la couverture →</a>
+    </div>
+  </section>
+
+  <!-- STORY ROXANE -->
+  <section class="section cream story-a">
+    <div class="section-inner mid">
+      <div class="card-foyer">
+        <div class="portrait">R</div>
+        <div>
+          <span class="eyebrow">Notre histoire</span>
+          <h2>Ici, c'est un lieu.</h2>
+          <p>
+            Je suis Roxane, aide médico-psychologique. J'exerce mon métier avec passion depuis une dizaine d'années.
+          </p>
+          <p>
+            Aujourd'hui, je fais un constat : la difficulté, en tant qu'accompagné ou accompagnant, à trouver son accompagnement. Où, quoi, qui, comment chercher ?
+          </p>
+          <p>
+            <strong style="font-weight: 500; color: var(--ink);">C'est ici.</strong> Parlons de nous, pour nous faciliter l'accès à demain.
+          </p>
+          <p class="quote">
+            Notre avenir de l'accompagnement à domicile et à la vie sociale. Nous sommes âgés, nous sommes en situation de handicap. Créons, nous, ensemble, l'avenir que nous souhaitons.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- COMMENT CA MARCHE -->
+  <section class="section warm">
+    <div class="section-inner center">
+      <span class="eyebrow">Étape par étape</span>
+      <h2 class="h-display h2-section">Comment ça marche</h2>
+      <p class="lead">Une mise en relation simple, vérifiée, sans intermédiaire.</p>
+      <div class="steps">
+        <div class="step">
+          <span class="num">01</span>
+          <h3>Inscription</h3>
+          <p>Créez votre compte en tant qu'accompagnant ou accompagné.</p>
+        </div>
+        <div class="step">
+          <span class="num">02</span>
+          <h3>Justificatifs</h3>
+          <p>Accompagnants : diplômes et pièce d'identité. Accompagnés : décrivez votre besoin.</p>
+        </div>
+        <div class="step">
+          <span class="num">03</span>
+          <h3>Validation</h3>
+          <p>Notre équipe vérifie manuellement chaque profil accompagnant sous 48h.</p>
+        </div>
+        <div class="step">
+          <span class="num">04</span>
+          <h3>Mise en relation</h3>
+          <p>Publiez votre annonce et recevez nos recommandations.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- POUR QUI -->
+  <section class="section cream">
+    <div class="section-inner center">
+      <span class="eyebrow">Pour vous</span>
+      <h2 class="h-display h2-section">Pour qui</h2>
+      <p class="lead">Deux espaces dédiés, une seule communauté.</p>
+      <div class="pour-qui">
+        <div class="card-foyer gradient" style="text-align: left;">
+          <h3>Accompagnants</h3>
+          <ul>
+            <li>Profil vérifié qui inspire confiance</li>
+            <li>Visibilité directe auprès des accompagnés</li>
+            <li>Profils recommandés selon vos compétences</li>
+            <li>Pas de commission. Vous fixez vos conditions.</li>
+          </ul>
+          <a href="#" class="btn btn-primary">Créer mon profil accompagnant</a>
+        </div>
+        <div class="card-foyer gradient" style="text-align: left;">
+          <h3>Accompagnés et proches</h3>
+          <ul>
+            <li>Tous les profils vérifiés manuellement</li>
+            <li>Recherche par spécialité, localisation, expérience</li>
+            <li>Recommandations personnalisées</li>
+            <li>Chaque accompagnant rencontré et validé</li>
+          </ul>
+          <a href="#" class="btn btn-primary">Trouver un accompagnant</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TARIFS -->
+  <section class="section warm">
+    <div class="section-inner center">
+      <span class="eyebrow">Tarifs</span>
+      <h2 class="h-display h2-section">Un tarif unique, simple</h2>
+      <p class="lead">Même prix pour les accompagnants et les accompagnés.</p>
+      <div class="tarifs">
+        <div class="tarif">
+          <h3>Mensuel</h3>
+          <div class="price">4,99€<small> / mois</small></div>
+          <p class="desc">Sans engagement, résiliable à tout moment.</p>
+          <a href="#" class="btn btn-ghost" style="width: 100%;">Commencer</a>
+        </div>
+        <div class="tarif featured">
+          <span class="badge-reco">Recommandé</span>
+          <h3>Annuel</h3>
+          <div class="strike">59,88€</div>
+          <div class="price">49,99€<small> / an</small></div>
+          <p class="desc">Soit 4,17€/mois. Économisez 17%.</p>
+          <a href="#" class="btn btn-primary" style="width: 100%;">Commencer</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="section cream">
+    <div class="section-inner narrow center">
+      <span class="eyebrow">Questions</span>
+      <h2 class="h-display h2-section">Questions fréquentes</h2>
+      <div class="faq-list" style="text-align: left;">
+        <details class="faq" open>
+          <summary>Comment fonctionne la vérification des profils ?</summary>
+          <p>Chaque accompagnant doit déposer ses diplômes et sa pièce d'identité. Notre équipe vérifie manuellement ces documents avant d'activer le profil.</p>
+        </details>
+        <details class="faq">
+          <summary>Combien coûte l'abonnement ?</summary>
+          <p>L'abonnement mensuel est à 4,99€/mois sans engagement. L'abonnement annuel est à 49,99€/an, soit une économie de 17%.</p>
+        </details>
+        <details class="faq">
+          <summary>Comment fonctionnent les recommandations ?</summary>
+          <p>Nous analysons 5 critères (spécialités, localisation, expérience, diplôme, disponibilités) pour vous recommander les profils les plus compatibles.</p>
+        </details>
+        <details class="faq">
+          <summary>Puis-je utiliser la plateforme sans abonnement ?</summary>
+          <p>Vous pouvez consulter les annonces sans abonnement. L'abonnement est requis pour publier et accéder aux recommandations.</p>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section class="section warm">
+    <div class="section-inner narrow center">
+      <span class="eyebrow">Contact</span>
+      <h2 class="h-display h2-section">Une question ?</h2>
+      <p class="lead">Notre équipe répond sous 24h ouvrées.</p>
+      <a href="#" class="btn btn-primary" style="margin-top: 1.5rem;">Nous écrire</a>
+    </div>
+  </section>
+
+</main>
+
+<footer class="footer">
+  <div>roxanetnous · Aide · Confidentialité · Conditions · Contact</div>
+</footer>
+
+</body>
+</html>

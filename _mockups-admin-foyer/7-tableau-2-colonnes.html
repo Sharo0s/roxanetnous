@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Admin · 7 — Tableau 2 colonnes</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="_shared.css" rel="stylesheet">
+<style>
+  .page-2col { max-width: 1240px; margin: 0 auto; padding: 3rem 1.5rem 5rem; }
+  .head-2col { margin-bottom: 2.5rem; max-width: 720px; }
+
+  .grid-2col {
+    display: grid;
+    grid-template-columns: 1fr 1.15fr;
+    gap: 2rem;
+  }
+
+  /* Section heading */
+  .col-title {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 1.45rem;
+    margin: 0 0 0.3rem;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+  .col-title small {
+    font-family: 'Inter', sans-serif;
+    font-style: normal;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--kraft-deep);
+    font-weight: 500;
+  }
+  .col-sub {
+    color: var(--ink-soft);
+    font-size: 13.5px;
+    margin: 0 0 1.5rem;
+  }
+
+  /* LEFT: queue */
+  .queue-item {
+    display: block;
+    background: white;
+    border: 1px solid var(--rule);
+    border-radius: 12px;
+    padding: 1rem 1.25rem;
+    text-decoration: none;
+    color: inherit;
+    margin-bottom: 0.8rem;
+    transition: border-color 0.15s, transform 0.15s;
+  }
+  .queue-item:hover { border-color: var(--kraft); transform: translateY(-1px); }
+  .queue-item.priority { border-color: var(--kraft); background: var(--kraft-tint); }
+
+  .queue-row { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; }
+  .queue-name { font-weight: 500; }
+  .queue-meta { color: var(--ink-soft); font-size: 13px; margin-top: 0.25rem; }
+
+  .queue-count {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 1.6rem;
+    color: var(--kraft-deep);
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .queue-section-card {
+    background: white;
+    border: 1px solid var(--rule);
+    border-radius: 12px;
+    padding: 1.1rem 1.25rem;
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 0.8rem;
+    transition: border-color 0.15s, transform 0.15s;
+  }
+  .queue-section-card:hover { border-color: var(--kraft); transform: translateY(-1px); }
+  .queue-section-card .label { font-size: 14px; color: var(--ink); }
+  .queue-section-card .label small { display: block; color: var(--ink-muted); font-size: 12px; margin-top: 0.15rem; }
+  .queue-section-card .val {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 1.4rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* RIGHT: pilotage */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.85rem;
+    margin-bottom: 1.25rem;
+  }
+  .kpi-card {
+    background: white;
+    border: 1px solid var(--rule);
+    border-radius: 12px;
+    padding: 1.1rem 1.25rem;
+    text-decoration: none;
+    color: inherit;
+    transition: border-color 0.15s, transform 0.15s;
+  }
+  .kpi-card:hover { border-color: var(--kraft); transform: translateY(-1px); }
+  .kpi-card .lbl { font-size: 12px; color: var(--ink-soft); }
+  .kpi-card .num {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 2.1rem;
+    line-height: 1;
+    margin: 0.45rem 0 0.3rem;
+    font-variant-numeric: tabular-nums;
+  }
+  .kpi-card .delta { font-size: 11.5px; }
+
+  /* Repartition bars */
+  .repartition {
+    background: white;
+    border: 1px solid var(--rule);
+    border-radius: 12px;
+    padding: 1.25rem;
+    margin-bottom: 1.25rem;
+  }
+  .repartition h4 { font-size: 13px; margin: 0 0 1rem; color: var(--ink-soft); font-weight: 500; }
+  .rep-row {
+    display: grid;
+    grid-template-columns: 110px 1fr 90px;
+    align-items: center;
+    gap: 1rem;
+    font-size: 13px;
+    margin-bottom: 0.6rem;
+  }
+  .rep-row:last-child { margin-bottom: 0; }
+  .rep-bar {
+    background: var(--rule-soft);
+    height: 8px;
+    border-radius: 999px;
+    overflow: hidden;
+  }
+  .rep-bar > div { height: 100%; border-radius: 999px; }
+  .rep-bar.kraft > div { background: var(--kraft); }
+  .rep-bar.muted > div { background: var(--ink-muted); }
+  .rep-val { text-align: right; font-variant-numeric: tabular-nums; }
+
+  /* Section cards (raccourcis vers pages) */
+  .nav-section-card {
+    background: white;
+    border: 1px solid var(--rule);
+    border-radius: 12px;
+    padding: 1rem 1.25rem;
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 0.7rem;
+    transition: border-color 0.15s, transform 0.15s;
+  }
+  .nav-section-card:hover { border-color: var(--kraft); transform: translateY(-1px); }
+  .nav-section-card .info .ttl { font-size: 14px; font-weight: 500; }
+  .nav-section-card .info .ln { font-size: 12.5px; color: var(--ink-soft); margin-top: 0.15rem; font-variant-numeric: tabular-nums; }
+  .nav-section-card .arrow { color: var(--ink-muted); font-family: 'Playfair Display', serif; font-size: 1.3rem; }
+
+  .block-spacer { height: 0.5rem; }
+
+  @media (max-width: 900px) {
+    .grid-2col { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">roxanetnous <span class="brand-pill">Admin</span></div>
+      <div class="topbar-right"><span>Sylvain Malard</span><a href="#" class="muted">Se déconnecter</a></div>
+    </div>
+  </header>
+  <nav class="subnav">
+    <div class="subnav-inner">
+      <a class="active" href="#">Tableau de bord</a><a href="#">Utilisateurs</a><a href="#">Annonces</a>
+      <a href="#">Messages</a><a href="#">Signalements</a><a href="#">Parrainages</a>
+      <a href="#">Couverture</a><a href="#">Historique</a>
+    </div>
+  </nav>
+
+  <main class="page-2col">
+    <a class="back" href="index.html">&larr; Retour</a>
+
+    <header class="head-2col">
+      <div class="eyebrow">Espace admin</div>
+      <h1 class="page-title">Tableau de bord</h1>
+      <p class="page-lede">À gauche, ce qui demande une décision. À droite, l'état du foyer. Tout est cliquable.</p>
+    </header>
+
+    <div class="grid-2col">
+
+      <!-- COLONNE GAUCHE : À TRAITER -->
+      <section>
+        <h2 class="col-title">À traiter <small>file d'action</small></h2>
+        <p class="col-sub">Triées par ancienneté. Les trois premières sont prioritaires.</p>
+
+        <a class="queue-item priority" href="#">
+          <div class="queue-row">
+            <div>
+              <div class="queue-name">Camille B. <span class="pill pill-blue" style="margin-left: 0.4rem;">Visio à planifier</span></div>
+              <div class="queue-meta">Rennes (35000) · DEAS · 4 ans expé · arrivée il y a 4 j</div>
+            </div>
+            <div class="queue-count">1</div>
+          </div>
+        </a>
+
+        <a class="queue-item" href="#">
+          <div class="queue-row">
+            <div>
+              <div class="queue-name">Lucie M. <span class="pill pill-amber" style="margin-left: 0.4rem;">Visio réalisée</span></div>
+              <div class="queue-meta">Brest (29200) · DEAVS · 8 ans expé · 2 j d'attente</div>
+            </div>
+            <div class="queue-count">2</div>
+          </div>
+        </a>
+
+        <a class="queue-item" href="#">
+          <div class="queue-row">
+            <div>
+              <div class="queue-name">Anne P. <span class="pill pill-grey" style="margin-left: 0.4rem;">En attente</span></div>
+              <div class="queue-meta">Quimper (29000) · Diplôme étranger équivalent · 1 j</div>
+            </div>
+            <div class="queue-count">3</div>
+          </div>
+        </a>
+
+        <div class="block-spacer"></div>
+
+        <a class="queue-section-card" href="#" style="border-color: var(--kraft); background: var(--kraft-tint);">
+          <div class="label">
+            Annonces à modérer
+            <small>file de modération</small>
+          </div>
+          <div class="val" style="color: var(--kraft-deep);">9</div>
+        </a>
+
+        <a class="queue-section-card" href="#" style="border-color: var(--kraft); background: var(--kraft-tint);">
+          <div class="label">
+            Signalements ouverts
+            <small>aucun grave</small>
+          </div>
+          <div class="val" style="color: var(--kraft-deep);">2</div>
+        </a>
+
+        <a class="queue-section-card" href="#">
+          <div class="label">
+            Waitlist hors zone bénéficiaire
+            <small>top : 44 (52) · 75 (38) · 33 (24)</small>
+          </div>
+          <div class="val">189</div>
+        </a>
+
+        <a class="queue-section-card" href="#">
+          <div class="label">
+            Parrainages — fraude potentielle
+            <small>3 blacklists actives · 0 nouveau cas</small>
+          </div>
+          <div class="val">3</div>
+        </a>
+
+        <a class="queue-section-card" href="#">
+          <div class="label">
+            Visios programmées cette semaine
+            <small>prochaine : mardi 14 h</small>
+          </div>
+          <div class="val">4</div>
+        </a>
+      </section>
+
+      <!-- COLONNE DROITE : PILOTAGE -->
+      <section>
+        <h2 class="col-title">Pilotage <small>l'état du foyer</small></h2>
+        <p class="col-sub">Chaque chiffre ouvre sa page de détail.</p>
+
+        <div class="kpi-grid">
+          <a class="kpi-card" href="#">
+            <div class="lbl">Revenu mensuel récurrent</div>
+            <div class="num">4 280 €</div>
+            <div class="delta kpi-delta-up">▲ +6,2 % vs avril</div>
+          </a>
+          <a class="kpi-card" href="#">
+            <div class="lbl">Conversion inscrits → abonnés</div>
+            <div class="num">24,8 %</div>
+            <div class="delta kpi-delta-up">▲ +1,4 pt</div>
+          </a>
+          <a class="kpi-card" href="#">
+            <div class="lbl">Taux de résiliation (mai)</div>
+            <div class="num">1,8 %</div>
+            <div class="delta kpi-delta-up">▼ −0,6 pt · sain</div>
+          </a>
+          <a class="kpi-card" href="#">
+            <div class="lbl">Utilisateurs actifs (30 j)</div>
+            <div class="num">312</div>
+            <div class="delta soft">25 % des inscrits</div>
+          </a>
+        </div>
+
+        <div class="repartition">
+          <h4>Répartition des utilisateurs · 1 247 au total</h4>
+          <div class="rep-row">
+            <span>Accompagnants</span>
+            <div class="rep-bar kraft"><div style="width: 23%;"></div></div>
+            <span class="rep-val">286 · 23 %</span>
+          </div>
+          <div class="rep-row">
+            <span>Accompagnés</span>
+            <div class="rep-bar muted"><div style="width: 77%;"></div></div>
+            <span class="rep-val">961 · 77 %</span>
+          </div>
+        </div>
+
+        <a class="nav-section-card" href="#">
+          <div class="info">
+            <div class="ttl">Activité du mois</div>
+            <div class="ln">1 842 messages · 67 conversations · +14 %</div>
+          </div>
+          <span class="arrow">&rsaquo;</span>
+        </a>
+        <a class="nav-section-card" href="#">
+          <div class="info">
+            <div class="ttl">Annonces publiées</div>
+            <div class="ln">148 actives · dernière il y a 2 h</div>
+          </div>
+          <span class="arrow">&rsaquo;</span>
+        </a>
+        <a class="nav-section-card" href="#">
+          <div class="info">
+            <div class="ttl">Couverture géographique</div>
+            <div class="ln">4 départements ouverts · Bretagne complète</div>
+          </div>
+          <span class="arrow">&rsaquo;</span>
+        </a>
+        <a class="nav-section-card" href="#">
+          <div class="info">
+            <div class="ttl">Parrainage</div>
+            <div class="ln">47 aboutis · 11 en cours</div>
+          </div>
+          <span class="arrow">&rsaquo;</span>
+        </a>
+        <a class="nav-section-card" href="#">
+          <div class="info">
+            <div class="ttl">Historique des actions</div>
+            <div class="ln">23 actions / 24 h · dernière il y a 18 min</div>
+          </div>
+          <span class="arrow">&rsaquo;</span>
+        </a>
+      </section>
+
+    </div>
+  </main>
+
+</div>
+</body>
+</html>

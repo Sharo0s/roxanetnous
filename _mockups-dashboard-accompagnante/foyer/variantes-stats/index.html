@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>3 variantes pour remplacer les cercles stats</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  body {
+    font-family: 'Inter', sans-serif;
+    background: #faf7f2;
+    color: #1f1a14;
+    font-weight: 300;
+    margin: 0; padding: 4rem 2rem;
+    line-height: 1.65;
+  }
+  .container { max-width: 720px; margin: 0 auto; }
+  h1 {
+    font-family: 'Playfair Display', serif;
+    font-style: italic; font-weight: 400;
+    font-size: 2.2rem; margin-bottom: 0.5rem;
+  }
+  .lede { color: #6b6258; margin-bottom: 3rem; }
+  .list { display: grid; gap: 1rem; }
+  a.card {
+    border: 1px solid #e8dfd2;
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem 1.75rem;
+    text-decoration: none;
+    color: inherit;
+    transition: all 0.2s;
+    display: block;
+  }
+  a.card:hover {
+    border-color: #d3a387;
+    transform: translateX(2px);
+  }
+  a.card h2 {
+    font-family: 'Playfair Display', serif;
+    font-weight: 400; font-style: italic;
+    font-size: 1.35rem; margin-bottom: 0.4rem;
+  }
+  a.card p { color: #6b6258; font-size: 0.93rem; margin: 0; }
+  .num {
+    display: inline-block;
+    width: 24px; height: 24px;
+    line-height: 24px; text-align: center;
+    color: #d3a387;
+    font-size: 0.85rem;
+    margin-right: 0.5rem;
+    font-family: 'Playfair Display', serif;
+  }
+  .nb {
+    color: #6b6258;
+    font-size: 0.85rem;
+    background: #faecd9;
+    padding: 0.75rem 1.25rem;
+    border-radius: 10px;
+    margin-top: 2.5rem;
+    font-style: italic;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>3 variantes pour remplacer les cercles stats</h1>
+  <p class="lede">
+    Le hero, la pill de présence et la section "Mon espace" en bas restent inchangés.
+    Seul le bloc des 3 cercles (Demandes / Messages / Annonces) change.
+  </p>
+
+  <div class="list">
+    <a class="card" href="1-liste-narrative.html">
+      <h2><span class="num">1</span>Liste narrative</h2>
+      <p>Trois lignes verticales avec gros chiffre italique à gauche, titre + sous-titre, flèche kraft. Plus de cercles, lecture séquentielle, ton éditorial proche du « journal de bord ».</p>
+    </a>
+
+    <a class="card" href="2-bandeau-actualite.html">
+      <h2><span class="num">2</span>Bandeau d'actualité</h2>
+      <p>Un seul gros bloc qui te parle directement : titre éditorial, contexte (« la plus récente, à 8 km de chez vous »), CTA noir vers les demandes, et les autres infos (messages, annonces) en métriques discrètes en bas.</p>
+    </a>
+
+    <a class="card" href="3-tuiles-asymetriques.html">
+      <h2><span class="num">3</span>Tuiles asymétriques</h2>
+      <p>Mosaïque 2 colonnes : grande tuile Demandes en gradient kraft à gauche (priorité visuelle), Messages + Annonces empilés à droite. Eyebrow uppercase, gros chiffres Playfair italic.</p>
+    </a>
+  </div>
+
+  <p class="nb">
+    Chaque variante affiche dans son contexte complet : hero + présence + nouveau bloc + section Mon espace + footer.
+    Cliquez pour voir le rendu intégré.
+  </p>
+</div>
+</body>
+</html>

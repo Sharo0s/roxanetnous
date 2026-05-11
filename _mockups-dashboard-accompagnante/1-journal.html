@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Mockup 1 — Le journal de bord</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --accent: #F4C8A3;
+    --kraft: #d3a387;
+    --ink: #2a2520;
+    --ink-soft: #6b6258;
+    --paper: #faf7f2;
+    --line: #e8dfd2;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    font-weight: 300;
+    line-height: 1.7;
+  }
+  header {
+    border-bottom: 1px solid var(--line);
+    padding: 1.25rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--paper);
+  }
+  .logo {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 1.4rem;
+    letter-spacing: -0.01em;
+  }
+  .user-menu {
+    font-size: 0.9rem;
+    color: var(--ink-soft);
+  }
+  main {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 5rem 2rem 6rem;
+  }
+  .greeting {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 2.4rem;
+    font-weight: 400;
+    line-height: 1.2;
+    margin-bottom: 1.5rem;
+    letter-spacing: -0.02em;
+  }
+  .lede {
+    font-size: 1.05rem;
+    color: var(--ink-soft);
+    margin-bottom: 0.75rem;
+  }
+  .lede-rule {
+    width: 60px;
+    height: 1px;
+    background: var(--kraft);
+    margin: 2rem 0 4rem;
+  }
+  .section {
+    margin-bottom: 3.5rem;
+  }
+  .section-label {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    text-transform: uppercase;
+    font-size: 0.72rem;
+    letter-spacing: 0.18em;
+    color: var(--kraft);
+    font-weight: 500;
+    margin-bottom: 1.25rem;
+  }
+  .section-label::before {
+    content: "";
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+  .item {
+    padding: 1.25rem 0;
+  }
+  .item-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.3rem;
+    font-weight: 400;
+    margin-bottom: 0.5rem;
+    line-height: 1.4;
+  }
+  .item-meta {
+    color: var(--ink-soft);
+    font-size: 0.95rem;
+    margin-bottom: 1rem;
+  }
+  .item-action {
+    display: inline-block;
+    color: var(--ink);
+    font-size: 0.92rem;
+    border-bottom: 1px solid var(--kraft);
+    padding-bottom: 2px;
+    text-decoration: none;
+    transition: opacity 0.2s;
+  }
+  .item-action:hover { opacity: 0.6; }
+  .inline-stats {
+    color: var(--ink-soft);
+    font-size: 0.98rem;
+  }
+  .inline-stats strong {
+    color: var(--ink);
+    font-weight: 500;
+  }
+  .presence-state {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+  .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #7fb37a;
+    display: inline-block;
+  }
+  footer-nav {
+    display: block;
+    border-top: 1px solid var(--line);
+    padding-top: 2.5rem;
+    margin-top: 5rem;
+    text-align: center;
+  }
+  .footer-nav {
+    border-top: 1px solid var(--line);
+    padding-top: 2.5rem;
+    margin-top: 5rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 2rem;
+    justify-content: center;
+    font-size: 0.92rem;
+  }
+  .footer-nav a {
+    color: var(--ink-soft);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .footer-nav a:hover { color: var(--ink); }
+  .footer-nav .sep { color: var(--line); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">roxanetnous</div>
+  <div class="user-menu">Marie ▾</div>
+</header>
+
+<main>
+
+  <h1 class="greeting">Bonjour Marie,<br>ce dimanche 10 mai.</h1>
+  <p class="lede">Vous avez 3 personnes qui pensent à vous.</p>
+  <div class="lede-rule"></div>
+
+  <section class="section">
+    <div class="section-label">Aujourd'hui</div>
+    <div class="item">
+      <h2 class="item-title">Sophie attend votre retour</h2>
+      <p class="item-meta">Depuis 2 jours, sur sa demande d'accompagnement à Quimper.</p>
+      <a href="#" class="item-action">Lui répondre</a>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-label">Cette semaine</div>
+    <p class="inline-stats">
+      <strong>2</strong> nouveaux messages &nbsp;·&nbsp;
+      <strong>1</strong> nouvelle demande à 12 km
+    </p>
+  </section>
+
+  <section class="section">
+    <div class="section-label">Votre présence</div>
+    <div class="presence-state">
+      <span class="dot"></span>
+      <span class="inline-stats">Disponible jusqu'au <strong>24 mai</strong></span>
+    </div>
+    <p class="item-meta">Rayon 30 km autour de Rennes.</p>
+    <a href="#" class="item-action">Modifier ma présence</a>
+  </section>
+
+  <nav class="footer-nav">
+    <a href="#">Mon profil</a><span class="sep">·</span>
+    <a href="#">Mes annonces (4)</a><span class="sep">·</span>
+    <a href="#">Mon abonnement</a><span class="sep">·</span>
+    <a href="#">Mon parrainage (2/5)</a>
+  </nav>
+
+</main>
+
+</body>
+</html>

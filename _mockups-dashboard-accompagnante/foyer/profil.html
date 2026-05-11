@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Profil — style « foyer »</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="_shared.css">
+<style>
+  /* surcharges locales : reproduire l'esthetique du dashboard */
+  body { background: #faf7f2; }
+
+  .page-header {
+    margin-bottom: 3rem;
+    text-align: center;
+  }
+  .page-header .eyebrow {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--kraft);
+    margin-bottom: 0.5rem;
+  }
+  .page-header h1 {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-weight: 400;
+    font-size: 2.5rem;
+    line-height: 1.15;
+    color: var(--ink);
+    letter-spacing: -0.015em;
+  }
+  .page-header .subtitle {
+    margin-top: 0.75rem;
+    color: var(--ink-soft);
+    font-size: 0.95rem;
+  }
+
+  /* code parrainage : en regle horizontale discrete */
+  .parrainage-code {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: white;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 1rem 1.5rem;
+    margin-bottom: 2rem;
+  }
+  .parrainage-code-label {
+    font-size: 0.85rem;
+    color: var(--ink-soft);
+  }
+  .parrainage-code-value {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 1.1rem;
+    letter-spacing: 0.18em;
+    font-weight: 500;
+    color: var(--ink);
+  }
+
+  /* bandeau statut : plus aere, harmonise */
+  .status-banner {
+    margin-bottom: 2rem;
+    padding: 1.25rem 1.5rem;
+    border-radius: 12px;
+    border: 1px solid var(--line);
+    background: white;
+    font-size: 0.93rem;
+    line-height: 1.55;
+  }
+  .status-banner.info { background: #f0f5f8; border-color: #c6d5e0; color: #2c4357; }
+  .status-banner.warning { background: #fdf6ea; border-color: #e8c89a; color: #6b4d22; }
+  .status-banner.alert { background: #fbf0ed; border-color: #e5b3ab; color: #7a2e23; }
+  .status-banner strong {
+    display: block;
+    margin-bottom: 0.25rem;
+    font-weight: 500;
+    color: inherit;
+  }
+
+  /* placeholder formulaire : montrer qu'on ne touche pas a son contenu */
+  .form-placeholder {
+    background: white;
+    border: 1px dashed #d3a387;
+    border-radius: 12px;
+    padding: 3rem 2rem;
+    text-align: center;
+    color: var(--ink-soft);
+  }
+  .form-placeholder .label {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 1.4rem;
+    color: var(--ink);
+    margin-bottom: 0.5rem;
+  }
+  .form-placeholder .desc {
+    font-size: 0.9rem;
+    line-height: 1.6;
+  }
+
+  /* section RGPD : sobre, distincte */
+  .rgpd-section {
+    margin-top: 4rem;
+    padding-top: 3rem;
+    border-top: 1px solid var(--line);
+  }
+  .rgpd-section h2 {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 1.4rem;
+    font-weight: 400;
+    margin-bottom: 0.5rem;
+    text-align: center;
+  }
+  .rgpd-section .desc {
+    text-align: center;
+    color: var(--ink-soft);
+    font-size: 0.9rem;
+    margin-bottom: 1.5rem;
+    max-width: 480px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .rgpd-actions {
+    display: flex;
+    justify-content: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+  .btn-soft {
+    padding: 0.7rem 1.4rem;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: white;
+    font-size: 0.88rem;
+    color: var(--ink);
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s;
+  }
+  .btn-soft:hover {
+    border-color: var(--kraft);
+  }
+  .btn-soft.danger {
+    color: #a13f33;
+  }
+  .btn-soft.danger:hover {
+    border-color: #a13f33;
+    background: #fbf0ed;
+  }
+</style>
+</head>
+<body>
+
+<header class="app-header">
+  <div class="app-header-inner">
+    <a href="#" class="logo">roxanetnous</a>
+    <nav class="nav-desktop">
+      <a href="#">Accueil</a>
+      <a href="#">Annonces</a>
+      <a href="#">Demandes</a>
+      <a href="#">Messages <span class="nav-badge">2</span></a>
+      <a href="#" class="active">Profil</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+
+  <div class="page-header">
+    <div class="eyebrow">Mon espace</div>
+    <h1>Mon profil</h1>
+    <p class="subtitle">Tenez vos informations à jour pour rassurer les accompagnées.</p>
+  </div>
+
+  <!-- Code parrainage (si valide) -->
+  <div class="parrainage-code">
+    <span class="parrainage-code-label">Votre code de parrainage</span>
+    <span class="parrainage-code-value">MARIE-2K9X</span>
+  </div>
+
+  <!-- Bandeau de statut (exemple : visio à planifier) -->
+  <div class="status-banner info">
+    <strong>Votre dossier a été revu.</strong>
+    Nous vous avons envoyé un email pour convenir d'un créneau visio avec l'équipe.
+  </div>
+
+  <!-- Placeholder formulaire : on ne le refait pas dans ce mockup -->
+  <div class="form-placeholder">
+    <div class="label">Formulaire de profil</div>
+    <div class="desc">
+      Champs existants conservés tels quels :<br>
+      identité, contact, ville et rayon, spécialités, diplômes,<br>
+      disponibilités par jour, permis, véhicule, description, justificatifs.<br><br>
+      <em>Le composant <code>AccompagnanteProfileForm</code> n'est pas modifié.</em>
+    </div>
+  </div>
+
+  <!-- Section RGPD -->
+  <section class="rgpd-section">
+    <h2>Mes données personnelles</h2>
+    <p class="desc">
+      Conformément au RGPD, vous pouvez exporter ou supprimer vos données à tout moment.
+    </p>
+    <div class="rgpd-actions">
+      <a href="#" class="btn-soft">Exporter mes données</a>
+      <a href="#" class="btn-soft danger">Supprimer mon compte</a>
+    </div>
+  </section>
+
+  <!-- FOOTER cohérent avec dashboard -->
+  <div class="footer-meta">
+    <a href="#">Aide</a>
+    <span>·</span>
+    <a href="#">Confidentialité</a>
+    <span>·</span>
+    <a href="#">Conditions</a>
+    <span>·</span>
+    <a href="#">Se déconnecter</a>
+  </div>
+
+</main>
+
+</body>
+</html>

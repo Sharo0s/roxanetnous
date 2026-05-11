@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Variante 1 — Liste narrative</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="_base.css">
+<style>
+  .activity-list {
+    margin-bottom: 1rem;
+  }
+  .activity-row {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    padding: 1.25rem 0;
+    border-bottom: 1px solid var(--line);
+    text-decoration: none;
+    color: inherit;
+    transition: padding 0.2s;
+  }
+  .activity-row:hover {
+    padding-left: 0.5rem;
+  }
+  .activity-row:last-child { border-bottom: none; }
+
+  .activity-marker {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--accent-soft);
+    color: var(--kraft);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 1.1rem;
+  }
+  .activity-marker.icon {
+    background: white;
+    border: 1px solid var(--line);
+  }
+
+  .activity-body { flex: 1; min-width: 0; }
+  .activity-title {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 1.15rem;
+    color: var(--ink);
+    margin-bottom: 0.15rem;
+  }
+  .activity-sub {
+    font-size: 0.86rem;
+    color: var(--ink-soft);
+  }
+  .activity-arrow {
+    color: var(--kraft);
+    font-size: 1.1rem;
+    flex-shrink: 0;
+  }
+
+  .activity-marker.empty {
+    background: white;
+    border: 1px solid var(--line);
+    color: var(--ink-faint);
+  }
+</style>
+</head>
+<body>
+
+<header class="app-header">
+  <div class="app-header-inner">
+    <a href="#" class="logo">roxanetnous</a>
+    <nav class="nav-desktop">
+      <a href="#" class="active">Accueil</a>
+      <a href="#">Annonces</a>
+      <a href="#">Demandes</a>
+      <a href="#">Messages <span class="nav-badge">2</span></a>
+      <a href="#">Profil</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+
+  <!-- HERO (statique pour le contexte) -->
+  <section class="hero">
+    <div class="portrait"></div>
+    <div class="hero-info">
+      <h1 class="hero-name">Marie Dubois</h1>
+      <div class="status-badge">Accompagnante validée</div>
+      <p class="hero-location">Rennes &middot; sur 30 km</p>
+      <div class="tags">
+        <span class="tag">Allaitement</span>
+        <span class="tag">Post-partum</span>
+        <span class="tag">Portage</span>
+      </div>
+    </div>
+  </section>
+
+  <div class="presence-wrap">
+    <div class="presence">
+      <span class="dot"></span>
+      <span>Disponible</span>
+    </div>
+  </div>
+
+  <!-- ─── VARIANTE 1 : LISTE NARRATIVE ─── -->
+  <div class="variant-marker">Variante 1</div>
+  <h2 class="variant-title">Cette semaine chez vous</h2>
+
+  <div class="activity-list">
+    <a href="#" class="activity-row">
+      <span class="activity-marker">3</span>
+      <div class="activity-body">
+        <div class="activity-title">Demandes en attente</div>
+        <div class="activity-sub">À consulter — nouvelles depuis votre dernière visite</div>
+      </div>
+      <span class="activity-arrow" aria-hidden="true">→</span>
+    </a>
+
+    <a href="#" class="activity-row">
+      <span class="activity-marker">2</span>
+      <div class="activity-body">
+        <div class="activity-title">Messages non lus</div>
+        <div class="activity-sub">Sophie et Camille vous ont écrit</div>
+      </div>
+      <span class="activity-arrow" aria-hidden="true">→</span>
+    </a>
+
+    <a href="#" class="activity-row">
+      <span class="activity-marker icon">1</span>
+      <div class="activity-body">
+        <div class="activity-title">Annonce publiée</div>
+        <div class="activity-sub">142 vues cette semaine</div>
+      </div>
+      <span class="activity-arrow" aria-hidden="true">→</span>
+    </a>
+  </div>
+
+  <!-- Section secondaire (statique pour le contexte) -->
+  <section class="secondary-section">
+    <h2 class="section-title">Mon espace</h2>
+    <div class="secondary-grid">
+      <div class="secondary-card">
+        <h3>Mon profil</h3>
+        <div class="value">Informations professionnelles, photos, diplômes.</div>
+      </div>
+      <div class="secondary-card">
+        <h3>Mon parrainage</h3>
+        <div class="value">2 / 5 parrainages confirmés.</div>
+      </div>
+      <div class="secondary-card">
+        <h3>Mon abonnement</h3>
+        <div class="value">Mensuel · actif</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="footer-meta">
+    <a href="#">Aide</a><span>·</span>
+    <a href="#">Confidentialité</a><span>·</span>
+    <a href="#">Conditions</a><span>·</span>
+    <a href="#">Se déconnecter</a>
+  </div>
+
+</main>
+
+</body>
+</html>

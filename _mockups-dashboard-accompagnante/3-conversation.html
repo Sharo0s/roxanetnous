@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Mockup 3 — La conversation</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --accent: #F4C8A3;
+    --kraft: #d3a387;
+    --ink: #2a2520;
+    --ink-soft: #6b6258;
+    --paper: #faf7f2;
+    --line: #e8dfd2;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    font-weight: 300;
+    line-height: 1.65;
+  }
+  header {
+    border-bottom: 1px solid var(--line);
+    padding: 1.25rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .logo {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 1.4rem;
+  }
+  .user-menu {
+    font-size: 0.9rem;
+    color: var(--ink-soft);
+  }
+  main {
+    max-width: 620px;
+    margin: 0 auto;
+    padding: 5rem 2rem 6rem;
+  }
+
+  .quote {
+    margin-bottom: 1.75rem;
+  }
+  .quote-text {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 2.3rem;
+    font-weight: 400;
+    line-height: 1.25;
+    color: var(--ink);
+    letter-spacing: -0.015em;
+    margin-bottom: 1.25rem;
+  }
+  .quote-context {
+    color: var(--ink-soft);
+    font-size: 1rem;
+    margin-bottom: 1.75rem;
+  }
+  .actions {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 4rem;
+  }
+  .btn {
+    padding: 0.85rem 1.6rem;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    background: white;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 400;
+    color: var(--ink);
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    transition: all 0.2s;
+  }
+  .btn.primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    font-weight: 500;
+  }
+  .btn.primary:hover {
+    background: var(--kraft);
+    border-color: var(--kraft);
+  }
+  .btn:hover {
+    border-color: var(--kraft);
+  }
+
+  hr.soft {
+    border: none;
+    border-top: 1px solid var(--line);
+    margin: 3rem 0;
+  }
+
+  .group-label {
+    text-transform: uppercase;
+    font-size: 0.72rem;
+    letter-spacing: 0.18em;
+    color: var(--kraft);
+    font-weight: 500;
+    margin-bottom: 1.5rem;
+  }
+
+  .pending-list {
+    list-style: none;
+  }
+  .pending-list li {
+    padding: 0.9rem 0;
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    font-size: 1rem;
+  }
+  .pending-list li:last-child { border-bottom: none; }
+  .pending-list a {
+    color: var(--ink);
+    text-decoration: none;
+    flex: 1;
+  }
+  .pending-list a:hover { color: var(--kraft); }
+  .pending-list .marker {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--kraft);
+    flex-shrink: 0;
+  }
+  .pending-list .when {
+    color: var(--ink-soft);
+    font-size: 0.85rem;
+  }
+
+  .reassurance {
+    background: white;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 1.75rem 2rem;
+  }
+  .reassurance h3 {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 1.1rem;
+    font-weight: 400;
+    margin-bottom: 0.75rem;
+    color: var(--ink);
+  }
+  .reassurance p {
+    color: var(--ink-soft);
+    font-size: 0.95rem;
+    margin-bottom: 1.5rem;
+  }
+  .quick-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .quick-link {
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    font-size: 0.85rem;
+    color: var(--ink);
+    text-decoration: none;
+    background: var(--paper);
+    transition: all 0.2s;
+  }
+  .quick-link:hover {
+    border-color: var(--kraft);
+    background: white;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">roxanetnous</div>
+  <div class="user-menu">Marie ▾</div>
+</header>
+
+<main>
+
+  <div class="quote">
+    <p class="quote-text">« Marie, Sophie a besoin d'une réponse. »</p>
+    <p class="quote-context">Sa demande date de mardi. Vous l'avez consultée mais n'avez pas encore répondu.</p>
+    <div class="actions">
+      <a href="#" class="btn primary">Lire sa demande</a>
+      <a href="#" class="btn">Plus tard</a>
+    </div>
+  </div>
+
+  <hr class="soft">
+
+  <div class="group-label">Aussi en attente</div>
+  <ul class="pending-list">
+    <li>
+      <span class="marker"></span>
+      <a href="#">Camille vous a écrit</a>
+      <span class="when">hier soir</span>
+    </li>
+    <li>
+      <span class="marker"></span>
+      <a href="#">Une nouvelle demande à 12 km de chez vous</a>
+      <span class="when">ce matin</span>
+    </li>
+  </ul>
+
+  <hr class="soft">
+
+  <div class="reassurance">
+    <h3>Tout va bien par ailleurs.</h3>
+    <p>Vous êtes visible, votre profil est validé, votre abonnement court jusqu'au 12 juin. Vous avez parrainé 2 accompagnantes sur 5.</p>
+    <div class="quick-links">
+      <a href="#" class="quick-link">Mes annonces</a>
+      <a href="#" class="quick-link">Mon profil</a>
+      <a href="#" class="quick-link">Mon abonnement</a>
+      <a href="#" class="quick-link">Mon parrainage</a>
+    </div>
+  </div>
+
+</main>
+
+</body>
+</html>

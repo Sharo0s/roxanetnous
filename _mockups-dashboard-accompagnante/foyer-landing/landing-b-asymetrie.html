@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Landing B - asymetrie chaleureuse</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="_shared.css">
+<style>
+  /* HEADER : logo + nom cote a cote */
+  .app-header .logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+  .app-header .logo img {
+    width: 100px;
+    height: 100px;
+    object-fit: contain;
+  }
+
+  /* HERO B : 2 colonnes asymetriques, texte gauche + portrait+map droite */
+  .hero-b {
+    background: var(--paper);
+    padding: 5rem 2rem 4rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-b::before {
+    content: "";
+    position: absolute;
+    top: -100px; right: -150px;
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, var(--accent-soft) 0%, transparent 65%);
+    pointer-events: none;
+    z-index: 0;
+  }
+  .hero-b .row {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1.1fr 1fr;
+    gap: 4rem;
+    align-items: center;
+    position: relative;
+    z-index: 1;
+  }
+  .hero-b h1 {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-weight: 400;
+    font-size: clamp(2.6rem, 5.5vw, 4rem);
+    line-height: 1.05;
+    letter-spacing: -0.015em;
+    margin: 0.8rem 0 1.25rem;
+    color: var(--ink);
+  }
+  .hero-b .lead { font-size: 1.15rem; margin-bottom: 2rem; max-width: 480px; }
+  .hero-b .ctas { display: flex; gap: 0.75rem; margin-bottom: 2.5rem; flex-wrap: wrap; }
+  .hero-b .stats-row { gap: 2rem; }
+  .hero-b .map-col {
+    width: 100%;
+  }
+  .hero-b .map-col svg {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+  @media (max-width: 900px) {
+    .hero-b .row { grid-template-columns: 1fr; gap: 3rem; }
+    .hero-b .map-col { max-width: 380px; margin: 0 auto; }
+  }
+
+  /* MAP STRIP (recupere de la A) */
+  .map-strip {
+    background: var(--paper-warm);
+    padding: 1.5rem 2rem;
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+  }
+  .map-strip .row {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2rem;
+    flex-wrap: wrap;
+  }
+  .map-strip .label {
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--kraft);
+    font-weight: 500;
+  }
+  .map-strip .num {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 1.5rem;
+    margin-left: 0.4rem;
+  }
+  .map-strip a { color: var(--kraft); font-size: 0.92rem; }
+
+  /* TUILES POUR QUI - asymetriques */
+  .pour-qui-tiles {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr;
+    gap: 1rem;
+    margin-top: 2.5rem;
+  }
+  .pour-qui-tiles .tile {
+    background: white;
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    padding: 2.5rem 2rem;
+    text-decoration: none;
+    color: inherit;
+    transition: all 0.2s;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 280px;
+    position: relative;
+    overflow: hidden;
+  }
+  .pour-qui-tiles .tile:hover { border-color: var(--kraft); transform: translateY(-2px); }
+  .pour-qui-tiles .tile.featured {
+    border-color: var(--accent);
+    grid-row: span 1;
+    padding: 0;
+    overflow: hidden;
+    background: white;
+  }
+  .pour-qui-tiles .tile.featured .img-wrap {
+    aspect-ratio: 16/10;
+    overflow: hidden;
+  }
+  .pour-qui-tiles .tile.featured .img-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .pour-qui-tiles .tile.featured .body {
+    padding: 1.75rem 2rem 2rem;
+    background: linear-gradient(180deg, white 0%, var(--accent-soft) 100%);
+  }
+  .pour-qui-tiles .tile.featured h3 { margin-bottom: 0.75rem; }
+  .pour-qui-tiles .tile.featured .arrow {
+    margin-top: 0.85rem;
+    display: inline-block;
+  }
+  .pour-qui-tiles .tile.compact {
+    min-height: auto;
+    background: white;
+  }
+  .pour-qui-tiles .right { display: grid; gap: 1rem; }
+  .pour-qui-tiles h3 {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-weight: 400;
+    font-size: 1.8rem;
+    margin-bottom: 0.5rem;
+  }
+  .pour-qui-tiles .compact h3 { font-size: 1.3rem; }
+  .pour-qui-tiles ul { list-style: none; }
+  .pour-qui-tiles ul li {
+    color: var(--ink-soft);
+    font-size: 0.92rem;
+    padding: 0.25rem 0;
+    display: flex;
+    gap: 0.5rem;
+  }
+  .pour-qui-tiles ul li::before { content: "·"; color: var(--kraft); font-weight: bold; }
+  .pour-qui-tiles .arrow {
+    margin-top: 1rem;
+    color: var(--kraft);
+    font-size: 0.92rem;
+  }
+  @media (max-width: 720px) {
+    .pour-qui-tiles { grid-template-columns: 1fr; }
+  }
+
+  /* STORY ROXANE simplifiee carte */
+  .story-b .card-foyer {
+    padding: 3rem 3rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+    align-items: center;
+  }
+  .story-b .photo {
+    aspect-ratio: 4/5;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 18px 40px -18px rgba(0,0,0,0.25);
+  }
+  .story-b .photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .story-b h2 {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 2.2rem;
+    margin-bottom: 1rem;
+  }
+  .story-b p {
+    color: var(--ink-soft);
+    margin-bottom: 0.85rem;
+  }
+  .story-b .signature {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    color: var(--kraft);
+    margin-top: 1.5rem;
+  }
+  @media (max-width: 720px) {
+    .story-b .card-foyer { grid-template-columns: 1fr; padding: 2rem; }
+    .story-b .photo { max-width: 240px; margin: 0 auto; }
+  }
+
+  /* TIMELINE Comment ca marche */
+  .timeline {
+    margin-top: 2.5rem;
+    max-width: 720px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .timeline-row {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 1.5rem;
+    align-items: start;
+    padding: 1.5rem 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .timeline-row:last-child { border-bottom: none; }
+  .timeline-num {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 2.5rem;
+    color: var(--kraft);
+    line-height: 1;
+    min-width: 60px;
+  }
+  .timeline-row h3 {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-weight: 400;
+    font-size: 1.3rem;
+    margin-bottom: 0.4rem;
+  }
+  .timeline-row p { color: var(--ink-soft); font-size: 0.95rem; }
+
+  /* TARIFS B - mini cartes */
+  .tarifs-b {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    max-width: 720px;
+    margin: 2.5rem auto 0;
+  }
+  .tarif-b {
+    background: white;
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    padding: 2rem;
+    text-align: center;
+    position: relative;
+  }
+  .tarif-b.feat { border-color: var(--kraft); background: linear-gradient(180deg, white 0%, var(--accent-soft) 100%); }
+  .tarif-b h3 {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 1.4rem;
+    margin-bottom: 0.5rem;
+  }
+  .tarif-b .price {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.8rem;
+    color: var(--ink);
+    margin-bottom: 0.25rem;
+  }
+  .tarif-b .price small { font-family: 'Inter', sans-serif; font-size: 0.95rem; color: var(--ink-soft); }
+  .tarif-b .desc { font-size: 0.88rem; color: var(--ink-soft); margin-bottom: 1.25rem; }
+  .tarif-b .badge {
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--kraft);
+    color: white;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    padding: 0.3rem 0.8rem;
+    border-radius: 999px;
+  }
+  @media (max-width: 720px) { .tarifs-b { grid-template-columns: 1fr; } }
+
+  /* FAQ avec image cote */
+  .faq-with-img {
+    display: grid;
+    grid-template-columns: minmax(280px, 360px) 1fr;
+    gap: 3rem;
+    align-items: start;
+    margin-top: 2.5rem;
+  }
+  .faq-with-img .img-col {
+    position: sticky;
+    top: 100px;
+    aspect-ratio: 3/4;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 18px 40px -18px rgba(0,0,0,0.22);
+  }
+  .faq-with-img .img-col img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  @media (max-width: 900px) {
+    .faq-with-img { grid-template-columns: 1fr; }
+    .faq-with-img .img-col { max-width: 320px; margin: 0 auto; position: static; }
+  }
+
+  /* FAQ */
+  .faq-grid { display: grid; gap: 0.75rem; margin-top: 0; }
+  .faq-b {
+    background: white;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 1.1rem 1.4rem;
+    transition: all 0.2s;
+  }
+  .faq-b:hover { border-color: var(--kraft); }
+  .faq-b summary {
+    cursor: pointer;
+    list-style: none;
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 1.05rem;
+    color: var(--ink);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .faq-b summary::after { content: "+"; color: var(--kraft); font-size: 1.3rem; }
+  .faq-b[open] summary::after { content: "−"; }
+  .faq-b p { color: var(--ink-soft); margin-top: 0.7rem; font-size: 0.93rem; }
+
+  /* Contact card */
+  .contact-card {
+    background: white;
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    padding: 3rem 2.5rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .contact-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at top right, var(--accent-soft) 0%, transparent 60%);
+    pointer-events: none;
+  }
+  .contact-card .body { position: relative; }
+  .contact-card .form-row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 0.5rem;
+    max-width: 480px;
+    margin: 1.5rem auto 0;
+  }
+  .contact-card input {
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 0.85rem 1.25rem;
+    font-family: inherit;
+    font-size: 0.95rem;
+    background: var(--paper);
+  }
+</style>
+</head>
+<body>
+
+<div class="bandeau-offre">
+  Offre de lancement — 1 mois offert pour les premiers inscrits
+</div>
+
+<header class="app-header">
+  <div class="app-header-inner">
+    <a href="#" class="logo">
+      <img src="../../public/logo-transparent.png" alt="" aria-hidden="true">
+      <span>roxanetnous</span>
+    </a>
+    <nav class="nav-public">
+      <a href="#">Comment ça marche</a>
+      <a href="#">Tarifs</a>
+      <a href="#">FAQ</a>
+      <a href="#" class="btn btn-ghost" style="padding: 0.55rem 1.15rem;">Connexion</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+
+  <!-- HERO ASYMETRIE -->
+  <section class="hero-b">
+    <div class="row">
+      <!-- Texte gauche -->
+      <div>
+        <span class="eyebrow">L'accompagnement de vie</span>
+        <h1>L'accompagnement, entre nous.</h1>
+        <p class="lead">
+          Une communauté de mise en relation entre accompagnants vérifiés et personnes accompagnées. Sans intermédiaire, sans commission.
+        </p>
+        <div class="ctas">
+          <a href="#" class="btn btn-primary">Créer mon profil</a>
+          <a href="#" class="btn btn-ghost">Consulter les annonces</a>
+        </div>
+        <div class="stats-row">
+          <div class="stat-item">
+            <div class="num">42</div>
+            <div class="label">accompagnants</div>
+          </div>
+          <div class="stat-item">
+            <div class="num">18</div>
+            <div class="label">accompagnés</div>
+          </div>
+          <div class="stat-item">
+            <div class="num">12</div>
+            <div class="label">villes</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Carte SVG Bretagne droite -->
+      <div class="map-col">
+        <svg viewBox="-30 -20 850 560" aria-hidden="true" role="presentation">
+          <path d="M607.5 100.9 L597.4 81.4 L584.3 82.6 L579.2 95.5 L569.4 93.9 L556.2 74.2 L535.9 80.8 L522.8 78.9 L490.8 112.1 L475.4 106 L457.2 92.7 L456.4 77.3 L421.7 47.7 L404.2 21.7 L387.5 30.3 L377.4 28.9 L353.2 35.3 L325.2 33.5 L317.2 47.4 L323.7 53.4 L311.9 73 L289.8 63.4 L275.2 62.2 L267.6 68.5 L269.1 85 L249.9 78.1 L247.2 60 L207.6 70 L196.9 78.7 L176.4 71.9 L153.3 85.7 L138 85.9 L128.1 99.1 L103.5 106.1 L94.4 140.7 L107.8 163 L125.2 161 L148.6 150.4 L166.3 164.7 L174 158.6 L184.3 171.5 L165.4 177.2 L139.1 172.4 L127.1 179.7 L137 188.7 L158.3 187.8 L185.1 198.7 L191 214.2 L184.3 226.3 L174.1 221 L150.8 227.1 L109.5 233.9 L112.3 242.7 L139.7 246.5 L157.8 254.7 L168.7 267.7 L176.6 294 L191.5 304.8 L208.3 300.9 L210.7 289.4 L228.2 285.4 L244.4 288 L248.2 276.8 L270.3 303.3 L327.5 311.4 L341.5 329.8 L371 327.8 L402.1 362.9 L416.9 360.4 L430.6 366.1 L452.7 350.2 L465.6 349.9 L481.8 357.6 L474.3 370 L447.8 372.1 L458.8 384.7 L483.2 382.4 L495.5 369.3 L527.6 381.4 L520.6 396.4 L551.4 390.3 L590.7 372.2 L591 346.6 L601.6 336.6 L633.8 326.7 L650.8 329 L669.6 325.3 L678.7 311.7 L721.2 295 L725.6 302.5 L747.6 308.4 L758 284.7 L764 259.1 L772.9 252.5 L788.6 251.2 L788.8 231.8 L783.6 226 L774.2 179.7 L784.5 163.4 L777.4 135.7 L779.9 116.1 L761.5 110.1 L742.7 109.4 L722.9 129.8 L701.7 116.5 L687.7 85.1 L650.4 91.1 L632.4 79.6 L636.4 65.9 L611.4 70.7 L604.2 82.2 Z"
+                fill="none" stroke="black" stroke-width="1.5" stroke-linejoin="round" />
+          <g>
+            <circle cx="600" cy="180" r="5.5" fill="black" opacity="0.85" />
+            <circle cx="290" cy="320" r="5.5" fill="black" opacity="0.85" />
+            <circle cx="200" cy="260" r="5.5" fill="black" opacity="0.85" />
+            <circle cx="490" cy="130" r="5.5" fill="black" opacity="0.85" />
+            <circle cx="170" cy="180" r="5.5" fill="black" opacity="0.85" />
+            <circle cx="430" cy="380" r="5.5" fill="black" opacity="0.85" />
+          </g>
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <!-- STRIP DEPARTEMENTS OUVERTS (recupere de la A) -->
+  <section class="map-strip">
+    <div class="row">
+      <div>
+        <span class="label">Bretagne</span>
+        <span class="num">4</span>
+        <span style="color: var(--ink-soft); margin-left: 0.3rem;">départements ouverts</span>
+      </div>
+      <a href="#">Voir la couverture →</a>
+    </div>
+  </section>
+
+  <!-- STORY ROXANE -->
+  <section class="section warm story-b">
+    <div class="section-inner mid">
+      <div class="card-foyer gradient">
+        <div class="photo">
+          <img src="../../public/roxane-portrait.svg" alt="Roxane, aide medico-psychologique">
+        </div>
+        <div>
+          <span class="eyebrow">Notre histoire</span>
+          <h2>Ici, c'est un lieu.</h2>
+          <p>
+            Roxanetnous a pour mission de créer une communauté, un endroit unique dédié à la recherche d'accompagnement entre particuliers. Ensemble.
+          </p>
+          <p>
+            Je suis Roxane, aide médico-psychologique, j'exerce mon métier avec passion depuis une dizaine d'années.
+          </p>
+          <p>
+            Aujourd'hui, je fais un constat : la difficulté, en tant qu'accompagné ou accompagnant, à trouver son accompagnement. Où, quoi, qui, comment chercher ? <strong style="color: var(--ink); font-weight: 500;">C'est ici.</strong>
+          </p>
+          <p class="signature">Roxane</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- POUR QUI - TUILES ASYMETRIQUES -->
+  <section class="section cream">
+    <div class="section-inner">
+      <div style="text-align: center; margin-bottom: 1rem;">
+        <span class="eyebrow">Pour vous</span>
+        <h2 class="h-display h2-section">Pour qui</h2>
+        <p class="lead" style="margin: 0 auto;">Deux espaces dédiés, une seule communauté.</p>
+      </div>
+      <div class="pour-qui-tiles">
+        <a href="#" class="tile featured">
+          <div class="img-wrap">
+            <img src="../../public/pour-qui.svg" alt="Accompagnement de vie">
+          </div>
+          <div class="body">
+            <span class="eyebrow">Côté accompagnants</span>
+            <h3>Faites-vous connaître, gardez la main.</h3>
+            <ul>
+              <li>Profil vérifié qui inspire confiance</li>
+              <li>Visibilité directe auprès des accompagnés</li>
+              <li>Profils recommandés selon vos compétences</li>
+              <li>Pas de commission. Vous fixez vos conditions.</li>
+            </ul>
+            <span class="arrow">Créer mon profil →</span>
+          </div>
+        </a>
+        <div class="right">
+          <a href="#" class="tile compact">
+            <div>
+              <span class="eyebrow">Accompagnés</span>
+              <h3>Trouver son accompagnant</h3>
+              <p style="color: var(--ink-soft); font-size: 0.92rem; margin-top: 0.5rem;">
+                Profils vérifiés manuellement, recherche fine et recommandations adaptées.
+              </p>
+            </div>
+            <span class="arrow">Découvrir →</span>
+          </a>
+          <a href="#" class="tile compact">
+            <div>
+              <span class="eyebrow">Proches</span>
+              <h3>Aider un proche</h3>
+              <p style="color: var(--ink-soft); font-size: 0.92rem; margin-top: 0.5rem;">
+                Vous accompagnez un parent ou un proche dans sa recherche ? Inscrivez-vous pour lui.
+              </p>
+            </div>
+            <span class="arrow">En savoir plus →</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- COMMENT CA MARCHE - TIMELINE -->
+  <section class="section warm">
+    <div style="text-align: center; max-width: 720px; margin: 0 auto;">
+      <span class="eyebrow">Étape par étape</span>
+      <h2 class="h-display h2-section">Comment ça marche</h2>
+      <p class="lead" style="margin: 0 auto;">Quatre étapes, et la mise en relation se fait.</p>
+    </div>
+    <div class="timeline">
+      <div class="timeline-row">
+        <div class="timeline-num">01</div>
+        <div>
+          <h3>Inscription</h3>
+          <p>Créez votre compte en tant qu'accompagnant ou accompagné.</p>
+        </div>
+      </div>
+      <div class="timeline-row">
+        <div class="timeline-num">02</div>
+        <div>
+          <h3>Justificatifs</h3>
+          <p>Accompagnants : déposez vos diplômes et pièce d'identité. Accompagnés : décrivez votre besoin.</p>
+        </div>
+      </div>
+      <div class="timeline-row">
+        <div class="timeline-num">03</div>
+        <div>
+          <h3>Validation</h3>
+          <p>Notre équipe vérifie manuellement chaque profil accompagnant, sous 48h.</p>
+        </div>
+      </div>
+      <div class="timeline-row">
+        <div class="timeline-num">04</div>
+        <div>
+          <h3>Mise en relation</h3>
+          <p>Publiez votre annonce, nous vous recommandons les profils les plus compatibles. Premiers contacts en quelques jours.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TARIFS -->
+  <section class="section cream">
+    <div style="text-align: center; max-width: 720px; margin: 0 auto;">
+      <span class="eyebrow">Tarifs</span>
+      <h2 class="h-display h2-section">Un tarif unique, simple</h2>
+      <p class="lead" style="margin: 0 auto;">Même prix pour les accompagnants et les accompagnés.</p>
+    </div>
+    <div class="tarifs-b">
+      <div class="tarif-b">
+        <h3>Mensuel</h3>
+        <div class="price">4,99€<small> / mois</small></div>
+        <p class="desc">Sans engagement, résiliable à tout moment.</p>
+        <a href="#" class="btn btn-ghost" style="width: 100%;">Commencer</a>
+      </div>
+      <div class="tarif-b feat">
+        <span class="badge">Recommandé</span>
+        <h3>Annuel</h3>
+        <div class="price">49,99€<small> / an</small></div>
+        <p class="desc">Soit 4,17€/mois. Économisez 17%.</p>
+        <a href="#" class="btn btn-primary" style="width: 100%;">Commencer</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="section warm">
+    <div class="section-inner">
+      <div style="text-align: center;">
+        <span class="eyebrow">Questions</span>
+        <h2 class="h-display h2-section">Questions fréquentes</h2>
+      </div>
+      <div class="faq-with-img">
+        <div class="img-col">
+          <img src="../../public/faq.svg" alt="Questions frequentes">
+        </div>
+        <div class="faq-grid">
+          <details class="faq-b" open>
+            <summary>Comment fonctionne la vérification des profils ?</summary>
+            <p>Chaque accompagnant doit déposer ses diplômes et sa pièce d'identité. Notre équipe vérifie manuellement ces documents avant d'activer le profil.</p>
+          </details>
+          <details class="faq-b">
+            <summary>Combien coûte l'abonnement ?</summary>
+            <p>4,99€/mois sans engagement, ou 49,99€/an (économie de 17%).</p>
+          </details>
+          <details class="faq-b">
+            <summary>Comment fonctionnent les recommandations ?</summary>
+            <p>5 critères : spécialités, localisation, expérience, diplôme, disponibilités.</p>
+          </details>
+          <details class="faq-b">
+            <summary>Sans abonnement, puis-je consulter ?</summary>
+            <p>Oui, les annonces publiées sont libres d'accès. L'abonnement débloque la publication et les recommandations.</p>
+          </details>
+          <details class="faq-b">
+            <summary>Comment contacter un accompagnant ?</summary>
+            <p>Une fois inscrit en tant qu'accompagné, vous pouvez envoyer un message via la messagerie integree a partir de la fiche de l'accompagnant.</p>
+          </details>
+          <details class="faq-b">
+            <summary>Comment supprimer mon compte ?</summary>
+            <p>Vous pouvez supprimer votre compte depuis les paramètres de votre espace personnel. Toutes vos données seront supprimées conformément au RGPD.</p>
+          </details>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section class="section cream">
+    <div class="section-inner narrow">
+      <div class="contact-card">
+        <div class="body">
+          <span class="eyebrow">Contact</span>
+          <h2 class="h-display h2-section">Une question ?</h2>
+          <p class="lead" style="margin: 0 auto;">Notre équipe vous répond sous 48h ouvrées.</p>
+          <div class="form-row">
+            <input type="email" placeholder="votre@email.fr">
+            <button class="btn btn-primary">Nous écrire</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="footer">
+  <div>roxanetnous · Aide · Confidentialité · Conditions · Contact</div>
+</footer>
+
+</body>
+</html>

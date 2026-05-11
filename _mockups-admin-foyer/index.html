@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Refonte /admin — direction retenue</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="_shared.css" rel="stylesheet">
+<style>
+  .idx { max-width: 880px; margin: 0 auto; padding: 5rem 1.5rem 6rem; }
+  .idx-head { margin-bottom: 3rem; max-width: 620px; }
+
+  .idx-card {
+    background: white;
+    border: 1px solid var(--rule);
+    border-radius: 14px;
+    padding: 2rem 2.25rem;
+    text-decoration: none;
+    color: inherit;
+    display: grid;
+    grid-template-columns: 80px 1fr auto;
+    align-items: center;
+    gap: 2rem;
+    transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+  }
+  .idx-card:hover {
+    border-color: var(--kraft);
+    transform: translateY(-2px);
+    box-shadow: 0 16px 30px -22px rgba(60,40,20,0.2);
+  }
+  .idx-num {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 3rem;
+    line-height: 1;
+    color: var(--kraft);
+    border: 1px solid var(--kraft);
+    border-radius: 50%;
+    width: 62px;
+    height: 62px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-variant-numeric: tabular-nums;
+  }
+  .idx-title {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 1.5rem;
+    margin: 0 0 0.4rem;
+  }
+  .idx-desc { color: var(--ink-soft); font-size: 14px; line-height: 1.55; }
+  .idx-tag {
+    display: inline-block;
+    margin-top: 0.5rem;
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--kraft-deep);
+  }
+  .idx-arrow {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.6rem;
+    color: var(--ink-muted);
+    transition: transform 0.2s, color 0.2s;
+  }
+  .idx-card:hover .idx-arrow { color: var(--kraft-deep); transform: translateX(4px); }
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <main class="idx">
+    <header class="idx-head">
+      <div class="eyebrow">Espace admin · 11 mai 2026</div>
+      <h1 class="page-title">Refonte /admin — direction retenue</h1>
+      <p class="page-lede">
+        Le tableau à deux colonnes : à gauche ce qui demande une décision, à droite l'état du foyer.
+        Drill-down partout — chaque section ouvre sa page dédiée.
+      </p>
+    </header>
+
+    <a class="idx-card" href="7-tableau-2-colonnes.html">
+      <span class="idx-num">7</span>
+      <div>
+        <h2 class="idx-title">Le tableau à deux colonnes</h2>
+        <p class="idx-desc">
+          Séparation franche : à gauche tout ce qui demande une décision (queue nominative + raccourcis kraft),
+          à droite l'état du foyer (4 KPI + répartition + raccourcis sections). Lecture parallèle.
+        </p>
+        <span class="idx-tag">Action / pilotage · 2 colonnes</span>
+      </div>
+      <span class="idx-arrow">&rsaquo;</span>
+    </a>
+
+  </main>
+
+</div>
+</body>
+</html>
