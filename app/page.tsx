@@ -192,12 +192,12 @@ export default async function HomePage() {
                   style={{ background: 'radial-gradient(circle at top right, #faecd9 0%, transparent 70%)' }}
                 />
                 <div className="relative grid md:grid-cols-[280px_1fr] gap-8 md:gap-10 items-start">
-                  <div className="w-full aspect-[4/5] rounded-2xl overflow-hidden shadow-[0_18px_40px_-18px_rgba(0,0,0,0.25)] max-w-[260px] mx-auto md:mx-0">
+                  <div className="w-full aspect-[4/5] rounded-2xl overflow-hidden shadow-[0_18px_40px_-18px_rgba(0,0,0,0.25)] mx-auto md:mx-0">
                     <Image
-                      src="/roxane-portrait.svg"
+                      src="/roxane-portrait.jpg"
                       alt="Roxane, aide médico-psychologique"
-                      width={1080}
-                      height={1350}
+                      width={2048}
+                      height={1365}
                       className="w-full h-full object-cover"
                     />
                   </div>
@@ -249,16 +249,16 @@ export default async function HomePage() {
                   href="/register?role=accompagnante"
                   className="group bg-white rounded-2xl border border-accent overflow-hidden flex flex-col h-full hover:border-kraft transition"
                 >
-                  <div className="aspect-[16/10] overflow-hidden">
+                  <div className="aspect-[7/5]">
                     <Image
                       src="/pour-qui.svg"
                       alt=""
                       width={1080}
-                      height={675}
-                      className="w-full h-full object-cover"
+                      height={776}
+                      className="w-full h-full object-cover object-[center_35%]"
                     />
                   </div>
-                  <div className="p-7 md:p-8 bg-gradient-to-b from-white to-[#faecd9]">
+                  <div className="p-7 md:p-8 bg-gradient-to-b from-white to-[#faecd9] rounded-b-2xl">
                     <span className="inline-block text-[11px] uppercase tracking-[0.18em] text-kraft font-medium mb-2">
                       Côté accompagnants
                     </span>
@@ -441,10 +441,10 @@ export default async function HomePage() {
               <Reveal>
                 <div className="md:sticky md:top-24 aspect-[3/4] max-w-[320px] mx-auto md:mx-0 rounded-2xl overflow-hidden shadow-[0_18px_40px_-18px_rgba(0,0,0,0.22)]">
                   <Image
-                    src="/faq.svg"
+                    src="/faq.jpg"
                     alt=""
-                    width={1080}
-                    height={1440}
+                    width={768}
+                    height={1024}
                     className="w-full h-full object-cover"
                   />
                 </div>

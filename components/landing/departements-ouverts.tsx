@@ -33,7 +33,7 @@ function prefixeRegion(region: string): string {
   return PREFIXE_REGION[region] ?? 'en'
 }
 
-const CTA_WAITLIST_LABEL = 'Mon département n\'est pas encore couvert ? Me tenir au courant'
+const CTA_WAITLIST_LABEL = 'Mon département n\'est pas encore couvert ? Me tenir au courant.'
 
 // Règle D1 : si la whitelist contient exactement {Bretagne, Pays de la Loire}
 // et que les codes Pays de la Loire ouverts sont uniquement '44', on présente
@@ -124,12 +124,12 @@ export async function DepartementsOuverts() {
                   </li>
                 ))}
               </ul>
-              <p className="mt-3 pt-3 border-t border-[#e8dfd2] text-sm">
+              <p className="mt-3 pt-3 border-t border-[#e8dfd2] text-base">
                 <Link
                   href="/waitlist"
                   className="text-kraft hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-focus-ring rounded-sm"
                 >
-                  {CTA_WAITLIST_LABEL} →
+                  {CTA_WAITLIST_LABEL}
                 </Link>
               </p>
             </div>
@@ -175,12 +175,12 @@ export async function DepartementsOuverts() {
                 </ul>
               </div>
             ))}
-            <p className="text-sm pt-3 border-t border-[#e8dfd2]">
+            <p className="text-base pt-3 border-t border-[#e8dfd2]">
               <Link
                 href="/waitlist"
                 className="text-kraft hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-focus-ring rounded-sm"
               >
-                {CTA_WAITLIST_LABEL} →
+                {CTA_WAITLIST_LABEL}
               </Link>
             </p>
           </div>
