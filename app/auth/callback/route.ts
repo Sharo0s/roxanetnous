@@ -5,11 +5,22 @@ import { sendWelcomeEmailIfFirstTime } from '@/lib/emails'
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url)
   const code = searchParams.get('code')
+  const tokenHash = searchParams.get('token_hash')
+  const type = searchParams.get('type')
   const next = searchParams.get('next')
 
-  if (code) {
+  if (code || tokenHash) {
     const supabase = await createClient()
-    const { error } = await supabase.auth.exchangeCodeForSession(code)
+
+    // Deux formats Supabase :
+    // - code= : flux PKCE (par défaut sur les nouveaux templates)
+    // - token_hash + type : ancien flux (templates non migrés)
+    const { error } = code
+      ? await supabase.auth.exchangeCodeForSession(code)
+      : await supabase.auth.verifyOtp({
+          token_hash: tokenHash!,
+          type: (type as 'signup' | 'email' | 'recovery' | 'invite' | 'email_change') ?? 'email',
+        })
 
     if (!error) {
       // Si une redirection specifique est demandee (ex: reset-password)

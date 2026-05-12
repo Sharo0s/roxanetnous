@@ -26,7 +26,17 @@ function isPublicPath(pathname: string): boolean {
 }
 
 export async function updateSession(request: NextRequest) {
-  const { pathname } = request.nextUrl
+  const { pathname, searchParams } = request.nextUrl
+
+  // Interception OAuth Supabase : le template "Confirm signup" renvoie sur
+  // {{ .SiteURL }}/?code=... (racine) au lieu de /auth/callback?code=...
+  // On rattrape ici pour rediriger vers le bon endpoint qui échange le code
+  // contre une session et redirige vers le dashboard.
+  if (pathname !== '/auth/callback' && (searchParams.has('code') || searchParams.has('token_hash'))) {
+    const callbackUrl = request.nextUrl.clone()
+    callbackUrl.pathname = '/auth/callback'
+    return NextResponse.redirect(callbackUrl)
+  }
 
   let supabaseResponse = NextResponse.next({
     request,
