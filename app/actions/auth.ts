@@ -216,9 +216,14 @@ export async function resetPassword(formData: FormData): Promise<AuthResult> {
 export async function updatePassword(formData: FormData): Promise<AuthResult> {
   const supabase = await createClient()
   const password = formData.get('password') as string
+  const passwordConfirm = formData.get('passwordConfirm') as string
 
   if (!password || password.length < 8) {
     return { error: 'Le mot de passe doit contenir au moins 8 caractères.' }
+  }
+
+  if (password !== passwordConfirm) {
+    return { error: 'Les deux mots de passe ne correspondent pas.' }
   }
 
   const { error } = await supabase.auth.updateUser({ password })

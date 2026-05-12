@@ -13,6 +13,19 @@ export function ResetPasswordForm() {
 
   async function handleSubmit(formData: FormData) {
     setError(null)
+    const password = formData.get('password') as string
+    const passwordConfirm = formData.get('passwordConfirm') as string
+
+    if (!password || password.length < 8) {
+      setError('Le mot de passe doit contenir au moins 8 caractères.')
+      return
+    }
+
+    if (password !== passwordConfirm) {
+      setError('Les deux mots de passe ne correspondent pas.')
+      return
+    }
+
     setLoading(true)
     const result = await updatePassword(formData)
     if (result?.error) {
@@ -60,6 +73,17 @@ export function ResetPasswordForm() {
             label="Nouveau mot de passe"
             placeholder="8 caractères minimum"
             minLength={8}
+            autoComplete="new-password"
+            required
+          />
+
+          <Input
+            name="passwordConfirm"
+            type="password"
+            label="Confirmer le mot de passe"
+            placeholder="Retapez le mot de passe"
+            minLength={8}
+            autoComplete="new-password"
             required
           />
 
