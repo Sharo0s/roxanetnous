@@ -65,6 +65,7 @@ export function RegisterForm() {
   })
   const [email, setEmail] = useState(initialEmail)
   const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [emailSent, setEmailSent] = useState(false)
@@ -151,6 +152,10 @@ export function RegisterForm() {
     e.preventDefault()
     if (!password || password.length < 8) {
       setError('Le mot de passe doit contenir au moins 8 caractères.')
+      return
+    }
+    if (password !== confirmPassword) {
+      setError('Les mots de passe ne correspondent pas.')
       return
     }
     setError(null)
@@ -254,9 +259,9 @@ export function RegisterForm() {
                   : 'border-gray-200 hover:border-accent'
               }`}
             >
-              <p className="font-semibold text-sm">Choisissez votre accompagnant(e)</p>
+              <p className="font-semibold text-sm">Trouvez votre accompagnant</p>
               <p className={`text-xs mt-1 ${role === 'accompagne' ? 'text-black/50' : 'text-gray-500'}`}>
-                On s'occupe de tout
+                créer votre mise en relation
               </p>
             </button>
           </div>
@@ -397,6 +402,21 @@ export function RegisterForm() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               autoFocus={isCurrent('password')}
+            />
+            <Input
+              name="confirmPassword"
+              type="password"
+              label="Confirmer le mot de passe"
+              placeholder="Saisissez à nouveau"
+              minLength={8}
+              required
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              error={
+                confirmPassword.length > 0 && confirmPassword !== password
+                  ? 'Les mots de passe ne correspondent pas.'
+                  : undefined
+              }
             />
             <Button type="submit" className="w-full" disabled={loading}>
               {loading ? 'Création du compte...' : 'Créer mon compte'}
