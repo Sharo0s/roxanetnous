@@ -20,6 +20,7 @@ const REQUIRED = [
   { name: 'CRON_SECRET',                description: 'Auth /api/cron/*.' },
   { name: 'PARRAINAGE_INTERNAL_SECRET', description: 'Auth helper revoke filleule (story 2.3).' },
   { name: 'ENCRYPTION_KEY',             description: 'Chiffrement justificatifs accompagnantes.' },
+  { name: 'OPTOUT_TOKEN_SECRET',        description: 'HMAC liens opt-out emails de rappel (>=32 chars).' },
 ]
 
 const OPTIONAL_ON_PREVIEW = [

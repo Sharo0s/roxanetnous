@@ -24,6 +24,10 @@
     {
       "path": "/api/cron/notify-ouverture-retry",
       "schedule": "0 5 * * *"
+    },
+    {
+      "path": "/api/cron/relance-profils-incomplets",
+      "schedule": "0 9 * * *"
     }
   ]
 }

@@ -1183,6 +1183,7 @@ export type Database = {
           parrainee_par: string | null
           phone: string | null
           phone_hash: string | null
+          rappels_optout: boolean
           role: Database["public"]["Enums"]["user_role"]
           updated_at: string
         }
@@ -1197,6 +1198,7 @@ export type Database = {
           parrainee_par?: string | null
           phone?: string | null
           phone_hash?: string | null
+          rappels_optout?: boolean
           role: Database["public"]["Enums"]["user_role"]
           updated_at?: string
         }
@@ -1211,6 +1213,7 @@ export type Database = {
           parrainee_par?: string | null
           phone?: string | null
           phone_hash?: string | null
+          rappels_optout?: boolean
           role?: Database["public"]["Enums"]["user_role"]
           updated_at?: string
         }

@@ -874,6 +874,75 @@ export async function sendExpirationReminderEmail(params: {
   }
 }
 
+// Relance d'onboarding pour une accompagnante au statut 'a_completer'
+// (cron quotidien /api/cron/relance-profils-incomplets). Envoye a J+2 puis
+// J+7, jamais plus. Le mail liste dynamiquement les champs vides du profil
+// et inclut un lien d'opt-out signe HMAC (cf. lib/optout-token.ts).
+export async function sendRelanceOnboardingEmail(params: {
+  email: string
+  firstName: string
+  userId: string
+  missingFields: { label: string }[]
+  optoutToken: string
+  notificationType: 'relance_onboarding_j2' | 'relance_onboarding_j7'
+}) {
+  const subject =
+    params.notificationType === 'relance_onboarding_j2'
+      ? 'Finalisez votre profil sur roxanetnous'
+      : 'Votre profil roxanetnous est toujours incomplet'
+
+  const optoutUrl = `${BASE_URL}/api/email/optout?type=rappels_onboarding&token=${encodeURIComponent(params.optoutToken)}`
+  const dashboardUrl = `${BASE_URL}/accompagnante/onboarding`
+
+  const missingListHtml =
+    params.missingFields.length > 0
+      ? `<p>Il vous reste a renseigner :</p>
+         <ul style="color: #4b5563; line-height: 1.6;">
+           ${params.missingFields.map((f) => `<li>${escapeHtml(f.label)}</li>`).join('')}
+         </ul>`
+      : '<p>Votre profil est presque complet. Quelques etapes vous separent encore de la validation.</p>'
+
+  try {
+    await resend.emails.send({
+      from: FROM_EMAIL,
+      to: params.email,
+      subject,
+      html: `
+        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+          <h1 style="color: #000;">Bonjour ${escapeHtml(params.firstName)},</h1>
+          <p>Vous vous etes inscrite sur roxanetnous comme accompagnante de vie, mais votre profil n'est pas encore finalise. Sans profil complet, vous ne pouvez pas etre soumise a validation, ni apparaitre dans les recherches.</p>
+          ${missingListHtml}
+          <p style="margin-top: 24px;">
+            <a href="${dashboardUrl}" style="background: #000; color: #fff; padding: 12px 24px; text-decoration: none; display: inline-block;">
+              Completer mon profil
+            </a>
+          </p>
+          <p style="font-size: 12px; color: #9ca3af; margin-top: 36px; border-top: 1px solid #e5e7eb; padding-top: 16px;">
+            Vous recevez ce message car vous vous etes inscrite sur roxanetnous. Si vous ne souhaitez plus recevoir ces rappels, <a href="${optoutUrl}" style="color: #9ca3af;">cliquez ici</a>.
+          </p>
+        </div>
+      `,
+    })
+
+    await logNotification({
+      userId: params.userId,
+      email: params.email,
+      type: params.notificationType,
+      subject,
+      status: 'sent',
+    })
+  } catch (error) {
+    await logNotification({
+      userId: params.userId,
+      email: params.email,
+      type: params.notificationType,
+      subject,
+      status: 'error',
+      error: error instanceof Error ? error.message : 'Erreur inconnue',
+    })
+  }
+}
+
 // Email envoye au visiteur apres inscription pour un departement
 // non-ouvert. userId optionnel : visiteur anonyme -> user_id NULL en BDD
 // (schema story 4.2).
