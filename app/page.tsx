@@ -149,7 +149,7 @@ export default async function HomePage() {
                   href="/register"
                   className="inline-flex items-center px-5 py-2.5 rounded-full bg-accent border border-accent text-black hover:bg-kraft hover:border-kraft hover:text-white transition text-sm font-medium"
                 >
-                  Créer mon profil
+                  S&apos;inscrire
                 </Link>
                 <Link
                   href="/recherche"
@@ -280,7 +280,7 @@ export default async function HomePage() {
                       ))}
                     </ul>
                     <span className="inline-flex items-center gap-1 text-sm text-kraft font-medium">
-                      Créer mon profil <span aria-hidden="true">→</span>
+                      S&apos;inscrire <span aria-hidden="true">→</span>
                     </span>
                   </div>
                 </Link>
