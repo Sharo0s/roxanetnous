@@ -42,6 +42,16 @@ export async function signup(formData: FormData): Promise<AuthResult> {
     return { error: 'Le mot de passe doit contenir au moins 8 caractères.' }
   }
 
+  // Check préalable : Supabase Auth ne renvoie plus "already registered" pour
+  // éviter l'énumération d'emails — il accepte silencieusement le re-signup
+  // d'un email existant. Sans ce garde-fou, l'INSERT dans public.users plante
+  // sur la contrainte unique users_email_key et l'utilisateur voit un message
+  // d'erreur générique.
+  const emailAlreadyTaken = await checkEmailExists(email)
+  if (emailAlreadyTaken) {
+    return { error: 'Cette adresse email est déjà utilisée. Connectez-vous ou réinitialisez votre mot de passe.' }
+  }
+
   const { data: authData, error: authError } = await supabase.auth.signUp({
     email,
     password,
