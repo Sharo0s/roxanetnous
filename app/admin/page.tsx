@@ -54,7 +54,7 @@ export default async function AdminDashboard() {
   // Story 4.6 (variante locale SCP) : cast localisé au point d'appel.
   const supabaseAdmin = (await createClient({ serviceRole: true })) as unknown as SupabaseClient<Database>
 
-  const [pendingResult, signalementsResult, visiosResult, kpis, repartition, activiteMois, waitlist, parrainages, derniereAction] =
+  const [pendingResult, signalementsResult, visiosResult, incompletsResult, kpis, repartition, activiteMois, waitlist, parrainages, derniereAction] =
     await Promise.all([
       supabaseAdmin
         .from('accompagnantes_profiles')
@@ -80,6 +80,10 @@ export default async function AdminDashboard() {
         .from('accompagnantes_profiles')
         .select('id', { count: 'exact', head: true })
         .eq('validation_status', 'visio_a_planifier'),
+      supabaseAdmin
+        .from('accompagnantes_profiles')
+        .select('id', { count: 'exact', head: true })
+        .eq('validation_status', 'a_completer'),
       getKpis(),
       getRepartitionRoles(),
       getActiviteMois(),
@@ -91,6 +95,7 @@ export default async function AdminDashboard() {
   const pending = pendingResult.data || []
   const signalementsCount = signalementsResult.count || 0
   const visiosCount = visiosResult.count || 0
+  const incompletsCount = incompletsResult.count || 0
 
   const pctAux = repartition.total > 0
     ? (repartition.accompagnantes / repartition.total) * 100
@@ -272,6 +277,11 @@ export default async function AdminDashboard() {
               </div>
               <span className="text-right tabular-nums">{repartition.accompagnes} · {pctBen.toFixed(0)} %</span>
             </div>
+            {incompletsCount > 0 && (
+              <p className="text-xs text-gray-500 mt-3 pt-3 border-t border-[#f3ebde]">
+                Dont <span className="tabular-nums">{incompletsCount}</span> profil{incompletsCount > 1 ? 's' : ''} accompagnant{incompletsCount > 1 ? 's' : ''} incomplet{incompletsCount > 1 ? 's' : ''} (onboarding non finalisé).
+              </p>
+            )}
           </div>
 
           {/* Cartes navigation */}
