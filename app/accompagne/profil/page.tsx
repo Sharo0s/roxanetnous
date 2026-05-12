@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { AccompagneProfileForm } from '@/components/accompagne/profile-form'
+import { SecurityCredentialsForm } from '@/components/account/security-credentials-form'
 import { ExportDataButton } from '@/components/export-data-button'
 import { DeleteAccountButton } from '@/components/delete-account-button'
 import { AccompagneDashboardHeader } from '@/components/layout/accompagne-dashboard-header'
@@ -62,6 +63,8 @@ export default async function AccompagneProfilPage() {
             adresse: profile?.adresse || '',
           }}
         />
+
+        <SecurityCredentialsForm currentEmail={userData.email} />
 
         <section className="mt-16 pt-12 border-t border-[#e8dfd2] text-center">
           <h2 className="text-xl italic text-gray-900 mb-2">Mes données personnelles</h2>

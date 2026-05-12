@@ -296,6 +296,110 @@ export async function updatePassword(formData: FormData): Promise<AuthResult> {
   return {}
 }
 
+// Changement de mot de passe depuis le profil utilisateur (session active).
+// Contrairement à `updatePassword` qui est utilisée après un lien de reset,
+// on exige ici le mot de passe actuel pour empêcher qu'une session volée ou
+// laissée ouverte permette de prendre le contrôle du compte.
+export async function updatePasswordFromProfile(formData: FormData): Promise<AuthResult> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user || !user.email) {
+    return { error: 'Session expirée. Reconnectez-vous.' }
+  }
+
+  const currentPassword = formData.get('currentPassword') as string
+  const password = formData.get('password') as string
+  const passwordConfirm = formData.get('passwordConfirm') as string
+
+  if (!currentPassword) {
+    return { error: 'Veuillez saisir votre mot de passe actuel.' }
+  }
+
+  if (!password || password.length < 8) {
+    return { error: 'Le nouveau mot de passe doit contenir au moins 8 caractères.' }
+  }
+
+  if (password !== passwordConfirm) {
+    return { error: 'Les deux nouveaux mots de passe ne correspondent pas.' }
+  }
+
+  if (password === currentPassword) {
+    return { error: 'Le nouveau mot de passe doit être différent de l\'actuel.' }
+  }
+
+  const { error: signInError } = await supabase.auth.signInWithPassword({
+    email: user.email,
+    password: currentPassword,
+  })
+  if (signInError) {
+    return { error: 'Mot de passe actuel incorrect.' }
+  }
+
+  const { error } = await supabase.auth.updateUser({ password })
+  if (error) {
+    return { error: 'Erreur lors de la mise à jour du mot de passe.' }
+  }
+
+  return { success: true }
+}
+
+// Demande de changement d'email depuis le profil. Supabase envoie un mail de
+// confirmation au NOUVEL email ; tant que l'utilisateur n'a pas cliqué dessus,
+// l'email de connexion reste l'ancien.
+export async function updateEmailFromProfile(formData: FormData): Promise<AuthResult> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user || !user.email) {
+    return { error: 'Session expirée. Reconnectez-vous.' }
+  }
+
+  const newEmail = ((formData.get('email') as string) || '').trim().toLowerCase()
+  const currentPassword = (formData.get('currentPassword') as string) || ''
+
+  if (!newEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newEmail)) {
+    return { error: 'Adresse email invalide.' }
+  }
+
+  if (newEmail === user.email.toLowerCase()) {
+    return { error: 'Cette adresse est déjà votre email actuel.' }
+  }
+
+  if (!currentPassword) {
+    return { error: 'Veuillez saisir votre mot de passe pour confirmer.' }
+  }
+
+  // Vérification du mot de passe actuel pour bloquer un changement d'email
+  // depuis une session ouverte sans réauthentification.
+  const { error: signInError } = await supabase.auth.signInWithPassword({
+    email: user.email,
+    password: currentPassword,
+  })
+  if (signInError) {
+    return { error: 'Mot de passe incorrect.' }
+  }
+
+  // Garde-fou côté applicatif : éviter d'envoyer une demande de changement
+  // vers un email déjà utilisé par un autre compte. (Supabase Auth refusera
+  // aussi, mais on rend l'erreur lisible.)
+  const taken = await checkEmailExists(newEmail)
+  if (taken) {
+    return { error: 'Cette adresse email est déjà utilisée par un autre compte.' }
+  }
+
+  const { error } = await supabase.auth.updateUser(
+    { email: newEmail },
+    {
+      emailRedirectTo: `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/auth/callback`,
+    }
+  )
+
+  if (error) {
+    return { error: 'Erreur lors de la demande de changement d\'email.' }
+  }
+
+  return { success: true }
+}
+
 export async function deleteAccount(): Promise<AuthResult> {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()

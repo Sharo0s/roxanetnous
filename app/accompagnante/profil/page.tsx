@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { AccompagnanteProfileForm } from '@/components/accompagnante/profile-form'
+import { SecurityCredentialsForm } from '@/components/account/security-credentials-form'
 import { ExportDataButton } from '@/components/export-data-button'
 import { DeleteAccountButton } from '@/components/delete-account-button'
 import { AccompagnanteDashboardHeader } from '@/components/layout/accompagnante-dashboard-header'
@@ -133,6 +134,9 @@ export default async function AccompagnanteProfilPage() {
           }}
           departementsOuverts={departementsOuverts}
         />
+
+        {/* SECTION IDENTIFIANTS / SECURITE */}
+        <SecurityCredentialsForm currentEmail={userData.email} />
 
         {/* SECTION RGPD */}
         <section className="mt-16 pt-12 border-t border-[#e8dfd2] text-center">
