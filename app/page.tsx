@@ -104,6 +104,7 @@ export default async function HomePage() {
             <span>roxanetnous</span>
           </Link>
           <nav aria-label="Navigation principale" className="hidden md:flex items-center gap-6 text-sm">
+            <Link href="/recherche" className="text-gray-600 hover:text-gray-900">Annonces</Link>
             <Link href="#comment" className="text-gray-600 hover:text-gray-900">Comment ça marche</Link>
             <Link href="#tarifs" className="text-gray-600 hover:text-gray-900">Tarifs</Link>
             <Link href="#faq" className="text-gray-600 hover:text-gray-900">FAQ</Link>
