@@ -6,6 +6,7 @@ import { LogoutButton } from '@/components/auth/logout-button'
 import { getUnreadCount } from '@/lib/unread-count'
 import { NouvelleAnnonceAccompagneForm } from '@/components/accompagne/nouvelle-annonce-form'
 import { getCodesDepartementsOuverts } from '@/lib/departements'
+import { hasActiveSubscription } from '@/lib/subscription-helpers'
 
 export default async function NouvelleAnnonceAccompagne() {
   const supabase = await createClient()
@@ -20,6 +21,9 @@ export default async function NouvelleAnnonceAccompagne() {
     .single()
 
   if (!userData || userData.role !== 'accompagne') redirect('/')
+
+  const subscribed = await hasActiveSubscription(user.id)
+  if (!subscribed) redirect('/accompagne/abonnement')
 
   const unreadCount = await getUnreadCount(user.id)
   const departementsOuverts = await getCodesDepartementsOuverts()

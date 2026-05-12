@@ -6,6 +6,7 @@ import { AccompagneDashboardHeader } from '@/components/layout/accompagne-dashbo
 import { LogoutButton } from '@/components/auth/logout-button'
 import { getUnreadCount } from '@/lib/unread-count'
 import { getCodesDepartementsOuverts } from '@/lib/departements'
+import { hasActiveSubscription } from '@/lib/subscription-helpers'
 
 export default async function ModifierAnnonceAccompagnePage({
   params,
@@ -25,6 +26,9 @@ export default async function ModifierAnnonceAccompagnePage({
     .single()
 
   if (!userData || userData.role !== 'accompagne') redirect('/')
+
+  const subscribed = await hasActiveSubscription(user.id)
+  if (!subscribed) redirect('/accompagne/abonnement')
 
   const { data: profile } = await supabase
     .from('accompagnes_profiles')

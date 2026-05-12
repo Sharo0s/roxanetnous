@@ -7,6 +7,7 @@ import { SPECIALITES } from '@/lib/constants'
 import { AccompagneDashboardHeader } from '@/components/layout/accompagne-dashboard-header'
 import { LogoutButton } from '@/components/auth/logout-button'
 import { getUnreadCount } from '@/lib/unread-count'
+import { hasActiveSubscription } from '@/lib/subscription-helpers'
 
 export default async function MesAnnoncesAccompagne() {
   const supabase = await createClient()
@@ -38,6 +39,7 @@ export default async function MesAnnoncesAccompagne() {
     : null
 
   const unreadCount = await getUnreadCount(user.id)
+  const subscribed = await hasActiveSubscription(user.id)
 
   return (
     <main id="main-content" tabIndex={-1} className="min-h-screen bg-[#fefaf8] focus:outline-none">
@@ -58,13 +60,30 @@ export default async function MesAnnoncesAccompagne() {
               Décrivez vos besoins et recevez des candidatures d&apos;accompagnants.
             </p>
           </div>
-          <Link
-            href="/accompagne/annonces/nouvelle"
-            className="inline-flex items-center px-5 py-2.5 bg-accent border border-accent text-black rounded-full hover:bg-kraft hover:border-kraft hover:text-white transition text-sm font-medium"
-          >
-            + Nouvelle annonce
-          </Link>
+          {subscribed && (
+            <Link
+              href="/accompagne/annonces/nouvelle"
+              className="inline-flex items-center px-5 py-2.5 bg-accent border border-accent text-black rounded-full hover:bg-kraft hover:border-kraft hover:text-white transition text-sm font-medium"
+            >
+              + Nouvelle annonce
+            </Link>
+          )}
         </header>
+
+        {!subscribed && (
+          <div className="bg-white rounded-2xl border border-kraft p-6 mb-6 flex flex-wrap items-center justify-between gap-4">
+            <div className="flex-1 min-w-[240px]">
+              <h2 className="italic text-xl text-gray-900 mb-1">Abonnement requis</h2>
+              <p className="text-sm text-gray-600">Souscrivez un abonnement pour publier vos annonces.</p>
+            </div>
+            <Link
+              href="/accompagne/abonnement"
+              className="inline-flex items-center px-5 py-2.5 bg-accent border border-accent text-black rounded-full hover:bg-kraft hover:border-kraft hover:text-white transition text-sm font-medium"
+            >
+              Voir les offres
+            </Link>
+          </div>
+        )}
 
         {!annonces || annonces.length === 0 ? (
           <div className="bg-white rounded-2xl border border-[#e8dfd2] p-12 text-center">
@@ -74,12 +93,14 @@ export default async function MesAnnoncesAccompagne() {
             <p className="text-gray-600 mb-6 max-w-md mx-auto">
               Créez votre première annonce pour décrire vos besoins et recevoir des candidatures.
             </p>
-            <Link
-              href="/accompagne/annonces/nouvelle"
-              className="inline-flex items-center px-5 py-2.5 bg-accent border border-accent text-black rounded-full hover:bg-kraft hover:border-kraft hover:text-white transition text-sm font-medium"
-            >
-              Créer ma première annonce
-            </Link>
+            {subscribed && (
+              <Link
+                href="/accompagne/annonces/nouvelle"
+                className="inline-flex items-center px-5 py-2.5 bg-accent border border-accent text-black rounded-full hover:bg-kraft hover:border-kraft hover:text-white transition text-sm font-medium"
+              >
+                Créer ma première annonce
+              </Link>
+            )}
           </div>
         ) : (
           <ul className="space-y-3">
