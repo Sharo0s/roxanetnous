@@ -22,15 +22,17 @@ export default async function AnnonceDetailPage({
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect('/login')
 
-  let userData = null
-  if (user) {
-    const { data } = await supabase
-      .from('users')
-      .select('first_name, last_name, role')
-      .eq('id', user.id)
-      .single()
-    userData = data
+  const { data: userData } = await supabase
+    .from('users')
+    .select('first_name, last_name, role')
+    .eq('id', user.id)
+    .single()
+
+  if (userData?.role === 'accompagne') {
+    const isSubscribed = await hasActiveSubscription(user.id)
+    if (!isSubscribed) redirect('/accompagne/abonnement')
   }
 
   const { data: annonce } = await supabase
@@ -67,27 +69,20 @@ export default async function AnnonceDetailPage({
   const auxUserId = profile?.user_id
 
   // Verifier si l'annonce est en favori
-  let isFavori = false
-  if (user) {
-    const { data: favori } = await supabase
-      .from('favoris')
-      .select('id')
-      .eq('user_id', user.id)
-      .eq('annonce_accompagnante_id', id)
-      .single()
-    isFavori = !!favori
-  }
+  const { data: favori } = await supabase
+    .from('favoris')
+    .select('id')
+    .eq('user_id', user.id)
+    .eq('annonce_accompagnante_id', id)
+    .single()
+  const isFavori = !!favori
 
   // Fetch des badges
   const badgesMap = auxUserId ? await getBadges([auxUserId]) : {}
 
-  const unreadCount = user ? await getUnreadCount(user.id) : 0
-  // Story 3.6 : prop subscribed pour defense en profondeur UI sur ContactButton.
-  // Patch F10 review : court-circuiter quand le bouton ne sera pas rendu (role != accompagne) pour
-  // economiser un round-trip Supabase service-role.
-  const subscribed = user && userData?.role === 'accompagne'
-    ? await hasActiveSubscription(user.id)
-    : false
+  const unreadCount = await getUnreadCount(user.id)
+  // Defense en profondeur UI sur ContactButton : accompagne arrivant ici est forcement abonne (gate page).
+  const subscribed = userData?.role === 'accompagne'
 
   const diplomeLabel = (profile?.diplomes as string[] || []).map((d: string) => DIPLOMES.find((dp) => dp.value === d)?.label || d).join(', ')
   const expLabel = formatExperienceLabel(profile?.experience)
@@ -99,14 +94,14 @@ export default async function AnnonceDetailPage({
 
   return (
     <main id="main-content" tabIndex={-1} className="min-h-screen bg-[#fefaf8] focus:outline-none">
-      {userData?.role === 'accompagnante' && user ? (
+      {userData?.role === 'accompagnante' ? (
         <AccompagnanteDashboardHeader
           firstName={userData.first_name}
           lastName={userData.last_name}
           unreadCount={unreadCount}
           currentPage="other"
         />
-      ) : userData?.role === 'accompagne' && user ? (
+      ) : userData?.role === 'accompagne' ? (
         <AccompagneDashboardHeader
           firstName={userData.first_name}
           lastName={userData.last_name}
@@ -144,9 +139,7 @@ export default async function AnnonceDetailPage({
               </p>
             </div>
           </div>
-          {user && (
-            <FavoriButton annonceId={id} type="accompagnante" initialIsFavori={isFavori} />
-          )}
+          <FavoriButton annonceId={id} type="accompagnante" initialIsFavori={isFavori} />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -257,26 +250,11 @@ export default async function AnnonceDetailPage({
                 </p>
                 <ContactButton accompagnanteProfileId={annonce.accompagnante_id} subscribed={subscribed} />
               </div>
-            ) : !user ? (
-              <div className="bg-white rounded-xl border p-6">
-                <h2 className="font-semibold mb-3">Intéressé ?</h2>
-                <p className="text-sm text-gray-600 mb-4">
-                  Connectez-vous pour contacter cet accompagnant.
-                </p>
-                <Link
-                  href="/register"
-                  className="inline-flex items-center px-4 py-2 bg-accent text-black rounded-lg btn-hover transition text-sm font-medium w-full justify-center"
-                >
-                  Créer un compte
-                </Link>
-              </div>
             ) : null}
 
-            {user && (
-              <div className="text-center pt-2">
-                <SignalementButton cibleType="annonce_accompagnante" cibleId={id} />
-              </div>
-            )}
+            <div className="text-center pt-2">
+              <SignalementButton cibleType="annonce_accompagnante" cibleId={id} />
+            </div>
           </div>
         </div>
       </div>
