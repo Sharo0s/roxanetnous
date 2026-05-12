@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { waitUntil } from '@vercel/functions'
 import { createClient } from '@/lib/supabase/server'
 import { sendWelcomeEmailIfFirstTime } from '@/lib/emails'
 
@@ -41,14 +42,18 @@ export async function GET(request: Request) {
 
         // Premier passage = confirmation email réussie : envoie le mail
         // "Bienvenue" (idempotent, ne renvoie pas si déjà loggé en 'sent').
-        // Non-bloquant : un échec d'email ne doit pas casser la connexion.
+        // waitUntil : Vercel laisse la promesse finir en arrière-plan APRÈS
+        // la redirection. Sans ça, NextResponse.redirect() tue le process
+        // avant que Resend ait fini son POST (test du 12/05 : aucun log).
         if ((role === 'accompagnante' || role === 'accompagne') && user.email && userData?.first_name) {
-          sendWelcomeEmailIfFirstTime({
-            email: user.email,
-            firstName: userData.first_name,
-            role,
-            userId: user.id,
-          }).catch(() => {})
+          waitUntil(
+            sendWelcomeEmailIfFirstTime({
+              email: user.email,
+              firstName: userData.first_name,
+              role,
+              userId: user.id,
+            }).catch(() => {})
+          )
         }
 
         if (role === 'admin') {

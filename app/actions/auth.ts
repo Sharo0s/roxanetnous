@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { headers } from 'next/headers'
+import { waitUntil } from '@vercel/functions'
 import { sendWelcomeEmailIfFirstTime } from '@/lib/emails'
 import { stripe } from '@/lib/stripe'
 import { getSubscriptionStatus } from '@/lib/subscription-helpers'
@@ -199,13 +200,16 @@ export async function login(formData: FormData): Promise<AuthResult> {
   // Filet de sécurité : si l'utilisateur arrive ici sans être passé par
   // /auth/callback (ex: callback en erreur, lien expiré rejoué, login manuel
   // après resend), on envoie le welcome maintenant. Idempotent.
+  // waitUntil : le redirect() ci-dessous tue le process Vercel sinon.
   if ((role === 'accompagnante' || role === 'accompagne') && user.email && userData?.first_name) {
-    sendWelcomeEmailIfFirstTime({
-      email: user.email,
-      firstName: userData.first_name,
-      role,
-      userId: user.id,
-    }).catch(() => {})
+    waitUntil(
+      sendWelcomeEmailIfFirstTime({
+        email: user.email,
+        firstName: userData.first_name,
+        role,
+        userId: user.id,
+      }).catch(() => {})
+    )
   }
 
   if (role === 'admin') {
