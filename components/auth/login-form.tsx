@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { login, checkEmailExists } from '@/app/actions/auth'
+import { login, checkEmailExists, resendConfirmation } from '@/app/actions/auth'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import Link from 'next/link'
@@ -12,7 +12,9 @@ export function LoginForm() {
   const [step, setStep] = useState<'email' | 'password'>('email')
   const [email, setEmail] = useState('')
   const [error, setError] = useState<string | null>(null)
+  const [errorCode, setErrorCode] = useState<'email_not_confirmed' | null>(null)
   const [loading, setLoading] = useState(false)
+  const [resendState, setResendState] = useState<'idle' | 'sending' | 'sent'>('idle')
 
   async function handleEmailSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -36,12 +38,28 @@ export function LoginForm() {
 
   async function handleLoginSubmit(formData: FormData) {
     setError(null)
+    setErrorCode(null)
+    setResendState('idle')
     setLoading(true)
     formData.set('email', email)
     const result = await login(formData)
     if (result?.error) {
       setError(result.error)
+      setErrorCode(result.errorCode ?? null)
       setLoading(false)
+    }
+  }
+
+  async function handleResend() {
+    setResendState('sending')
+    const formData = new FormData()
+    formData.set('email', email)
+    const result = await resendConfirmation(formData)
+    if (result?.success) {
+      setResendState('sent')
+    } else {
+      setResendState('idle')
+      setError(result?.error || 'Erreur lors de l\'envoi.')
     }
   }
 
@@ -79,7 +97,23 @@ export function LoginForm() {
         <form action={handleLoginSubmit} className="bg-white p-8 rounded-xl shadow-sm border space-y-5">
           {error && (
             <div role="alert" className="p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
-              {error}
+              <p>{error}</p>
+              {errorCode === 'email_not_confirmed' && resendState !== 'sent' && (
+                <button
+                  type="button"
+                  onClick={handleResend}
+                  disabled={resendState === 'sending'}
+                  className="mt-2 text-sm font-medium underline disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {resendState === 'sending' ? 'Envoi en cours...' : 'Renvoyer le lien de confirmation'}
+                </button>
+              )}
+            </div>
+          )}
+
+          {resendState === 'sent' && (
+            <div role="status" className="p-3 rounded-lg bg-green-50 border border-green-200 text-green-700 text-sm">
+              Un nouveau lien de confirmation a été envoyé à {email}. Vérifiez votre boîte mail (et vos spams).
             </div>
           )}
 
@@ -87,7 +121,7 @@ export function LoginForm() {
             <span className="text-gray-500">Compte :</span>{' '}
             <button
               type="button"
-              onClick={() => { setStep('email'); setError(null); setLoading(false) }}
+              onClick={() => { setStep('email'); setError(null); setErrorCode(null); setResendState('idle'); setLoading(false) }}
               disabled={loading}
               className="font-medium underline disabled:opacity-50 disabled:cursor-not-allowed"
             >

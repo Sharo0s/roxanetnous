@@ -3,7 +3,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { headers } from 'next/headers'
-import { sendWelcomeEmail } from '@/lib/emails'
+import { sendWelcomeEmailIfFirstTime } from '@/lib/emails'
 import { stripe } from '@/lib/stripe'
 import { getSubscriptionStatus } from '@/lib/subscription-helpers'
 import { createParrainageRelation } from '@/app/actions/parrainage'
@@ -11,6 +11,7 @@ import { getClientIp } from '@/lib/get-client-ip'
 
 export type AuthResult = {
   error?: string
+  errorCode?: 'email_not_confirmed'
   success?: boolean
 }
 
@@ -123,13 +124,10 @@ export async function signup(formData: FormData): Promise<AuthResult> {
     }
   }
 
-  // Envoyer l'email de bienvenue (non-bloquant)
-  sendWelcomeEmail({
-    email,
-    firstName,
-    role,
-    userId: authData.user.id,
-  }).catch(() => {})
+  // Le mail de bienvenue n'est PAS envoyé ici : Supabase envoie son mail de
+  // confirmation, et notre welcome part seulement après que l'utilisateur ait
+  // cliqué sur le lien (cf. app/auth/callback/route.ts). Évite l'UX où le
+  // welcome arrive avant que le compte soit utilisable.
 
   return { success: true }
 }
@@ -162,6 +160,15 @@ export async function login(formData: FormData): Promise<AuthResult> {
     if (error.message.includes('Invalid login credentials')) {
       return { error: 'Email ou mot de passe incorrect.' }
     }
+    // Supabase renvoie "Email not confirmed" tant que email_confirmed_at est
+    // NULL. On expose un code structuré pour permettre au form de proposer
+    // un renvoi du lien de confirmation.
+    if (error.message.toLowerCase().includes('email not confirmed')) {
+      return {
+        error: 'Votre adresse email n\'est pas encore confirmée. Vérifiez votre boîte mail (et vos spams) ou demandez un nouveau lien.',
+        errorCode: 'email_not_confirmed',
+      }
+    }
     return { error: error.message }
   }
 
@@ -173,11 +180,23 @@ export async function login(formData: FormData): Promise<AuthResult> {
 
   const { data: userData } = await supabase
     .from('users')
-    .select('role')
+    .select('role, first_name')
     .eq('id', user.id)
     .single()
 
   const role = userData?.role
+
+  // Filet de sécurité : si l'utilisateur arrive ici sans être passé par
+  // /auth/callback (ex: callback en erreur, lien expiré rejoué, login manuel
+  // après resend), on envoie le welcome maintenant. Idempotent.
+  if ((role === 'accompagnante' || role === 'accompagne') && user.email && userData?.first_name) {
+    sendWelcomeEmailIfFirstTime({
+      email: user.email,
+      firstName: userData.first_name,
+      role,
+      userId: user.id,
+    }).catch(() => {})
+  }
 
   if (role === 'admin') {
     redirect('/admin')
@@ -192,6 +211,34 @@ export async function logout() {
   const supabase = await createClient()
   await supabase.auth.signOut()
   redirect('/login')
+}
+
+// Renvoie le lien de confirmation email pour un utilisateur dont
+// `email_confirmed_at` est encore NULL. Réponse volontairement neutre côté
+// erreur pour ne pas leaker l'existence d'un compte.
+export async function resendConfirmation(formData: FormData): Promise<AuthResult> {
+  const supabase = await createClient()
+  const email = (formData.get('email') as string | null)?.trim()
+
+  if (!email) {
+    return { error: 'Adresse email requise.' }
+  }
+
+  const { error } = await supabase.auth.resend({
+    type: 'signup',
+    email,
+    options: {
+      emailRedirectTo: `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/auth/callback`,
+    },
+  })
+
+  if (error) {
+    // Supabase renvoie une erreur si l'email est déjà confirmé ou inexistant.
+    // On reste volontairement vague pour ne pas révéler quels emails existent.
+    return { error: 'Impossible d\'envoyer un nouveau lien. L\'adresse est peut-être déjà confirmée.' }
+  }
+
+  return { success: true }
 }
 
 export async function resetPassword(formData: FormData): Promise<AuthResult> {

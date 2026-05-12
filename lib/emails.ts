@@ -62,6 +62,34 @@ export async function sendWelcomeEmail(params: {
   }
 }
 
+// Envoie l'email "Bienvenue" si et seulement s'il n'a jamais été envoyé pour
+// cet utilisateur. Idempotent grâce à `notifications_log` : utilisé depuis le
+// callback OAuth/confirmation et le login (filet de sécurité au cas où le
+// callback échouerait).
+export async function sendWelcomeEmailIfFirstTime(params: {
+  email: string
+  firstName: string
+  role: 'accompagnante' | 'accompagne'
+  userId: string
+}): Promise<{ sent: boolean }> {
+  const supabase = await createClient({ serviceRole: true })
+  const { data: existing } = await supabase
+    .from('notifications_log')
+    .select('id')
+    .eq('user_id', params.userId)
+    .eq('type', 'welcome')
+    .eq('status', 'sent')
+    .limit(1)
+    .maybeSingle()
+
+  if (existing) {
+    return { sent: false }
+  }
+
+  await sendWelcomeEmail(params)
+  return { sent: true }
+}
+
 export async function sendValidationResultEmail(params: {
   email: string
   firstName: string

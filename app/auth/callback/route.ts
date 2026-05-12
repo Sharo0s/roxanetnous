@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { sendWelcomeEmailIfFirstTime } from '@/lib/emails'
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url)
@@ -21,11 +22,23 @@ export async function GET(request: Request) {
       if (user) {
         const { data: userData } = await supabase
           .from('users')
-          .select('role')
+          .select('role, first_name')
           .eq('id', user.id)
           .single()
 
         const role = userData?.role
+
+        // Premier passage = confirmation email réussie : envoie le mail
+        // "Bienvenue" (idempotent, ne renvoie pas si déjà loggé en 'sent').
+        // Non-bloquant : un échec d'email ne doit pas casser la connexion.
+        if ((role === 'accompagnante' || role === 'accompagne') && user.email && userData?.first_name) {
+          sendWelcomeEmailIfFirstTime({
+            email: user.email,
+            firstName: userData.first_name,
+            role,
+            userId: user.id,
+          }).catch(() => {})
+        }
 
         if (role === 'admin') {
           return NextResponse.redirect(`${origin}/admin`)
