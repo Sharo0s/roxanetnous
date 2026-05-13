@@ -693,3 +693,20 @@ Fenetre cutover estimee < 5 secondes (l'ALTER COLUMN TYPE sur 822 lignes est le 
 1. Le nombre de helpers depasse 30 (seuil arbitraire de complexite),
 2. OU un bug de coherence (ex : log non genere par un helper) est detecte en prod,
 3. OU une refonte des templates email passe par un systeme de composants (react-email).
+
+
+---
+
+## 2026-05-13 : Cloture 6.C.2 conditionnelle - switch domaine Supabase reste differe (decision F-Epic6-C2)
+
+**Contexte :** Story 6.C.2 (Epic 6) demande de mettre a jour Supabase Auth + Vercel env vars + Resend DKIM quand le vrai domaine remplacera roxanetnous.vercel.app. AC1 a un declencheur formel : achat du vrai domaine effectif.
+
+**Etat 2026-05-13 :** Le domaine roxanetnous.fr n est PAS encore achete/branche. Le declencheur AC1 n est pas advenu.
+
+**Decision :** AC1 differe, AC2 livre.
+
+- **AC1 (switch effectif) :** reporte. La story reste conditionnelle. Sera reactivee quand le domaine sera DNS-up.
+- **AC2 (checklist documentee) :** memoire `project_go_live_supabase_domain_switch` enrichie 2026-05-13 avec checklist exhaustive 6 etapes (pre-bascule DNS, env vars Vercel, Supabase Auth Dashboard, Resend DKIM/SPF, test E2E 5 points, clean-up J+7). Audit des 8 fichiers code utilisant NEXT_PUBLIC_BASE_URL (app/robots, app/sitemap, app/layout, app/actions/subscription x3, app/actions/auth x3, app/page, lib/emails) inclus dans la memoire pour reference future.
+- **AC3 (test E2E) :** non execute (depend AC1).
+
+**Regle :** Au jour J (achat domaine), suivre la checklist memoire. Ne pas tenter de modifier `NEXT_PUBLIC_BASE_URL` avant que Resend ait valide le domaine sinon tous les emails partiront en erreur.
