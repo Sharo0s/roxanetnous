@@ -2,7 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { headers } from 'next/headers'
+import { cookies, headers } from 'next/headers'
 import { waitUntil } from '@vercel/functions'
 import { sendWelcomeEmailIfFirstTime } from '@/lib/emails'
 import { stripe } from '@/lib/stripe'
@@ -198,6 +198,7 @@ export async function login(formData: FormData): Promise<AuthResult> {
 
   const email = formData.get('email') as string
   const password = formData.get('password') as string
+  const rememberMe = formData.get('rememberMe') === 'on'
 
   if (!email || !password) {
     return { error: 'Email et mot de passe requis.' }
@@ -222,6 +223,29 @@ export async function login(formData: FormData): Promise<AuthResult> {
       }
     }
     return { error: error.message }
+  }
+
+  // Si l'utilisateur n'a pas coché "Rester connecté", on convertit les cookies
+  // sb-* (posés par signInWithPassword) en cookies de session : ils seront
+  // détruits à la fermeture du navigateur. Un cookie marqueur permet au
+  // middleware Supabase de refaire le downgrade à chaque token refresh.
+  if (!rememberMe) {
+    const cookieStore = await cookies()
+    cookieStore.set('rxn-no-remember', '1', {
+      path: '/',
+      sameSite: 'lax',
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+    })
+    for (const c of cookieStore.getAll()) {
+      if (!c.name.startsWith('sb-')) continue
+      cookieStore.set(c.name, c.value, {
+        path: '/',
+        sameSite: 'lax',
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+      })
+    }
   }
 
   // Récupérer le rôle pour rediriger
@@ -265,6 +289,8 @@ export async function login(formData: FormData): Promise<AuthResult> {
 export async function logout() {
   const supabase = await createClient()
   await supabase.auth.signOut()
+  const cookieStore = await cookies()
+  cookieStore.delete('rxn-no-remember')
   redirect('/login')
 }
 

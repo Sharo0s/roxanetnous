@@ -47,6 +47,11 @@ export async function updateSession(request: NextRequest) {
     return supabaseResponse
   }
 
+  // Marqueur posé au login quand l'utilisateur n'a pas coché "Rester connecté".
+  // Tant qu'il est présent, on convertit les cookies sb-* en cookies de session
+  // à chaque écriture (notamment lors des token refresh côté middleware).
+  const noRemember = request.cookies.get('rxn-no-remember')?.value === '1'
+
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -62,9 +67,14 @@ export async function updateSession(request: NextRequest) {
           supabaseResponse = NextResponse.next({
             request,
           })
-          cookiesToSet.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, options)
-          )
+          cookiesToSet.forEach(({ name, value, options }) => {
+            if (noRemember && name.startsWith('sb-')) {
+              const { maxAge: _maxAge, expires: _expires, ...rest } = options
+              supabaseResponse.cookies.set(name, value, rest)
+            } else {
+              supabaseResponse.cookies.set(name, value, options)
+            }
+          })
         },
       },
     }

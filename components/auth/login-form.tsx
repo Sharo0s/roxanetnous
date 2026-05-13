@@ -138,6 +138,16 @@ export function LoginForm() {
             autoFocus
           />
 
+          <label className="flex items-center gap-2 text-sm text-black cursor-pointer select-none">
+            <input
+              type="checkbox"
+              name="rememberMe"
+              defaultChecked
+              className="h-4 w-4 rounded border-gray-300 text-black focus:ring-2 focus:ring-black focus:ring-offset-0"
+            />
+            <span>Rester connecté</span>
+          </label>
+
           <Button type="submit" className="w-full" disabled={loading}>
             {loading ? 'Connexion...' : 'Se connecter'}
           </Button>
