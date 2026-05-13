@@ -14,8 +14,7 @@ export type NotificationOuvertureResult = {
   nomDepartement?: string
 }
 
-// Story 5.A.3 : accepte 'accompagnante' en backward-compat pour anciens liens emails.
-const VALID_ROLES = ['accompagnant', 'accompagnante', 'accompagne', 'visiteur'] as const
+const VALID_ROLES = ['accompagnant', 'accompagne', 'visiteur'] as const
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 export async function submitNotificationOuverture(formData: FormData): Promise<NotificationOuvertureResult> {

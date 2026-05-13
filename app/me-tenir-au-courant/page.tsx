@@ -13,10 +13,8 @@ export default async function MeTenirAuCourantPage({ searchParams }: { searchPar
   const params = await searchParams
   const departements = await getAllDepartements()
 
-  // Story 5.A.3 : accepte aussi 'accompagnante' pour preserver les anciens liens
-  // emails deja envoyes (notifications waitlist anterieures au renommage).
-  const initialRole = params.role && ['accompagnant', 'accompagnante', 'accompagne', 'visiteur'].includes(params.role)
-    ? (params.role === 'accompagnante' ? 'accompagnant' : params.role)
+  const initialRole = params.role && ['accompagnant', 'accompagne', 'visiteur'].includes(params.role)
+    ? params.role
     : ''
 
   return (
