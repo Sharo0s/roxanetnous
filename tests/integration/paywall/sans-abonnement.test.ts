@@ -9,7 +9,11 @@ import {
 } from '@/tests/integration/_lib/fixtures'
 
 // T7 (epic-4.md AC3 #2) : utilisateur connecte sans subscriptions row active.
-// -> retour { error: 'Abonnement requis pour contacter une accompagnante.' }
+// -> retour { error: PAYWALL_GENERIC_ERROR }
+// Story 5.B.1 (2026-05-13) a unifie le message paywall messagerie sur les 3 server
+// actions (PAYWALL_GENERIC_ERROR) pour empecher l'oracle d'enumeration du role.
+// Story 7.A.1 (2026-05-13) aligne ce test avec le message unifie (l'ancien literal
+// 'contacter une accompagnante' tombait sous le coup du garde-fou check-oracle-paywall).
 describe('paywall : connecte sans abonnement (T7)', () => {
   beforeAll(async () => {
     await cleanupAllFixtures()
@@ -31,7 +35,7 @@ describe('paywall : connecte sans abonnement (T7)', () => {
 
     const result = await getOrCreateConversation(auxProfile.id)
     expect(result).toEqual({
-      error: 'Abonnement requis pour contacter une accompagnante.',
+      error: 'Abonnement requis pour contacter cet utilisateur.',
     })
   })
 })

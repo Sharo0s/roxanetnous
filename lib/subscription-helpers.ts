@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { stripe } from '@/lib/stripe'
 import type Stripe from 'stripe'
+import * as Sentry from '@sentry/nextjs'
 
 export type SubscriptionInfo = {
   active: boolean
@@ -39,12 +40,23 @@ export type SubscriptionAmount = {
 export async function hasActiveSubscription(userId: string): Promise<boolean> {
   const supabase = await createClient({ serviceRole: true })
 
-  const { data } = await supabase
+  // Story 7.A.1 : fail-loud sur incident Supabase transitoire. `.maybeSingle()`
+  // distingue `data === null` (pas d'abonnement, paywall legitime) de
+  // `error !== null` (incident BDD a remonter en Sentry + throw pour casser le
+  // silence et basculer sur error boundary Next.js plutot qu'un faux paywall).
+  const { data, error } = await supabase
     .from('subscriptions')
     .select('status, current_period_end')
     .eq('user_id', userId)
     .in('status', ['active', 'trialing'])
-    .single()
+    .maybeSingle()
+
+  if (error) {
+    Sentry.captureException(error, {
+      tags: { flow: 'subscription_check', severity: 'critical' },
+    })
+    throw new Error('subscription check failed')
+  }
 
   if (!data) return false
 

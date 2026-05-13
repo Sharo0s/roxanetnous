@@ -31,31 +31,50 @@ export async function getOrCreateConversation(
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'Non connecté.' }
 
-  const { data: userData } = await supabase
+  // Story 7.A.1 : .maybeSingle() + Sentry capture sur erreur transitoire.
+  // Retour { error } generique (server action, pas de throw cote client).
+  const { data: userData, error: userDataError } = await supabase
     .from('users')
     .select('role')
     .eq('id', user.id)
-    .single()
+    .maybeSingle()
+
+  if (userDataError) {
+    Sentry.captureException(userDataError, {
+      tags: { flow: 'messaging', signal: 'profile-lookup-error', severity: 'critical' },
+    })
+    return { error: 'Impossible de vérifier votre profil.' }
+  }
 
   if (!userData || userData.role !== 'accompagne') {
     return { error: 'Seuls les accompagnés peuvent initier une conversation.' }
   }
 
   // Recuperer le profil accompagne
-  let { data: benProfile } = await supabase
+  let { data: benProfile, error: benLookupError } = await supabase
     .from('accompagnes_profiles')
     .select('id')
     .eq('user_id', user.id)
-    .single()
+    .maybeSingle()
+
+  if (benLookupError) {
+    Sentry.captureException(benLookupError, {
+      tags: { flow: 'messaging', signal: 'profile-lookup-error', severity: 'critical' },
+    })
+    return { error: 'Impossible de vérifier votre profil.' }
+  }
 
   if (!benProfile) {
     const { data: newProfile, error: createError } = await supabase
       .from('accompagnes_profiles')
       .insert({ user_id: user.id })
       .select('id')
-      .single()
+      .maybeSingle()
 
     if (createError || !newProfile) {
+      Sentry.captureException(createError ?? new Error('insert accompagnes_profiles returned no row'), {
+        tags: { flow: 'messaging', signal: 'profile-lookup-error', severity: 'critical' },
+      })
       return { error: 'Erreur lors de la création du profil.' }
     }
     benProfile = newProfile
@@ -136,21 +155,36 @@ export async function getOrCreateConversationAsAccompagnante(
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'Non connecté.' }
 
-  const { data: userData } = await supabase
+  // Story 7.A.1 : .maybeSingle() + Sentry capture sur erreur transitoire.
+  const { data: userData, error: userDataError } = await supabase
     .from('users')
     .select('role')
     .eq('id', user.id)
-    .single()
+    .maybeSingle()
+
+  if (userDataError) {
+    Sentry.captureException(userDataError, {
+      tags: { flow: 'messaging', signal: 'profile-lookup-error', severity: 'critical' },
+    })
+    return { error: 'Impossible de vérifier votre profil.' }
+  }
 
   if (!userData || userData.role !== 'accompagnant') {
     return { error: 'Seuls les accompagnants peuvent utiliser cette fonction.' }
   }
 
-  const { data: auxProfile } = await supabase
+  const { data: auxProfile, error: auxLookupError } = await supabase
     .from('accompagnants_profiles')
     .select('id')
     .eq('user_id', user.id)
-    .single()
+    .maybeSingle()
+
+  if (auxLookupError) {
+    Sentry.captureException(auxLookupError, {
+      tags: { flow: 'messaging', signal: 'profile-lookup-error', severity: 'critical' },
+    })
+    return { error: 'Impossible de vérifier votre profil.' }
+  }
 
   if (!auxProfile) {
     return { error: 'Profil accompagnant introuvable.' }
@@ -226,23 +260,40 @@ export async function getOrCreateAdminConversation(
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'Non connecté.' }
 
-  const { data: userData } = await supabase
+  // Story 7.A.1 : .maybeSingle() + Sentry capture sur erreur transitoire.
+  const { data: userData, error: userDataError } = await supabase
     .from('users')
     .select('role')
     .eq('id', user.id)
-    .single()
+    .maybeSingle()
+
+  if (userDataError) {
+    Sentry.captureException(userDataError, {
+      tags: { flow: 'messaging', signal: 'profile-lookup-error', severity: 'critical' },
+    })
+    return { error: 'Impossible de vérifier votre profil.' }
+  }
 
   if (!userData || userData.role !== 'admin') {
     return { error: 'Seul un admin peut ouvrir ce type de conversation.' }
   }
 
-  const { data: existing } = await supabase
+  // Story 7.A.1 : alignement avec getOrCreateConversation* (5.B.2 + 7.A.1) -
+  // capture Sentry si erreur DB transitoire sur la lookup conversation existante.
+  const { data: existing, error: existingError } = await supabase
     .from('conversations')
     .select('id')
     .eq('accompagnant_id', accompagnanteProfileId)
     .eq('admin_id', user.id)
     .is('accompagne_id', null)
     .maybeSingle()
+
+  if (existingError) {
+    Sentry.captureException(existingError, {
+      tags: { flow: 'messaging', signal: 'getOrCreateAdminConversation-existing-error', severity: 'warning' },
+    })
+    return { error: 'Erreur lors de la vérification de la conversation existante.' }
+  }
 
   if (existing) {
     return { conversationId: existing.id }

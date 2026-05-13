@@ -1,5 +1,11 @@
 # Deferred Work
 
+## Deferred from: code review of 7-a-1-robustifier-hasactivesubscription-et-getorcreateconversation (2026-05-13)
+
+- Cron `confirm-parrainages` : le throw de `hasActiveSubscription` est rattrapé par le catch de boucle existant mais incrémente `errors` sans distinguer erreur-métier vs incident-BDD transitoire [app/api/cron/confirm-parrainages/route.ts:48] — amélioration de sémantique hors scope 7.A.1 ; candidat 7.A ou cron hardening dédié
+- Race condition `accompagnes_profiles` : le pattern "lookup → insert si absent" n'est pas protégé par ON CONFLICT ni UNIQUE sur `user_id` ; deux appels concurrents peuvent créer un double profil [app/actions/messages.ts:67-82] — pré-existant avant 7.A.1 ; candidat hardening profils
+- `getSubscriptionStatus` encore en `.single()` sans guard error — divergence avec `hasActiveSubscription` durci en 7.A.1 ; erreur Supabase transitoire silencieuse dans les pages settings [lib/subscription-helpers.ts:80] — hors scope story (Dev Notes l'exclut) ; candidat 7.A.x ou mini-epic hardening helpers
+
 ## Deferred from: code review of 2-1-validation-automatique-filleule (2026-04-28)
 
 - Quota marraine illimité (parrainages × N infini) [app/actions/parrainage.ts] — reporté Story 2.2 (compteur récompense + plafond éventuel)
