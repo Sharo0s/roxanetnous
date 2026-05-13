@@ -28,7 +28,8 @@ Cet index recense les épics du projet roxanetnous. Il a été créé rétroacti
 | 1 | MVP Core (auth, vérification, abonnement, annonces, recherche, messagerie, dashboards, landing, modération, RGPD) | livré | jusqu'à 2026-04-23 | FR1–FR14, FR17–FR44 (sauf parrainage) | code livré + DECISIONS 2026-02-* |
 | 2 | Programme parrainage + Accessibilité transverse (NFR a11y) | livré | 2026-04-18 → 2026-05-06 | parrainage (sans FR explicite, intégré aux annonces et abonnement) ; NFR a11y WCAG 2.2 AA | `epic-2-retro-2026-05-04.md` + tech-specs 2.1-2.4 + rétros 2.5/2.6/2.7 |
 | 3 | Lancement Bretagne (déploiement progressif géographique + clarifications produit) | livré | 2026-05-06 → 2026-05-07 | FR16, FR45–FR48, FR6 (audit) | `epic-3.md` + `../implementation-artifacts/epic-3-retro-2026-05-07.md` |
-| 4 | Hardening pré-go-live Bretagne (Sentry, schema logNotification, email queue, tests métier, debt résolution) | cadré 2026-05-07, en cours | démarrage 2026-05-07 | NFR fiabilité + NFR sécurité + NFR testabilité + dette technique Epic 2/3 | `epic-4.md` |
+| 4 | Hardening pré-go-live Bretagne (Sentry, schema logNotification, email queue, tests métier, debt résolution) | livré 2026-05-08 | 2026-05-07 → 2026-05-08 | NFR fiabilité + NFR sécurité + NFR testabilité + dette technique Epic 2/3 | `epic-4.md` + `../implementation-artifacts/epic-4-retro-2026-05-08.md` |
+| 5 | Cohérence éditoriale + hardening continu post-Bretagne (renommage `accompagnante` → `accompagnant`, bugs latents messagerie, hardening typage transverse, audits 30j, observabilité oncall) | cadré 2026-05-13, en attente déblocage audits 7j | démarrage post-2026-05-15 | FR1-2, FR4-5, FR7, FR11-12, FR16-19, FR27-29, FR45-46, FR48 (impacts indirects) + NFR2, NFR4-6 | `epic-5.md` |
 
 ## Note de méthode
 
@@ -36,7 +37,9 @@ Les Epic 1 et 2 ne sont **pas re-décomposés en stories** dans ce fichier. Leur
 
 L'Epic 3 est le premier épic du projet à bénéficier d'un cadrage BMad formel **avant** implémentation (cf. `epic-3.md`).
 
-L'Epic 4 « Hardening pré-go-live Bretagne » a été cadré formellement le 2026-05-07 à la suite de la rétrospective Epic 3. Il regroupe **4 stories ordre 1 bloquantes go-live** (4.1 Sentry + rate-limit, 4.2 fix schema logNotification, 4.3 email queue durable, 4.4 tests métier critiques) et **7 stories ordre 2 différées** (4.5 à 4.11). Le toggle admin du premier département Bretagne en production est conditionné à la livraison des 4 stories ordre 1.
+L'Epic 4 « Hardening pré-go-live Bretagne » a été cadré formellement le 2026-05-07 à la suite de la rétrospective Epic 3. Il regroupe **4 stories ordre 1 bloquantes go-live** (4.1 Sentry + rate-limit, 4.2 fix schema logNotification, 4.3 email queue durable, 4.4 tests métier critiques) et **7 stories ordre 2 différées** (4.5 à 4.11). Le toggle admin du premier département Bretagne en production est conditionné à la livraison des 4 stories ordre 1. Épic clos 2026-05-08, retro livrée.
+
+L'Epic 5 « Cohérence éditoriale + hardening continu post-Bretagne » a été cadré formellement le 2026-05-13 via le skill `bmad-create-epics-and-stories`. Il regroupe **5 mini-epics et 16 stories** : 5.A renommage `accompagnante` → `accompagnant` (6 stories, séquentiel strict), 5.B bugs latents `deferred-work` (3 stories), 5.C hardening typage + nettoyage CI (4 stories), 5.D audits post-stabilisation 30j (2 stories conditionnelles ~2026-06-08), 5.E observabilité oncall (1 story). **Pré-requis bloquants** hérités Epic 4 : audits 7j Sentry + GHA (ETA ~2026-05-15) + toggle admin Bretagne. Démarrage sprint conditionné à ces 3 conditions. Source : `epic-5.md`.
 
 ## Pointeurs croisés
 

@@ -160,3 +160,41 @@ development_status:
   4-11-matching-ui: conditionnel
 
   epic-4-retrospective: done
+
+  # ==========================================================================
+  # Epic 5 : Coherence editoriale + hardening continu post-Bretagne
+  # Cadre formellement 2026-05-13 via bmad-create-epics-and-stories (epic-5.md).
+  # 5 mini-epics, 16 stories. Pre-requis bloquants : AI-4.1 audit Sentry 7j
+  # (ETA ~2026-05-15), AI-4.2 stabilisation GHA 7j (ETA ~2026-05-14),
+  # AI-4.3 toggle admin premier dpt Bretagne. Sprint non demarre tant que
+  # ces 3 conditions ne sont pas levees.
+  # ==========================================================================
+  epic-5: backlog
+
+  # Mini-epic 5.A - Renommage accompagnante -> accompagnant (6 stories, sequentiel strict)
+  5-a-1-architecture-review-strategie-migration-enum-role: backlog
+  5-a-2-migration-bdd-enum-role-colonnes-helpers-rls: backlog
+  5-a-3-regeneration-types-supabase-resorption-references-code-ts: backlog
+  5-a-4-renommage-routes-redirects-301-middleware: backlog
+  5-a-5-find-replace-global-copy-ui-emails-templates-resend: backlog
+  5-a-6-tests-e2e-validation-a11y-documentation-decisions: backlog
+
+  # Mini-epic 5.B - Bugs latents deferred-work (3 stories, bloquee par 5.A merged)
+  5-b-1-fix-oracle-role-messagerie: backlog
+  5-b-2-fix-doublons-conversations-unique-constraint: backlog
+  5-b-3-validation-stricte-type-url-admin-annonces: backlog
+
+  # Mini-epic 5.C - Hardening typage + nettoyage CI (4 stories, parallele de 5.A/5.B)
+  5-c-1-resorption-as-any-hors-admin: backlog
+  5-c-2-suppression-endpoint-test-sentry: backlog
+  5-c-3-normalisation-ipv6-mapped-ipv4: backlog
+  5-c-4-script-vercel-env-add-automatise: backlog
+
+  # Mini-epic 5.D - Audits post-stabilisation 30j (2 stories, declencheur ~2026-06-08)
+  5-d-1-audit-suppression-cron-notify-waitlist-retry: backlog
+  5-d-2-audit-suppression-batch-limit-send-waitlist: backlog
+
+  # Mini-epic 5.E - Observabilite oncall (1 story, parallele)
+  5-e-1-coupling-sentry-plateforme-oncall: backlog
+
+  epic-5-retrospective: optional
