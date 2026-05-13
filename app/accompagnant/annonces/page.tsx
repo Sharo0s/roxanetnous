@@ -23,7 +23,7 @@ export default async function MesAnnoncesAccompagnante() {
   if (!userData || userData.role !== 'accompagnant') redirect('/')
 
   const { data: profile } = await supabase
-    .from('accompagnantes_profiles')
+    .from('accompagnants_profiles')
     .select('id, validation_status')
     .eq('user_id', user.id)
     .single()
@@ -34,7 +34,7 @@ export default async function MesAnnoncesAccompagnante() {
   const unreadCount = await getUnreadCount(user.id)
 
   const { data: annonces } = await supabase
-    .from('annonces_accompagnantes')
+    .from('annonces_accompagnants')
     .select('*')
     .eq('accompagnant_id', profile.id)
     .order('created_at', { ascending: false })

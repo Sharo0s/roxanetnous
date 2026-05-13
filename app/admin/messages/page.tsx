@@ -18,7 +18,7 @@ export default async function AdminMessagesPage() {
       last_message_at,
       accompagnant_id,
       admin_id,
-      accompagnantes_profiles:accompagnant_id (
+      accompagnants_profiles:accompagnant_id (
         user_id,
         users!user_id (first_name, last_name, email)
       )
@@ -53,7 +53,7 @@ export default async function AdminMessagesPage() {
       ) : (
         <ul className="space-y-2">
           {conversations.map((conv) => {
-            const aux = conv.accompagnantes_profiles?.users
+            const aux = conv.accompagnants_profiles?.users
             const unread = unreadCounts[conv.id] || 0
             const fullName = `${aux?.first_name || ''} ${aux?.last_name || ''}`.trim() || 'Accompagnant'
             const initials = `${aux?.first_name?.[0] || ''}${aux?.last_name?.[0] || ''}`

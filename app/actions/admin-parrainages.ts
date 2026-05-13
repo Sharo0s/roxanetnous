@@ -189,7 +189,7 @@ export async function confirmerFraude(
     // par un admin, puis impliquée dans une fraude parrainage, n'aurait pas
     // dû être suspendue par l'ancien check.
     const { data: profileBefore } = await supabaseAdmin
-      .from('accompagnantes_profiles')
+      .from('accompagnants_profiles')
       .select('id, validation_source, validation_status')
       .eq('user_id', parrainage.filleule_id)
       .maybeSingle()
@@ -208,7 +208,7 @@ export async function confirmerFraude(
     // d'un parrainage tiers.
     if (wasValidatedByParrainage && profileBefore) {
       const { error: suspendErr } = await supabaseAdmin
-        .from('accompagnantes_profiles')
+        .from('accompagnants_profiles')
         .update({
           validation_status: 'refuse',
           validation_date: null,

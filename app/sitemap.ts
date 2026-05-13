@@ -22,7 +22,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Annonces accompagnantes publiees (whitelist departements_ouverts)
   const codesFilter = await getCodesPostauxFilterOr()
   const { data: annonces } = await supabase
-    .from('annonces_accompagnantes')
+    .from('annonces_accompagnants')
     .select('id, updated_at')
     .eq('status', 'publiee')
     .or(codesFilter)

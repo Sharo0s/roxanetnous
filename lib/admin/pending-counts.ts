@@ -21,7 +21,7 @@ export async function getAdminPendingCounts(adminUserId: string): Promise<AdminP
 
   const [utilisateursRes, signalementsRes, parrainagesRes, messagesRes] = await Promise.all([
     supabase
-      .from('accompagnantes_profiles')
+      .from('accompagnants_profiles')
       .select('id', { count: 'exact', head: true })
       .eq('validation_status', 'en_attente'),
     supabase

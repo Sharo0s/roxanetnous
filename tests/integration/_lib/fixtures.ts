@@ -110,22 +110,22 @@ export async function createTestAccompagnanteProfile(
 ): Promise<TestProfile> {
   const supabase = getAdminClient()
   const { data: existing } = await supabase
-    .from('accompagnantes_profiles')
+    .from('accompagnants_profiles')
     .select('id')
     .eq('user_id', userId)
     .maybeSingle()
 
   if (existing) {
     await supabase
-      .from('accompagnantes_profiles')
+      .from('accompagnants_profiles')
       .update({ validation_status: 'valide', adresse: opts?.adresse ?? null })
       .eq('id', existing.id)
-    track('accompagnantes_profiles', existing.id)
+    track('accompagnants_profiles', existing.id)
     return { id: existing.id, userId }
   }
 
   const { data, error } = await supabase
-    .from('accompagnantes_profiles')
+    .from('accompagnants_profiles')
     .insert({
       user_id: userId,
       validation_status: 'valide',
@@ -136,7 +136,7 @@ export async function createTestAccompagnanteProfile(
   if (error || !data) {
     throw new Error(`createTestAccompagnanteProfile echec : ${error?.message}`)
   }
-  track('accompagnantes_profiles', data.id)
+  track('accompagnants_profiles', data.id)
   return { id: data.id, userId }
 }
 
@@ -269,7 +269,7 @@ export async function cleanupAllFixtures(): Promise<void> {
     { table: 'admin_actions_log', pk: 'id' },
     { table: 'stripe_events_processed', pk: 'event_id' },
     { table: 'notifications_log', pk: 'id' },
-    { table: 'accompagnantes_profiles', pk: 'id' },
+    { table: 'accompagnants_profiles', pk: 'id' },
     { table: 'accompagnes_profiles', pk: 'id' },
     { table: 'users', pk: 'id' },
   ]

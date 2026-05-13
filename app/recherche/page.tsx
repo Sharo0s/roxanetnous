@@ -56,10 +56,10 @@ export default async function RecherchePage({
 
   if (hasFilters) {
     let query = supabaseAdmin
-      .from('annonces_accompagnantes')
+      .from('annonces_accompagnants')
       .select(`
         *,
-        accompagnantes_profiles!inner (
+        accompagnants_profiles!inner (
           diplomes,
           experience,
           specialites,
@@ -72,7 +72,7 @@ export default async function RecherchePage({
         )
       `)
       .eq('status', 'publiee')
-      .eq('accompagnantes_profiles.validation_status', 'valide')
+      .eq('accompagnants_profiles.validation_status', 'valide')
       .or(codesFilter)
       .order('published_at', { ascending: false })
 
@@ -85,13 +85,13 @@ export default async function RecherchePage({
     if (params.specialite) {
       const specs = params.specialite.split(',').filter(Boolean)
       if (specs.length > 0) {
-        query = query.overlaps('accompagnantes_profiles.specialites', specs)
+        query = query.overlaps('accompagnants_profiles.specialites', specs)
       }
     }
 
     // Filtre par experience
     if (params.experience) {
-      query = query.eq('accompagnantes_profiles.experience', params.experience)
+      query = query.eq('accompagnants_profiles.experience', params.experience)
     }
 
     const { data: rawAnnonces } = await query
@@ -99,7 +99,7 @@ export default async function RecherchePage({
     // Filter to only show accompagnantes with active subscription
     annonces = rawAnnonces || []
     if (annonces.length > 0) {
-      const userIds = annonces.map((a: any) => a.accompagnantes_profiles?.user_id).filter(Boolean)
+      const userIds = annonces.map((a: any) => a.accompagnants_profiles?.user_id).filter(Boolean)
       const { data: activeSubs } = await supabaseAdmin
         .from('subscriptions')
         .select('user_id')
@@ -108,12 +108,12 @@ export default async function RecherchePage({
         .gte('current_period_end', new Date().toISOString())
 
       const activeUserIds = new Set((activeSubs || []).map((s) => s.user_id))
-      annonces = annonces.filter((a: any) => activeUserIds.has(a.accompagnantes_profiles?.user_id))
+      annonces = annonces.filter((a: any) => activeUserIds.has(a.accompagnants_profiles?.user_id))
     }
   }
 
   // Fetch des badges
-  const badgeUserIds = annonces.map((a: any) => a.accompagnantes_profiles?.user_id).filter(Boolean)
+  const badgeUserIds = annonces.map((a: any) => a.accompagnants_profiles?.user_id).filter(Boolean)
   const badgesMap = await getBadges(badgeUserIds)
 
   // Matching pour les accompagnes avec annonce publiee
@@ -162,10 +162,10 @@ export default async function RecherchePage({
         let matchSourceAnnonces = annonces
         if (matchSourceAnnonces.length === 0) {
           const { data: allAnnonces } = await supabaseAdmin
-            .from('annonces_accompagnantes')
+            .from('annonces_accompagnants')
             .select(`
               *,
-              accompagnantes_profiles!inner (
+              accompagnants_profiles!inner (
                 diplomes,
                 experience,
                 specialites,
@@ -178,13 +178,13 @@ export default async function RecherchePage({
               )
             `)
             .eq('status', 'publiee')
-            .eq('accompagnantes_profiles.validation_status', 'valide')
+            .eq('accompagnants_profiles.validation_status', 'valide')
             .or(codesFilter)
             .order('published_at', { ascending: false })
 
           matchSourceAnnonces = allAnnonces || []
           if (matchSourceAnnonces.length > 0) {
-            const userIds = matchSourceAnnonces.map((a: any) => a.accompagnantes_profiles?.user_id).filter(Boolean)
+            const userIds = matchSourceAnnonces.map((a: any) => a.accompagnants_profiles?.user_id).filter(Boolean)
             const { data: activeSubs } = await supabaseAdmin
               .from('subscriptions')
               .select('user_id')
@@ -192,12 +192,12 @@ export default async function RecherchePage({
               .in('status', ['active', 'trialing'])
               .gte('current_period_end', new Date().toISOString())
             const activeUserIds = new Set((activeSubs || []).map((s) => s.user_id))
-            matchSourceAnnonces = matchSourceAnnonces.filter((a: any) => activeUserIds.has(a.accompagnantes_profiles?.user_id))
+            matchSourceAnnonces = matchSourceAnnonces.filter((a: any) => activeUserIds.has(a.accompagnants_profiles?.user_id))
           }
         }
 
         matchResults = matchSourceAnnonces.map((a: any) => {
-          const auxProfile = a.accompagnantes_profiles
+          const auxProfile = a.accompagnants_profiles
           const { score, details } = calculateMatchScore(
             {
               specialites: auxProfile.specialites || [],
@@ -313,7 +313,7 @@ export default async function RecherchePage({
             </div>
             <div className="space-y-3">
               {matchResults.map(({ annonce }) => {
-                const profile = annonce.accompagnantes_profiles
+                const profile = annonce.accompagnants_profiles
                 const u = profile?.users
                 const diplomeLabel = (profile?.diplomes as string[] || []).map((d: string) => DIPLOMES.find((dp) => dp.value === d)?.label || d).join(', ')
                 const expLabel = formatExperienceLabel(profile?.experience)

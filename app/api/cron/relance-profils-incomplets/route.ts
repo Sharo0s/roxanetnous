@@ -59,7 +59,7 @@ export async function GET(request: NextRequest) {
 
     // Profils accompagnantes en a_completer, candidats relance.
     const { data: profiles, error } = await supabase
-      .from('accompagnantes_profiles')
+      .from('accompagnants_profiles')
       .select(`
         id,
         ville,

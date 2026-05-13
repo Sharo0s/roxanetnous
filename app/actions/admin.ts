@@ -58,7 +58,7 @@ export async function validateAccompagnante(
   // post-fraude ou après complément de dossier sans recréer une visio.
   if (decision === 'valide') {
     const { data: current } = await supabase
-      .from('accompagnantes_profiles')
+      .from('accompagnants_profiles')
       .select('validation_status')
       .eq('id', profileId)
       .single()
@@ -83,7 +83,7 @@ export async function validateAccompagnante(
   }
 
   const { error: updateError } = await supabase
-    .from('accompagnantes_profiles')
+    .from('accompagnants_profiles')
     .update(updateData)
     .eq('id', profileId)
 
@@ -108,7 +108,7 @@ export async function validateAccompagnante(
   // pouvoir beneficier de la confirmation a 30 jours.
   if (decision === 'valide') {
     const { data: profileForUser } = await supabaseAdmin
-      .from('accompagnantes_profiles')
+      .from('accompagnants_profiles')
       .select('user_id')
       .eq('id', profileId)
       .maybeSingle()
@@ -159,7 +159,7 @@ export async function validateAccompagnante(
   after(async () => {
     try {
       const { data: auxProfile } = await supabaseAdmin
-        .from('accompagnantes_profiles')
+        .from('accompagnants_profiles')
         .select('user_id')
         .eq('id', profileId)
         .maybeSingle()
@@ -197,7 +197,7 @@ export async function validateAccompagnante(
     after(async () => {
       try {
         const { data: auxProfile } = await supabaseAdmin
-          .from('accompagnantes_profiles')
+          .from('accompagnants_profiles')
           .select('user_id')
           .eq('id', profileId)
           .maybeSingle()
@@ -256,7 +256,7 @@ export async function markVisioToPlan(profileId: string): Promise<ValidationResu
   }
 
   const { data: current } = await supabase
-    .from('accompagnantes_profiles')
+    .from('accompagnants_profiles')
     .select('validation_status, user_id')
     .eq('id', profileId)
     .single()
@@ -267,7 +267,7 @@ export async function markVisioToPlan(profileId: string): Promise<ValidationResu
   }
 
   const { error: updateError } = await supabase
-    .from('accompagnantes_profiles')
+    .from('accompagnants_profiles')
     .update({ validation_status: 'visio_a_planifier' })
     .eq('id', profileId)
 
@@ -380,7 +380,7 @@ export async function markVisioRealisee(
   }
 
   const { data: current } = await supabase
-    .from('accompagnantes_profiles')
+    .from('accompagnants_profiles')
     .select('validation_status')
     .eq('id', profileId)
     .single()
@@ -399,7 +399,7 @@ export async function markVisioRealisee(
   }
 
   const { error: updateError } = await supabase
-    .from('accompagnantes_profiles')
+    .from('accompagnants_profiles')
     .update(updateData)
     .eq('id', profileId)
 
@@ -470,7 +470,7 @@ export async function adminDeleteUser(userId: string): Promise<{ error?: string 
     // 2. Supprimer les fichiers Storage
     try {
       const { data: profile } = await supabaseAdmin
-        .from('accompagnantes_profiles')
+        .from('accompagnants_profiles')
         .select('justificatif_identite_url, justificatif_permis_url, justificatif_cv_url, justificatifs_diplomes')
         .eq('user_id', userId)
         .single()

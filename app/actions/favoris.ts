@@ -51,7 +51,7 @@ export async function toggleFavori(
   // Mettre a jour le compteur sur l'annonce accompagnante
   if (type === 'accompagnante') {
     await supabase
-      .from('annonces_accompagnantes')
+      .from('annonces_accompagnants')
       .update({ favoris_count: (await supabase.from('favoris').select('id', { count: 'exact', head: true }).eq('annonce_accompagnant_id', annonceId)).count || 0 })
       .eq('id', annonceId)
   }

@@ -52,7 +52,7 @@ export async function updateAccompagnanteProfile(data: {
 
   // Verifier le statut actuel pour remettre en attente si necessaire
   const { data: currentProfile } = await supabase
-    .from('accompagnantes_profiles')
+    .from('accompagnants_profiles')
     .select('validation_status')
     .eq('user_id', user.id)
     .single()
@@ -88,7 +88,7 @@ export async function updateAccompagnanteProfile(data: {
   }
 
   const { error } = await supabase
-    .from('accompagnantes_profiles')
+    .from('accompagnants_profiles')
     .update(updateData)
     .eq('user_id', user.id)
 
@@ -151,7 +151,7 @@ export async function toggleDisponible(indisponibleJusquAu?: string | null): Pro
   if (!user) return { error: 'Non connecté.' }
 
   const { data: profile } = await supabase
-    .from('accompagnantes_profiles')
+    .from('accompagnants_profiles')
     .select('disponible')
     .eq('user_id', user.id)
     .single()
@@ -161,7 +161,7 @@ export async function toggleDisponible(indisponibleJusquAu?: string | null): Pro
   const newValue = !profile.disponible
 
   const { error } = await supabase
-    .from('accompagnantes_profiles')
+    .from('accompagnants_profiles')
     .update({
       disponible: newValue,
       indisponible_jusqu_au: newValue ? null : (indisponibleJusquAu || null),

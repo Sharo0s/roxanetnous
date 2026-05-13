@@ -137,7 +137,7 @@ export default async function AdminParrainagesPage({
     const filleuleIds = Array.from(new Set(rows.map((r) => r.filleule_id).filter(Boolean) as string[]))
     if (filleuleIds.length > 0) {
       const { data: profiles } = await supabaseAdmin
-        .from('accompagnantes_profiles')
+        .from('accompagnants_profiles')
         .select('user_id, adresse, ville, code_postal')
         .in('user_id', filleuleIds)
       for (const p of profiles || []) {

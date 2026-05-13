@@ -34,12 +34,12 @@ export default async function AdminUtilisateursPage() {
   const supabaseAdmin = await createClient({ serviceRole: true })
 
   // Charger les accompagnantes avec leur profil
-  // Hint FK necessaire car accompagnantes_profiles a 2 FK vers users (user_id + validated_by)
+  // Hint FK necessaire car accompagnants_profiles a 2 FK vers users (user_id + validated_by)
   const { data: auxUsers } = await supabaseAdmin
     .from('users')
     .select(`
       id, email, first_name, last_name, role, created_at,
-      accompagnantes_profiles!auxiliaires_profiles_user_id_fkey (id, ville, code_postal, validation_status, validation_source, diplomes, experience)
+      accompagnants_profiles!auxiliaires_profiles_user_id_fkey (id, ville, code_postal, validation_status, validation_source, diplomes, experience)
     `)
     .eq('role', 'accompagnant')
     .order('created_at', { ascending: false })
@@ -57,9 +57,9 @@ export default async function AdminUtilisateursPage() {
     .limit(5000)
 
   const accompagnantes: AccompagnanteRow[] = (auxUsers || []).map((u: any) => {
-    const p = Array.isArray(u.accompagnantes_profiles)
-      ? u.accompagnantes_profiles[0]
-      : u.accompagnantes_profiles
+    const p = Array.isArray(u.accompagnants_profiles)
+      ? u.accompagnants_profiles[0]
+      : u.accompagnants_profiles
     return {
       id: u.id,
       email: u.email,

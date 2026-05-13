@@ -52,7 +52,7 @@ export default async function AdminUtilisateurDetailPage({
 
   if (userData.role === 'accompagnant') {
     const { data } = await supabaseAdmin
-      .from('accompagnantes_profiles')
+      .from('accompagnants_profiles')
       .select('*')
       .eq('user_id', id)
       .single()

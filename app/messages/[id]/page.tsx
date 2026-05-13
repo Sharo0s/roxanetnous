@@ -40,7 +40,7 @@ export default async function ConversationPage({
       accompagnant_id,
       accompagne_id,
       admin_id,
-      accompagnantes_profiles:accompagnant_id (
+      accompagnants_profiles:accompagnant_id (
         user_id,
         users:user_id (first_name, last_name)
       ),
@@ -58,7 +58,7 @@ export default async function ConversationPage({
   // Verifier que l'utilisateur fait partie de la conversation.
   // Supabase generated types modelisent les relations 1-1 imbriquees comme tableaux,
   // alors qu'avec `.single()` sur une FK unique le retour est un objet. Type local.
-  const auxProfile = conversation.accompagnantes_profiles as unknown as ConversationParticipantProfile
+  const auxProfile = conversation.accompagnants_profiles as unknown as ConversationParticipantProfile
   const benProfile = conversation.accompagnes_profiles as unknown as ConversationParticipantProfile
   const adminUserId = conversation.admin_id as string | null
   const isAdminConv = !!adminUserId
@@ -87,7 +87,7 @@ export default async function ConversationPage({
   let otherProfileUrl: string | null = null
   if (!isAdminConv && userData.role === 'accompagne' && conversation.accompagnant_id) {
     const { data: auxAnnonce } = await supabase
-      .from('annonces_accompagnantes')
+      .from('annonces_accompagnants')
       .select('id')
       .eq('accompagnant_id', conversation.accompagnant_id)
       .eq('status', 'publiee')

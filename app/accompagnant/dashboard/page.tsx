@@ -29,7 +29,7 @@ export default async function AccompagnanteDashboard() {
   const isFilleule = !!userData.parrainee_par
 
   const { data: profile } = await supabase
-    .from('accompagnantes_profiles')
+    .from('accompagnants_profiles')
     .select('id, validation_status, validation_source, diplomes, refus_motif, ville, rayon_km, specialites, disponible, indisponible_jusqu_au')
     .eq('user_id', user.id)
     .single()
@@ -75,13 +75,13 @@ export default async function AccompagnanteDashboard() {
   let annoncesPubliees = 0
   if (profile) {
     const { count: total } = await supabase
-      .from('annonces_accompagnantes')
+      .from('annonces_accompagnants')
       .select('id', { count: 'exact', head: true })
       .eq('accompagnant_id', profile.id)
     annoncesCount = total || 0
 
     const { count: publiees } = await supabase
-      .from('annonces_accompagnantes')
+      .from('annonces_accompagnants')
       .select('id', { count: 'exact', head: true })
       .eq('accompagnant_id', profile.id)
       .eq('status', 'publiee')

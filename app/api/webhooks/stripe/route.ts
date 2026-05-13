@@ -49,15 +49,15 @@ async function detectBlacklistAtWebhook(
   try {
     if (!parrainage.filleule_id) return
 
-    // 1) Détection meme_adresse (FLAG) via accompagnantes_profiles
+    // 1) Détection meme_adresse (FLAG) via accompagnants_profiles
     const [{ data: marraineProfile }, { data: filleuleProfile }] = await Promise.all([
       supabase
-        .from('accompagnantes_profiles')
+        .from('accompagnants_profiles')
         .select('adresse')
         .eq('user_id', parrainage.marraine_id)
         .maybeSingle(),
       supabase
-        .from('accompagnantes_profiles')
+        .from('accompagnants_profiles')
         .select('adresse')
         .eq('user_id', parrainage.filleule_id)
         .maybeSingle(),

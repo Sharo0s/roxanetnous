@@ -8,7 +8,7 @@ export async function notifyFavoriAccompagnes(accompagnanteUserId: string) {
 
   // Trouver le profil accompagnante
   const { data: auxProfile } = await supabase
-    .from('accompagnantes_profiles')
+    .from('accompagnants_profiles')
     .select('id')
     .eq('user_id', accompagnanteUserId)
     .single()
@@ -17,7 +17,7 @@ export async function notifyFavoriAccompagnes(accompagnanteUserId: string) {
 
   // Trouver les annonces de cette accompagnante
   const { data: annonces } = await supabase
-    .from('annonces_accompagnantes')
+    .from('annonces_accompagnants')
     .select('id')
     .eq('accompagnant_id', auxProfile.id)
 

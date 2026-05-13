@@ -128,7 +128,7 @@ export async function analyzeDocument(
 
   // Recuperer le profil pour la verification de coherence
   const { data: profile } = await supabase
-    .from('accompagnantes_profiles')
+    .from('accompagnants_profiles')
     .select('*, users:user_id (first_name, last_name)')
     .eq('id', profileId)
     .single()

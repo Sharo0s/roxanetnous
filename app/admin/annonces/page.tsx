@@ -31,7 +31,7 @@ type RawAnnonceWithProfile = {
   code_postal: string | null
   status: string
   created_at: string
-  accompagnantes_profiles?: { users: { first_name: string; last_name: string; email: string } | null } | null
+  accompagnants_profiles?: { users: { first_name: string; last_name: string; email: string } | null } | null
   accompagnes_profiles?: { users: { first_name: string; last_name: string; email: string } | null } | null
 }
 
@@ -39,7 +39,7 @@ function extractUser(
   annonce: RawAnnonceWithProfile,
   type: 'accompagnante' | 'accompagne',
 ): { first_name: string; last_name: string; email: string } | null {
-  if (type === 'accompagnante') return annonce.accompagnantes_profiles?.users ?? null
+  if (type === 'accompagnante') return annonce.accompagnants_profiles?.users ?? null
   return annonce.accompagnes_profiles?.users ?? null
 }
 
@@ -59,16 +59,16 @@ export default async function AdminAnnoncesPage({
   const [auxResult, benResult] = await Promise.all([
     type === 'accompagnante'
       ? supabaseAdmin
-          .from('annonces_accompagnantes')
+          .from('annonces_accompagnants')
           .select(`
             id, titre, ville, code_postal, status, created_at, published_at, vues, contacts_count,
-            accompagnantes_profiles:accompagnant_id (
+            accompagnants_profiles:accompagnant_id (
               users!user_id (first_name, last_name, email)
             )
           `)
           .order('created_at', { ascending: false })
       : supabaseAdmin
-          .from('annonces_accompagnantes')
+          .from('annonces_accompagnants')
           .select('id', { count: 'exact', head: true }),
     type === 'accompagne'
       ? supabaseAdmin

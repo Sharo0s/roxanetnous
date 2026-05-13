@@ -33,7 +33,7 @@ export default async function OnboardingPage() {
   const departementsOuverts = await getCodesDepartementsOuverts()
 
   const { data: profile } = await supabaseAdmin
-    .from('accompagnantes_profiles')
+    .from('accompagnants_profiles')
     .select('ville, code_postal')
     .eq('user_id', user.id)
     .maybeSingle()

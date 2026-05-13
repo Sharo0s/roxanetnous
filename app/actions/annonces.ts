@@ -25,7 +25,7 @@ export async function createAnnonceAccompagnante(data: {
   if (!user) return { error: 'Non connecté.' }
 
   const { data: profile } = await supabase
-    .from('accompagnantes_profiles')
+    .from('accompagnants_profiles')
     .select('id, validation_status')
     .eq('user_id', user.id)
     .single()
@@ -56,7 +56,7 @@ export async function createAnnonceAccompagnante(data: {
   const coords = await geocodeAddress(data.ville.trim(), data.code_postal.trim())
 
   const { data: insertedAnnonce, error } = await supabase
-    .from('annonces_accompagnantes')
+    .from('annonces_accompagnants')
     .insert({
       accompagnant_id: profile.id,
       titre: '',
@@ -78,7 +78,7 @@ export async function createAnnonceAccompagnante(data: {
   // Mettre a jour lat/lng sur le profil accompagnante si pas encore renseigne
   if (coords) {
     await supabase
-      .from('accompagnantes_profiles')
+      .from('accompagnants_profiles')
       .update({ latitude: coords.lat, longitude: coords.lng })
       .eq('id', profile.id)
       .is('latitude', null)
@@ -111,7 +111,7 @@ export async function updateAnnonceAccompagnante(
   if (!user) return { error: 'Non connecté.' }
 
   const { data: profile } = await supabase
-    .from('accompagnantes_profiles')
+    .from('accompagnants_profiles')
     .select('id')
     .eq('user_id', user.id)
     .single()
@@ -134,7 +134,7 @@ export async function updateAnnonceAccompagnante(
   }
 
   const { error } = await supabase
-    .from('annonces_accompagnantes')
+    .from('annonces_accompagnants')
     .update({
       description: data.description.trim(),
       ville: data.ville.trim(),
@@ -162,7 +162,7 @@ export async function updateAnnonceAccompagnanteStatus(
   if (!user) return { error: 'Non connecté.' }
 
   const { data: profile } = await supabase
-    .from('accompagnantes_profiles')
+    .from('accompagnants_profiles')
     .select('id')
     .eq('user_id', user.id)
     .single()
@@ -184,7 +184,7 @@ export async function updateAnnonceAccompagnanteStatus(
   }
 
   const { error } = await supabase
-    .from('annonces_accompagnantes')
+    .from('annonces_accompagnants')
     .update(updateData)
     .eq('id', annonceId)
     .eq('accompagnant_id', profile.id)
@@ -407,7 +407,7 @@ export async function deleteAnnonceAccompagnante(
   if (!user) return { error: 'Non connecté.' }
 
   const { data: profile } = await supabase
-    .from('accompagnantes_profiles')
+    .from('accompagnants_profiles')
     .select('id')
     .eq('user_id', user.id)
     .single()
@@ -415,7 +415,7 @@ export async function deleteAnnonceAccompagnante(
   if (!profile) return { error: 'Profil non trouvé.' }
 
   const { error } = await supabase
-    .from('annonces_accompagnantes')
+    .from('annonces_accompagnants')
     .delete()
     .eq('id', annonceId)
     .eq('accompagnant_id', profile.id)

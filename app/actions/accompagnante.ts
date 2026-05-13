@@ -124,7 +124,7 @@ export async function submitOnboarding(data: {
 
   // Le trigger handle_new_user cree deja un profil vide, on fait un upsert
   const { data: existingProfile } = await supabase
-    .from('accompagnantes_profiles')
+    .from('accompagnants_profiles')
     .select('id')
     .eq('user_id', user.id)
     .single()
@@ -132,13 +132,13 @@ export async function submitOnboarding(data: {
   let error
   if (existingProfile) {
     const result = await supabase
-      .from('accompagnantes_profiles')
+      .from('accompagnants_profiles')
       .update(profileData)
       .eq('user_id', user.id)
     error = result.error
   } else {
     const result = await supabase
-      .from('accompagnantes_profiles')
+      .from('accompagnants_profiles')
       .insert({ user_id: user.id, ...profileData })
     error = result.error
   }
@@ -193,7 +193,7 @@ export async function uploadJustificatif(formData: FormData): Promise<Onboarding
   if (isDiplomeType && diplomeKey) {
     // Recuperer le profil pour merger dans le jsonb
     const { data: currentProfile } = await supabase
-      .from('accompagnantes_profiles')
+      .from('accompagnants_profiles')
       .select('justificatifs_diplomes')
       .eq('user_id', user.id)
       .single()
@@ -202,7 +202,7 @@ export async function uploadJustificatif(formData: FormData): Promise<Onboarding
     const updated = { ...current, [diplomeKey]: path }
 
     const { error: updateError } = await supabase
-      .from('accompagnantes_profiles')
+      .from('accompagnants_profiles')
       .update({ justificatifs_diplomes: updated })
       .eq('user_id', user.id)
 
@@ -221,7 +221,7 @@ export async function uploadJustificatif(formData: FormData): Promise<Onboarding
     }
 
     const { error: updateError } = await supabase
-      .from('accompagnantes_profiles')
+      .from('accompagnants_profiles')
       .update({ [field]: path })
       .eq('user_id', user.id)
 

@@ -12,7 +12,7 @@ export async function getUnreadCount(userId: string): Promise<number> {
   const role = userData?.role
 
   const { data: auxProfile } = await supabase
-    .from('accompagnantes_profiles')
+    .from('accompagnants_profiles')
     .select('id')
     .eq('user_id', userId)
     .single()

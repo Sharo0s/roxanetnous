@@ -53,10 +53,10 @@ export default async function AnnonceDetailPage({
   }
 
   const { data: annonce } = await supabase
-    .from('annonces_accompagnantes')
+    .from('annonces_accompagnants')
     .select(`
       *,
-      accompagnantes_profiles!inner (
+      accompagnants_profiles!inner (
         user_id,
         diplomes,
         experience,
@@ -75,13 +75,13 @@ export default async function AnnonceDetailPage({
     `)
     .eq('id', id)
     .eq('status', 'publiee')
-    .eq('accompagnantes_profiles.validation_status', 'valide')
+    .eq('accompagnants_profiles.validation_status', 'valide')
     .single()
 
   if (!annonce) redirect('/recherche')
   if (!(await isDepartementOuvert(annonce.code_postal))) redirect('/recherche')
 
-  const profile = annonce.accompagnantes_profiles as unknown as AnnoncePublicProfile
+  const profile = annonce.accompagnants_profiles as unknown as AnnoncePublicProfile
   const u = profile?.users
   const auxUserId = profile?.user_id
 

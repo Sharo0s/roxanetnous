@@ -27,9 +27,9 @@ export default async function FavorisPage() {
       annonce_accompagnant_id,
       annonce_accompagne_id,
       created_at,
-      annonces_accompagnantes:annonce_accompagnant_id (
+      annonces_accompagnants:annonce_accompagnant_id (
         id, description, ville, code_postal, status,
-        accompagnantes_profiles:accompagnant_id (
+        accompagnants_profiles:accompagnant_id (
           diplomes, experience, specialites,
           users:user_id (first_name, last_name)
         )
@@ -80,9 +80,9 @@ export default async function FavorisPage() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {favoris.map((fav: any) => {
-              if (fav.annonces_accompagnantes) {
-                const annonce = fav.annonces_accompagnantes
-                const profile = annonce.accompagnantes_profiles
+              if (fav.annonces_accompagnants) {
+                const annonce = fav.annonces_accompagnants
+                const profile = annonce.accompagnants_profiles
                 const u = profile?.users
                 const diplomeLabel = (profile?.diplomes as string[] || []).map((d: string) => DIPLOMES.find((dp) => dp.value === d)?.label || d).join(', ')
 

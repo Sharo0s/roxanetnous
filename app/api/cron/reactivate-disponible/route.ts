@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
 
   // Trouver les accompagnantes dont la date de retour est passee
   const { data: profiles } = await supabase
-    .from('accompagnantes_profiles')
+    .from('accompagnants_profiles')
     .select('user_id')
     .eq('disponible', false)
     .not('indisponible_jusqu_au', 'is', null)
@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
 
   // Reactiver les profils
   await supabase
-    .from('accompagnantes_profiles')
+    .from('accompagnants_profiles')
     .update({ disponible: true, indisponible_jusqu_au: null })
     .in('user_id', userIds)
 

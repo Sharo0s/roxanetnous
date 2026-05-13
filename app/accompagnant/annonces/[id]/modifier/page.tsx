@@ -27,7 +27,7 @@ export default async function ModifierAnnoncePage({
   if (!userData || userData.role !== 'accompagnant') redirect('/')
 
   const { data: profile } = await supabase
-    .from('accompagnantes_profiles')
+    .from('accompagnants_profiles')
     .select('id')
     .eq('user_id', user.id)
     .single()
@@ -35,7 +35,7 @@ export default async function ModifierAnnoncePage({
   if (!profile) redirect('/accompagnant/dashboard')
 
   const { data: annonce } = await supabase
-    .from('annonces_accompagnantes')
+    .from('annonces_accompagnants')
     .select('*')
     .eq('id', id)
     .eq('accompagnant_id', profile.id)

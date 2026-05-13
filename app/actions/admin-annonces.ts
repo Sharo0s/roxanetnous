@@ -25,7 +25,7 @@ export async function adminUpdateAnnonceStatus(
 
   const supabaseAdmin = await createClient({ serviceRole: true })
 
-  const table = type === 'accompagnante' ? 'annonces_accompagnantes' : 'annonces_accompagnes'
+  const table = type === 'accompagnante' ? 'annonces_accompagnants' : 'annonces_accompagnes'
 
   const { error } = await supabaseAdmin
     .from(table)

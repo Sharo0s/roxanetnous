@@ -52,7 +52,7 @@ export async function notifyMatchingUsers(params: {
 
     // Recuperer les accompagnantes valides avec abonnement actif (whitelist departements_ouverts)
     const { data: auxProfiles } = await supabase
-      .from('accompagnantes_profiles')
+      .from('accompagnants_profiles')
       .select('user_id, specialites, ville, code_postal, experience, diplomes, disponibilites, rayon_km, latitude, longitude')
       .eq('validation_status', 'valide')
       .or(codesFilter)
@@ -116,10 +116,10 @@ export async function notifyMatchingUsers(params: {
   } else {
     // Nouvelle annonce accompagnante -> notifier les accompagnes qui ont des annonces correspondantes
     const { data: auxAnnonce } = await supabase
-      .from('annonces_accompagnantes')
+      .from('annonces_accompagnants')
       .select(`
         id, titre, ville, code_postal, rayon_km, disponibilites,
-        accompagnantes_profiles:accompagnant_id!inner (
+        accompagnants_profiles:accompagnant_id!inner (
           user_id, specialites, ville, code_postal, experience, diplomes,
           disponibilites, rayon_km, latitude, longitude
         )
@@ -131,7 +131,7 @@ export async function notifyMatchingUsers(params: {
     // Defense en profondeur : ne pas notifier pour une annonce source hors zone
     if (!(await isDepartementOuvert(auxAnnonce.code_postal))) return
 
-    const auxProfile = auxAnnonce.accompagnantes_profiles as unknown as AccompagnanteMatchingProfile
+    const auxProfile = auxAnnonce.accompagnants_profiles as unknown as AccompagnanteMatchingProfile
     if (!auxProfile) return
     const codesFilter = await getCodesPostauxFilterOr()
 

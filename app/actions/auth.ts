@@ -116,13 +116,13 @@ export async function signup(formData: FormData): Promise<AuthResult> {
   // handle_new_user). Géocodage best-effort : si l'API tombe, on stocke quand
   // même ville+CP pour ne pas bloquer l'inscription ; le matching tombera sur
   // le fallback ville-exacte/département en attendant.
-  // Note : seule la table accompagnantes_profiles a latitude/longitude
+  // Note : seule la table accompagnants_profiles a latitude/longitude
   // (pour le matching Haversine côté offre). Les accompagnés ne stockent
   // que ville+code_postal.
   if (role === 'accompagnant') {
     const geo = await geocodeAddress(ville, codePostal)
     const { error: profileError } = await supabaseAdmin
-      .from('accompagnantes_profiles')
+      .from('accompagnants_profiles')
       .update({
         ville,
         code_postal: codePostal,
@@ -131,7 +131,7 @@ export async function signup(formData: FormData): Promise<AuthResult> {
       })
       .eq('user_id', authData.user.id)
     if (profileError) {
-      console.error('Erreur update accompagnantes_profiles avec localisation:', profileError.message)
+      console.error('Erreur update accompagnants_profiles avec localisation:', profileError.message)
     }
   } else {
     const { error: profileError } = await supabaseAdmin
@@ -491,7 +491,7 @@ export async function deleteAccount(): Promise<AuthResult> {
     // 2. Delete Storage files (justificatifs)
     try {
       const { data: profile } = await supabaseAdmin
-        .from('accompagnantes_profiles')
+        .from('accompagnants_profiles')
         .select('justificatif_identite_url, justificatif_diplome_url, justificatifs_autres')
         .eq('user_id', user.id)
         .single()

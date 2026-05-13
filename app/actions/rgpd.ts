@@ -22,9 +22,9 @@ export async function exportUserData(): Promise<string> {
     { data: favoris },
   ] = await Promise.all([
     supabaseAdmin.from('users').select('*').eq('id', user.id).single(),
-    supabaseAdmin.from('accompagnantes_profiles').select('*').eq('user_id', user.id).single(),
+    supabaseAdmin.from('accompagnants_profiles').select('*').eq('user_id', user.id).single(),
     supabaseAdmin.from('accompagnes_profiles').select('*').eq('user_id', user.id).single(),
-    supabaseAdmin.from('annonces_accompagnantes').select('*').eq('accompagnant_id', user.id),
+    supabaseAdmin.from('annonces_accompagnants').select('*').eq('accompagnant_id', user.id),
     supabaseAdmin.from('annonces_accompagnes').select('*').eq('accompagne_id', user.id),
     supabaseAdmin.from('messages').select('*').eq('sender_id', user.id),
     supabaseAdmin.from('subscriptions').select('*').eq('user_id', user.id).single(),
@@ -36,7 +36,7 @@ export async function exportUserData(): Promise<string> {
   let annoncesBenData = annoncesBen
   if (auxProfile) {
     const { data } = await supabaseAdmin
-      .from('annonces_accompagnantes')
+      .from('annonces_accompagnants')
       .select('*')
       .eq('accompagnant_id', auxProfile.id)
     annoncesAuxData = data

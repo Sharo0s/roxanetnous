@@ -25,7 +25,7 @@ export default async function AdminConversationPage({
       id,
       accompagnant_id,
       admin_id,
-      accompagnantes_profiles:accompagnant_id (
+      accompagnants_profiles:accompagnant_id (
         user_id,
         users!user_id (first_name, last_name, email)
       )
@@ -35,7 +35,7 @@ export default async function AdminConversationPage({
 
   if (!conversation || !conversation.admin_id) redirect('/admin/messages')
 
-  const aux = conversation.accompagnantes_profiles?.users
+  const aux = conversation.accompagnants_profiles?.users
   const fullName = `${aux?.first_name || ''} ${aux?.last_name || ''}`.trim() || 'Accompagnant'
 
   const { data: messages } = await supabaseAdmin

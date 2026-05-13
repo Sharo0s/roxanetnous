@@ -11,7 +11,7 @@ type Annonce = {
   description: string
   ville: string
   code_postal: string
-  accompagnantes_profiles: {
+  accompagnants_profiles: {
     diplomes: string[]
     experience: string
     specialites: string[]
@@ -60,7 +60,7 @@ export function InfiniteAnnoncesGrid({ annonces, badgesMap, userId, favorisIds =
     <>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
         {visible.map((annonce: any) => {
-          const profile = annonce.accompagnantes_profiles
+          const profile = annonce.accompagnants_profiles
           const u = profile?.users
           const diplomeLabel = (profile?.diplomes as string[] || []).map((d: string) => DIPLOMES.find((dp) => dp.value === d)?.label || d).join(', ')
           const expLabel = formatExperienceLabel(profile?.experience)

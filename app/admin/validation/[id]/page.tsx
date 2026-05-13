@@ -21,7 +21,7 @@ export default async function ValidationDetailPage({
   const supabaseAdmin = (await createClient({ serviceRole: true })) as unknown as SupabaseClient<Database>
 
   const { data: profile } = await supabaseAdmin
-    .from('accompagnantes_profiles')
+    .from('accompagnants_profiles')
     .select(`
       *,
       users!user_id (first_name, last_name, email, phone, created_at)

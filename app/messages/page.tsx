@@ -29,7 +29,7 @@ export default async function MessagesPage() {
 
   if (userData.role === 'accompagnant') {
     const { data: profile } = await supabase
-      .from('accompagnantes_profiles')
+      .from('accompagnants_profiles')
       .select('id')
       .eq('user_id', user.id)
       .single()
@@ -56,7 +56,7 @@ export default async function MessagesPage() {
       accompagnant_id,
       accompagne_id,
       admin_id,
-      accompagnantes_profiles:accompagnant_id (
+      accompagnants_profiles:accompagnant_id (
         user_id,
         users:user_id (first_name, last_name)
       ),
@@ -150,7 +150,7 @@ export default async function MessagesPage() {
                 displayName = `${u?.first_name || ''} ${u?.last_name || ''}`.trim() || 'Accompagné'
                 initials = `${u?.first_name?.[0] || ''}${u?.last_name?.[0] || ''}`
               } else {
-                const profile = conv.accompagnantes_profiles as unknown as ConvProfileWithUser
+                const profile = conv.accompagnants_profiles as unknown as ConvProfileWithUser
                 const u = profile?.users
                 displayName = `${u?.first_name || ''} ${u?.last_name || ''}`.trim() || 'Accompagnant'
                 initials = `${u?.first_name?.[0] || ''}${u?.last_name?.[0] || ''}`

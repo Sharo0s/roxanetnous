@@ -170,7 +170,7 @@ export async function GET(request: NextRequest) {
       // M3 : re-vérifier que le statut de validation de la marraine est
       // toujours 'valide' (peut avoir été révoqué par l'admin entre J+0 et J+30).
       const { data: marraineProfile } = await supabase
-        .from('accompagnantes_profiles')
+        .from('accompagnants_profiles')
         .select('validation_status')
         .eq('user_id', row.marraine_id)
         .single()

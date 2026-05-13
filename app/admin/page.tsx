@@ -57,7 +57,7 @@ export default async function AdminDashboard() {
   const [pendingResult, signalementsResult, visiosResult, incompletsResult, kpis, repartition, activiteMois, waitlist, parrainages, derniereAction] =
     await Promise.all([
       supabaseAdmin
-        .from('accompagnantes_profiles')
+        .from('accompagnants_profiles')
         .select(`
           id,
           ville,
@@ -77,11 +77,11 @@ export default async function AdminDashboard() {
         .select('id', { count: 'exact', head: true })
         .eq('status', 'en_attente'),
       supabaseAdmin
-        .from('accompagnantes_profiles')
+        .from('accompagnants_profiles')
         .select('id', { count: 'exact', head: true })
         .eq('validation_status', 'visio_a_planifier'),
       supabaseAdmin
-        .from('accompagnantes_profiles')
+        .from('accompagnants_profiles')
         .select('id', { count: 'exact', head: true })
         .eq('validation_status', 'a_completer'),
       getKpis(),

@@ -147,7 +147,7 @@ export async function getOrCreateConversationAsAccompagnante(
   }
 
   const { data: auxProfile } = await supabase
-    .from('accompagnantes_profiles')
+    .from('accompagnants_profiles')
     .select('id')
     .eq('user_id', user.id)
     .single()
@@ -304,7 +304,7 @@ export async function sendMessage(
       accompagnant_id,
       accompagne_id,
       admin_id,
-      accompagnantes_profiles:accompagnant_id (user_id),
+      accompagnants_profiles:accompagnant_id (user_id),
       accompagnes_profiles:accompagne_id (user_id)
     `)
     .eq('id', conversationId)
@@ -315,7 +315,7 @@ export async function sendMessage(
   }
 
   // Supabase generated types modelisent les relations 1-1 imbriquees comme tableaux.
-  const auxProfile = conversation.accompagnantes_profiles as unknown as ConversationParticipantUserId
+  const auxProfile = conversation.accompagnants_profiles as unknown as ConversationParticipantUserId
   const benProfile = conversation.accompagnes_profiles as unknown as ConversationParticipantUserId
   const adminUserId = conversation.admin_id as string | null
 

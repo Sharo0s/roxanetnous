@@ -15,7 +15,7 @@ export default async function HomePage() {
   const supabase = await createClient({ serviceRole: true })
 
   const { count: accompagnantesCount } = await supabase
-    .from('accompagnantes_profiles')
+    .from('accompagnants_profiles')
     .select('id', { count: 'exact', head: true })
     .eq('validation_status', 'valide')
 
@@ -24,7 +24,7 @@ export default async function HomePage() {
     .select('id', { count: 'exact', head: true })
 
   const { data: villesData } = await supabase
-    .from('accompagnantes_profiles')
+    .from('accompagnants_profiles')
     .select('ville, latitude, longitude')
     .eq('validation_status', 'valide')
 

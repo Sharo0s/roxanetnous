@@ -113,7 +113,7 @@ async function revokeFilleuleValidation(
   const supabaseAdmin = await createClient({ serviceRole: true })
 
   const { data: profile } = await supabaseAdmin
-    .from('accompagnantes_profiles')
+    .from('accompagnants_profiles')
     .select('id, validation_status, validation_source')
     .eq('user_id', filleuleId)
     .maybeSingle()
@@ -121,7 +121,7 @@ async function revokeFilleuleValidation(
   // Si la filleule était validée par parrainage, on remet en attente.
   if (profile?.validation_source === 'parrainage' && profile?.validation_status === 'valide') {
     await supabaseAdmin
-      .from('accompagnantes_profiles')
+      .from('accompagnants_profiles')
       .update({
         validation_status: 'en_attente',
         validation_source: 'manuelle',
@@ -386,17 +386,17 @@ export async function validateCode(rawCode: string): Promise<ValidationCodeResul
     return { valid: false, reason: 'unknown_code' }
   }
 
-  // Désambiguïsation FK : accompagnantes_profiles a deux FK vers users
+  // Désambiguïsation FK : accompagnants_profiles a deux FK vers users
   // (user_id et validated_by), donc PostgREST exige un hint explicite
   // sur le nom de la contrainte. Sans cela, l'embed renvoie un tableau
   // vide et la marraine apparaît comme non validée.
   const { data: marraine } = await supabaseAdmin
     .from('users')
-    .select('first_name, accompagnantes_profiles!auxiliaires_profiles_user_id_fkey(validation_status)')
+    .select('first_name, accompagnants_profiles!auxiliaires_profiles_user_id_fkey(validation_status)')
     .eq('id', row.user_id)
     .maybeSingle()
 
-  const profileRow = marraine?.accompagnantes_profiles as
+  const profileRow = marraine?.accompagnants_profiles as
     | { validation_status?: string }
     | { validation_status?: string }[]
     | undefined
@@ -774,7 +774,7 @@ export async function confirmParrainageOnSuccess(
   // Si elle a été déchue entre l'inscription de la filleule et le paiement, on
   // refuse la validation automatique par parrainage.
   const { data: marraineProfile } = await supabaseAdmin
-    .from('accompagnantes_profiles')
+    .from('accompagnants_profiles')
     .select('validation_status')
     .eq('user_id', parrainage.marraine_id)
     .maybeSingle()
@@ -785,7 +785,7 @@ export async function confirmParrainageOnSuccess(
   // Décision 3a : refuser la validation et le log si le profil filleule est absent.
   // .maybeSingle() pour gérer le cas onboarding incomplet sans lever PGRST116.
   const { data: filleuleProfile } = await supabaseAdmin
-    .from('accompagnantes_profiles')
+    .from('accompagnants_profiles')
     .select('id')
     .eq('user_id', user.id)
     .maybeSingle()
@@ -819,7 +819,7 @@ export async function confirmParrainageOnSuccess(
   // filleule est déjà 'valide' (idempotence), on saute. Si elle est dans
   // un autre statut, on log et on n'écrase pas.
   const { data: validationUpdated } = await supabaseAdmin
-    .from('accompagnantes_profiles')
+    .from('accompagnants_profiles')
     .update({
       validation_status: 'valide',
       validation_source: 'parrainage',
@@ -834,7 +834,7 @@ export async function confirmParrainageOnSuccess(
     // Statut courant n'est pas 'en_attente' : peut être 'valide' (idempotence,
     // OK) ou 'refuse' / 'a_completer' (décision admin à préserver).
     const { data: currentProfile } = await supabaseAdmin
-      .from('accompagnantes_profiles')
+      .from('accompagnants_profiles')
       .select('validation_status')
       .eq('id', filleuleProfile.id)
       .single()

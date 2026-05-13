@@ -25,7 +25,7 @@ export default async function AccompagnanteProfilPage() {
   if (!userData || userData.role !== 'accompagnant') redirect('/')
 
   const { data: profile } = await supabase
-    .from('accompagnantes_profiles')
+    .from('accompagnants_profiles')
     .select('*')
     .eq('user_id', user.id)
     .single()
