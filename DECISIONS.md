@@ -669,3 +669,27 @@ Fenetre cutover estimee < 5 secondes (l'ALTER COLUMN TYPE sur 822 lignes est le 
 
 **Regle :** Stories 6.A.2 a 6.A.5 ne peuvent demarrer qu'apres validation Sylvain du tech-spec et apres snapshot pre-cutover persiste. 6.B.1 (fix tests integration paywall) doit etre execute apres 6.A.2 et avant 6.A merge final pour ne pas casser la CI integration.
 
+
+
+---
+
+## 2026-05-13 : Confirmation rejet centralisation helpers email (decision F-Epic6-C4)
+
+**Contexte :** Story 6.C.4 (Epic 6) re-evalue la decision Epic 4 4.3 D9 de ne pas centraliser les helpers email. Audit factuel 2026-05-13 :
+
+- `lib/emails.ts` monolithe : 1243 lignes, 20 helpers `sendXxxEmail` (vs 18 annonces Epic 4 D9). +2 helpers ajoutes Epic 4-6 : `sendOuvertureConfirmationEmail`, `sendOuvertureNotificationEmail`, `sendParrainageVerificationEmail`.
+- Pattern uniforme par helper : ~62 lignes, try/catch + 2 `logNotification` (success/error) + HTML template inline + signature parametree.
+- 19 appels `resend.emails.send` au total, 39 `logNotification`, 19 blocs try/catch.
+
+**Decision :** confirmer le rejet historique. Pas de centralisation Epic 6.
+
+**Justification :**
+- Le pattern actuel est uniforme et lisible : chaque helper est self-contained, facile a auditer en isolation.
+- Centraliser le boilerplate (try/catch + logNotification) reduirait ~300 lignes mais introduirait un wrapper qui couplerait 20 callers a son interface. Churn de refactor disproportionne par rapport au gain de maintenabilite.
+- Le HTML template inline (le gros de chaque helper) ne peut pas etre centralise sans introduire un systeme de templates (jsx-email, react-email, mjml...) qui depasse largement le scope Epic 6.
+- Apres 1 mois de Epic 4-5-6, aucun bug de coherence rapporte entre helpers (Sentry oncall).
+
+**Regle :** la centralisation reste candidate Epic 7+ si :
+1. Le nombre de helpers depasse 30 (seuil arbitraire de complexite),
+2. OU un bug de coherence (ex : log non genere par un helper) est detecte en prod,
+3. OU une refonte des templates email passe par un systeme de composants (react-email).
