@@ -6,6 +6,7 @@ import { HeroCarte } from '@/components/landing/hero-carte'
 import { AnimatedCounter } from '@/components/landing/animated-counter'
 import { Reveal } from '@/components/landing/reveal'
 import { DepartementsOuverts } from '@/components/landing/departements-ouverts'
+import { HeaderAuthLink } from '@/components/layout/header-auth-link'
 import { createClient } from '@/lib/supabase/server'
 
 export const revalidate = 120
@@ -108,19 +109,11 @@ export default async function HomePage() {
             <Link href="#comment" className="text-gray-600 hover:text-gray-900">Comment ça marche</Link>
             <Link href="#tarifs" className="text-gray-600 hover:text-gray-900">Tarifs</Link>
             <Link href="#faq" className="text-gray-600 hover:text-gray-900">FAQ</Link>
-            <Link
-              href="/login"
-              className="inline-flex items-center px-4 py-2 rounded-full bg-accent border border-accent text-black hover:bg-kraft hover:border-kraft hover:text-white transition text-sm font-medium"
-            >
-              Connexion
-            </Link>
+            <HeaderAuthLink className="inline-flex items-center px-4 py-2 rounded-full bg-accent border border-accent text-black hover:bg-kraft hover:border-kraft hover:text-white transition text-sm font-medium" />
           </nav>
-          <Link
-            href="/login"
-            className="md:hidden inline-flex items-center px-3 py-1.5 rounded-full bg-accent border border-accent text-black hover:bg-kraft hover:border-kraft hover:text-white transition text-xs font-medium"
-          >
-            Connexion
-          </Link>
+          <div className="md:hidden">
+            <HeaderAuthLink className="inline-flex items-center px-3 py-1.5 rounded-full bg-accent border border-accent text-black hover:bg-kraft hover:border-kraft hover:text-white transition text-xs font-medium" />
+          </div>
         </div>
       </header>
 

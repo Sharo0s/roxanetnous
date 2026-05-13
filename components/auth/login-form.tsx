@@ -42,6 +42,11 @@ export function LoginForm() {
     setResendState('idle')
     setLoading(true)
     formData.set('email', email)
+    try {
+      sessionStorage.removeItem('rxn-me-v1')
+    } catch {
+      // sessionStorage indisponible — pas bloquant, le cache se rafraîchira au prochain fetch.
+    }
     const result = await login(formData)
     if (result?.error) {
       setError(result.error)
