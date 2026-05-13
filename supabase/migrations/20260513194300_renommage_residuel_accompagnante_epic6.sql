@@ -173,20 +173,27 @@ CREATE POLICY ann_acc_delete ON public.annonces_accompagnants
 -- 4.1 : Creer le nouveau type sans la valeur orpheline
 CREATE TYPE public.user_role_v2 AS ENUM ('accompagnant', 'accompagne', 'admin');
 
--- 4.2 : Drop les helpers RLS qui referencent l'ancien type (verifie safe : aucune policy ne les utilise)
+-- 4.2 : Drop les policies RLS qui referencent users.role textuellement
+--       (Postgres refuse ALTER COLUMN TYPE tant que des policies referencent la colonne).
+--       Decouvert en pratique 2026-05-13 : 3 policies bloquantes hors scope tech-spec D8.
+DROP POLICY IF EXISTS parrainages_codes_admin_full ON public.parrainages_codes;
+DROP POLICY IF EXISTS parrainages_admin_full ON public.parrainages;
+DROP POLICY IF EXISTS users_update_own ON public.users;
+
+-- 4.3 : Drop les helpers RLS qui referencent l'ancien type (verifie safe : aucune policy ne les utilise)
 DROP FUNCTION IF EXISTS public.is_accompagnant();
 DROP FUNCTION IF EXISTS public.is_accompagne();
 
--- 4.3 : Reecrire la colonne users.role (seule colonne typee user_role)
+-- 4.4 : Reecrire la colonne users.role (seule colonne typee user_role)
 ALTER TABLE public.users
   ALTER COLUMN role TYPE public.user_role_v2
   USING role::text::public.user_role_v2;
 
--- 4.4 : Drop l'ancien type, rename le nouveau
+-- 4.5 : Drop l'ancien type, rename le nouveau
 DROP TYPE public.user_role;
 ALTER TYPE public.user_role_v2 RENAME TO user_role;
 
--- 4.5 : Recreer les helpers RLS (corps preserves a l'identique, cf. snapshot 7)
+-- 4.6 : Recreer les helpers RLS (corps preserves a l'identique, cf. snapshot 7)
 CREATE FUNCTION public.is_accompagnant()
 RETURNS boolean
 LANGUAGE sql
@@ -209,6 +216,29 @@ AS $function$
     WHERE id = auth.uid() AND role = 'accompagne'
   );
 $function$;
+
+-- 4.7 : Recreer les 3 policies droppees en 4.2 (texte SQL identique, references vers le nouveau type user_role)
+CREATE POLICY parrainages_codes_admin_full ON public.parrainages_codes
+  FOR ALL TO public
+  USING (EXISTS (
+    SELECT 1 FROM users
+    WHERE users.id = auth.uid() AND users.role = 'admin'::user_role
+  ));
+
+CREATE POLICY parrainages_admin_full ON public.parrainages
+  FOR ALL TO public
+  USING (EXISTS (
+    SELECT 1 FROM users
+    WHERE users.id = auth.uid() AND users.role = 'admin'::user_role
+  ));
+
+CREATE POLICY users_update_own ON public.users
+  FOR UPDATE TO public
+  USING ((id = auth.uid()) OR is_admin())
+  WITH CHECK (
+    is_admin()
+    OR ((id = auth.uid()) AND (role = (SELECT u.role FROM users u WHERE u.id = auth.uid())))
+  );
 
 -- ===========================================================================
 -- Etape 5 : Fix trigger handle_new_user (bug latent + pointer nouvelle table)

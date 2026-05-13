@@ -240,6 +240,39 @@ AS $function$
 $function$;
 ```
 
+## 8bis. Policies RLS dependant de users.role (decouvert 2026-05-13 en pratique)
+
+**Decouverte** : premiere tentative apply_migration 6.A.2 a echoue avec `0A000: cannot alter type of a column used in a policy definition`. Audit `pg_policies` complet 2026-05-13 (apres rollback automatique) identifie 3 policies bloquantes pour `ALTER COLUMN TYPE users.role` :
+
+```sql
+-- DDL replay-able pour rollback
+CREATE POLICY parrainages_codes_admin_full ON public.parrainages_codes
+  FOR ALL TO public
+  USING (EXISTS (
+    SELECT 1 FROM users
+    WHERE users.id = auth.uid() AND users.role = 'admin'::user_role
+  ));
+
+CREATE POLICY parrainages_admin_full ON public.parrainages
+  FOR ALL TO public
+  USING (EXISTS (
+    SELECT 1 FROM users
+    WHERE users.id = auth.uid() AND users.role = 'admin'::user_role
+  ));
+
+CREATE POLICY users_update_own ON public.users
+  FOR UPDATE TO public
+  USING ((id = auth.uid()) OR is_admin())
+  WITH CHECK (
+    is_admin()
+    OR ((id = auth.uid()) AND (role = (SELECT u.role FROM users u WHERE u.id = auth.uid())))
+  );
+```
+
+Note : `planning_subscriptions."Service role manages planning subscriptions"` mentionne `role` mais via `auth.role()` (fonction, pas colonne) -> non bloquant.
+
+La migration 6.A.2 (revisee 2026-05-13) DROP ces 3 policies avant `ALTER COLUMN TYPE` (etape 4.2) et CREATE apres recreation des helpers RLS (etape 4.7).
+
 ## 8. Dependances helpers RLS (verifie : aucune)
 
 Query :

@@ -32,6 +32,11 @@ DROP POLICY IF EXISTS ann_acc_delete ON public.annonces_accompagnants;
 -- Etape 2 inverse : Pattern recreate-enum pour restaurer la valeur 'accompagnante'
 -- ===========================================================================
 
+-- Drop les 3 policies dependant de users.role (idem migration etape 4.2)
+DROP POLICY IF EXISTS parrainages_codes_admin_full ON public.parrainages_codes;
+DROP POLICY IF EXISTS parrainages_admin_full ON public.parrainages;
+DROP POLICY IF EXISTS users_update_own ON public.users;
+
 -- Drop les helpers RLS (a recreer apres ALTER COLUMN TYPE)
 DROP FUNCTION IF EXISTS public.is_accompagnant();
 DROP FUNCTION IF EXISTS public.is_accompagne();
@@ -71,6 +76,29 @@ AS $function$
     WHERE id = auth.uid() AND role = 'accompagne'
   );
 $function$;
+
+-- Recreer les 3 policies users.role (texte SQL identique pre/post-migration)
+CREATE POLICY parrainages_codes_admin_full ON public.parrainages_codes
+  FOR ALL TO public
+  USING (EXISTS (
+    SELECT 1 FROM users
+    WHERE users.id = auth.uid() AND users.role = 'admin'::user_role
+  ));
+
+CREATE POLICY parrainages_admin_full ON public.parrainages
+  FOR ALL TO public
+  USING (EXISTS (
+    SELECT 1 FROM users
+    WHERE users.id = auth.uid() AND users.role = 'admin'::user_role
+  ));
+
+CREATE POLICY users_update_own ON public.users
+  FOR UPDATE TO public
+  USING ((id = auth.uid()) OR is_admin())
+  WITH CHECK (
+    is_admin()
+    OR ((id = auth.uid()) AND (role = (SELECT u.role FROM users u WHERE u.id = auth.uid())))
+  );
 
 -- ===========================================================================
 -- Etape 3 inverse : RENAME des 3 tables vers les anciens noms feminins
