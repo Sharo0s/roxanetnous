@@ -119,7 +119,7 @@ export async function notifyMatchingUsers(params: {
       .from('annonces_accompagnantes')
       .select(`
         id, titre, ville, code_postal, rayon_km, disponibilites,
-        accompagnantes_profiles:accompagnante_id!inner (
+        accompagnantes_profiles:accompagnant_id!inner (
           user_id, specialites, ville, code_postal, experience, diplomes,
           disponibilites, rayon_km, latitude, longitude
         )

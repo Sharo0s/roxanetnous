@@ -65,7 +65,7 @@ export async function GET(request: NextRequest) {
         email: userData.email,
         firstName: userData.first_name || '',
         expirationDate: sub.cancel_at!,
-        role: userData.role as 'accompagnante' | 'accompagne',
+        role: userData.role as 'accompagnant' | 'accompagne',
         userId: sub.user_id,
       })
 

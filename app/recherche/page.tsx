@@ -226,17 +226,17 @@ export default async function RecherchePage({
   if (user) {
     const { data: favs } = await supabase
       .from('favoris')
-      .select('annonce_accompagnante_id')
+      .select('annonce_accompagnant_id')
       .eq('user_id', user.id)
-      .not('annonce_accompagnante_id', 'is', null)
-    favorisIds = (favs || []).map((f) => f.annonce_accompagnante_id).filter(Boolean)
+      .not('annonce_accompagnant_id', 'is', null)
+    favorisIds = (favs || []).map((f) => f.annonce_accompagnant_id).filter(Boolean)
   }
 
   const unreadCount = user ? await getUnreadCount(user.id) : 0
 
   return (
     <main id="main-content" tabIndex={-1} className="min-h-screen bg-[#fefaf8] focus:outline-none">
-      {userData?.role === 'accompagnante' && user ? (
+      {userData?.role === 'accompagnant' && user ? (
         <AccompagnanteDashboardHeader
           firstName={userData.first_name}
           lastName={userData.last_name}

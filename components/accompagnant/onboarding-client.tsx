@@ -1,0 +1,260 @@
+'use client'
+
+import { useState, useRef, useEffect } from 'react'
+import { submitOnboarding, uploadJustificatif } from '@/app/actions/accompagnante'
+import { Button } from '@/components/ui/button'
+import Link from 'next/link'
+import { extraireCodeDepartement } from '@/lib/code-postal'
+import { StepDiplome } from '@/components/accompagnant/step-diplome'
+import { StepSpecialites } from '@/components/accompagnant/step-specialites'
+import { StepLocalisation } from '@/components/accompagnant/step-localisation'
+import { StepDisponibilites } from '@/components/accompagnant/step-disponibilites'
+
+const STEPS = [
+  'Diplôme et expérience',
+  'Spécialités',
+  'Localisation',
+  'Disponibilités',
+]
+
+export type OnboardingData = {
+  diplomes: string[]
+  experience: string
+  specialites: string[]
+  ville: string
+  code_postal: string
+  rayon_km: number
+  disponibilites: Record<string, string[]>
+  langues: string[]
+  permis_conduire: boolean
+  vehicule: boolean
+  description: string
+}
+
+const initialData: OnboardingData = {
+  diplomes: [],
+  experience: '',
+  specialites: [],
+  ville: '',
+  code_postal: '',
+  rayon_km: 10,
+  disponibilites: {},
+  langues: [],
+  permis_conduire: false,
+  vehicule: false,
+  description: '',
+}
+
+type Props = {
+  parrainage: {
+    isFilleule: boolean
+    marraineFirstName: string | null
+  }
+  departementsOuverts: string[]
+  userEmail: string
+  initialVille?: string
+  initialCodePostal?: string
+}
+
+export function OnboardingClient({ parrainage, departementsOuverts, userEmail, initialVille = '', initialCodePostal = '' }: Props) {
+  const [step, setStep] = useState(0)
+  const [data, setData] = useState<OnboardingData>({
+    ...initialData,
+    ville: initialVille,
+    code_postal: initialCodePostal,
+  })
+  const [error, setError] = useState<string | null>(null)
+  const [loading, setLoading] = useState(false)
+  const [uploads, setUploads] = useState<{ cv: boolean; diplomes: Record<string, boolean> }>({ cv: false, diplomes: {} })
+  const [permisUploaded, setPermisUploaded] = useState(false)
+  const headingRef = useRef<HTMLHeadingElement>(null)
+  const previousStep = useRef(step)
+
+  // Deplace le focus sur le h2 de la nouvelle etape uniquement quand `step`
+  // change effectivement (pas au mount, ni au double-mount React Strict Mode
+  // en dev). Le skip-link et le flux clavier classique restent prioritaires
+  // a l'arrivee sur la page.
+  useEffect(() => {
+    if (previousStep.current === step) return
+    previousStep.current = step
+    headingRef.current?.focus()
+  }, [step])
+
+  function updateData(partial: Partial<OnboardingData>) {
+    setData((prev) => ({ ...prev, ...partial }))
+  }
+
+  function buildOuvertureHref(): string | null {
+    if (!error) return null
+    const isZoneError = /departement|territoire/i.test(error)
+    if (!isZoneError) return null
+    const code = extraireCodeDepartement(data.code_postal)
+    if (!userEmail || !code) return null
+    const params = new URLSearchParams({
+      email: userEmail,
+      code_departement: code,
+      role: 'accompagnant',
+    })
+    return `/me-tenir-au-courant?${params.toString()}`
+  }
+
+  const ouvertureHref = buildOuvertureHref()
+
+  function canProceed(): boolean {
+    // Si filleule (parrainee) : meme exigences que la voie manuelle SAUF
+    // les uploads (CV, justificatifs de diplome, justificatif permis) qui
+    // sont remplaces par la garantie de la marraine.
+    if (parrainage.isFilleule) {
+      switch (step) {
+        case 0:
+          return !!data.experience
+        case 1:
+          return data.specialites.length > 0
+        case 2:
+          return !!data.ville && /^\d{5}$/.test(data.code_postal)
+        case 3:
+          return true
+        default:
+          return false
+      }
+    }
+
+    switch (step) {
+      case 0: {
+        const isSansDiplome = data.diplomes.includes('sans_diplome')
+        const hasAllDiplomeUploads = isSansDiplome || (data.diplomes.length > 0 && data.diplomes.every((d) => uploads.diplomes[d]))
+        return data.diplomes.length > 0 && !!data.experience && uploads.cv && hasAllDiplomeUploads
+      }
+      case 1:
+        return data.specialites.length > 0
+      case 2:
+        return !!data.ville && /^\d{5}$/.test(data.code_postal) && (!data.permis_conduire || permisUploaded)
+      case 3:
+        return true
+      default:
+        return false
+    }
+  }
+
+  async function handleSubmit() {
+    setError(null)
+    setLoading(true)
+    const result = await submitOnboarding(data)
+    if (result?.error) {
+      setError(result.error)
+      setLoading(false)
+    }
+  }
+
+  async function handleUpload(file: File, type: string) {
+    const formData = new FormData()
+    formData.set('file', file)
+    formData.set('type', type)
+    const result = await uploadJustificatif(formData)
+    if (result?.error) {
+      setError(result.error)
+      return false
+    }
+    return true
+  }
+
+  return (
+    <>
+      <header className="bg-white border-b relative z-10">
+        <div className="max-w-3xl mx-auto px-4 py-4 flex items-center justify-between">
+          <Link href="/accompagnant/dashboard" className="text-xl font-bold text-black">
+            roxanetnous
+          </Link>
+          <span className="text-sm text-gray-500">
+            Étape {step + 1} sur {STEPS.length}
+          </span>
+        </div>
+      </header>
+
+      {parrainage.isFilleule && (
+        <div className="max-w-3xl mx-auto px-4 pt-6 relative z-10">
+          <div className="rounded-xl border bg-white p-4 text-sm text-gray-700">
+            <p className="font-medium text-black mb-1">
+              Vous avez été parrainée
+              {parrainage.marraineFirstName ? ` par ${parrainage.marraineFirstName}` : ''}.
+            </p>
+            <p>
+              Pour finaliser votre inscription, complétez vos disponibilités et souscrivez votre abonnement — pas de pièces justificatives ni de visio à fournir.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Progress bar */}
+      <div className="max-w-3xl mx-auto px-4 pt-6 relative z-10">
+        <div
+          role="progressbar"
+          aria-valuenow={step + 1}
+          aria-valuemin={1}
+          aria-valuemax={STEPS.length}
+          aria-valuetext={`Etape ${step + 1} sur ${STEPS.length} : ${STEPS[step]}`}
+          aria-label="Progression de l'onboarding"
+          className="flex gap-1"
+        >
+          {STEPS.map((_, i) => (
+            <div
+              key={i}
+              className={`h-1 flex-1 rounded-full ${
+                i <= step ? 'bg-accent' : 'bg-gray-200'
+              }`}
+            />
+          ))}
+        </div>
+        <p className="mt-3 text-sm text-gray-500">{STEPS[step]}</p>
+      </div>
+
+      <div className="max-w-3xl mx-auto px-4 py-6 relative z-10">
+        {error && (
+          <div role="alert" className="mb-4 p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
+            <p>{error}</p>
+            {ouvertureHref && (
+              <p className="mt-2">
+                <Link
+                  href={ouvertureHref}
+                  className="underline font-medium text-red-700 hover:text-red-900 focus:outline-none focus:ring-2 focus:ring-focus-ring rounded-sm"
+                >
+                  Me tenir au courant pour mon departement
+                </Link>
+              </p>
+            )}
+          </div>
+        )}
+
+        <div className="bg-white rounded-xl border p-6">
+          {step === 0 && <StepDiplome data={data} onChange={updateData} onUpload={handleUpload} onUploadsChange={setUploads} isFilleule={parrainage.isFilleule} headingRef={headingRef} />}
+          {step === 1 && <StepSpecialites data={data} onChange={updateData} headingRef={headingRef} />}
+          {step === 2 && <StepLocalisation data={data} onChange={updateData} onUpload={handleUpload} onPermisUploaded={setPermisUploaded} departementsOuverts={departementsOuverts} headingRef={headingRef} />}
+          {step === 3 && <StepDisponibilites data={data} onChange={updateData} headingRef={headingRef} />}
+        </div>
+
+        <div className="flex justify-between mt-6">
+          <Button
+            variant="outline"
+            onClick={() => { setStep((s) => s - 1); setError(null) }}
+            disabled={step === 0}
+          >
+            Précédent
+          </Button>
+
+          {step < STEPS.length - 1 ? (
+            <Button
+              onClick={() => { setStep((s) => s + 1); setError(null) }}
+              disabled={!canProceed()}
+            >
+              Suivant
+            </Button>
+          ) : (
+            <Button onClick={handleSubmit} disabled={loading}>
+              {loading ? 'Envoi en cours...' : 'Valider mon profil'}
+            </Button>
+          )}
+        </div>
+      </div>
+    </>
+  )
+}

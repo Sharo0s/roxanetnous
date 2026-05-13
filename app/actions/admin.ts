@@ -292,7 +292,7 @@ export async function markVisioToPlan(profileId: string): Promise<ValidationResu
       let { data: conv } = await supabaseAdmin
         .from('conversations')
         .select('id')
-        .eq('accompagnante_id', profileId)
+        .eq('accompagnant_id', profileId)
         .eq('admin_id', user.id)
         .is('accompagne_id', null)
         .maybeSingle()
@@ -301,7 +301,7 @@ export async function markVisioToPlan(profileId: string): Promise<ValidationResu
         const { data: newConv } = await supabaseAdmin
           .from('conversations')
           .insert({
-            accompagnante_id: profileId,
+            accompagnant_id: profileId,
             accompagne_id: null,
             admin_id: user.id,
           })
@@ -562,8 +562,8 @@ export async function adminGrantSubscription(
 
   if (!targetUser) return { error: 'Utilisateur introuvable.' }
 
-  const role = targetUser.role as 'accompagnante' | 'accompagne'
-  if (role !== 'accompagnante' && role !== 'accompagne') {
+  const role = targetUser.role as 'accompagnant' | 'accompagne'
+  if (role !== 'accompagnant' && role !== 'accompagne') {
     return { error: 'Rôle non éligible à un abonnement.' }
   }
 

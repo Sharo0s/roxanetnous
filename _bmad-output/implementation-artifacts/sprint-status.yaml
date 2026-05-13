@@ -171,11 +171,29 @@ development_status:
   # ==========================================================================
   epic-5: backlog
 
-  # Mini-epic 5.A - Renommage accompagnante -> accompagnant (6 stories, sequentiel strict)
-  # 5.A.1 livre 2026-05-13 commit a venir : tech-spec-5-a-renommage.md + DECISIONS.md F12
-  # decision cutover atomique + valeur enum orpheline differee Epic 6 + renommage tables
-  # out-of-scope + 15 colonnes + 23 policies + 3 helpers RLS + 5 modes rollback.
+  # Mini-epic 5.A - Renommage accompagnante -> accompagnant (6 stories) - CLOTURE 2026-05-13
+  # F12bis : execution complete 5.A.2 -> 5.A.6 le 2026-05-13 en assumant l'ecart F12 fenetre
+  # go-live. Risque cutover juge faible (822 users, 9 tables vides).
   5-a-1-architecture-review-strategie-migration-enum-role: done
+  # 5.A.2 livre 2026-05-13 : 2 migrations Supabase (part1 ADD VALUE + part2 backfill + RENAME
+  # + helpers RLS + 23 policies recreees). 818 users migres accompagnante -> accompagnant.
+  # Snapshot pre-cutover persiste. Cutover < 5 sec.
+  5-a-2-migration-bdd-enum-role-colonnes-helpers-rls: done
+  # 5.A.3 livre 2026-05-13 : types/supabase.ts regenere via MCP. 45 occurrences role===
+  # mises a jour + 8 unions de type + 20 references colonnes BDD renommees. tsc exit 0.
+  5-a-3-regeneration-types-supabase-resorption-references-code-ts: done
+  # 5.A.4 livre 2026-05-13 : git mv app/accompagnante -> app/accompagnant (6 dossiers)
+  # + git mv components/accompagnante -> components/accompagnant. Redirect 301
+  # /accompagnante/:path* -> /accompagnant/:path* dans next.config.mjs. Middleware
+  # supabase mis a jour. components/layout/accompagnante-dashboard-header.tsx conserve.
+  5-a-4-renommage-routes-redirects-301-middleware: done
+  # 5.A.5 livre 2026-05-13 : copy UI deja au masculin neutre (refonte foyer 2026-05-11).
+  # 2 bugs role utilisateur corriges (role='accompagnante' -> 'accompagnant').
+  5-a-5-find-replace-global-copy-ui-emails-templates-resend: done
+  # 5.A.6 livre 2026-05-13 : validations CI completes (tsc, lint, lint:a11y-check 155
+  # baseline regeneree 2026-05-13, check:* tous verts, test:unit 25/25). DECISIONS.md
+  # F12bis ajoutee. a11y:axe:check differe a preview Vercel.
+  5-a-6-tests-e2e-validation-a11y-documentation-decisions: done
   5-a-2-migration-bdd-enum-role-colonnes-helpers-rls: backlog
   5-a-3-regeneration-types-supabase-resorption-references-code-ts: backlog
   5-a-4-renommage-routes-redirects-301-middleware: backlog

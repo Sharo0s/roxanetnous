@@ -22,8 +22,8 @@ export async function createCheckoutSession(formData: FormData): Promise<void> {
 
   if (!userData) redirect('/')
 
-  const role = userData.role as 'accompagnante' | 'accompagne'
-  if (role !== 'accompagnante' && role !== 'accompagne') redirect('/')
+  const role = userData.role as 'accompagnant' | 'accompagne'
+  if (role !== 'accompagnant' && role !== 'accompagne') redirect('/')
 
   const priceId = getStripePriceId(role, plan)
   if (!priceId) redirect(`/${role}/abonnement`)
@@ -42,7 +42,7 @@ export async function createCheckoutSession(formData: FormData): Promise<void> {
   }
 
   const trialDays = getTrialDays(plan)
-  const dashboardPath = role === 'accompagnante' ? '/accompagnante' : '/accompagne'
+  const dashboardPath = role === 'accompagnant' ? '/accompagnante' : '/accompagne'
 
   const metadata: Record<string, string> = { user_id: user.id, role, plan }
 
@@ -52,7 +52,7 @@ export async function createCheckoutSession(formData: FormData): Promise<void> {
   // RLS sur `parrainages` autorise uniquement la marraine à lire ses lignes ; la
   // filleule ne peut donc pas lire la sienne via le client utilisateur. On passe
   // par le service role pour cette lecture serveur-side.
-  if (role === 'accompagnante' && userData.parrainee_par) {
+  if (role === 'accompagnant' && userData.parrainee_par) {
     const supabaseAdmin = await createClient({ serviceRole: true })
     const { data: parrainageRow } = await supabaseAdmin
       .from('parrainages')
@@ -113,7 +113,7 @@ export async function createPortalSession(): Promise<void> {
     .eq('id', user.id)
     .single()
 
-  const role = userData?.role || 'accompagnante'
+  const role = userData?.role || 'accompagnant'
   const subStatus = await getSubscriptionStatus(user.id)
 
   if (!subStatus.stripeCustomerId) redirect(`/${role}/abonnement`)
@@ -138,7 +138,7 @@ export async function cancelSubscription(): Promise<void> {
     .eq('id', user.id)
     .single()
 
-  const role = userData?.role || 'accompagnante'
+  const role = userData?.role || 'accompagnant'
   const subStatus = await getSubscriptionStatus(user.id)
 
   if (!subStatus.stripeSubscriptionId) redirect(`/${role}/abonnement`)
@@ -199,7 +199,7 @@ export async function switchPlan(formData: FormData): Promise<void> {
 
   if (!userData) redirect('/')
 
-  const role = userData.role as 'accompagnante' | 'accompagne'
+  const role = userData.role as 'accompagnant' | 'accompagne'
   const subscription = await getSubscriptionStatus(user.id)
 
   if (subscription.status !== 'active' || subscription.cancelAt) {
@@ -246,7 +246,7 @@ export async function reactivateSubscription(): Promise<void> {
     .eq('id', user.id)
     .single()
 
-  const role = userData?.role || 'accompagnante'
+  const role = userData?.role || 'accompagnant'
   const subStatus = await getSubscriptionStatus(user.id)
 
   if (!subStatus.stripeSubscriptionId || !subStatus.cancelAt) {

@@ -15,14 +15,14 @@ const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'
 export async function sendWelcomeEmail(params: {
   email: string
   firstName: string
-  role: 'accompagnante' | 'accompagne'
+  role: 'accompagnant' | 'accompagne'
   userId?: string
 }) {
-  const dashboardUrl = params.role === 'accompagnante'
-    ? `${BASE_URL}/accompagnante/dashboard`
+  const dashboardUrl = params.role === 'accompagnant'
+    ? `${BASE_URL}/accompagnant/dashboard`
     : `${BASE_URL}/accompagne/dashboard`
 
-  const roleLabel = params.role === 'accompagnante' ? 'accompagnant de vie' : 'accompagné'
+  const roleLabel = params.role === 'accompagnant' ? 'accompagnant de vie' : 'accompagné'
 
   try {
     await resend.emails.send({
@@ -33,7 +33,7 @@ export async function sendWelcomeEmail(params: {
         <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
           <h1 style="color: #000;">Bienvenue ${escapeHtml(params.firstName)},</h1>
           <p>Votre compte ${roleLabel} a été créé avec succès sur roxanetnous.</p>
-          ${params.role === 'accompagnante' ? '<p>Pour apparaître sur la plateforme, complétez votre profil professionnel puis soumettez-le à validation.</p>' : '<p>Vous pouvez dès maintenant rechercher un accompagnant de vie ou publier une annonce.</p>'}
+          ${params.role === 'accompagnant' ? '<p>Pour apparaître sur la plateforme, complétez votre profil professionnel puis soumettez-le à validation.</p>' : '<p>Vous pouvez dès maintenant rechercher un accompagnant de vie ou publier une annonce.</p>'}
           <p style="margin-top: 24px;">
             <a href="${dashboardUrl}" style="background: #000; color: #fff; padding: 12px 24px; text-decoration: none; display: inline-block;">
               Accéder à mon espace
@@ -69,7 +69,7 @@ export async function sendWelcomeEmail(params: {
 export async function sendWelcomeEmailIfFirstTime(params: {
   email: string
   firstName: string
-  role: 'accompagnante' | 'accompagne'
+  role: 'accompagnant' | 'accompagne'
   userId: string
 }): Promise<{ sent: boolean }> {
   const supabase = await createClient({ serviceRole: true })
@@ -120,7 +120,7 @@ export async function sendValidationResultEmail(params: {
           <p>Bonjour ${escapeHtml(params.firstName)},</p>
           <p>${messages[params.decision]}</p>
           <p style="margin-top: 24px;">
-            <a href="${BASE_URL}/accompagnante/profil" style="background: #000; color: #fff; padding: 12px 24px; text-decoration: none; display: inline-block;">
+            <a href="${BASE_URL}/accompagnant/profil" style="background: #000; color: #fff; padding: 12px 24px; text-decoration: none; display: inline-block;">
               Voir mon profil
             </a>
           </p>
@@ -195,10 +195,10 @@ export async function sendNewMessageEmail(params: {
 export async function sendSubscriptionConfirmEmail(params: {
   email: string
   firstName: string
-  role?: 'accompagnante' | 'accompagne'
+  role?: 'accompagnant' | 'accompagne'
   userId?: string
 }) {
-  const role = params.role || 'accompagnante'
+  const role = params.role || 'accompagnant'
   try {
     await resend.emails.send({
       from: FROM_EMAIL,
@@ -240,10 +240,10 @@ export async function sendSubscriptionConfirmEmail(params: {
 export async function sendSubscriptionCancelEmail(params: {
   email: string
   firstName: string
-  role?: 'accompagnante' | 'accompagne'
+  role?: 'accompagnant' | 'accompagne'
   userId?: string
 }) {
-  const role = params.role || 'accompagnante'
+  const role = params.role || 'accompagnant'
   try {
     await resend.emails.send({
       from: FROM_EMAIL,
@@ -300,7 +300,7 @@ export async function sendDisponibleReactivatedEmail(params: {
           <p>Votre date de retour est arrivée, votre profil est automatiquement repassé en disponible sur roxanetnous.</p>
           <p>Si vous souhaitez prolonger votre indisponibilité, vous pouvez le faire depuis votre profil.</p>
           <p style="margin-top: 24px;">
-            <a href="${BASE_URL}/accompagnante/profil" style="background: #000; color: #fff; padding: 12px 24px; text-decoration: none; display: inline-block;">
+            <a href="${BASE_URL}/accompagnant/profil" style="background: #000; color: #fff; padding: 12px 24px; text-decoration: none; display: inline-block;">
               Gérer ma disponibilité
             </a>
           </p>
@@ -440,7 +440,7 @@ export async function sendPlanChangeEmail(params: {
   firstName: string
   oldPlan: string
   newPlan: string
-  role: 'accompagnante' | 'accompagne'
+  role: 'accompagnant' | 'accompagne'
   userId?: string
 }) {
   const planLabels: Record<string, string> = { mensuel: 'Mensuel', annuel: 'Annuel' }
@@ -490,7 +490,7 @@ export async function sendRenewalReminderEmail(params: {
   firstName: string
   renewalDate: string
   amount: number
-  role: 'accompagnante' | 'accompagne'
+  role: 'accompagnant' | 'accompagne'
   userId?: string
 }) {
   const subject = 'Votre abonnement sera renouvelé prochainement'
@@ -543,7 +543,7 @@ export async function sendParrainageBienvenueMarraine(params: {
   userId?: string
 }) {
   const subject = 'Votre code de parrainage roxanetnous'
-  const dashboardUrl = `${BASE_URL}/accompagnante/dashboard`
+  const dashboardUrl = `${BASE_URL}/accompagnant/dashboard`
 
   try {
     await resend.emails.send({
@@ -600,7 +600,7 @@ export async function sendParrainageFilleuleConfirmation(params: {
   userId?: string
 }) {
   const subject = 'Bienvenue sur roxanetnous, votre profil est validé'
-  const dashboardUrl = `${BASE_URL}/accompagnante/dashboard`
+  const dashboardUrl = `${BASE_URL}/accompagnant/dashboard`
   const marraineLabel = params.marraineFirstName?.trim()
     ? escapeHtml(params.marraineFirstName)
     : 'votre marraine'
@@ -651,7 +651,7 @@ export async function sendParrainageRecompense(params: {
   planType?: 'mensuel' | 'annuel' | null
 }) {
   const subject = 'Félicitations, vous avez 6 mois offerts sur roxanetnous'
-  const abonnementUrl = `${BASE_URL}/accompagnante/abonnement`
+  const abonnementUrl = `${BASE_URL}/accompagnant/abonnement`
   const safeFirstName = params.firstName?.trim() ? escapeHtml(params.firstName) : ''
   const greetingFirstName = safeFirstName ? `, ${safeFirstName}` : ''
   const cumulSentence = params.totalRecompenses > 1
@@ -829,7 +829,7 @@ export async function sendExpirationReminderEmail(params: {
   email: string
   firstName: string
   expirationDate: string
-  role: 'accompagnante' | 'accompagne'
+  role: 'accompagnant' | 'accompagne'
   userId?: string
 }) {
   const subject = 'Votre abonnement expire bientôt'
@@ -892,7 +892,7 @@ export async function sendRelanceOnboardingEmail(params: {
       : 'Votre profil roxanetnous est toujours incomplet'
 
   const optoutUrl = `${BASE_URL}/api/email/optout?type=rappels_onboarding&token=${encodeURIComponent(params.optoutToken)}`
-  const dashboardUrl = `${BASE_URL}/accompagnante/onboarding`
+  const dashboardUrl = `${BASE_URL}/accompagnant/onboarding`
 
   const missingListHtml =
     params.missingFields.length > 0
@@ -1216,7 +1216,7 @@ export async function sendParrainageVerificationEmail(params: {
             <a href="mailto:roxanetnous@outlook.com">roxanetnous@outlook.com</a>.
           </p>
           <p style="margin-top: 24px;">
-            <a href="${BASE_URL}/accompagnante/dashboard" style="background: #000; color: #fff; padding: 12px 24px; text-decoration: none; display: inline-block;">
+            <a href="${BASE_URL}/accompagnant/dashboard" style="background: #000; color: #fff; padding: 12px 24px; text-decoration: none; display: inline-block;">
               Accéder à mon espace
             </a>
           </p>

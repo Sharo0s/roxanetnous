@@ -1,0 +1,109 @@
+# Ne pas regenerer ce baseline pour faire passer la CI sans justification dans le PR.
+# Toute regeneration doit etre motivee : montee de version plugin, livraison story Lot A, ou correction massive justifiee.
+
+A11Y LINT BASELINE
+Generated: 2026-05-13
+Commit: ee2fd66391b30eb7b878163ab3c0d9206061a2fb
+Total a11y violations: 155
+Total errors: 0
+Total warnings: 155
+
+By rule:
+  jsx-a11y/label-has-for: 75
+  jsx-a11y/label-has-associated-control: 51
+  jsx-a11y/control-has-associated-label: 15
+  jsx-a11y/no-autofocus: 5
+  jsx-a11y/aria-role: 2
+  jsx-a11y/click-events-have-key-events: 2
+  jsx-a11y/no-noninteractive-element-interactions: 2
+  jsx-a11y/no-static-element-interactions: 2
+  jsx-a11y/heading-has-content: 1
+
+By file:
+  app/accompagnant/abonnement/page.tsx:
+    jsx-a11y/aria-role (1)
+  app/accompagne/abonnement/page.tsx:
+    jsx-a11y/aria-role (1)
+  app/admin/utilisateurs/[id]/page.tsx:
+    jsx-a11y/control-has-associated-label (1)
+  app/recherche/[id]/page.tsx:
+    jsx-a11y/control-has-associated-label (1)
+  app/recherche/page.tsx:
+    jsx-a11y/label-has-for (1)
+  components/abonnement/cancel-modal.tsx:
+    jsx-a11y/click-events-have-key-events (1)
+    jsx-a11y/no-static-element-interactions (1)
+  components/accompagnant/disponible-toggle.tsx:
+    jsx-a11y/control-has-associated-label (2)
+    jsx-a11y/label-has-associated-control (1)
+    jsx-a11y/label-has-for (1)
+  components/accompagnant/modifier-annonce-form.tsx:
+    jsx-a11y/label-has-for (2)
+    jsx-a11y/control-has-associated-label (1)
+    jsx-a11y/label-has-associated-control (1)
+  components/accompagnant/nouvelle-annonce-form.tsx:
+    jsx-a11y/label-has-for (2)
+    jsx-a11y/control-has-associated-label (1)
+    jsx-a11y/label-has-associated-control (1)
+  components/accompagnant/profile-form.tsx:
+    jsx-a11y/label-has-for (11)
+    jsx-a11y/label-has-associated-control (8)
+    jsx-a11y/control-has-associated-label (1)
+  components/accompagnant/step-diplome.tsx:
+    jsx-a11y/label-has-for (6)
+    jsx-a11y/label-has-associated-control (2)
+  components/accompagnant/step-disponibilites.tsx:
+    jsx-a11y/control-has-associated-label (1)
+  components/accompagnant/step-justificatifs.tsx:
+    jsx-a11y/label-has-associated-control (1)
+    jsx-a11y/label-has-for (1)
+  components/accompagnant/step-localisation.tsx:
+    jsx-a11y/label-has-for (3)
+  components/accompagnant/step-specialites.tsx:
+    jsx-a11y/label-has-for (1)
+  components/accompagne/modifier-annonce-form.tsx:
+    jsx-a11y/label-has-associated-control (10)
+    jsx-a11y/label-has-for (10)
+    jsx-a11y/control-has-associated-label (1)
+  components/accompagne/nouvelle-annonce-form.tsx:
+    jsx-a11y/label-has-associated-control (10)
+    jsx-a11y/label-has-for (10)
+    jsx-a11y/control-has-associated-label (1)
+  components/accompagne/profile-form.tsx:
+    jsx-a11y/label-has-associated-control (7)
+    jsx-a11y/label-has-for (7)
+  components/admin/departements-manager.tsx:
+    jsx-a11y/label-has-for (1)
+  components/admin/grant-subscription-modal.tsx:
+    jsx-a11y/click-events-have-key-events (1)
+    jsx-a11y/no-static-element-interactions (1)
+  components/admin/signalement-actions.tsx:
+    jsx-a11y/label-has-associated-control (2)
+    jsx-a11y/label-has-for (2)
+  components/admin/utilisateurs-client.tsx:
+    jsx-a11y/control-has-associated-label (4)
+  components/admin/validation-actions.tsx:
+    jsx-a11y/label-has-associated-control (3)
+    jsx-a11y/label-has-for (3)
+  components/auth/login-form.tsx:
+    jsx-a11y/no-autofocus (1)
+  components/auth/register-form.tsx:
+    jsx-a11y/no-autofocus (4)
+    jsx-a11y/label-has-associated-control (1)
+    jsx-a11y/label-has-for (1)
+  components/contact-form.tsx:
+    jsx-a11y/label-has-for (5)
+  components/recherche/favori-button.tsx:
+    jsx-a11y/control-has-associated-label (1)
+  components/recherche/search-filters.tsx:
+    jsx-a11y/label-has-for (4)
+    jsx-a11y/label-has-associated-control (2)
+    jsx-a11y/no-noninteractive-element-interactions (1)
+  components/signalement-button.tsx:
+    jsx-a11y/label-has-associated-control (2)
+    jsx-a11y/label-has-for (2)
+  components/ui/card.tsx:
+    jsx-a11y/heading-has-content (1)
+  components/ui/city-autocomplete.tsx:
+    jsx-a11y/label-has-for (2)
+    jsx-a11y/no-noninteractive-element-interactions (1)

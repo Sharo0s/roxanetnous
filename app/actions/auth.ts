@@ -17,7 +17,7 @@ export type AuthResult = {
   success?: boolean
 }
 
-const SIGNUP_ALLOWED_ROLES = ['accompagnante', 'accompagne'] as const
+const SIGNUP_ALLOWED_ROLES = ['accompagnant', 'accompagne'] as const
 type SignupRole = (typeof SIGNUP_ALLOWED_ROLES)[number]
 
 export async function signup(formData: FormData): Promise<AuthResult> {
@@ -119,7 +119,7 @@ export async function signup(formData: FormData): Promise<AuthResult> {
   // Note : seule la table accompagnantes_profiles a latitude/longitude
   // (pour le matching Haversine côté offre). Les accompagnés ne stockent
   // que ville+code_postal.
-  if (role === 'accompagnante') {
+  if (role === 'accompagnant') {
     const geo = await geocodeAddress(ville, codePostal)
     const { error: profileError } = await supabaseAdmin
       .from('accompagnantes_profiles')
@@ -150,7 +150,7 @@ export async function signup(formData: FormData): Promise<AuthResult> {
   // créer la relation marraine/filleule. Silencieux côté UX (l'inscription
   // réussit même si le code ne convient pas), mais logué côté serveur pour
   // ne pas perdre le signal opérationnel en cas d'échec.
-  if (role === 'accompagnante') {
+  if (role === 'accompagnant') {
     const parrainageCode = (formData.get('parrainage_code') as string | null)?.trim() || ''
     if (parrainageCode) {
       try {
@@ -242,7 +242,7 @@ export async function login(formData: FormData): Promise<AuthResult> {
   // /auth/callback (ex: callback en erreur, lien expiré rejoué, login manuel
   // après resend), on envoie le welcome maintenant. Idempotent.
   // waitUntil : le redirect() ci-dessous tue le process Vercel sinon.
-  if ((role === 'accompagnante' || role === 'accompagne') && user.email && userData?.first_name) {
+  if ((role === 'accompagnant' || role === 'accompagne') && user.email && userData?.first_name) {
     waitUntil(
       sendWelcomeEmailIfFirstTime({
         email: user.email,
@@ -255,8 +255,8 @@ export async function login(formData: FormData): Promise<AuthResult> {
 
   if (role === 'admin') {
     redirect('/admin')
-  } else if (role === 'accompagnante') {
-    redirect('/accompagnante/dashboard')
+  } else if (role === 'accompagnant') {
+    redirect('/accompagnant/dashboard')
   } else {
     redirect('/accompagne/dashboard')
   }

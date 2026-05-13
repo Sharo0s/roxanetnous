@@ -62,7 +62,7 @@ export default async function AdminAnnoncesPage({
           .from('annonces_accompagnantes')
           .select(`
             id, titre, ville, code_postal, status, created_at, published_at, vues, contacts_count,
-            accompagnantes_profiles:accompagnante_id (
+            accompagnantes_profiles:accompagnant_id (
               users!user_id (first_name, last_name, email)
             )
           `)

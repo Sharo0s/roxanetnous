@@ -670,7 +670,7 @@ export async function POST(request: NextRequest) {
           await sendSubscriptionConfirmEmail({
             email: userData.email,
             firstName: userData.first_name || '',
-            role: userData.role as 'accompagnante' | 'accompagne',
+            role: userData.role as 'accompagnant' | 'accompagne',
             userId,
           })
         }
@@ -736,7 +736,7 @@ export async function POST(request: NextRequest) {
               firstName: userData.first_name || '',
               oldPlan: oldPlanType,
               newPlan: newPlanType,
-              role: userData.role as 'accompagnante' | 'accompagne',
+              role: userData.role as 'accompagnant' | 'accompagne',
               userId: existing.user_id,
             })
           }
@@ -779,7 +779,7 @@ export async function POST(request: NextRequest) {
           await sendSubscriptionCancelEmail({
             email: userData.email,
             firstName: userData.first_name || '',
-            role: userData.role as 'accompagnante' | 'accompagne',
+            role: userData.role as 'accompagnant' | 'accompagne',
             userId: deletedUserId,
           })
         }
@@ -847,7 +847,7 @@ export async function POST(request: NextRequest) {
           firstName: userData.first_name || '',
           renewalDate: periodEnd,
           amount,
-          role: userData.role as 'accompagnante' | 'accompagne',
+          role: userData.role as 'accompagnant' | 'accompagne',
           userId: sub.user_id,
         })
       }

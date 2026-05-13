@@ -19,11 +19,11 @@ type LinkDef = {
 }
 
 const links: LinkDef[] = [
-  { href: '/accompagnante/dashboard', label: 'Accueil', key: 'dashboard' },
-  { href: '/accompagnante/annonces', label: 'Annonces', key: 'annonces' },
+  { href: '/accompagnant/dashboard', label: 'Accueil', key: 'dashboard' },
+  { href: '/accompagnant/annonces', label: 'Annonces', key: 'annonces' },
   { href: '/recherche/demandes', label: 'Demandes', key: 'demandes' },
   { href: '/messages', label: 'Messages', key: 'messages', badge: true },
-  { href: '/accompagnante/profil', label: 'Profil', key: 'profil' },
+  { href: '/accompagnant/profil', label: 'Profil', key: 'profil' },
 ]
 
 export function AccompagnanteDashboardHeader({ firstName, lastName, unreadCount, currentPage = 'dashboard' }: Props) {
@@ -32,7 +32,7 @@ export function AccompagnanteDashboardHeader({ firstName, lastName, unreadCount,
   return (
     <header className="bg-[#faf7f2] border-b border-[#e8dfd2] relative z-10">
       <div className="max-w-5xl mx-auto px-4 md:px-6 py-4 flex items-center justify-between">
-        <Link href="/accompagnante/dashboard" className="text-lg font-bold text-black">
+        <Link href="/accompagnant/dashboard" className="text-lg font-bold text-black">
           roxanetnous
         </Link>
 

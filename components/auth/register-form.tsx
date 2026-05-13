@@ -55,12 +55,15 @@ export function RegisterForm({ departementsOuverts }: RegisterFormProps = {}) {
   const initialEmail = searchParams.get('email') || ''
   const initialParrainageCode = (searchParams.get('parrainage_code') || '').toUpperCase()
 
-  const [role, setRole] = useState<'accompagnante' | 'accompagne' | null>(
-    initialRole === 'accompagnante' || initialRole === 'accompagne' ? initialRole : null
+  // Story 5.A.3 : role aligne sur le nouvel enum. Accepte 'accompagnante' en input
+  // (anciens liens) et le convertit en 'accompagnant'.
+  const normalizedInitialRole = initialRole === 'accompagnante' ? 'accompagnant' : initialRole
+  const [role, setRole] = useState<'accompagnant' | 'accompagne' | null>(
+    normalizedInitialRole === 'accompagnant' || normalizedInitialRole === 'accompagne' ? normalizedInitialRole : null
   )
-  const stepsForRole = role === 'accompagnante' ? STEPS_ACCOMPAGNANTE : STEPS_ACCOMPAGNE
+  const stepsForRole = role === 'accompagnant' ? STEPS_ACCOMPAGNANTE : STEPS_ACCOMPAGNE
   const [step, setStep] = useState<Step>(
-    initialRole === 'accompagnante' || initialRole === 'accompagne' ? 'name' : 'role'
+    initialRole === 'accompagnant' || initialRole === 'accompagnante' || initialRole === 'accompagne' ? 'name' : 'role'
   )
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
@@ -87,13 +90,13 @@ export function RegisterForm({ departementsOuverts }: RegisterFormProps = {}) {
 
   // Validation automatique du code pré-rempli depuis l'URL au mount
   useEffect(() => {
-    if (initialParrainageCode && role === 'accompagnante') {
+    if (initialParrainageCode && role === 'accompagnant') {
       void checkParrainageCode(initialParrainageCode)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  function selectRole(r: 'accompagnante' | 'accompagne') {
+  function selectRole(r: 'accompagnant' | 'accompagne') {
     setRole(r)
     setStep('name')
     // Reset état parrainage si changement de rôle (évite état résiduel après aller-retour)
@@ -112,7 +115,7 @@ export function RegisterForm({ departementsOuverts }: RegisterFormProps = {}) {
   function submitLocalisation(e: React.FormEvent) {
     e.preventDefault()
     if (!ville.trim() || !/^\d{5}$/.test(codePostal.trim())) return
-    setStep(role === 'accompagnante' ? 'parrainage' : 'email')
+    setStep(role === 'accompagnant' ? 'parrainage' : 'email')
   }
 
   async function checkParrainageCode(value: string) {
@@ -176,7 +179,7 @@ export function RegisterForm({ departementsOuverts }: RegisterFormProps = {}) {
     formData.set('role', role!)
     formData.set('ville', ville.trim())
     formData.set('code_postal', codePostal.trim())
-    if (role === 'accompagnante' && parrainageCode.trim()) {
+    if (role === 'accompagnant' && parrainageCode.trim()) {
       formData.set('parrainage_code', parrainageCode.trim())
     }
 
@@ -250,15 +253,15 @@ export function RegisterForm({ departementsOuverts }: RegisterFormProps = {}) {
           <div className="grid grid-cols-2 gap-3">
             <button
               type="button"
-              onClick={() => selectRole('accompagnante')}
+              onClick={() => selectRole('accompagnant')}
               className={`p-4 rounded-lg border-2 text-left transition ${
-                role === 'accompagnante'
+                role === 'accompagnant'
                   ? 'border-accent bg-accent text-black'
                   : 'border-gray-200 hover:border-accent'
               }`}
             >
               <p className="font-semibold text-sm">Un accompagnant</p>
-              <p className={`text-xs mt-1 ${role === 'accompagnante' ? 'text-black/50' : 'text-gray-500'}`}>
+              <p className={`text-xs mt-1 ${role === 'accompagnant' ? 'text-black/50' : 'text-gray-500'}`}>
                 Je propose mes services d&apos;accompagnement
               </p>
             </button>
@@ -338,7 +341,7 @@ export function RegisterForm({ departementsOuverts }: RegisterFormProps = {}) {
         )}
 
         {/* Step 4 : Parrainage (accompagnante uniquement) */}
-        {role === 'accompagnante' && isVisible('parrainage') && (
+        {role === 'accompagnant' && isVisible('parrainage') && (
           <form
             onSubmit={continueAfterParrainage}
             className="space-y-4 animate-fade-in"

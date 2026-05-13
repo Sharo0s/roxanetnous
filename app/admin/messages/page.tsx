@@ -16,9 +16,9 @@ export default async function AdminMessagesPage() {
     .select(`
       id,
       last_message_at,
-      accompagnante_id,
+      accompagnant_id,
       admin_id,
-      accompagnantes_profiles:accompagnante_id (
+      accompagnantes_profiles:accompagnant_id (
         user_id,
         users!user_id (first_name, last_name, email)
       )

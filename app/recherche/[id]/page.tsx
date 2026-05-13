@@ -90,7 +90,7 @@ export default async function AnnonceDetailPage({
     .from('favoris')
     .select('id')
     .eq('user_id', user.id)
-    .eq('annonce_accompagnante_id', id)
+    .eq('annonce_accompagnant_id', id)
     .single()
   const isFavori = !!favori
 
@@ -111,7 +111,7 @@ export default async function AnnonceDetailPage({
 
   return (
     <main id="main-content" tabIndex={-1} className="min-h-screen bg-[#fefaf8] focus:outline-none">
-      {userData?.role === 'accompagnante' ? (
+      {userData?.role === 'accompagnant' ? (
         <AccompagnanteDashboardHeader
           firstName={userData.first_name}
           lastName={userData.last_name}
@@ -265,7 +265,7 @@ export default async function AnnonceDetailPage({
                 <p className="text-sm text-gray-600 mb-4">
                   Envoyez un message pour en savoir plus ou proposer une mission.
                 </p>
-                <ContactButton accompagnanteProfileId={annonce.accompagnante_id} subscribed={subscribed} />
+                <ContactButton accompagnanteProfileId={annonce.accompagnant_id} subscribed={subscribed} />
               </div>
             ) : null}
 

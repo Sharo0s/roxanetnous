@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { AnnonceStatusToggle } from '@/components/accompagnante/annonce-status-toggle'
+import { AnnonceStatusToggle } from '@/components/accompagnant/annonce-status-toggle'
 import { AnnonceDeleteButton } from '@/components/annonce-delete-button'
 import { SPECIALITES } from '@/lib/constants'
 import { AccompagneDashboardHeader } from '@/components/layout/accompagne-dashboard-header'

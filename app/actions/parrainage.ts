@@ -942,8 +942,8 @@ export async function confirmParrainageOnSuccess(
 
   // Invalide le cache du dashboard pour que le teaser parrainage apparaisse
   // sans nécessiter un reload manuel après validation par parrainage.
-  revalidatePath('/accompagnante/dashboard')
-  revalidatePath('/accompagnante/parrainage')
+  revalidatePath('/accompagnant/dashboard')
+  revalidatePath('/accompagnant/parrainage')
 
   return { ok: true }
 }

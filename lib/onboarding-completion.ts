@@ -3,7 +3,7 @@
 // contenu ("Il vous reste a renseigner : votre ville, vos diplomes...").
 //
 // L'ordre de la liste suit l'ordre logique de l'onboarding (cf.
-// /accompagnante/onboarding) : identite geographique d'abord, puis
+// /accompagnant/onboarding) : identite geographique d'abord, puis
 // experience/competences, puis disponibilites/details.
 
 type AccompagnanteProfileForCompletion = {

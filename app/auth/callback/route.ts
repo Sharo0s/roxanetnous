@@ -45,7 +45,7 @@ export async function GET(request: Request) {
         // waitUntil : Vercel laisse la promesse finir en arrière-plan APRÈS
         // la redirection. Sans ça, NextResponse.redirect() tue le process
         // avant que Resend ait fini son POST (test du 12/05 : aucun log).
-        if ((role === 'accompagnante' || role === 'accompagne') && user.email && userData?.first_name) {
+        if ((role === 'accompagnant' || role === 'accompagne') && user.email && userData?.first_name) {
           waitUntil(
             sendWelcomeEmailIfFirstTime({
               email: user.email,
@@ -58,8 +58,8 @@ export async function GET(request: Request) {
 
         if (role === 'admin') {
           return NextResponse.redirect(`${origin}/admin`)
-        } else if (role === 'accompagnante') {
-          return NextResponse.redirect(`${origin}/accompagnante/dashboard`)
+        } else if (role === 'accompagnant') {
+          return NextResponse.redirect(`${origin}/accompagnant/dashboard`)
         } else {
           return NextResponse.redirect(`${origin}/accompagne/dashboard`)
         }

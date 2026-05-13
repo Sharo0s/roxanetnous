@@ -50,7 +50,7 @@ export default async function AdminUtilisateurDetailPage({
   let auxProfile: any = null
   let benProfile: any = null
 
-  if (userData.role === 'accompagnante') {
+  if (userData.role === 'accompagnant') {
     const { data } = await supabaseAdmin
       .from('accompagnantes_profiles')
       .select('*')
@@ -413,7 +413,7 @@ export default async function AdminUtilisateurDetailPage({
       </div>
 
       {/* Abonnement */}
-      {(userData.role === 'accompagnante' || userData.role === 'accompagne') && (
+      {(userData.role === 'accompagnant' || userData.role === 'accompagne') && (
         <div className="bg-white rounded-2xl border border-[#e8dfd2] p-6 mt-6">
           <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4">Abonnement</h2>
           {subscriptionStatus.status ? (

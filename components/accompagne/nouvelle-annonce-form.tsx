@@ -79,7 +79,7 @@ export function NouvelleAnnonceAccompagneForm({ departementsOuverts }: Props) {
       disponibilites,
       date_debut: dateDebut,
       infos_complementaires: infosComplementaires,
-      message_accompagnantes: messageAccompagnantes,
+      message_accompagnants: messageAccompagnantes,
     })
 
     if (result?.error) {

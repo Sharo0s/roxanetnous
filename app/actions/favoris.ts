@@ -12,7 +12,8 @@ export async function toggleFavori(
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'Non connecté.' }
 
-  const field = type === 'accompagnante' ? 'annonce_accompagnante_id' : 'annonce_accompagne_id'
+  // Story 5.A.2 (D4) : colonnes renommees accompagnant_id, table conservee accompagnantes (D3).
+  const field = type === 'accompagnante' ? 'annonce_accompagnant_id' : 'annonce_accompagne_id'
 
   // Verifier si deja en favori
   const { data: existing } = await supabase
@@ -51,7 +52,7 @@ export async function toggleFavori(
   if (type === 'accompagnante') {
     await supabase
       .from('annonces_accompagnantes')
-      .update({ favoris_count: (await supabase.from('favoris').select('id', { count: 'exact', head: true }).eq('annonce_accompagnante_id', annonceId)).count || 0 })
+      .update({ favoris_count: (await supabase.from('favoris').select('id', { count: 'exact', head: true }).eq('annonce_accompagnant_id', annonceId)).count || 0 })
       .eq('id', annonceId)
   }
 

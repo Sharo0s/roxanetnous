@@ -104,7 +104,7 @@ export async function getInscriptionsParMois() {
     const key = `${ud.getFullYear()}-${String(ud.getMonth() + 1).padStart(2, '0')}`
     const entry = moisMap.get(key)
     if (!entry) continue
-    if (u.role === 'accompagnante') entry.accompagnantes++
+    if (u.role === 'accompagnant') entry.accompagnantes++
     else if (u.role === 'accompagne') entry.accompagnes++
   }
 
@@ -267,7 +267,7 @@ export async function getMrrDetail() {
 
     if (s.status === 'trialing') {
       essaiGratuit++
-      if (role === 'accompagnante') essaiAccompagnantes++
+      if (role === 'accompagnant') essaiAccompagnantes++
       else essaiAccompagnes++
     } else {
       payants++
@@ -378,7 +378,7 @@ export async function getChurn() {
 
     for (const a of annulationsData || []) {
       const role = roleMap.get(a.user_id)
-      if (role === 'accompagnante') annulAccompagnantes++
+      if (role === 'accompagnant') annulAccompagnantes++
       else annulAccompagnes++
       if (a.plan_type === 'annuel' || a.plan_type === 'annual') annulAnnuel++
       else annulMensuel++

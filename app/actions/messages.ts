@@ -67,7 +67,7 @@ export async function getOrCreateConversation(
   const { data: existing, error: existingError } = await supabase
     .from('conversations')
     .select('id')
-    .eq('accompagnante_id', accompagnanteProfileId)
+    .eq('accompagnant_id', accompagnanteProfileId)
     .eq('accompagne_id', benProfile.id)
     .maybeSingle()
 
@@ -98,7 +98,7 @@ export async function getOrCreateConversation(
   const { data: conversation, error } = await supabase
     .from('conversations')
     .insert({
-      accompagnante_id: accompagnanteProfileId,
+      accompagnant_id: accompagnanteProfileId,
       accompagne_id: benProfile.id,
     })
     .select('id')
@@ -110,7 +110,7 @@ export async function getOrCreateConversation(
       const { data: refetched } = await supabase
         .from('conversations')
         .select('id')
-        .eq('accompagnante_id', accompagnanteProfileId)
+        .eq('accompagnant_id', accompagnanteProfileId)
         .eq('accompagne_id', benProfile.id)
         .maybeSingle()
       if (refetched) return { conversationId: refetched.id }
@@ -142,7 +142,7 @@ export async function getOrCreateConversationAsAccompagnante(
     .eq('id', user.id)
     .single()
 
-  if (!userData || userData.role !== 'accompagnante') {
+  if (!userData || userData.role !== 'accompagnant') {
     return { error: 'Seuls les accompagnants peuvent utiliser cette fonction.' }
   }
 
@@ -160,7 +160,7 @@ export async function getOrCreateConversationAsAccompagnante(
   const { data: existing, error: existingError } = await supabase
     .from('conversations')
     .select('id')
-    .eq('accompagnante_id', auxProfile.id)
+    .eq('accompagnant_id', auxProfile.id)
     .eq('accompagne_id', accompagneProfileId)
     .maybeSingle()
 
@@ -189,7 +189,7 @@ export async function getOrCreateConversationAsAccompagnante(
   const { data: conversation, error } = await supabase
     .from('conversations')
     .insert({
-      accompagnante_id: auxProfile.id,
+      accompagnant_id: auxProfile.id,
       accompagne_id: accompagneProfileId,
     })
     .select('id')
@@ -200,7 +200,7 @@ export async function getOrCreateConversationAsAccompagnante(
       const { data: refetched } = await supabase
         .from('conversations')
         .select('id')
-        .eq('accompagnante_id', auxProfile.id)
+        .eq('accompagnant_id', auxProfile.id)
         .eq('accompagne_id', accompagneProfileId)
         .maybeSingle()
       if (refetched) return { conversationId: refetched.id }
@@ -239,7 +239,7 @@ export async function getOrCreateAdminConversation(
   const { data: existing } = await supabase
     .from('conversations')
     .select('id')
-    .eq('accompagnante_id', accompagnanteProfileId)
+    .eq('accompagnant_id', accompagnanteProfileId)
     .eq('admin_id', user.id)
     .is('accompagne_id', null)
     .maybeSingle()
@@ -251,7 +251,7 @@ export async function getOrCreateAdminConversation(
   const { data: conversation, error } = await supabase
     .from('conversations')
     .insert({
-      accompagnante_id: accompagnanteProfileId,
+      accompagnant_id: accompagnanteProfileId,
       accompagne_id: null,
       admin_id: user.id,
     })
@@ -259,12 +259,12 @@ export async function getOrCreateAdminConversation(
     .single()
 
   if (error) {
-    // Story 5.B.2 : 23505 sur UNIQUE (accompagnante_id, admin_id) where admin_id IS NOT NULL.
+    // Story 5.B.2 : 23505 sur UNIQUE (accompagnant_id, admin_id) where admin_id IS NOT NULL.
     if (error.code === '23505') {
       const { data: refetched } = await supabase
         .from('conversations')
         .select('id')
-        .eq('accompagnante_id', accompagnanteProfileId)
+        .eq('accompagnant_id', accompagnanteProfileId)
         .eq('admin_id', user.id)
         .is('accompagne_id', null)
         .maybeSingle()
@@ -301,10 +301,10 @@ export async function sendMessage(
     .from('conversations')
     .select(`
       id,
-      accompagnante_id,
+      accompagnant_id,
       accompagne_id,
       admin_id,
-      accompagnantes_profiles:accompagnante_id (user_id),
+      accompagnantes_profiles:accompagnant_id (user_id),
       accompagnes_profiles:accompagne_id (user_id)
     `)
     .eq('id', conversationId)

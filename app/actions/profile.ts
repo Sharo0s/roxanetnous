@@ -34,7 +34,7 @@ export async function updateAccompagnanteProfile(data: {
     .eq('id', user.id)
     .single()
 
-  if (!userData || userData.role !== 'accompagnante') {
+  if (!userData || userData.role !== 'accompagnant') {
     return { error: 'Accès non autorisé.' }
   }
 
@@ -96,8 +96,8 @@ export async function updateAccompagnanteProfile(data: {
     return { error: 'Erreur lors de la mise à jour du profil.' }
   }
 
-  revalidatePath('/accompagnante/profil')
-  revalidatePath('/accompagnante/dashboard')
+  revalidatePath('/accompagnant/profil')
+  revalidatePath('/accompagnant/dashboard')
   return { success: true }
 }
 
@@ -129,7 +129,7 @@ export async function updateUserInfo(data: {
     return { error: 'Erreur lors de la mise à jour.' }
   }
 
-  revalidatePath('/accompagnante/profil')
+  revalidatePath('/accompagnant/profil')
   revalidatePath('/accompagne/profil')
   return { success: true }
 }
@@ -181,8 +181,8 @@ export async function toggleDisponible(indisponibleJusquAu?: string | null): Pro
     notifyFavoriAccompagnes(user.id).catch(() => {})
   }
 
-  revalidatePath('/accompagnante/profil')
-  revalidatePath('/accompagnante/dashboard')
+  revalidatePath('/accompagnant/profil')
+  revalidatePath('/accompagnant/dashboard')
   revalidatePath('/recherche')
   return { success: true }
 }
@@ -293,8 +293,8 @@ export async function uploadAvatar(formData: FormData): Promise<ProfileResult> {
     return { error: 'Erreur lors de la mise à jour du profil.' }
   }
 
-  revalidatePath('/accompagnante/dashboard')
-  revalidatePath('/accompagnante/profil')
+  revalidatePath('/accompagnant/dashboard')
+  revalidatePath('/accompagnant/profil')
   revalidatePath('/accompagne/dashboard')
   revalidatePath('/accompagne/profil')
   return { success: true }

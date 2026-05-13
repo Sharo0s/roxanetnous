@@ -19,6 +19,14 @@ const nextConfig = {
         destination: '/me-tenir-au-courant',
         permanent: true,
       },
+      // Story 5.A.4 : routes /accompagnante/* renommees en /accompagnant/*.
+      // 301 permanent pour preserver SEO + bookmarks utilisateurs + liens emails
+      // deja envoyes (notifications matching, validation, etc.).
+      {
+        source: '/accompagnante/:path*',
+        destination: '/accompagnant/:path*',
+        permanent: true,
+      },
     ]
   },
 }

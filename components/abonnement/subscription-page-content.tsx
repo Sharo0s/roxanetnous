@@ -16,7 +16,7 @@ export function SubscriptionPageContent({
   subscription: SubscriptionInfo
   paymentMethod?: PaymentMethod | null
   invoices?: Invoice[]
-  role?: 'accompagnante' | 'accompagne'
+  role?: 'accompagnant' | 'accompagne'
   amount?: SubscriptionAmount | null
   searchParams?: Record<string, string | string[] | undefined>
 }) {

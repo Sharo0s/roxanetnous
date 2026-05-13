@@ -144,7 +144,7 @@ export type Database = {
       }
       accompagne_accompagnantes: {
         Row: {
-          accompagnante_user_id: string
+          accompagnant_user_id: string
           accompagne_id: string
           actif: boolean
           couleur: string
@@ -152,7 +152,7 @@ export type Database = {
           id: string
         }
         Insert: {
-          accompagnante_user_id: string
+          accompagnant_user_id: string
           accompagne_id: string
           actif?: boolean
           couleur?: string
@@ -160,7 +160,7 @@ export type Database = {
           id?: string
         }
         Update: {
-          accompagnante_user_id?: string
+          accompagnant_user_id?: string
           accompagne_id?: string
           actif?: boolean
           couleur?: string
@@ -170,7 +170,7 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "beneficiaire_auxiliaires_auxiliaire_user_id_fkey"
-            columns: ["accompagnante_user_id"]
+            columns: ["accompagnant_user_id"]
             isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]
@@ -251,7 +251,7 @@ export type Database = {
           id?: string
           target_id?: string
           target_id_text?: string | null
-          target_type?: string
+          target_type: string
         }
         Relationships: [
           {
@@ -265,7 +265,7 @@ export type Database = {
       }
       annonces_accompagnantes: {
         Row: {
-          accompagnante_id: string
+          accompagnant_id: string
           code_postal: string | null
           contacts_count: number
           created_at: string
@@ -282,7 +282,7 @@ export type Database = {
           vues: number
         }
         Insert: {
-          accompagnante_id: string
+          accompagnant_id: string
           code_postal?: string | null
           contacts_count?: number
           created_at?: string
@@ -299,7 +299,7 @@ export type Database = {
           vues?: number
         }
         Update: {
-          accompagnante_id?: string
+          accompagnant_id?: string
           code_postal?: string | null
           contacts_count?: number
           created_at?: string
@@ -318,7 +318,7 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "annonces_auxiliaires_auxiliaire_id_fkey"
-            columns: ["accompagnante_id"]
+            columns: ["accompagnant_id"]
             isOneToOne: false
             referencedRelation: "accompagnantes_profiles"
             referencedColumns: ["id"]
@@ -341,7 +341,7 @@ export type Database = {
           infos_complementaires: string | null
           latitude: number | null
           longitude: number | null
-          message_accompagnantes: string | null
+          message_accompagnants: string | null
           niveau_dependance:
             | Database["public"]["Enums"]["niveau_dependance"]
             | null
@@ -368,7 +368,7 @@ export type Database = {
           infos_complementaires?: string | null
           latitude?: number | null
           longitude?: number | null
-          message_accompagnantes?: string | null
+          message_accompagnants?: string | null
           niveau_dependance?:
             | Database["public"]["Enums"]["niveau_dependance"]
             | null
@@ -395,7 +395,7 @@ export type Database = {
           infos_complementaires?: string | null
           latitude?: number | null
           longitude?: number | null
-          message_accompagnantes?: string | null
+          message_accompagnants?: string | null
           niveau_dependance?:
             | Database["public"]["Enums"]["niveau_dependance"]
             | null
@@ -454,30 +454,30 @@ export type Database = {
       }
       conversations: {
         Row: {
-          accompagnante_id: string
+          accompagnant_id: string
           accompagne_id: string | null
           admin_id: string | null
-          archived_by_accompagnante: boolean
+          archived_by_accompagnant: boolean
           archived_by_accompagne: boolean
           created_at: string
           id: string
           last_message_at: string | null
         }
         Insert: {
-          accompagnante_id: string
+          accompagnant_id: string
           accompagne_id?: string | null
           admin_id?: string | null
-          archived_by_accompagnante?: boolean
+          archived_by_accompagnant?: boolean
           archived_by_accompagne?: boolean
           created_at?: string
           id?: string
           last_message_at?: string | null
         }
         Update: {
-          accompagnante_id?: string
+          accompagnant_id?: string
           accompagne_id?: string | null
           admin_id?: string | null
-          archived_by_accompagnante?: boolean
+          archived_by_accompagnant?: boolean
           archived_by_accompagne?: boolean
           created_at?: string
           id?: string
@@ -493,7 +493,7 @@ export type Database = {
           },
           {
             foreignKeyName: "conversations_auxiliaire_id_fkey"
-            columns: ["accompagnante_id"]
+            columns: ["accompagnant_id"]
             isOneToOne: false
             referencedRelation: "accompagnantes_profiles"
             referencedColumns: ["id"]
@@ -547,21 +547,21 @@ export type Database = {
       }
       favoris: {
         Row: {
-          annonce_accompagnante_id: string | null
+          annonce_accompagnant_id: string | null
           annonce_accompagne_id: string | null
           created_at: string
           id: string
           user_id: string
         }
         Insert: {
-          annonce_accompagnante_id?: string | null
+          annonce_accompagnant_id?: string | null
           annonce_accompagne_id?: string | null
           created_at?: string
           id?: string
           user_id: string
         }
         Update: {
-          annonce_accompagnante_id?: string | null
+          annonce_accompagnant_id?: string | null
           annonce_accompagne_id?: string | null
           created_at?: string
           id?: string
@@ -570,7 +570,7 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "favoris_annonce_auxiliaire_id_fkey"
-            columns: ["annonce_accompagnante_id"]
+            columns: ["annonce_accompagnant_id"]
             isOneToOne: false
             referencedRelation: "annonces_accompagnantes"
             referencedColumns: ["id"]
@@ -683,6 +683,47 @@ export type Database = {
           },
         ]
       }
+      notifications_ouverture: {
+        Row: {
+          code_departement: string
+          created_at: string
+          email: string
+          id: string
+          ip_inscription: string | null
+          notified_at: string | null
+          role: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          code_departement: string
+          created_at?: string
+          email: string
+          id?: string
+          ip_inscription?: string | null
+          notified_at?: string | null
+          role?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          code_departement?: string
+          created_at?: string
+          email?: string
+          id?: string
+          ip_inscription?: string | null
+          notified_at?: string | null
+          role?: string | null
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "waitlist_departements_code_departement_fkey"
+            columns: ["code_departement"]
+            isOneToOne: false
+            referencedRelation: "departements_ouverts"
+            referencedColumns: ["code"]
+          },
+        ]
+      }
       parrainages: {
         Row: {
           blocage_raison: string | null
@@ -786,19 +827,19 @@ export type Database = {
       }
       planning_document_assignments: {
         Row: {
-          accompagnante_user_id: string
+          accompagnant_user_id: string
           created_at: string
           document_id: string
           id: string
         }
         Insert: {
-          accompagnante_user_id: string
+          accompagnant_user_id: string
           created_at?: string
           document_id: string
           id?: string
         }
         Update: {
-          accompagnante_user_id?: string
+          accompagnant_user_id?: string
           created_at?: string
           document_id?: string
           id?: string
@@ -806,7 +847,7 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "planning_document_assignments_auxiliaire_user_id_fkey"
-            columns: ["accompagnante_user_id"]
+            columns: ["accompagnant_user_id"]
             isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]
@@ -896,7 +937,7 @@ export type Database = {
       }
       planning_shifts: {
         Row: {
-          accompagnante_user_id: string
+          accompagnant_user_id: string
           accompagne_id: string
           created_at: string
           creneaux: Json
@@ -907,7 +948,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
-          accompagnante_user_id: string
+          accompagnant_user_id: string
           accompagne_id: string
           created_at?: string
           creneaux?: Json
@@ -918,7 +959,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
-          accompagnante_user_id?: string
+          accompagnant_user_id?: string
           accompagne_id?: string
           created_at?: string
           creneaux?: Json
@@ -931,7 +972,7 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "planning_shifts_auxiliaire_user_id_fkey"
-            columns: ["accompagnante_user_id"]
+            columns: ["accompagnant_user_id"]
             isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]
@@ -1227,47 +1268,6 @@ export type Database = {
           },
         ]
       }
-      notifications_ouverture: {
-        Row: {
-          code_departement: string
-          created_at: string
-          email: string
-          id: string
-          ip_inscription: string | null
-          notified_at: string | null
-          role: string | null
-          user_agent: string | null
-        }
-        Insert: {
-          code_departement: string
-          created_at?: string
-          email: string
-          id?: string
-          ip_inscription?: string | null
-          notified_at?: string | null
-          role?: string | null
-          user_agent?: string | null
-        }
-        Update: {
-          code_departement?: string
-          created_at?: string
-          email?: string
-          id?: string
-          ip_inscription?: string | null
-          notified_at?: string | null
-          role?: string | null
-          user_agent?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "waitlist_departements_code_departement_fkey"
-            columns: ["code_departement"]
-            isOneToOne: false
-            referencedRelation: "departements_ouverts"
-            referencedColumns: ["code"]
-          },
-        ]
-      }
     }
     Views: {
       parrainages_filleule_view: {
@@ -1304,7 +1304,7 @@ export type Database = {
         Returns: string
       }
       has_active_subscription: { Args: never; Returns: boolean }
-      is_accompagnante: { Args: never; Returns: boolean }
+      is_accompagnant: { Args: never; Returns: boolean }
       is_accompagne: { Args: never; Returns: boolean }
       is_admin: { Args: never; Returns: boolean }
       is_document_owner: { Args: { doc_id: string }; Returns: boolean }
@@ -1360,7 +1360,7 @@ export type Database = {
         | "besoins_plus_plus"
         | "besoins_plus"
       subscription_status: "active" | "cancelled" | "past_due" | "trialing"
-      user_role: "accompagnante" | "accompagne" | "admin"
+      user_role: "accompagnante" | "accompagnant" | "accompagne" | "admin"
       validation_status:
         | "en_attente"
         | "visio_a_planifier"
@@ -1512,7 +1512,7 @@ export const Constants = {
         "besoins_plus",
       ],
       subscription_status: ["active", "cancelled", "past_due", "trialing"],
-      user_role: ["accompagnante", "accompagne", "admin"],
+      user_role: ["accompagnante", "accompagnant", "accompagne", "admin"],
       validation_status: [
         "en_attente",
         "visio_a_planifier",

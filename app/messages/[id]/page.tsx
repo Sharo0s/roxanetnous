@@ -37,10 +37,10 @@ export default async function ConversationPage({
     .from('conversations')
     .select(`
       id,
-      accompagnante_id,
+      accompagnant_id,
       accompagne_id,
       admin_id,
-      accompagnantes_profiles:accompagnante_id (
+      accompagnantes_profiles:accompagnant_id (
         user_id,
         users:user_id (first_name, last_name)
       ),
@@ -85,11 +85,11 @@ export default async function ConversationPage({
 
   // Recuperer le lien profil de l'interlocuteur (si accompagnante) - jamais pour conv admin
   let otherProfileUrl: string | null = null
-  if (!isAdminConv && userData.role === 'accompagne' && conversation.accompagnante_id) {
+  if (!isAdminConv && userData.role === 'accompagne' && conversation.accompagnant_id) {
     const { data: auxAnnonce } = await supabase
       .from('annonces_accompagnantes')
       .select('id')
-      .eq('accompagnante_id', conversation.accompagnante_id)
+      .eq('accompagnant_id', conversation.accompagnant_id)
       .eq('status', 'publiee')
       .limit(1)
       .single()
@@ -117,7 +117,7 @@ export default async function ConversationPage({
     ? 'Équipe roxanetnous'
     : `${otherUser?.first_name || ''} ${otherUser?.last_name || ''}`.trim() || 'votre interlocuteur'
 
-  const isAccompagnante = userData.role === 'accompagnante'
+  const isAccompagnante = userData.role === 'accompagnant'
   const otherInitials = `${otherUser?.first_name?.[0] || ''}${otherUser?.last_name?.[0] || ''}`
 
   return (

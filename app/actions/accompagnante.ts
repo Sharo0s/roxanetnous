@@ -34,7 +34,7 @@ export async function submitOnboarding(data: {
     .eq('id', user.id)
     .single()
 
-  if (!userData || userData.role !== 'accompagnante') {
+  if (!userData || userData.role !== 'accompagnant') {
     return { error: 'Accès non autorisé.' }
   }
 
@@ -147,7 +147,7 @@ export async function submitOnboarding(data: {
     return { error: 'Erreur lors de la création du profil.' }
   }
 
-  redirect('/accompagnante/dashboard')
+  redirect('/accompagnant/dashboard')
 }
 
 export async function uploadJustificatif(formData: FormData): Promise<OnboardingResult> {

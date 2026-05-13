@@ -27,7 +27,7 @@ export default async function MessagesPage() {
   // Recuperer le profil selon le role
   let profileId: string | null = null
 
-  if (userData.role === 'accompagnante') {
+  if (userData.role === 'accompagnant') {
     const { data: profile } = await supabase
       .from('accompagnantes_profiles')
       .select('id')
@@ -43,20 +43,20 @@ export default async function MessagesPage() {
     profileId = profile?.id || null
   }
 
-  if (!profileId) redirect(userData.role === 'accompagnante' ? '/accompagnante/dashboard' : '/accompagne/dashboard')
+  if (!profileId) redirect(userData.role === 'accompagnant' ? '/accompagnant/dashboard' : '/accompagne/dashboard')
 
   // Recuperer les conversations (inclut les conversations admin cote accompagnante)
-  const profileField = userData.role === 'accompagnante' ? 'accompagnante_id' : 'accompagne_id'
+  const profileField = userData.role === 'accompagnant' ? 'accompagnant_id' : 'accompagne_id'
 
   const { data: conversations } = await supabase
     .from('conversations')
     .select(`
       id,
       last_message_at,
-      accompagnante_id,
+      accompagnant_id,
       accompagne_id,
       admin_id,
-      accompagnantes_profiles:accompagnante_id (
+      accompagnantes_profiles:accompagnant_id (
         user_id,
         users:user_id (first_name, last_name)
       ),
@@ -84,7 +84,7 @@ export default async function MessagesPage() {
   }
 
   const unreadCount = await getUnreadCount(user.id)
-  const isAccompagnante = userData.role === 'accompagnante'
+  const isAccompagnante = userData.role === 'accompagnant'
 
   return (
     <main id="main-content" tabIndex={-1} className="min-h-screen bg-[#fefaf8] focus:outline-none">
@@ -144,7 +144,7 @@ export default async function MessagesPage() {
                 isTeam = true
                 displayName = 'Équipe roxanetnous'
                 initials = 'RN'
-              } else if (userData.role === 'accompagnante') {
+              } else if (userData.role === 'accompagnant') {
                 const profile = conv.accompagnes_profiles as unknown as ConvProfileWithUser
                 const u = profile?.users
                 displayName = `${u?.first_name || ''} ${u?.last_name || ''}`.trim() || 'Accompagné'

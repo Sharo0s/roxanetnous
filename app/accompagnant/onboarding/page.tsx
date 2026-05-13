@@ -1,0 +1,60 @@
+import { redirect } from 'next/navigation'
+import { createClient } from '@/lib/supabase/server'
+import { OnboardingClient } from '@/components/accompagnant/onboarding-client'
+import { getCodesDepartementsOuverts } from '@/lib/departements'
+
+export default async function OnboardingPage() {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) redirect('/login')
+
+  const supabaseAdmin = await createClient({ serviceRole: true })
+
+  const { data: filleuleRow } = await supabaseAdmin
+    .from('users')
+    .select('parrainee_par')
+    .eq('id', user.id)
+    .maybeSingle()
+
+  const marraineId = filleuleRow?.parrainee_par || null
+
+  let marraineFirstName: string | null = null
+  if (marraineId) {
+    const { data: marraine } = await supabaseAdmin
+      .from('users')
+      .select('first_name')
+      .eq('id', marraineId)
+      .maybeSingle()
+    marraineFirstName = marraine?.first_name || null
+  }
+
+  const departementsOuverts = await getCodesDepartementsOuverts()
+
+  const { data: profile } = await supabaseAdmin
+    .from('accompagnantes_profiles')
+    .select('ville, code_postal')
+    .eq('user_id', user.id)
+    .maybeSingle()
+
+  return (
+    <main
+      id="main-content"
+      tabIndex={-1}
+      className="min-h-screen bg-[#fefaf8] focus:outline-none"
+    >
+      <h1 className="sr-only">Onboarding accompagnant</h1>
+      <OnboardingClient
+        parrainage={{
+          isFilleule: !!marraineId,
+          marraineFirstName,
+        }}
+        departementsOuverts={departementsOuverts}
+        userEmail={user.email ?? ''}
+        initialVille={profile?.ville ?? ''}
+        initialCodePostal={profile?.code_postal ?? ''}
+      />
+    </main>
+  )
+}

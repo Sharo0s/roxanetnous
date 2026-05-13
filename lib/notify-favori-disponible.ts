@@ -19,7 +19,7 @@ export async function notifyFavoriAccompagnes(accompagnanteUserId: string) {
   const { data: annonces } = await supabase
     .from('annonces_accompagnantes')
     .select('id')
-    .eq('accompagnante_id', auxProfile.id)
+    .eq('accompagnant_id', auxProfile.id)
 
   if (!annonces || annonces.length === 0) return
 
@@ -29,7 +29,7 @@ export async function notifyFavoriAccompagnes(accompagnanteUserId: string) {
   const { data: favoris } = await supabase
     .from('favoris')
     .select('user_id')
-    .in('annonce_accompagnante_id', annonceIds)
+    .in('annonce_accompagnant_id', annonceIds)
 
   if (!favoris || favoris.length === 0) return
 

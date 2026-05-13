@@ -24,12 +24,12 @@ export default async function FavorisPage() {
     .from('favoris')
     .select(`
       id,
-      annonce_accompagnante_id,
+      annonce_accompagnant_id,
       annonce_accompagne_id,
       created_at,
-      annonces_accompagnantes:annonce_accompagnante_id (
+      annonces_accompagnantes:annonce_accompagnant_id (
         id, description, ville, code_postal, status,
-        accompagnantes_profiles:accompagnante_id (
+        accompagnantes_profiles:accompagnant_id (
           diplomes, experience, specialites,
           users:user_id (first_name, last_name)
         )
@@ -46,7 +46,7 @@ export default async function FavorisPage() {
 
   return (
     <main id="main-content" tabIndex={-1} className="min-h-screen bg-[#fefaf8] focus:outline-none">
-      {userData.role === 'accompagnante' ? (
+      {userData.role === 'accompagnant' ? (
         <AccompagnanteDashboardHeader
           firstName={userData.first_name}
           lastName={userData.last_name}
@@ -65,7 +65,7 @@ export default async function FavorisPage() {
       <div className="max-w-5xl mx-auto px-4 py-10 md:py-14 relative z-10">
         <header className="text-center mb-8">
           <span className="inline-block text-[11px] uppercase tracking-[0.18em] text-kraft font-medium mb-2">
-            {userData.role === 'accompagnante' ? 'Mon espace' : 'Votre espace'}
+            {userData.role === 'accompagnant' ? 'Mon espace' : 'Votre espace'}
           </span>
           <h1 className="text-3xl md:text-4xl italic text-gray-900 leading-tight">Mes favoris</h1>
         </header>

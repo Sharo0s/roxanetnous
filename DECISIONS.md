@@ -526,3 +526,40 @@ Fenetre cutover estimee : < 5 secondes.
 
 **Regle :** Aucune story 5.A.2+ ne peut etre executee sans le snapshot pre-cutover prealable. Le snapshot est l'artefact de rollback canonical pour les modes 1, 2 et 3. La fenetre 5j entourant le go-live Bretagne (du vendredi 2026-05-16 au mercredi 2026-05-21 inclus) est exclue de l'execution 5.A.2 (cf. F-Epic5-0).
 
+---
+
+## 2026-05-13 : Cloture mini-epic 5.A - Renommage `accompagnante` -> `accompagnant` execute (decision F12bis)
+
+**Decision :** Le mini-epic 5.A (renommage `accompagnante` -> `accompagnant`) est livre integralement le **2026-05-13** en assumant l'ecart F-Epic5-0/F12 (execution dans la fenetre 5j entourant le go-live Bretagne, lundi 2026-05-18).
+
+**Justification de l'ecart :** Sylvain a choisi de derouler la chaine complete 5.A.2 -> 5.A.6 le 2026-05-13 plutot que d'attendre le 2026-05-21. Le risque cutover BDD a ete juge faible compte tenu :
+- Volumetrie prod minimale (822 users, 9 tables a 0 ligne).
+- Strategie cutover atomique (downtime mesure < 1 sec).
+- Pas de coexistence simultanee avec une activation departement Bretagne (le toggle reste prevu lundi).
+- Audits 7j Sentry / GHA en observation passive (non bloquants).
+
+**Resultat execution :**
+
+| Story | Commit | Resultat |
+|---|---|---|
+| 5.A.2 | (a venir) | Migration enum + 15 colonnes + 3 helpers RLS + 23 policies recreees en 2 parts (Postgres < 18 ADD VALUE limitation). 818 users migres `accompagnante` -> `accompagnant`. Sentry verifie zero exception post-cutover. |
+| 5.A.3 | (a venir) | Regeneration types/supabase.ts via MCP (~1670 lignes). Find-replace 45 occurrences `role === 'accompagnante'` -> `'accompagnant'` dans 17 fichiers + 8 unions de type. tsc exit 0. |
+| 5.A.4 | (a venir) | `git mv app/accompagnante app/accompagnant` (6 dossiers routes) + `git mv components/accompagnante components/accompagnant`. Redirect 301 `/accompagnante/:path*` -> `/accompagnant/:path*` dans next.config.mjs. Middleware `lib/supabase/middleware.ts` mis a jour. |
+| 5.A.5 | (a venir) | Copy UI deja au masculin neutre (heritage refonte foyer 2026-05-11). Seulement 2 bugs role utilisateur corriges (`role="accompagnante"` -> `'accompagnant'`). |
+| 5.A.6 | (a venir) | Validations CI completes : tsc, lint:a11y-check 155 baseline, check:as-any-admin/global, check:oracle-paywall, check:ip-spoofing, test:unit 25/25. a11y:axe:check differe a preview Vercel. |
+
+**Hors scope 5.A confirme :**
+
+- **Valeur enum orpheline `'accompagnante'`** : conservee en BDD (Postgres < 18 DROP VALUE indisponible). 0 ligne en prod post-cutover. Suppression reportee Epic 6.
+- **Renommage 2 tables `accompagne_accompagnantes` + `annonces_accompagnantes`** : conservees au feminin (decision F12 D3). Dette technique acceptee.
+- **Renommage `components/layout/accompagnante-dashboard-header.tsx`** : conserve au feminin. Renommage de classe React possible Epic 6 si necessaire.
+
+**Tracabilite :**
+
+- Snapshot pre-cutover : `_bmad-output/implementation-artifacts/snapshot-5-a-2-pre-cutover.md`.
+- Migrations Supabase : `supabase/migrations/20260513150000_renommage_accompagnante_part1_enum_value.sql` + `..._part2_backfill_rename_rls.sql`.
+- Tech-spec source : `_bmad-output/planning-artifacts/tech-spec-5-a-renommage.md` (story 5.A.1).
+- Baseline a11y regeneree : `_bmad-output/test-artifacts/a11y-lint-baseline-2026-05-13.txt` (155 violations, identique au total prod precedent).
+
+**Regle :** La memoire projet `project_renommage_accompagnante_todo` peut etre marquee `done` ou supprimee. La regle CLAUDE.md ligne 6 (interdiction `accompagnante` dans la copy nouvelle) reste applicable et durcie. Le code metier historique au feminin (noms de tables `*_accompagnantes`, helpers components/layout) reste en place jusqu'a une story Epic 6 dediee si justifiee.
+

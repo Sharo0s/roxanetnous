@@ -8,7 +8,7 @@ export type AccompagnanteRow = {
   email: string
   first_name: string
   last_name: string
-  role: 'accompagnante'
+  role: 'accompagnant'
   created_at: string
   ville: string | null
   code_postal: string | null
@@ -41,7 +41,7 @@ export default async function AdminUtilisateursPage() {
       id, email, first_name, last_name, role, created_at,
       accompagnantes_profiles!auxiliaires_profiles_user_id_fkey (id, ville, code_postal, validation_status, validation_source, diplomes, experience)
     `)
-    .eq('role', 'accompagnante')
+    .eq('role', 'accompagnant')
     .order('created_at', { ascending: false })
     .limit(5000)
 
@@ -65,7 +65,7 @@ export default async function AdminUtilisateursPage() {
       email: u.email,
       first_name: u.first_name,
       last_name: u.last_name,
-      role: 'accompagnante' as const,
+      role: 'accompagnant' as const,
       created_at: u.created_at,
       ville: p?.ville || null,
       code_postal: p?.code_postal || null,

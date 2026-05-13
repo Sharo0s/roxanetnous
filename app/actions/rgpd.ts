@@ -24,7 +24,7 @@ export async function exportUserData(): Promise<string> {
     supabaseAdmin.from('users').select('*').eq('id', user.id).single(),
     supabaseAdmin.from('accompagnantes_profiles').select('*').eq('user_id', user.id).single(),
     supabaseAdmin.from('accompagnes_profiles').select('*').eq('user_id', user.id).single(),
-    supabaseAdmin.from('annonces_accompagnantes').select('*').eq('accompagnante_id', user.id),
+    supabaseAdmin.from('annonces_accompagnantes').select('*').eq('accompagnant_id', user.id),
     supabaseAdmin.from('annonces_accompagnes').select('*').eq('accompagne_id', user.id),
     supabaseAdmin.from('messages').select('*').eq('sender_id', user.id),
     supabaseAdmin.from('subscriptions').select('*').eq('user_id', user.id).single(),
@@ -38,7 +38,7 @@ export async function exportUserData(): Promise<string> {
     const { data } = await supabaseAdmin
       .from('annonces_accompagnantes')
       .select('*')
-      .eq('accompagnante_id', auxProfile.id)
+      .eq('accompagnant_id', auxProfile.id)
     annoncesAuxData = data
   }
   if (benProfile) {

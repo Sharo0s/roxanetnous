@@ -22,7 +22,7 @@ type Annonce = {
   disponibilites: Record<string, string[]> | null
   date_debut: string
   infos_complementaires: string | null
-  message_accompagnantes: string | null
+  message_accompagnants: string | null
 }
 
 export function ModifierAnnonceAccompagneForm({ annonce, departementsOuverts }: { annonce: Annonce; departementsOuverts: string[] }) {
@@ -39,7 +39,7 @@ export function ModifierAnnonceAccompagneForm({ annonce, departementsOuverts }: 
   const [disponibilites, setDisponibilites] = useState<Record<string, string[]>>(annonce.disponibilites || {})
   const [dateDebut, setDateDebut] = useState(annonce.date_debut)
   const [infosComplementaires, setInfosComplementaires] = useState(annonce.infos_complementaires || '')
-  const [messageAccompagnantes, setMessageAccompagnantes] = useState(annonce.message_accompagnantes || '')
+  const [messageAccompagnantes, setMessageAccompagnantes] = useState(annonce.message_accompagnants || '')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -90,7 +90,7 @@ export function ModifierAnnonceAccompagneForm({ annonce, departementsOuverts }: 
       disponibilites,
       date_debut: dateDebut,
       infos_complementaires: infosComplementaires,
-      message_accompagnantes: messageAccompagnantes,
+      message_accompagnants: messageAccompagnantes,
     })
 
     if (result?.error) {

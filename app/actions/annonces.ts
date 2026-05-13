@@ -58,7 +58,7 @@ export async function createAnnonceAccompagnante(data: {
   const { data: insertedAnnonce, error } = await supabase
     .from('annonces_accompagnantes')
     .insert({
-      accompagnante_id: profile.id,
+      accompagnant_id: profile.id,
       titre: '',
       description: data.description.trim(),
       ville: data.ville.trim(),
@@ -92,7 +92,7 @@ export async function createAnnonceAccompagnante(data: {
     }).catch(() => {})
   }
 
-  redirect('/accompagnante/annonces')
+  redirect('/accompagnant/annonces')
 }
 
 export async function updateAnnonceAccompagnante(
@@ -143,13 +143,13 @@ export async function updateAnnonceAccompagnante(
       disponibilites: data.disponibilites,
     })
     .eq('id', annonceId)
-    .eq('accompagnante_id', profile.id)
+    .eq('accompagnant_id', profile.id)
 
   if (error) {
     return { error: 'Erreur lors de la mise à jour.' }
   }
 
-  redirect('/accompagnante/annonces')
+  redirect('/accompagnant/annonces')
 }
 
 export async function updateAnnonceAccompagnanteStatus(
@@ -187,7 +187,7 @@ export async function updateAnnonceAccompagnanteStatus(
     .from('annonces_accompagnantes')
     .update(updateData)
     .eq('id', annonceId)
-    .eq('accompagnante_id', profile.id)
+    .eq('accompagnant_id', profile.id)
 
   if (error) {
     return { error: 'Erreur lors de la mise à jour.' }
@@ -211,7 +211,7 @@ export async function createAnnonceAccompagne(data: {
   disponibilites: Record<string, string[]>
   date_debut: string
   infos_complementaires: string
-  message_accompagnantes: string
+  message_accompagnants: string
 }): Promise<AnnonceResult> {
   const supabase = await createClient()
 
@@ -292,7 +292,7 @@ export async function createAnnonceAccompagne(data: {
       disponibilites: data.disponibilites,
       date_debut: data.date_debut,
       infos_complementaires: data.infos_complementaires.trim() || null,
-      message_accompagnantes: data.message_accompagnantes.trim() || null,
+      message_accompagnants: data.message_accompagnants.trim() || null,
       status: 'publiee',
       published_at: new Date().toISOString(),
     })
@@ -330,7 +330,7 @@ export async function updateAnnonceAccompagne(
     disponibilites: Record<string, string[]>
     date_debut: string
     infos_complementaires: string
-    message_accompagnantes: string
+    message_accompagnants: string
   }
 ): Promise<AnnonceResult> {
   const supabase = await createClient()
@@ -385,7 +385,7 @@ export async function updateAnnonceAccompagne(
       disponibilites: data.disponibilites,
       date_debut: data.date_debut,
       infos_complementaires: data.infos_complementaires.trim() || null,
-      message_accompagnantes: data.message_accompagnantes.trim() || null,
+      message_accompagnants: data.message_accompagnants.trim() || null,
       updated_at: new Date().toISOString(),
     })
     .eq('id', annonceId)
@@ -418,7 +418,7 @@ export async function deleteAnnonceAccompagnante(
     .from('annonces_accompagnantes')
     .delete()
     .eq('id', annonceId)
-    .eq('accompagnante_id', profile.id)
+    .eq('accompagnant_id', profile.id)
 
   if (error) {
     return { error: 'Erreur lors de la suppression.' }

@@ -5,7 +5,7 @@ import { getUnreadCount } from '@/lib/unread-count'
 import { getSubscriptionStatus } from '@/lib/subscription-helpers'
 import { AccompagneSubscriptionBanner } from '@/components/accompagne/subscription-banner'
 import { AccompagneDashboardHeader } from '@/components/layout/accompagne-dashboard-header'
-import { DashboardPortrait } from '@/components/accompagnante/dashboard-portrait'
+import { DashboardPortrait } from '@/components/accompagnant/dashboard-portrait'
 import { LogoutButton } from '@/components/auth/logout-button'
 
 export default async function AccompagneDashboard() {

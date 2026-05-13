@@ -29,7 +29,7 @@ export async function getUnreadCount(userId: string): Promise<number> {
     const { data } = await supabase
       .from('conversations')
       .select('id')
-      .eq('accompagnante_id', auxProfile.id)
+      .eq('accompagnant_id', auxProfile.id)
     for (const c of data || []) conversationIds.push(c.id)
   }
 
