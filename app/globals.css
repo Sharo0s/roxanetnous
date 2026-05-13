@@ -2,7 +2,7 @@
 
 @theme {
   --color-accent: #F4C8A3;
-  --color-kraft: #d3a387;
+  --color-kraft: #8e5b35;
   --focus-ring: oklch(0.4 0.15 30);
   --color-focus-ring: var(--focus-ring);
   --font-sans: var(--font-body);

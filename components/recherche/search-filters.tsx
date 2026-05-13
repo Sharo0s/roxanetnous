@@ -147,7 +147,7 @@ export function SearchFilters({ currentVille, currentSpecialite, currentExperien
             onClick={() => setSpecOpen(!specOpen)}
             className="w-full rounded-lg border border-gray-400 bg-white px-3 py-2 text-sm text-left focus:outline-none focus:ring-2 focus:ring-black flex items-center justify-between"
           >
-            <span className={specialites.length === 0 ? 'text-gray-400' : 'text-gray-900 truncate'}>
+            <span className={specialites.length === 0 ? 'text-gray-500' : 'text-gray-900 truncate'}>
               {specialites.length === 0
                 ? 'Toutes'
                 : specialites.length === 1
