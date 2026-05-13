@@ -136,12 +136,6 @@ export function RegisterForm() {
     setStep('email')
   }
 
-  function skipParrainage() {
-    setParrainageCode('')
-    setParrainageState({ status: 'idle' })
-    setStep('email')
-  }
-
   function submitEmail(e: React.FormEvent) {
     e.preventDefault()
     if (!email.trim()) return
@@ -343,26 +337,17 @@ export function RegisterForm() {
             </div>
 
             {isCurrent('parrainage') && (
-              <div className="space-y-3">
-                <Button
-                  type="submit"
-                  className="w-full"
-                  disabled={
-                    parrainageCode.trim().length > 0 &&
-                    (parrainageState.status === 'invalid' ||
-                      parrainageState.status === 'checking')
-                  }
-                >
-                  Continuer
-                </Button>
-                <button
-                  type="button"
-                  onClick={skipParrainage}
-                  className="block w-full text-center text-sm text-gray-600 underline underline-offset-2 hover:text-black focus:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded"
-                >
-                  Je n&apos;ai pas de code de parrainage
-                </button>
-              </div>
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={
+                  parrainageCode.trim().length > 0 &&
+                  (parrainageState.status === 'invalid' ||
+                    parrainageState.status === 'checking')
+                }
+              >
+                Continuer
+              </Button>
             )}
           </form>
         )}
