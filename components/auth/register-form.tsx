@@ -209,8 +209,11 @@ export function RegisterForm({ departementsOuverts }: RegisterFormProps = {}) {
             Un email de confirmation a été envoyé à :
           </p>
           <p className="font-medium text-black mb-6">{email}</p>
-          <p className="text-sm text-black/50 mb-6">
+          <p className="text-sm text-black/50 mb-3">
             Cliquez sur le lien dans le mail pour activer votre compte, puis connectez-vous.
+          </p>
+          <p className="text-sm text-black mb-6 p-3 rounded-lg border border-kraft bg-accent/30">
+            Vous ne le voyez pas&nbsp;? Pensez à vérifier vos spams ou courrier indésirable.
           </p>
           <Link
             href="/login"
