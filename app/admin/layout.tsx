@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { LogoutButton } from '@/components/auth/logout-button'
 import { AdminNav } from '@/components/admin/admin-nav'
+import { getAdminPendingCounts } from '@/lib/admin/pending-counts'
 import Link from 'next/link'
 
 export default async function AdminLayout({
@@ -21,6 +22,8 @@ export default async function AdminLayout({
     .single()
 
   if (!userData || userData.role !== 'admin') redirect('/')
+
+  const pendingCounts = await getAdminPendingCounts(user.id)
 
   return (
     <main id="main-content" tabIndex={-1} className="min-h-screen bg-[#fefaf8] focus:outline-none">
@@ -44,7 +47,7 @@ export default async function AdminLayout({
       </header>
 
       {/* NAV (composant client pour gerer le state actif via usePathname) */}
-      <AdminNav />
+      <AdminNav badges={pendingCounts} />
 
       <div className="relative z-10">{children}</div>
     </main>
