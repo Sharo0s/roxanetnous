@@ -63,7 +63,7 @@ export async function getOrCreateConversation(
   // Story 3.6 : paywall sur ouverture conversation (apres check existence pour preserver idempotence D3)
   const subscribed = await hasActiveSubscription(user.id)
   if (!subscribed) {
-    return { error: 'Abonnement requis pour contacter une accompagnante.' }
+    return { error: 'Abonnement requis pour contacter un accompagnant.' }
   }
 
   // Creer la conversation
@@ -98,7 +98,7 @@ export async function getOrCreateConversationAsAccompagnante(
     .single()
 
   if (!userData || userData.role !== 'accompagnante') {
-    return { error: 'Seuls les accompagnantes peuvent utiliser cette fonction.' }
+    return { error: 'Seuls les accompagnants peuvent utiliser cette fonction.' }
   }
 
   const { data: auxProfile } = await supabase
@@ -108,7 +108,7 @@ export async function getOrCreateConversationAsAccompagnante(
     .single()
 
   if (!auxProfile) {
-    return { error: 'Profil accompagnante introuvable.' }
+    return { error: 'Profil accompagnant introuvable.' }
   }
 
   // Verifier si une conversation existe deja

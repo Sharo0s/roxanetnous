@@ -24,7 +24,7 @@ export default function CGUPage() {
             <p>
               Les présentes conditions générales d&apos;utilisation (CGU) régissent l&apos;accès et
               l&apos;utilisation de la plateforme roxanetnous, un service de mise en relation entre
-              accompagnantes de vie et accompagnés.
+              accompagnants de vie et accompagnés.
             </p>
           </section>
 
@@ -42,11 +42,11 @@ export default function CGUPage() {
             <p>Deux types de comptes sont disponibles :</p>
             <ul className="list-disc pl-5 mt-2 space-y-1">
               <li>
-                <strong>Accompagnante de vie</strong> : professionnel proposant ses services d&apos;aide à
+                <strong>Accompagnant de vie</strong> : professionnel proposant ses services d&apos;aide à
                 domicile. Son profil est soumis à une validation manuelle (diplôme, identité).
               </li>
               <li>
-                <strong>Accompagné</strong> : personne recherchant une accompagnante de vie pour
+                <strong>Accompagné</strong> : personne recherchant un accompagnant de vie pour
                 elle-même ou pour un proche.
               </li>
             </ul>
@@ -69,7 +69,7 @@ export default function CGUPage() {
               <li>Ne pas usurper l&apos;identité d&apos;un tiers</li>
               <li>Respecter les autres utilisateurs dans les échanges</li>
               <li>Ne pas utiliser la plateforme à des fins contraires à son objet</li>
-              <li>Fournir des justificatifs authentiques (pour les accompagnantes)</li>
+              <li>Fournir des justificatifs authentiques (pour les accompagnants)</li>
             </ul>
           </section>
 
@@ -78,7 +78,7 @@ export default function CGUPage() {
             <p>
               roxanetnous est un service de mise en relation. La plateforme ne se substitue pas
               à un employeur et n&apos;est pas partie prenante dans la relation contractuelle entre
-              l&apos;accompagnante et l&apos;accompagné. Chaque partie est responsable de ses obligations
+              l&apos;accompagnant et l&apos;accompagné. Chaque partie est responsable de ses obligations
               légales (contrat de travail, déclarations, etc.).
             </p>
           </section>

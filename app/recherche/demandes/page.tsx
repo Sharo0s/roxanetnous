@@ -108,7 +108,7 @@ export default async function DemandesAccompagnesPage({
             Demandes des accompagnés
           </h1>
           <p className="mt-3 text-sm text-gray-600">
-            Découvrez les personnes qui cherchent une accompagnante près de chez vous.
+            Découvrez les personnes qui cherchent un accompagnant près de chez vous.
           </p>
         </header>
 

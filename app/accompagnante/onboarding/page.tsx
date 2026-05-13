@@ -38,7 +38,7 @@ export default async function OnboardingPage() {
       tabIndex={-1}
       className="min-h-screen bg-[#fefaf8] focus:outline-none"
     >
-      <h1 className="sr-only">Onboarding accompagnante</h1>
+      <h1 className="sr-only">Onboarding accompagnant</h1>
       <OnboardingClient
         parrainage={{
           isFilleule: !!marraineId,

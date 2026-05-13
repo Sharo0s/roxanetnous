@@ -123,7 +123,7 @@ export function NouvelleAnnonceAccompagneForm({ departementsOuverts }: Props) {
                   type="text"
                   value={titre}
                   onChange={(e) => setTitre(e.target.value)}
-                  placeholder="Ex: Recherche accompagnante de vie pour personne âgée"
+                  placeholder="Ex: Recherche accompagnant de vie pour personne âgée"
                   className="w-full rounded-lg border border-gray-400 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
                 />
               </div>
@@ -367,12 +367,12 @@ export function NouvelleAnnonceAccompagneForm({ departementsOuverts }: Props) {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Message aux accompagnantes
+                  Message aux accompagnants
                 </label>
                 <textarea
                   value={messageAccompagnantes}
                   onChange={(e) => setMessageAccompagnantes(e.target.value)}
-                  placeholder="Un mot personnel pour les accompagnantes qui verront votre annonce..."
+                  placeholder="Un mot personnel pour les accompagnants qui verront votre annonce..."
                   rows={3}
                   className="w-full rounded-lg border border-gray-400 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black resize-none"
                 />

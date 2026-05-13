@@ -388,7 +388,7 @@ export default async function RecherchePage({
 
         {matchResults.length > 0 && (
           <div className="border-t border-gray-300 mt-8 mb-6 pt-6">
-            <h2 className="text-lg font-semibold text-gray-900">Tous les accompagnantes</h2>
+            <h2 className="text-lg font-semibold text-gray-900">Tous les accompagnants</h2>
           </div>
         )}
 
@@ -397,7 +397,7 @@ export default async function RecherchePage({
             <p className="text-gray-500">{(params.ville || params.specialite || params.experience) ? 'Aucun résultat pour votre recherche.' : 'Lancez votre recherche.'}</p>
             {(params.ville || params.specialite || params.experience) && (
               <Link href="/recherche" className="text-sm text-black underline mt-2 inline-block">
-                Voir tous les accompagnantes
+                Voir tous les accompagnants
               </Link>
             )}
           </div>

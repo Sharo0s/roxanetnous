@@ -89,7 +89,7 @@ export default async function AccompagnanteParrainagePage() {
           <div className="text-xs uppercase tracking-[0.18em] text-kraft mb-2">Mon espace</div>
           <h1 className="text-3xl md:text-4xl italic text-gray-900 leading-tight">Mon parrainage</h1>
           <p className="mt-3 text-sm text-gray-600">
-            Partagez votre code, accueillez de nouvelles accompagnantes.
+            Partagez votre code, accueillez de nouveaux accompagnants.
           </p>
         </header>
 

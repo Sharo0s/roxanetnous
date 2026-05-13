@@ -149,7 +149,7 @@ export function InfiniteAnnoncesGrid({ annonces, badgesMap, userId, favorisIds =
 
       {!hasMore && annonces.length > PER_PAGE && (
         <p className="text-center text-sm text-gray-400 py-6">
-          {annonces.length} accompagnantes affichées
+          {annonces.length} accompagnants affichés
         </p>
       )}
     </>

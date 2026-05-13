@@ -97,7 +97,7 @@ export function NotificationsOuvertureForm({ initial, departements }: Props) {
             className="flex h-10 w-full rounded-lg border border-gray-400 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-focus-ring"
           >
             <option value="" disabled>Choisir...</option>
-            <option value="accompagnante">Accompagnante de vie (auxiliaire)</option>
+            <option value="accompagnante">Accompagnant de vie (auxiliaire)</option>
             <option value="accompagne">Accompagne ou proche aidant</option>
             <option value="visiteur">Visiteur curieux</option>
           </select>

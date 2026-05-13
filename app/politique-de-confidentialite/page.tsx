@@ -33,7 +33,7 @@ export default function PolitiqueConfidentialitePage() {
             <ul className="list-disc pl-5 mt-2 space-y-1">
               <li>Données d&apos;identification : nom, prénom, adresse email, téléphone</li>
               <li>Données de profil : ville, code postal, adresse, spécialités, diplômes, expérience</li>
-              <li>Documents justificatifs : pièce d&apos;identité, diplôme (pour les accompagnantes)</li>
+              <li>Documents justificatifs : pièce d&apos;identité, diplôme (pour les accompagnants)</li>
               <li>Données d&apos;utilisation : annonces, messages, favoris</li>
               <li>Données de paiement : gérées par Stripe (nous ne stockons pas les numéros de carte)</li>
               <li>Données de parrainage (accompagnants) : code de parrainage, identifiant du parrain et du filleul, adresse IP au moment de l&apos;inscription, et empreinte technique de la carte de paiement (fingerprint Stripe, sans numéro de carte ; le paiement est limité aux cartes bancaires pour rendre cette détection effective) — conservés à des fins d&apos;audit et de prévention de la fraude. Une détection automatique compare l&apos;email, l&apos;adresse IP, l&apos;adresse postale et l&apos;empreinte de la carte entre parrain et filleul pour identifier les parrainages suspects ; aucune décision pénalisante n&apos;est prise automatiquement sur la seule base de l&apos;adresse IP, qui ne sert qu&apos;à signaler le cas à un administrateur pour revue manuelle.</li>
@@ -44,8 +44,8 @@ export default function PolitiqueConfidentialitePage() {
             <h2 className="text-lg font-semibold text-black mb-2">Finalités du traitement</h2>
             <ul className="list-disc pl-5 space-y-1">
               <li>Création et gestion de votre compte utilisateur</li>
-              <li>Mise en relation entre accompagnantes de vie et accompagnés</li>
-              <li>Vérification des qualifications des accompagnantes</li>
+              <li>Mise en relation entre accompagnants de vie et accompagnés</li>
+              <li>Vérification des qualifications des accompagnants</li>
               <li>Gestion des abonnements et paiements</li>
               <li>Envoi de notifications liées au service (messages, validation de profil)</li>
               <li>Modération et sécurité de la plateforme</li>
@@ -131,7 +131,7 @@ export default function PolitiqueConfidentialitePage() {
             </p>
             <p className="mt-2">
               Sur les pages permettant de configurer une zone géographique (création ou
-              modification d&apos;un profil accompagnante, onboarding initial accompagnante,
+              modification d&apos;un profil accompagnant, onboarding initial accompagnant,
               création d&apos;une annonce — toutes accessibles uniquement après connexion),
               une carte interactive charge des tuiles cartographiques depuis OpenStreetMap
               Foundation, fondation à but non lucratif

@@ -42,7 +42,7 @@ export async function notifyFavoriAccompagnes(accompagnanteUserId: string) {
     .eq('id', accompagnanteUserId)
     .single()
 
-  const auxFirstName = auxUser?.first_name || 'Une accompagnante'
+  const auxFirstName = auxUser?.first_name || 'Un accompagnant'
 
   // Recuperer les infos des accompagnes et envoyer les mails
   const { data: accompagnes } = await supabase

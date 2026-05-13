@@ -22,7 +22,7 @@ export async function sendWelcomeEmail(params: {
     ? `${BASE_URL}/accompagnante/dashboard`
     : `${BASE_URL}/accompagne/dashboard`
 
-  const roleLabel = params.role === 'accompagnante' ? 'accompagnante de vie' : 'accompagné'
+  const roleLabel = params.role === 'accompagnante' ? 'accompagnant de vie' : 'accompagné'
 
   try {
     await resend.emails.send({
@@ -33,7 +33,7 @@ export async function sendWelcomeEmail(params: {
         <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
           <h1 style="color: #000;">Bienvenue ${escapeHtml(params.firstName)},</h1>
           <p>Votre compte ${roleLabel} a été créé avec succès sur roxanetnous.</p>
-          ${params.role === 'accompagnante' ? '<p>Pour apparaître sur la plateforme, complétez votre profil professionnel puis soumettez-le à validation.</p>' : '<p>Vous pouvez dès maintenant rechercher une accompagnante de vie ou publier une annonce.</p>'}
+          ${params.role === 'accompagnante' ? '<p>Pour apparaître sur la plateforme, complétez votre profil professionnel puis soumettez-le à validation.</p>' : '<p>Vous pouvez dès maintenant rechercher un accompagnant de vie ou publier une annonce.</p>'}
           <p style="margin-top: 24px;">
             <a href="${dashboardUrl}" style="background: #000; color: #fff; padding: 12px 24px; text-decoration: none; display: inline-block;">
               Accéder à mon espace
@@ -104,8 +104,8 @@ export async function sendValidationResultEmail(params: {
   }
 
   const messages: Record<string, string> = {
-    valide: 'Votre profil accompagnante a été validé par notre équipe. Vous pouvez désormais publier des annonces et être visible dans les recherches.',
-    refuse: `Votre profil accompagnante a été refusé.${params.motif ? ` Motif : ${escapeHtml(params.motif)}` : ''} Vous pouvez mettre à jour votre profil et le soumettre à nouveau.`,
+    valide: 'Votre profil accompagnant a été validé par notre équipe. Vous pouvez désormais publier des annonces et être visible dans les recherches.',
+    refuse: `Votre profil accompagnant a été refusé.${params.motif ? ` Motif : ${escapeHtml(params.motif)}` : ''} Vous pouvez mettre à jour votre profil et le soumettre à nouveau.`,
     a_completer: `Des informations complémentaires sont nécessaires pour valider votre profil.${params.motif ? ` Détails : ${escapeHtml(params.motif)}` : ''} Veuillez mettre à jour votre profil.`,
   }
 
@@ -383,11 +383,11 @@ export async function sendMatchingNotificationEmail(params: {
   const isForAccompagnante = params.type === 'nouvelle_annonce_accompagne'
   const subject = isForAccompagnante
     ? 'Une nouvelle annonce correspond à votre profil'
-    : 'Une nouvelle accompagnante correspond à vos critères'
+    : 'Un nouvel accompagnant correspond à vos critères'
 
   const description = isForAccompagnante
     ? "Une nouvelle annonce d'accompagné correspond à votre profil."
-    : 'Une nouvelle accompagnante de vie correspond aux critères de votre annonce.'
+    : 'Un nouvel accompagnant de vie correspond aux critères de votre annonce.'
 
   const linkUrl = isForAccompagnante
     ? `${BASE_URL}/recherche`
@@ -553,15 +553,15 @@ export async function sendParrainageBienvenueMarraine(params: {
       html: `
         <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
           <h1 style="color: #000;">Votre profil est validé, ${escapeHtml(params.firstName)}</h1>
-          <p>Félicitations, votre profil accompagnante est maintenant validé sur roxanetnous.</p>
-          <p>Pour vous remercier de votre engagement, nous vous offrons un programme de parrainage : invitez d'autres accompagnantes à rejoindre la plateforme.</p>
+          <p>Félicitations, votre profil accompagnant est maintenant validé sur roxanetnous.</p>
+          <p>Pour vous remercier de votre engagement, nous vous offrons un programme de parrainage : invitez d'autres accompagnants à rejoindre la plateforme.</p>
           <div style="margin: 24px 0; padding: 24px; background: #f5f5f5; border-radius: 8px; text-align: center;">
             <p style="margin: 0 0 8px 0; color: #666; font-size: 14px;">Votre code de parrainage</p>
             <p style="margin: 0; font-size: 32px; font-weight: bold; letter-spacing: 4px; color: #000;">${escapeHtml(params.code)}</p>
           </div>
           <p>Comment ça marche :</p>
           <ul>
-            <li>Partagez ce code avec une accompagnante de votre réseau professionnel.</li>
+            <li>Partagez ce code avec un accompagnant de votre réseau professionnel.</li>
             <li>À son inscription, elle s'appuie sur votre garantie : pas de vérification de documents ni de visio, et son profil est activé dès la souscription.</li>
             <li>5 parrainages confirmés vous offrent <strong>6 mois d'abonnement gratuit</strong>.</li>
           </ul>
@@ -613,7 +613,7 @@ export async function sendParrainageFilleuleConfirmation(params: {
       html: `
         <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
           <h1 style="color: #000;">Bienvenue ${escapeHtml(params.firstName)}</h1>
-          <p>Grâce au parrainage de ${marraineLabel}, votre profil accompagnante est validé automatiquement sur roxanetnous.</p>
+          <p>Grâce au parrainage de ${marraineLabel}, votre profil accompagnant est validé automatiquement sur roxanetnous.</p>
           <p>Vous pouvez dès maintenant publier vos annonces, répondre aux demandes des accompagnés et gérer votre planning.</p>
           <p style="margin-top: 24px;">
             <a href="${dashboardUrl}" style="background: #000; color: #fff; padding: 12px 24px; text-decoration: none; display: inline-block;">
@@ -665,8 +665,8 @@ export async function sendParrainageRecompense(params: {
   // (6/12 = 50% off au lieu de 6 mois free). On adapte le texte pour ne pas
   // mentir à la marraine.
   const recompenseText = params.planType === 'annuel'
-    ? `5 accompagnantes que vous avez parrainées sont actives depuis plus de 30 jours. Comme promis, votre prochaine facturation annuelle bénéficiera d'une réduction équivalente à 6 mois d'abonnement (50 %), automatiquement appliquée sur votre compte.`
-    : `5 accompagnantes que vous avez parrainées sont actives depuis plus de 30 jours. Comme promis, vos 6 prochains prélèvements mensuels seront offerts, automatiquement appliqués sur votre compte.`
+    ? `5 accompagnants que vous avez parrainés sont actifs depuis plus de 30 jours. Comme promis, votre prochaine facturation annuelle bénéficiera d'une réduction équivalente à 6 mois d'abonnement (50 %), automatiquement appliquée sur votre compte.`
+    : `5 accompagnants que vous avez parrainés sont actifs depuis plus de 30 jours. Comme promis, vos 6 prochains prélèvements mensuels seront offerts, automatiquement appliqués sur votre compte.`
 
   try {
     await resend.emails.send({
@@ -910,7 +910,7 @@ export async function sendRelanceOnboardingEmail(params: {
       html: `
         <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
           <h1 style="color: #000;">Bonjour ${escapeHtml(params.firstName)},</h1>
-          <p>Vous vous etes inscrite sur roxanetnous comme accompagnante de vie, mais votre profil n'est pas encore finalise. Sans profil complet, vous ne pouvez pas etre soumise a validation, ni apparaitre dans les recherches.</p>
+          <p>Vous vous etes inscrit·e sur roxanetnous comme accompagnant de vie, mais votre profil n'est pas encore finalise. Sans profil complet, vous ne pouvez pas etre soumis·e a validation, ni apparaitre dans les recherches.</p>
           ${missingListHtml}
           <p style="margin-top: 24px;">
             <a href="${dashboardUrl}" style="background: #000; color: #fff; padding: 12px 24px; text-decoration: none; display: inline-block;">

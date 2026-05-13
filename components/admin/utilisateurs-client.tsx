@@ -40,7 +40,7 @@ const VALIDATION_LABELS: Record<string, string> = {
 }
 
 const ROLE_LABELS: Record<string, string> = {
-  accompagnante: 'Accompagnante',
+  accompagnante: 'Accompagnant',
   accompagne: 'Accompagné',
   admin: 'Administrateur',
 }

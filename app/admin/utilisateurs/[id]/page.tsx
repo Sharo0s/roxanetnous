@@ -8,7 +8,7 @@ import { CancelSubscriptionButton } from '@/components/admin/cancel-subscription
 import { getSubscriptionStatus } from '@/lib/subscription-helpers'
 
 const ROLE_LABELS: Record<string, string> = {
-  accompagnante: 'Accompagnante',
+  accompagnante: 'Accompagnant',
   accompagne: 'Accompagné',
   admin: 'Administrateur',
 }

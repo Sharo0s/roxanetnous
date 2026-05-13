@@ -137,7 +137,7 @@ export function ParrainageView({ code, baseUrl, compteur, totalRecompenses, fill
           </button>
         </div>
         <p className="text-sm text-gray-600 mt-6 max-w-md mx-auto leading-relaxed">
-          Partagez ce code ou ce lien avec une accompagnante de votre réseau.
+          Partagez ce code ou ce lien avec un accompagnant de votre réseau.
           Vous vous portez garant : il évite la visio et publie ses annonces dès la souscription.
         </p>
       </div>
