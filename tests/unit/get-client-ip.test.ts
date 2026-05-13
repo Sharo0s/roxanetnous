@@ -5,7 +5,7 @@
 // U7 (empty-string normalise en absence d'IP, P4 anti-DoS bucket vide).
 
 import { describe, it, expect } from 'vitest'
-import { getClientIp, getClientIpOrUnknown, type RequestHeaders } from '@/lib/get-client-ip'
+import { getClientIp, getClientIpOrUnknown, normalizeIp, type RequestHeaders } from '@/lib/get-client-ip'
 
 function makeHeaders(entries: Record<string, string>): RequestHeaders {
   return {
@@ -56,5 +56,47 @@ describe('getClientIpOrUnknown', () => {
   it('U7b : x-real-ip vide retourne "unknown" (pas de bucket notifications-ouverture: vide)', () => {
     const h = makeHeaders({ 'x-real-ip': '' })
     expect(getClientIpOrUnknown(h)).toBe('unknown')
+  })
+})
+
+// Story 5.C.3 (AI-4.15) : tests normalizeIp pour la conversion
+// IPv4-mapped IPv6 vers IPv4 canonique. Couvre 4 cas requis par le tech-spec.
+describe('normalizeIp', () => {
+  it('N1 : IPv4-mapped IPv6 -> IPv4 canonique', () => {
+    expect(normalizeIp('::ffff:1.2.3.4')).toBe('1.2.3.4')
+    expect(normalizeIp('::ffff:192.168.1.1')).toBe('192.168.1.1')
+    expect(normalizeIp('::ffff:255.255.255.255')).toBe('255.255.255.255')
+  })
+
+  it('N2 : vraie IPv6 -> conservee telle quelle', () => {
+    expect(normalizeIp('2001:db8::1')).toBe('2001:db8::1')
+    expect(normalizeIp('::1')).toBe('::1')
+    expect(normalizeIp('fe80::1234:5678:90ab:cdef')).toBe('fe80::1234:5678:90ab:cdef')
+  })
+
+  it('N3 : IPv4 deja canonique -> conservee telle quelle', () => {
+    expect(normalizeIp('1.2.3.4')).toBe('1.2.3.4')
+    expect(normalizeIp('192.168.1.1')).toBe('192.168.1.1')
+  })
+
+  it('N4 : valeur invalide / null / vide -> null', () => {
+    expect(normalizeIp(null)).toBeNull()
+    expect(normalizeIp(undefined)).toBeNull()
+    expect(normalizeIp('')).toBeNull()
+  })
+
+  it('N5 : IPv4-mapped avec octets hors plage -> conservee (pas de fix tacite)', () => {
+    expect(normalizeIp('::ffff:999.999.999.999')).toBe('::ffff:999.999.999.999')
+    expect(normalizeIp('::ffff:1.2.3.256')).toBe('::ffff:1.2.3.256')
+  })
+
+  it('N6 : faux positif IPv4-mapped (prefixe sans IPv4 valide derriere) -> conservee', () => {
+    expect(normalizeIp('::ffff:foo')).toBe('::ffff:foo')
+    expect(normalizeIp('::ffff:1.2.3')).toBe('::ffff:1.2.3')
+  })
+
+  it('N7 : integration getClientIp normalise IPv4-mapped', () => {
+    const h = makeHeaders({ 'x-real-ip': '::ffff:1.2.3.4' })
+    expect(getClientIp(h)).toBe('1.2.3.4')
   })
 })

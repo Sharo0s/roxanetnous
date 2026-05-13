@@ -104,6 +104,7 @@ source: product-brief-roxanetnous-2026-02-09.md
 - **Hosting :** Vercel
 - **CI/CD :** Automatique (push → deploy)
 - **Edge :** Edge Functions pour performance
+- **Env vars management :** liste autoritaire dans `scripts/check-required-env.mjs` (REQUIRED + OPTIONAL_ON_PREVIEW). Push semi-automatise vers Vercel Production + Preview via `npm run env:push:apply` (Story 5.C.4, AI-4.10) — prompt interactif pour chaque variable manquante, validation `vercel env ls` avant push.
 
 ### Services Tiers
 - **OCR :** Tesseract.js ou Google Vision API

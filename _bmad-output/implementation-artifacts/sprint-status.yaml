@@ -192,9 +192,15 @@ development_status:
   # 5 types locaux ajoutes pour relations Supabase 1-1, scripts/check-as-any-global.mjs
   # cree + integre vercel.json buildCommand. tsc exit 0, lint:a11y-check 155 baseline.
   5-c-1-resorption-as-any-hors-admin: done
-  5-c-2-suppression-endpoint-test-sentry: backlog
-  5-c-3-normalisation-ipv6-mapped-ipv4: backlog
-  5-c-4-script-vercel-env-add-automatise: backlog
+  # 5.C.2 livre 2026-05-13 : suppression app/api/test-sentry/route.ts. Zero ref orpheline code.
+  5-c-2-suppression-endpoint-test-sentry: done
+  # 5.C.3 livre 2026-05-13 : normalizeIp dans lib/get-client-ip.ts (cas N1-N7),
+  # integre dans resolve() helper. Test:unit 25/25 verts.
+  5-c-3-normalisation-ipv6-mapped-ipv4: done
+  # 5.C.4 livre 2026-05-13 : scripts/vercel-env-push.mjs (dry-run + --apply mode interactif).
+  # Lit liste autoritaire depuis check-required-env.mjs. npm run env:push / env:push:apply.
+  # Doc archi section Stack Technique > Deploiement.
+  5-c-4-script-vercel-env-add-automatise: done
 
   # Mini-epic 5.D - Audits post-stabilisation 30j (2 stories, declencheur ~2026-06-08)
   5-d-1-audit-suppression-cron-notify-waitlist-retry: backlog
