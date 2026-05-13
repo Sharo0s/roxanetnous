@@ -115,20 +115,22 @@ export default async function AccompagneDashboard() {
               ) : (
                 <Link
                   href="/accompagne/profil"
-                  className="inline-flex items-center gap-1.5 text-sm text-gray-700 hover:text-black underline underline-offset-2"
+                  className="inline-flex items-center gap-1.5 text-sm font-medium text-black bg-accent/30 border border-kraft rounded-lg px-3 py-1.5 hover:bg-accent/50 transition"
                 >
-                  <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                  <svg className="w-3.5 h-3.5 flex-shrink-0 text-kraft" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M5.07 19h13.86c1.54 0 2.5-1.67 1.73-3L13.73 4a2 2 0 00-3.46 0L3.34 16c-.77 1.33.19 3 1.73 3z" />
                   </svg>
                   Renseignez votre ville pour des recommandations locales
                 </Link>
               )}
               {(!subscribed || profilIncomplet) && (
-                <p className="text-sm text-gray-600 mt-3 max-w-prose">
-                  {!subscribed
-                    ? 'Souscrivez pour accéder à la recherche et publier vos annonces.'
-                    : 'Encore quelques détails pour profiter pleinement de la plateforme.'}
-                </p>
+                <div className="mt-3 p-3 rounded-lg border border-kraft bg-accent/30 max-w-prose">
+                  <p className="text-sm text-black">
+                    {!subscribed
+                      ? 'Souscrivez pour accéder à la recherche et publier vos annonces.'
+                      : 'Encore quelques détails pour profiter pleinement de la plateforme.'}
+                  </p>
+                </div>
               )}
             </div>
           </div>

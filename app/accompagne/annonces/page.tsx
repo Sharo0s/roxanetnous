@@ -71,10 +71,10 @@ export default async function MesAnnoncesAccompagne() {
         </header>
 
         {!subscribed && (
-          <div className="bg-white rounded-2xl border border-kraft p-6 mb-6 flex flex-wrap items-center justify-between gap-4">
+          <div className="rounded-2xl border-2 border-kraft bg-accent/30 p-6 mb-6 flex flex-wrap items-center justify-between gap-4">
             <div className="flex-1 min-w-[240px]">
-              <h2 className="italic text-xl text-gray-900 mb-1">Abonnement requis</h2>
-              <p className="text-sm text-gray-600">Souscrivez un abonnement pour publier vos annonces.</p>
+              <h2 className="italic text-xl text-black mb-1">Abonnement requis</h2>
+              <p className="text-sm text-black">Souscrivez un abonnement pour publier vos annonces.</p>
             </div>
             <Link
               href="/accompagne/abonnement"

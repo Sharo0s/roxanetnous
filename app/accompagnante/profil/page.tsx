@@ -80,23 +80,23 @@ export default async function AccompagnanteProfilPage() {
           </div>
         )}
         {profile.validation_status === 'visio_a_planifier' && (
-          <div className="mb-6 p-4 rounded-xl border border-blue-200 bg-blue-50 text-sm">
-            <p className="font-medium text-blue-900 mb-1">Votre dossier a été revu.</p>
-            <p className="text-blue-900">
+          <div className="mb-6 p-4 rounded-xl border-2 border-kraft bg-accent/30 text-sm">
+            <p className="font-medium text-black mb-1">Votre dossier a été revu.</p>
+            <p className="text-black">
               Nous vous avons envoyé un email pour convenir d&apos;un créneau visio avec l&apos;équipe.
             </p>
           </div>
         )}
         {profile.validation_status === 'visio_realisee' && (
-          <div className="mb-6 p-4 rounded-xl border border-amber-200 bg-amber-50 text-sm">
-            <p className="font-medium text-amber-900">Visio réalisée — nous finalisons votre validation.</p>
+          <div className="mb-6 p-4 rounded-xl border-2 border-kraft bg-accent/30 text-sm">
+            <p className="font-medium text-black">Visio réalisée — nous finalisons votre validation.</p>
           </div>
         )}
         {profile.validation_status === 'a_completer' && (
-          <div className="mb-6 p-4 rounded-xl border border-blue-200 bg-blue-50 text-sm">
-            <p className="font-medium text-blue-900 mb-1">Complétez votre profil pour le soumettre à validation.</p>
+          <div className="mb-6 p-4 rounded-xl border-2 border-kraft bg-accent/30 text-sm">
+            <p className="font-medium text-black mb-1">Complétez votre profil pour le soumettre à validation.</p>
             {profile.refus_motif && (
-              <p className="text-blue-800">Détails : {profile.refus_motif}</p>
+              <p className="text-black/80">Détails : {profile.refus_motif}</p>
             )}
           </div>
         )}

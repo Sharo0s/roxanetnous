@@ -288,11 +288,11 @@ export default async function AccompagnanteDashboard() {
         ) : (
           <div className="space-y-4">
             {isFilleule && profile?.validation_status === 'en_attente' && !subscribed && (
-              <div className="bg-white rounded-xl border border-accent p-6">
+              <div className="rounded-xl border-2 border-kraft bg-accent/30 p-6">
                 <h2 className="font-semibold text-lg text-black mb-2">
                   Plus qu&apos;une étape : souscrivez votre abonnement
                 </h2>
-                <p className="text-gray-600 mb-4">
+                <p className="text-black mb-4">
                   Votre parrain se porte garant : pas de visio, pas de
                   vérification de documents. Souscrivez à un abonnement et
                   vous pourrez publier votre première annonce.
@@ -306,26 +306,26 @@ export default async function AccompagnanteDashboard() {
               </div>
             )}
             {profile?.validation_status === 'visio_a_planifier' && (
-              <div className="p-4 rounded-xl border border-blue-200 bg-blue-50 text-sm">
-                <p className="font-medium text-blue-900">
+              <div className="p-4 rounded-xl border-2 border-kraft bg-accent/30 text-sm">
+                <p className="font-medium text-black">
                   Votre dossier a été revu. Nous vous avons envoyé un email pour convenir d&apos;un créneau visio avec l&apos;équipe.
                 </p>
               </div>
             )}
             {profile?.validation_status === 'visio_realisee' && (
-              <div className="p-4 rounded-xl border border-amber-200 bg-amber-50 text-sm">
-                <p className="font-medium text-amber-900">
+              <div className="p-4 rounded-xl border-2 border-kraft bg-accent/30 text-sm">
+                <p className="font-medium text-black">
                   Visio réalisée — nous finalisons votre validation.
                 </p>
               </div>
             )}
             {profile?.validation_status === 'a_completer' && (
-              <div className="p-4 rounded-xl border border-blue-200 bg-blue-50 text-sm">
-                <p className="font-medium text-blue-900">
+              <div className="p-4 rounded-xl border-2 border-kraft bg-accent/30 text-sm">
+                <p className="font-medium text-black">
                   Bienvenue ! Complétez votre profil pour le soumettre à validation.
                 </p>
                 {profile.refus_motif && (
-                  <p className="text-blue-800 mt-1">{profile.refus_motif}</p>
+                  <p className="text-black/80 mt-1">{profile.refus_motif}</p>
                 )}
                 <Link
                   href="/accompagnante/onboarding"
