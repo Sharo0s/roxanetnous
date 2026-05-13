@@ -123,12 +123,10 @@ export default async function AccompagneDashboard() {
                   Renseignez votre ville pour des recommandations locales
                 </Link>
               )}
-              {(!subscribed || profilIncomplet) && (
+              {subscribed && profilIncomplet && (
                 <div className="mt-3 p-3 rounded-lg border border-kraft bg-accent/30 max-w-prose">
                   <p className="text-sm text-black">
-                    {!subscribed
-                      ? 'Souscrivez pour accéder à la recherche et publier vos annonces.'
-                      : 'Encore quelques détails pour profiter pleinement de la plateforme.'}
+                    Encore quelques détails pour profiter pleinement de la plateforme.
                   </p>
                 </div>
               )}
