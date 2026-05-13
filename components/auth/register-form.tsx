@@ -343,7 +343,7 @@ export function RegisterForm() {
             </div>
 
             {isCurrent('parrainage') && (
-              <div className="flex flex-col sm:flex-row gap-2">
+              <div className="space-y-3">
                 <Button
                   type="submit"
                   className="w-full"
@@ -355,14 +355,13 @@ export function RegisterForm() {
                 >
                   Continuer
                 </Button>
-                <Button
+                <button
                   type="button"
-                  variant="outline"
-                  className="w-full"
                   onClick={skipParrainage}
+                  className="block w-full text-center text-sm text-gray-600 underline underline-offset-2 hover:text-black focus:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded"
                 >
-                  Continuer sans code
-                </Button>
+                  Je n&apos;ai pas de code de parrainage
+                </button>
               </div>
             )}
           </form>
