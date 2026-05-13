@@ -116,21 +116,34 @@ export async function signup(formData: FormData): Promise<AuthResult> {
   // handle_new_user). Géocodage best-effort : si l'API tombe, on stocke quand
   // même ville+CP pour ne pas bloquer l'inscription ; le matching tombera sur
   // le fallback ville-exacte/département en attendant.
-  const geo = await geocodeAddress(ville, codePostal)
-  const profileTable = role === 'accompagnante' ? 'accompagnantes_profiles' : 'accompagnes_profiles'
-  const { error: profileError } = await supabaseAdmin
-    .from(profileTable)
-    .update({
-      ville,
-      code_postal: codePostal,
-      latitude: geo?.lat ?? null,
-      longitude: geo?.lng ?? null,
-    })
-    .eq('user_id', authData.user.id)
-
-  if (profileError) {
-    console.error('Erreur update profil avec localisation:', profileError.message)
-    // Non bloquant : l'utilisateur pourra compléter dans /profil si besoin.
+  // Note : seule la table accompagnantes_profiles a latitude/longitude
+  // (pour le matching Haversine côté offre). Les accompagnés ne stockent
+  // que ville+code_postal.
+  if (role === 'accompagnante') {
+    const geo = await geocodeAddress(ville, codePostal)
+    const { error: profileError } = await supabaseAdmin
+      .from('accompagnantes_profiles')
+      .update({
+        ville,
+        code_postal: codePostal,
+        latitude: geo?.lat ?? null,
+        longitude: geo?.lng ?? null,
+      })
+      .eq('user_id', authData.user.id)
+    if (profileError) {
+      console.error('Erreur update accompagnantes_profiles avec localisation:', profileError.message)
+    }
+  } else {
+    const { error: profileError } = await supabaseAdmin
+      .from('accompagnes_profiles')
+      .update({
+        ville,
+        code_postal: codePostal,
+      })
+      .eq('user_id', authData.user.id)
+    if (profileError) {
+      console.error('Erreur update accompagnes_profiles avec localisation:', profileError.message)
+    }
   }
 
   // Parrainage (accompagnante uniquement) : si un code valide est fourni,
