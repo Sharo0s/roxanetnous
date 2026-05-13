@@ -163,13 +163,11 @@ development_status:
 
   # ==========================================================================
   # Epic 5 : Coherence editoriale + hardening continu post-Bretagne
-  # Cadre formellement 2026-05-13 via bmad-create-epics-and-stories (epic-5.md).
-  # 5 mini-epics, 16 stories. Pre-requis bloquants : AI-4.1 audit Sentry 7j
-  # (ETA ~2026-05-15), AI-4.2 stabilisation GHA 7j (ETA ~2026-05-14),
-  # AI-4.3 toggle admin premier dpt Bretagne. Sprint non demarre tant que
-  # ces 3 conditions ne sont pas levees.
+  # Cadre 2026-05-13 matin via bmad-create-epics-and-stories. Sprint demarre
+  # apres-midi en assumant l'ecart fenetre go-live (F-Epic5-0). Cloture le soir.
+  # Bilan : 15/16 stories DONE en 1 journee calendaire (5.D.1 + 5.D.2 differees
+  # declencheur calendrier ~2026-06-08). Retro epic-5-retro-2026-05-13.md.
   # ==========================================================================
-  epic-5: backlog
 
   # Mini-epic 5.A - Renommage accompagnante -> accompagnant (6 stories) - CLOTURE 2026-05-13
   # F12bis : execution complete 5.A.2 -> 5.A.6 le 2026-05-13 en assumant l'ecart F12 fenetre
@@ -245,4 +243,9 @@ development_status:
   # 4 alert rules creees cote Sentry web par Sylvain.
   5-e-1-coupling-sentry-plateforme-oncall: done
 
-  epic-5-retrospective: optional
+  # Retro Epic 5 livree 2026-05-13 epic-5-retro-2026-05-13.md
+  # Bilan : 15/16 stories DONE en 1 journee calendaire (2 differees 5.D calendrier).
+  # 4 decisions DECISIONS.md (F-Epic5-0, F-Epic5-E1 x3 revisions, F12, F12bis).
+  # 3 garde-fous CI ajoutes. Schema BDD prod migre accompagnante -> accompagnant.
+  epic-5: done
+  epic-5-retrospective: done
