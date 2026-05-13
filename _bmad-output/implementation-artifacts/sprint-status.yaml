@@ -172,7 +172,10 @@ development_status:
   epic-5: backlog
 
   # Mini-epic 5.A - Renommage accompagnante -> accompagnant (6 stories, sequentiel strict)
-  5-a-1-architecture-review-strategie-migration-enum-role: backlog
+  # 5.A.1 livre 2026-05-13 commit a venir : tech-spec-5-a-renommage.md + DECISIONS.md F12
+  # decision cutover atomique + valeur enum orpheline differee Epic 6 + renommage tables
+  # out-of-scope + 15 colonnes + 23 policies + 3 helpers RLS + 5 modes rollback.
+  5-a-1-architecture-review-strategie-migration-enum-role: done
   5-a-2-migration-bdd-enum-role-colonnes-helpers-rls: backlog
   5-a-3-regeneration-types-supabase-resorption-references-code-ts: backlog
   5-a-4-renommage-routes-redirects-301-middleware: backlog

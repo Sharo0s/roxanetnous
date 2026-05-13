@@ -486,3 +486,43 @@ Les pages admin Server Components (`app/admin/`) consomment Supabase via 7 fichi
 
 **Regle :** Le compte Slack et l'integration Sentry sont consideres infrastructure critique (au meme niveau que Sentry lui-meme). Documente dans `architecture-technique-roxanetnous-2026-02-09.md` section Monitoring/Observabilite a la livraison 5.E.1.
 
+---
+
+## 2026-05-13 : Strategie migration enum role `accompagnante` -> `accompagnant` = cutover atomique avec valeur orpheline differee (decision F12)
+
+**Decision :** Le renommage du metier feminin `accompagnante` vers le masculin neutre `accompagnant` (Epic 5 mini-epic 5.A) suit une **strategie de cutover atomique** dans une seule migration BDD transactionnelle (story 5.A.2). La valeur enum orpheline `'accompagnante'` est conservee en BDD post-migration (0 ligne) et sa suppression est reportee Epic 6.
+
+**Motivation :** Audit MCP BDD prod 2026-05-13 revele :
+- **Postgres 17.6** : `ALTER TYPE ... DROP VALUE` indisponible nativement (requiert recreation enum complete, downtime supplementaire).
+- **Volumetrie faible** : 822 users, 818 accompagnantes_profiles, 796 annonces_accompagnantes ; 9 autres tables a 0 ligne. Risque cutover minime.
+- **15 colonnes BDD impactees dans 8 tables, 23 RLS policies dependantes sur 10 tables, 3 helpers RLS impactes** (`is_accompagnante`, `is_accompagne`, `is_document_owner`).
+- **2 tables nommees apres le role feminin** (`accompagne_accompagnantes`, `annonces_accompagnantes`) : renommage de table casse 6 policies, propage dans types Supabase et code TS.
+
+**Alternatives rejetees :**
+- **Expand-contract dual-write** : surcout d'orchestration injustifie pour 822 lignes prod et 0 utilisateur en messagerie active. Helpers RLS dual `IN ('accompagnante', 'accompagnant')` apportent une dette transitoire sans benefice.
+- **Alias via fonction SQL** : patch superficiel, ne resout pas la dette enum source.
+- **Renommage des 2 tables** : out-of-scope 5.A. Casse 6 policies + types Supabase + code TS sans benefice utilisateur (noms tables invisibles dans l'UI). Reporte Epic 6.
+- **Drop de la valeur enum orpheline `'accompagnante'`** dans 5.A.2 : impose recreation enum complete + `ALTER COLUMN TYPE` qui reecrit la table users. Cout/benefice negatif puisque la valeur orpheline a 0 ligne n'a aucun impact applicatif. Reporte Epic 6.
+
+**Pattern d'integration retenu (story 5.A.2 - migration cutover atomique) :**
+
+1. **Snapshot pre-cutover** : enum, 23 policies (DDL), counts users par role, body helpers. Persiste dans `_bmad-output/implementation-artifacts/snapshot-5-a-2-pre-cutover.md`.
+2. **ADD VALUE enum** : `ALTER TYPE user_role ADD VALUE 'accompagnant' BEFORE 'accompagne'`.
+3. **UPDATE backfill** : `UPDATE users SET role = 'accompagnant' WHERE role = 'accompagnante'` (~100 ms pour 822 lignes).
+4. **RENAME COLUMN x 15** : operations metadata, < 10 ms par colonne.
+5. **DROP FUNCTION** `is_accompagnante` (sans CASCADE pour controle explicite).
+6. **CREATE FUNCTION** `is_accompagnant()` avec body `role = 'accompagnant'`.
+7. **CREATE POLICY x 23** : recreation explicite des 23 policies inventoriees (DDL detaille dans tech-spec 5.A.1).
+
+Fenetre cutover estimee : < 5 secondes.
+
+**Plan rollback par mode de defaillance (5 modes documentes tech-spec 5.A.1) :**
+
+1. Backfill UPDATE incorrect -> `UPDATE` inverse + investigation race condition.
+2. Policies RLS cassees -> DROP + recreation depuis snapshot DDL.
+3. Helper renomme orphelin (call site oublie) -> creer `is_accompagnante` comme alias vers `is_accompagnant`.
+4. Code TS post-merge rouge -> revert commit 5.A.3.
+5. Regression UX visible -> revert commit 5.A.4 ou 5.A.5.
+
+**Regle :** Aucune story 5.A.2+ ne peut etre executee sans le snapshot pre-cutover prealable. Le snapshot est l'artefact de rollback canonical pour les modes 1, 2 et 3. La fenetre 5j entourant le go-live Bretagne (du vendredi 2026-05-16 au mercredi 2026-05-21 inclus) est exclue de l'execution 5.A.2 (cf. F-Epic5-0).
+
