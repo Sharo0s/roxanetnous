@@ -41,20 +41,22 @@ Trois objectifs paralleles, non-bloquants pour le go-live Bretagne :
 
 **FR/NFR couverts** : FR1, FR2, FR4-5 (RGPD), FR7, FR11-12 (verification auxiliaire), FR16-19 (paywall + annonces), FR27-29 (messagerie), FR45-46, FR48 (couverture geographique). NFR2 (securite : RLS messagerie), NFR4 (integrations : Sentry → oncall), NFR5 (fiabilite : observabilite), NFR6 (a11y : preservation baseline 0 violation Critical/Serious).
 
-## Pre-requis bloquants avant demarrage sprint
+## Pre-requis et conditions de demarrage
 
-Tous heritages directs de la cloture Epic 4 (2026-05-08) :
+**Decision 2026-05-13** : le sprint Epic 5 demarre en parallele du go-live Bretagne, sans attendre les audits 7j herites Epic 4 (DECISIONS.md F-Epic5-0).
 
-- **AI-4.1** - Audit Sentry prod 7j zero exception non-attendue, ETA 2026-05-15.
-- **AI-4.2** - Stabilisation GHA 7j stories 4.4 (tests metier) + 4.7 (seeds), ETA 2026-05-14.
-- **AI-4.3** - Toggle admin premier departement Bretagne en production (deblocage go-live).
+Justification : Epic 5 est un chantier d'hardening transverse independant du go-live. Les mini-epics 5.C (hardening typage / nettoyage CI) et 5.E (observabilite oncall) n'ont aucune surface commune avec les flux critiques Epic 4 sous observation. 5.A (renommage BDD) demarre par une architecture review (5.A.1) sans impact code/BDD. La fenetre 7j devient une **observation passive en parallele** plutot qu'un blocage actif.
 
-**Le sprint Epic 5 ne demarre pas tant que ces 3 conditions ne sont pas remplies.** En cas d'incident Sentry critique pendant la fenetre 7j, declencher `bmad-correct-course` plutot que d'embrayer sur Epic 5.
+**Conditions d'observation parallele** (non-bloquantes, mais a surveiller) :
 
-Pre-requis specifiques mini-epics :
+- **AI-4.1** - Audit Sentry prod observe en continu pendant le sprint Epic 5. Si exception critique non-attendue emerge, declencher `bmad-correct-course` avant d'embrayer une nouvelle story Epic 5.
+- **AI-4.2** - Stabilisation GHA observee en continu. Si CI redevient instable sur 4.4 / 4.7, prioriser le fix avant les stories Epic 5 qui touchent la CI (5.C.4 notamment).
+- **AI-4.3** - Toggle admin premier departement Bretagne en production : geste manuel independant, peut etre fait avant, pendant ou apres le sprint Epic 5.
 
-- **5.A renommage** : decider strategie migration enum role (mapping retro-compat vs cutover) en amont story 5.A.1 (architecture review legere).
-- **5.E observabilite oncall** : decider plateforme oncall (PagerDuty, Slack, Opsgenie) avant story 5.E.1. Compte Sentry deja actif depuis Epic 4 story 4.1.
+**Pre-requis specifiques mini-epics (decisions actees 2026-05-13) :**
+
+- **5.A renommage** : strategie migration enum role decidee en story 5.A.1 (architecture review legere, pas de modif code/BDD).
+- **5.E observabilite oncall** : plateforme retenue = **Slack** (decision Sylvain 2026-05-13). Justification : Sylvain seul oncall, integration Sentry native gratuite, push mobile app Slack equivalent fonctionnel a PagerDuty pour ce usage. Compte Sentry deja actif depuis Epic 4 story 4.1.
 
 ## Periodemetre et hors-scope
 

@@ -428,3 +428,61 @@ Les pages admin Server Components (`app/admin/`) consomment Supabase via 7 fichi
 
 **Regle :** Toute future story qui touche `app/admin/` ne peut introduire un nouveau `\bas any\b`. Le garde-fou `npm run check:as-any-admin` rejette la regression au build Vercel avant meme le code review. Si une migration BDD modifie le schema public, regenerer `types/supabase.ts` via le MCP avant de livrer la story metier (cf. procedure de regeneration). La levee du `as unknown as SupabaseClient<Database>` cast localise vers un typage natif des factories est candidate Epic 5+ (story 4.6.b) qui devra adresser les 48 erreurs TypeScript hors-admin (nullable narrowing + schema drift `ocr_results`).
 
+---
+
+## 2026-05-13 : Sprint Epic 5 demarre en parallele du go-live Bretagne (decision F-Epic5-0)
+
+**Decision :** Le sprint Epic 5 demarre des le 2026-05-13, en parallele du go-live Bretagne prevu lundi 2026-05-18 (toggle admin premier departement). Les 3 audits 7j herites Epic 4 (AI-4.1 Sentry, AI-4.2 GHA, AI-4.3 toggle admin) passent du statut "bloquants" au statut "observation passive en parallele".
+
+**Motivation :** Epic 5 est un chantier d'hardening transverse independant fonctionnellement du go-live Bretagne :
+- Mini-epics 5.C (hardening typage / nettoyage CI) et 5.E (observabilite oncall) n'ont aucune surface commune avec les flux critiques Epic 4 sous observation.
+- Mini-epic 5.A demarre par une architecture review (5.A.1) sans impact code/BDD.
+- L'ajout d'une observabilite oncall (5.E.1) est meme un benefice direct pour la fenetre go-live (notification active Slack vs consultation passive dashboard Sentry).
+- Le cadrage initial 2026-05-13 (`epic-5.md`) marquait les 3 AI comme "pre-requis bloquants" par heritage mecanique de la retrospective Epic 4, sans interroger la pertinence pour Epic 5 specifiquement.
+
+**Conditions d'observation parallele (non-bloquantes mais surveillees) :**
+- **AI-4.1 Sentry** : si exception critique non-attendue emerge pendant Epic 5, declencher `bmad-correct-course` avant d'embrayer une nouvelle story.
+- **AI-4.2 GHA** : si CI redevient instable sur 4.4/4.7, prioriser le fix avant les stories Epic 5 qui touchent la CI (5.C.4 notamment).
+- **AI-4.3 toggle admin** : geste manuel independant, peut etre fait avant/pendant/apres le sprint Epic 5.
+
+**Ordre de demarrage retenu :**
+1. **5.E.1 coupling Sentry -> Slack** en premier (livre avant go-live lundi = monitoring actif pendant la fenetre critique).
+2. **5.A.1 architecture review renommage** ensuite (tech-spec, sans impact code/BDD).
+3. **5.C.x** en parallele opportuniste (4 stories Verte/Orange independantes).
+4. **5.A.2-5.A.6** chaine sequentielle apres stabilisation go-live.
+5. **5.B.x** apres 5.A merged.
+6. **5.D.x** differe naturellement >= 2026-06-08.
+
+**Regle :** Le sprint Epic 5 peut etre interrompu a tout moment par `bmad-correct-course` si un incident Epic 4 emerge. Aucune story 5.A.2+ (impact BDD) ne sera lancee pendant la fenetre 5j entourant le go-live lundi (du vendredi 2026-05-16 au mercredi 2026-05-21 inclus).
+
+---
+
+## 2026-05-13 : Plateforme oncall = Slack (decision F-Epic5-E1)
+
+**Decision :** Pour le coupling oncall livre par story 5.E.1, la plateforme retenue est **Slack** (integration native Sentry).
+
+**Motivation :**
+- Sylvain est seul oncall sur roxanetnous : pas de rotation a orchestrer, pas de besoin d'escalade automatique multi-niveaux.
+- L'integration Sentry vers Slack est native, gratuite, sans carte bleue requise.
+- L'app Slack mobile fournit des push notifications equivalentes fonctionnellement a PagerDuty pour ce cas d'usage.
+- PagerDuty / Opsgenie sont justifies au-dela de ~3 personnes oncall ou pour des escalades de garde-fou type contrat SLA externe. Hors scope MVP roxanetnous.
+
+**Alternatives rejetees :**
+- **PagerDuty** : surfacage payant (~10$/utilisateur/mois) sans benefice pour un seul oncall.
+- **Opsgenie** : pareil + complexite UI superieure pour configuration regles.
+- **Email seul (deja en place via Sentry)** : insuffisant comme alerte critique (delai variable, risque de spam folder, pas de push mobile).
+- **SMS via Twilio** : surcharge integration + cout par message. Slack mobile suffit.
+
+**Pattern d'integration :**
+- **Workspace Slack** : a creer ou utiliser un workspace existant (Sylvain decide a l'execution 5.E.1).
+- **Channel dedie** : `#sentry-prod-alerts` (ou nom equivalent). Permettra d'archiver l'historique et de filtrer du flux general.
+- **Integration Sentry Settings -> Integrations -> Slack** : autorise OAuth, choisit le channel, configure les regles d'alerte.
+- **Regles d'alerte** :
+  1. Toute nouvelle exception non-resolved + tag `severity: 'critical'` -> push immediate channel.
+  2. Seuil frequence > 10 exceptions/min sur n'importe quel tag -> push immediate channel.
+  3. Erreur dans chemins critiques (`flow: 'webhook' | 'paywall' | 'parrainage' | 'email'`) -> push immediate channel.
+  4. Alertes non-critical (`severity: 'warning'`) -> digest quotidien 9h00.
+- **Test de bout en bout 5.E.1** : declencher exception intentionnelle taggee `severity: 'critical'` en preview env via Sentry SDK, mesurer delai reception push Slack mobile (cible < 2 min).
+
+**Regle :** Le compte Slack et l'integration Sentry sont consideres infrastructure critique (au meme niveau que Sentry lui-meme). Documente dans `architecture-technique-roxanetnous-2026-02-09.md` section Monitoring/Observabilite a la livraison 5.E.1.
+

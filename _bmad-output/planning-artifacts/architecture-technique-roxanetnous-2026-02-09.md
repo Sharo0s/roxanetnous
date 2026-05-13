@@ -26,7 +26,8 @@ source: product-brief-roxanetnous-2026-02-09.md
 9. [Notifications Email](#notifications-email)
 10. [Stockage Fichiers](#stockage-fichiers)
 11. [Jobs & Automatisations](#jobs--automatisations)
-12. [Sécurité & RGPD](#sécurité--rgpd)
+12. [Observabilité & Monitoring](#observabilité--monitoring)
+13. [Sécurité & RGPD](#sécurité--rgpd)
 
 ---
 
@@ -3630,6 +3631,76 @@ serve(async (req) => {
   )
 })
 ```
+
+---
+
+## Observabilité & Monitoring
+
+> **Section ajoutée 2026-05-13 (Epic 5 story 5.E.1).** L'instrumentation Sentry initiale a été livrée par Epic 4 story 4.1 (`@sentry/nextjs` SDK + 3 configs : client, server, edge). Le coupling oncall vers Slack documenté ci-dessous complète cette instrumentation.
+
+### Stack Observabilité
+
+| Outil | Rôle | Statut |
+|---|---|---|
+| **Sentry** | Capture exceptions runtime (server, client, edge), traçage performance, alerting | Actif depuis Epic 4 story 4.1 (~2026-05-08) |
+| **Slack** | Notification active oncall sur exceptions critiques (push mobile) | Actif depuis Epic 5 story 5.E.1 (2026-05-13) |
+| **Vercel Analytics** | Métriques Web Vitals, trafic | Actif depuis Epic 1 |
+| **Vercel Logs** | Logs runtime fonctions serverless | Actif depuis Epic 1 |
+| **notifications_log** (Supabase) | Audit trail envois email + retries (cron retry) | Actif depuis Epic 3 story 3.5 |
+| **admin_actions_log** (Supabase) | Audit trail actions admin (validations, suspensions, signalements) | Actif depuis Epic 1 |
+
+### Convention de tagging Sentry
+
+Tous les `Sentry.captureException()` du projet suivent la convention de tags suivante (cf. story 4.1 AC2) :
+
+```typescript
+Sentry.captureException(err, {
+  tags: {
+    flow: 'parrainage' | 'webhook-stripe' | 'email' | 'admin' | 'notifications_log' | 'relance_onboarding_cron',
+    signal: '<descripteur-court-incident>',
+    severity: 'critical' | 'warning',
+  },
+  extra: { /* contexte non-PII */ },
+})
+```
+
+**Audit 2026-05-13 (story 5.E.1)** : 52 `captureException` instrumentés dans le projet :
+- `severity` : 28 critical, 24 warning
+- `flow` : webhook-stripe (16), email (15), parrainage (13), admin (5), relance_onboarding_cron (2), test (2), notifications_log (1)
+
+### Coupling Sentry → Slack (oncall)
+
+**Plateforme retenue** : Slack (DECISIONS.md F-Epic5-E1 du 2026-05-13). Justification : Sylvain seul oncall, intégration native Sentry gratuite, app mobile Slack équivalente fonctionnellement à PagerDuty.
+
+**Configuration** (à effectuer dans le dashboard Sentry, hors code applicatif) :
+
+1. Sentry Settings → Integrations → Slack → Install Integration → OAuth Slack workspace.
+2. Créer channel dédié dans Slack workspace : `#sentry-prod-alerts` (ou nom équivalent).
+3. Configurer 4 règles d'alerte Sentry (Settings → Alerts → Create Alert Rule) :
+
+| # | Trigger | Action |
+|---|---|---|
+| 1 | Une nouvelle exception **non-resolved** avec tag `severity: critical` est enregistrée | Push immédiat dans `#sentry-prod-alerts` |
+| 2 | Fréquence > **10 exceptions/min** sur n'importe quel tag (sliding window) | Push immédiat dans `#sentry-prod-alerts` |
+| 3 | Exception dans `flow: webhook-stripe \| paywall \| parrainage \| email` non-resolved depuis > 5 min | Push immédiat dans `#sentry-prod-alerts` |
+| 4 | Toutes les alertes `severity: warning` | Digest quotidien 9h00 (Slack scheduled message) |
+
+**Note** : les règles 1 et 3 se recouvrent partiellement (un critical sur un flow critique déclenche les 2). C'est intentionnel : redondance défensive sur les chemins argent / abonnement / fraude.
+
+### Test de bout en bout
+
+Procédure documentée pour valider l'intégration en preview env :
+
+1. Déployer en preview avec endpoint test `/api/test-sentry` (note : cet endpoint a été supprimé par story 5.C.2 ; pour les futurs tests utiliser une route métier réelle et déclencher une exception intentionnelle taggée critical).
+2. Trigger l'exception via curl ou navigateur sur preview.
+3. Mesurer délai réception push Slack mobile.
+4. **Cible** : < 2 min entre exception captée et notification reçue.
+
+### Conformité
+
+- **Rétention logs 1 an** : Sentry plan retient les events 90j (gratuit) à 365j (Business). À aligner avec exigence NFR RGPD logs de sécurité 1 an.
+- **PII** : convention `extra: { keyHash: hashRateLimitKey(...) }` au lieu d'IP ou email brut (cf. story 4.5 hardening IP spoofing). Audit ponctuel via Sentry "Discover" pour détecter tout leak PII.
+- **Notifications channel Slack** : workspace + channel sont infrastructure critique (au même niveau que Sentry). Accès Slack = équivalent accès dashboard Sentry. À documenter dans la procédure de transmission compte fondateur.
 
 ---
 

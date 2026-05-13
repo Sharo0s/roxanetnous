@@ -195,6 +195,9 @@ development_status:
   5-d-2-audit-suppression-batch-limit-send-waitlist: backlog
 
   # Mini-epic 5.E - Observabilite oncall (1 story, parallele)
-  5-e-1-coupling-sentry-plateforme-oncall: backlog
+  # 5.E.1 partie code/doc livree 2026-05-13. Reste : OAuth manuel Sentry->Slack
+  # dashboard + 4 regles d'alerte + test bout en bout preview env. Statut
+  # 'review' pour acquit OAuth + test live (geste Sylvain hors code).
+  5-e-1-coupling-sentry-plateforme-oncall: review
 
   epic-5-retrospective: optional
