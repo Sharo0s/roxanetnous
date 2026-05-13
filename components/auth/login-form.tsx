@@ -138,8 +138,9 @@ export function LoginForm() {
             autoFocus
           />
 
-          <label className="flex items-center gap-2 text-sm text-black cursor-pointer select-none">
+          <label htmlFor="rememberMe" className="flex items-center gap-2 text-sm text-black cursor-pointer select-none">
             <input
+              id="rememberMe"
               type="checkbox"
               name="rememberMe"
               defaultChecked
