@@ -84,7 +84,7 @@ export default async function ValidationDetailPage({
   await supabaseAdmin.from('admin_actions_log').insert({
     admin_id: user.id,
     action_type: 'consultation_justificatif',
-    target_type: 'accompagnante',
+    target_type: 'accompagnant',
     target_id: id,
     details: { viewed_at: new Date().toISOString() },
   })

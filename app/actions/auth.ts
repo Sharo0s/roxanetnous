@@ -146,7 +146,7 @@ export async function signup(formData: FormData): Promise<AuthResult> {
     }
   }
 
-  // Parrainage (accompagnante uniquement) : si un code valide est fourni,
+  // Parrainage (accompagnant uniquement) : si un code valide est fourni,
   // créer la relation marraine/filleule. Silencieux côté UX (l'inscription
   // réussit même si le code ne convient pas), mais logué côté serveur pour
   // ne pas perdre le signal opérationnel en cas d'échec.
@@ -309,8 +309,7 @@ export async function resendConfirmation(formData: FormData): Promise<AuthResult
     type: 'signup',
     email,
     options: {
-      emailRedirectTo: `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/auth/callback`,
-    },
+      emailRedirectTo: `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/auth/callback`,    },
   })
 
   if (error) {
@@ -331,8 +330,7 @@ export async function resetPassword(formData: FormData): Promise<AuthResult> {
   }
 
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/auth/callback?next=/reset-password`,
-  })
+    redirectTo: `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/auth/callback?next=/reset-password`,  })
 
   if (error) {
     return { error: 'Erreur lors de l\'envoi du lien. Vérifiez votre adresse email.' }
@@ -456,8 +454,7 @@ export async function updateEmailFromProfile(formData: FormData): Promise<AuthRe
   const { error } = await supabase.auth.updateUser(
     { email: newEmail },
     {
-      emailRedirectTo: `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/auth/callback`,
-    }
+      emailRedirectTo: `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/auth/callback`,    }
   )
 
   if (error) {

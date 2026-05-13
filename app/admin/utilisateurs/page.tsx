@@ -33,7 +33,7 @@ export type AccompagneRow = {
 export default async function AdminUtilisateursPage() {
   const supabaseAdmin = await createClient({ serviceRole: true })
 
-  // Charger les accompagnantes avec leur profil
+  // Charger les accompagnants avec leur profil
   // Hint FK necessaire car accompagnants_profiles a 2 FK vers users (user_id + validated_by)
   const { data: auxUsers } = await supabaseAdmin
     .from('users')

@@ -1,4 +1,4 @@
-// Detection des champs manquants pour un profil accompagnante en cours
+// Detection des champs manquants pour un profil accompagnant en cours
 // d'onboarding. Utilise par le mail de relance pour personnaliser le
 // contenu ("Il vous reste a renseigner : votre ville, vos diplomes...").
 //
@@ -6,7 +6,7 @@
 // /accompagnant/onboarding) : identite geographique d'abord, puis
 // experience/competences, puis disponibilites/details.
 
-type AccompagnanteProfileForCompletion = {
+type AccompagnantProfileForCompletion = {
   ville: string | null
   code_postal: string | null
   experience: string | null
@@ -46,7 +46,7 @@ function isEmptyDisponibilites(v: unknown): boolean {
 }
 
 export function getMissingOnboardingFields(
-  profile: AccompagnanteProfileForCompletion
+  profile: AccompagnantProfileForCompletion
 ): MissingField[] {
   const missing: MissingField[] = []
 

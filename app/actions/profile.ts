@@ -10,7 +10,7 @@ export type ProfileResult = {
   success?: boolean
 }
 
-export async function updateAccompagnanteProfile(data: {
+export async function updateAccompagnantProfile(data: {
   diplomes: string[]
   experience: string
   specialites: string[]

@@ -26,7 +26,7 @@ describe('paywall : abonne actif (T8)', () => {
     await createTestAccompagneProfile(user.id)
     await createTestSubscription(user.id, { status: 'active' })
 
-    const aux = await createTestUser('accompagnante')
+    const aux = await createTestUser('accompagnant')
     const auxProfile = await createTestAccompagnanteProfile(aux.id)
 
     mockSupabaseSession(user.id)

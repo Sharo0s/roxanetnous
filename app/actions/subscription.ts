@@ -42,7 +42,7 @@ export async function createCheckoutSession(formData: FormData): Promise<void> {
   }
 
   const trialDays = getTrialDays(plan)
-  const dashboardPath = role === 'accompagnant' ? '/accompagnante' : '/accompagne'
+  const dashboardPath = role === 'accompagnant' ? '/accompagnant' : '/accompagne'
 
   const metadata: Record<string, string> = { user_id: user.id, role, plan }
 

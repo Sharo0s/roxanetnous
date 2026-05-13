@@ -8,7 +8,7 @@ import { CancelSubscriptionButton } from '@/components/admin/cancel-subscription
 import { getSubscriptionStatus } from '@/lib/subscription-helpers'
 
 const ROLE_LABELS: Record<string, string> = {
-  accompagnante: 'Accompagnant',
+  accompagnant: 'Accompagnant',
   accompagne: 'Accompagné',
   admin: 'Administrateur',
 }
@@ -66,7 +66,7 @@ export default async function AdminUtilisateurDetailPage({
     benProfile = data
   }
 
-  // Generer les URLs signees pour les justificatifs accompagnante
+  // Generer les URLs signees pour les justificatifs accompagnant
   let identiteUrl: string | null = null
   let permisUrl: string | null = null
   let cvUrl: string | null = null
@@ -184,7 +184,7 @@ export default async function AdminUtilisateurDetailPage({
         </div>
       </div>
 
-      {/* Actions de validation (accompagnante en cycle de validation) */}
+      {/* Actions de validation (accompagnant en cycle de validation) */}
       {auxProfile && (
         auxProfile.validation_status === 'en_attente' ||
         auxProfile.validation_status === 'visio_a_planifier' ||
@@ -300,7 +300,7 @@ export default async function AdminUtilisateurDetailPage({
           </div>
         )}
 
-        {/* Profil professionnel (accompagnante) */}
+        {/* Profil professionnel (accompagnant) */}
         {auxProfile && (
           <div className="bg-white rounded-2xl border border-[#e8dfd2] p-6">
             <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4">Profil professionnel</h2>
@@ -325,7 +325,7 @@ export default async function AdminUtilisateurDetailPage({
           </div>
         )}
 
-        {/* Specialites (accompagnante) */}
+        {/* Specialites (accompagnant) */}
         {auxProfile && specialiteLabels.length > 0 && (
           <div className="bg-white rounded-2xl border border-[#e8dfd2] p-6">
             <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4">
@@ -344,7 +344,7 @@ export default async function AdminUtilisateurDetailPage({
           </div>
         )}
 
-        {/* Disponibilites (accompagnante) */}
+        {/* Disponibilites (accompagnant) */}
         {auxProfile && disponibilites && Object.keys(disponibilites).length > 0 && (
           <div className="bg-white rounded-2xl border border-[#e8dfd2] p-6 md:col-span-2">
             <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4">Disponibilités</h2>
@@ -381,7 +381,7 @@ export default async function AdminUtilisateurDetailPage({
           </div>
         )}
 
-        {/* Description (accompagnante) */}
+        {/* Description (accompagnant) */}
         {auxProfile && (
           <div className="bg-white rounded-2xl border border-[#e8dfd2] p-6 md:col-span-2">
             <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4">Description</h2>
@@ -393,7 +393,7 @@ export default async function AdminUtilisateurDetailPage({
           </div>
         )}
 
-        {/* Justificatifs (accompagnante) */}
+        {/* Justificatifs (accompagnant) */}
         {auxProfile && (
           <div className="bg-white rounded-2xl border border-[#e8dfd2] p-6 md:col-span-2">
             <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4">Justificatifs</h2>

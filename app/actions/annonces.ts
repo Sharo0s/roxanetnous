@@ -75,7 +75,7 @@ export async function createAnnonceAccompagnante(data: {
     return { error: 'Erreur lors de la création de l\'annonce.' }
   }
 
-  // Mettre a jour lat/lng sur le profil accompagnante si pas encore renseigne
+  // Mettre a jour lat/lng sur le profil accompagnant si pas encore renseigne
   if (coords) {
     await supabase
       .from('accompagnants_profiles')
@@ -87,7 +87,7 @@ export async function createAnnonceAccompagnante(data: {
   // Notifier les accompagnes dont l'annonce correspond (fire-and-forget)
   if (insertedAnnonce) {
     notifyMatchingUsers({
-      annonceType: 'accompagnante',
+      annonceType: 'accompagnant',
       annonceId: insertedAnnonce.id,
     }).catch(() => {})
   }
@@ -303,7 +303,7 @@ export async function createAnnonceAccompagne(data: {
     return { error: 'Erreur lors de la création de l\'annonce.' }
   }
 
-  // Notifier les accompagnantes dont le profil correspond (fire-and-forget)
+  // Notifier les accompagnants dont le profil correspond (fire-and-forget)
   if (insertedAnnonce) {
     notifyMatchingUsers({
       annonceType: 'accompagne',

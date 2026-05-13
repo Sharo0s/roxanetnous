@@ -45,7 +45,7 @@ export default async function MessagesPage() {
 
   if (!profileId) redirect(userData.role === 'accompagnant' ? '/accompagnant/dashboard' : '/accompagne/dashboard')
 
-  // Recuperer les conversations (inclut les conversations admin cote accompagnante)
+  // Recuperer les conversations (inclut les conversations admin cote accompagnant)
   const profileField = userData.role === 'accompagnant' ? 'accompagnant_id' : 'accompagne_id'
 
   const { data: conversations } = await supabase
@@ -139,7 +139,7 @@ export default async function MessagesPage() {
               let isTeam = false
 
               if (isAdminConv) {
-                // Cote accompagnante : l'interlocuteur est l'equipe
+                // Cote accompagnant : l'interlocuteur est l'equipe
                 // Cote admin (theoriquement non atteint ici car admin utilise /admin/messages)
                 isTeam = true
                 displayName = 'Équipe roxanetnous'

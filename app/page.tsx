@@ -240,7 +240,7 @@ export default async function HomePage() {
             <div className="grid md:grid-cols-[1.5fr_1fr] gap-4 md:gap-4">
               <Reveal>
                 <Link
-                  href="/register?role=accompagnante"
+                  href="/register?role=accompagnant"
                   className="group bg-white rounded-2xl border border-accent overflow-hidden flex flex-col h-full hover:border-kraft transition"
                 >
                   <div className="aspect-[7/5]">

@@ -60,7 +60,7 @@ export default async function DemandesAccompagnesPage({
 
   const unreadCount = user ? await getUnreadCount(user.id) : 0
   // Story 3.6 : prop subscribed pour defense en profondeur UI sur ContactAccompagneButton.
-  // Patch F10 review : court-circuiter quand le bouton ne sera pas rendu (role != accompagnante).
+  // Patch F10 review : court-circuiter quand le bouton ne sera pas rendu (role != accompagnant).
   const subscribed = user && userData?.role === 'accompagnant'
     ? await hasActiveSubscription(user.id)
     : false
@@ -174,7 +174,7 @@ export default async function DemandesAccompagnesPage({
           </div>
         )}
 
-        {/* FOOTER : seulement si role accompagnante connecte */}
+        {/* FOOTER : seulement si role accompagnant connecte */}
         {isAccompagnante && (
           <div className="mt-16 pt-6 border-t border-[#e8dfd2] flex flex-wrap justify-center items-center gap-x-6 gap-y-2 text-xs text-gray-500">
             <Link href="/cgu" className="hover:text-gray-800">Aide</Link>

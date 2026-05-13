@@ -6,7 +6,7 @@ import { sendFavoriDisponibleEmail } from '@/lib/emails'
 export async function notifyFavoriAccompagnes(accompagnanteUserId: string) {
   const supabase = await createClient({ serviceRole: true })
 
-  // Trouver le profil accompagnante
+  // Trouver le profil accompagnant
   const { data: auxProfile } = await supabase
     .from('accompagnants_profiles')
     .select('id')
@@ -15,7 +15,7 @@ export async function notifyFavoriAccompagnes(accompagnanteUserId: string) {
 
   if (!auxProfile) return
 
-  // Trouver les annonces de cette accompagnante
+  // Trouver les annonces de cette accompagnant
   const { data: annonces } = await supabase
     .from('annonces_accompagnants')
     .select('id')
@@ -25,7 +25,7 @@ export async function notifyFavoriAccompagnes(accompagnanteUserId: string) {
 
   const annonceIds = annonces.map((a) => a.id)
 
-  // Trouver les accompagnes qui ont mis en favori une annonce de cette accompagnante
+  // Trouver les accompagnes qui ont mis en favori une annonce de cette accompagnant
   const { data: favoris } = await supabase
     .from('favoris')
     .select('user_id')
@@ -35,7 +35,7 @@ export async function notifyFavoriAccompagnes(accompagnanteUserId: string) {
 
   const accompagneUserIds = [...new Set(favoris.map((f) => f.user_id))]
 
-  // Recuperer le prenom de l'accompagnante
+  // Recuperer le prenom de l'accompagnant
   const { data: auxUser } = await supabase
     .from('users')
     .select('first_name')

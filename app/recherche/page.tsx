@@ -47,7 +47,7 @@ export default async function RecherchePage({
     userData = data
   }
 
-  // Requete les annonces accompagnantes publiees
+  // Requete les annonces accompagnants publiees
   // On utilise le service role pour permettre l'acces aux visiteurs non connectes
   const supabaseAdmin = await createClient({ serviceRole: true })
   const hasFilters = !!(params.ville || params.specialite || params.experience)
@@ -96,7 +96,7 @@ export default async function RecherchePage({
 
     const { data: rawAnnonces } = await query
 
-    // Filter to only show accompagnantes with active subscription
+    // Filter to only show accompagnants with active subscription
     annonces = rawAnnonces || []
     if (annonces.length > 0) {
       const userIds = annonces.map((a: any) => a.accompagnants_profiles?.user_id).filter(Boolean)
@@ -328,7 +328,7 @@ export default async function RecherchePage({
                       <div className="absolute top-3 right-3 z-10">
                         <FavoriButton
                           annonceId={annonce.id}
-                          type="accompagnante"
+                          type="accompagnant"
                           initialIsFavori={favorisIds.includes(annonce.id)}
                         />
                       </div>

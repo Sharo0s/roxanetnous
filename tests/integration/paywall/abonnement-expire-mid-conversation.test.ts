@@ -28,7 +28,7 @@ describe('paywall : abonnement expire mid-conversation (T9)', () => {
     const accompagne = await createTestUser('accompagne')
     const accompagneProfile = await createTestAccompagneProfile(accompagne.id)
 
-    const aux = await createTestUser('accompagnante')
+    const aux = await createTestUser('accompagnant')
     const auxProfile = await createTestAccompagnanteProfile(aux.id)
 
     // Abonnement expire (current_period_end dans le passe).

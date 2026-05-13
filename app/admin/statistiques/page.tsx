@@ -58,7 +58,7 @@ export default async function AdminStatistiquesPage() {
                   <p className="text-sm text-gray-500">Payants</p>
                   <p className="italic text-3xl text-gray-900 mt-1">{mrrDetail.payants}</p>
                   <div className="text-xs text-gray-400 mt-1 space-y-0.5">
-                    <p>{mrrDetail.segments.accompagnante_mensuel.count + mrrDetail.segments.accompagnante_annuel.count} accompagnants ({mrrDetail.segments.accompagnante_mensuel.count} mens. / {mrrDetail.segments.accompagnante_annuel.count} ann.)</p>
+                    <p>{mrrDetail.segments.accompagnant_mensuel.count + mrrDetail.segments.accompagnant_annuel.count} accompagnants ({mrrDetail.segments.accompagnant_mensuel.count} mens. / {mrrDetail.segments.accompagnant_annuel.count} ann.)</p>
                     <p>{mrrDetail.segments.accompagne_mensuel.count + mrrDetail.segments.accompagne_annuel.count} accompagnés ({mrrDetail.segments.accompagne_mensuel.count} mens. / {mrrDetail.segments.accompagne_annuel.count} ann.)</p>
                   </div>
                 </div>

@@ -9,8 +9,8 @@ export type PlanType = 'mensuel' | 'annuel'
 
 export function getStripePriceId(role: 'accompagnant' | 'accompagne', plan: PlanType): string {
   const prices: Record<string, string> = {
-    accompagnante_mensuel: process.env.STRIPE_PRICE_AUXILIAIRE_MENSUEL || process.env.STRIPE_PRICE_ACCOMPAGNANTE_MENSUEL || '',
-    accompagnante_annuel: process.env.STRIPE_PRICE_AUXILIAIRE_ANNUEL || process.env.STRIPE_PRICE_ACCOMPAGNANTE_ANNUEL || '',
+    accompagnant_mensuel: process.env.STRIPE_PRICE_AUXILIAIRE_MENSUEL || process.env.STRIPE_PRICE_ACCOMPAGNANTE_MENSUEL || '',
+    accompagnant_annuel: process.env.STRIPE_PRICE_AUXILIAIRE_ANNUEL || process.env.STRIPE_PRICE_ACCOMPAGNANTE_ANNUEL || '',
     accompagne_mensuel: process.env.STRIPE_PRICE_BENEFICIAIRE_MENSUEL || process.env.STRIPE_PRICE_ACCOMPAGNE_MENSUEL || '',
     accompagne_annuel: process.env.STRIPE_PRICE_BENEFICIAIRE_ANNUEL || process.env.STRIPE_PRICE_ACCOMPAGNE_ANNUEL || '',
   }

@@ -33,7 +33,7 @@ describe('Stripe webhook : customer.subscription.updated -> parrainage bloque me
 
   it('passe le parrainage en bloque + log admin + envoie email admin meme_carte', async () => {
     // Marraine + subscription marraine (necessaire pour la lookup customer dans detectBlacklistAtWebhook)
-    const marraine = await createTestUser('accompagnante')
+    const marraine = await createTestUser('accompagnant')
     await createTestSubscription(marraine.id, { status: 'active' })
 
     // Filleule + son profil
@@ -51,7 +51,7 @@ describe('Stripe webhook : customer.subscription.updated -> parrainage bloque me
 
     // Une 2e row parrainage de la marraine (en tant que filleule passee) avec
     // le meme fingerprint -> declenche matchAsFilleule dans detectBlacklistAtWebhook.
-    const marraineExFilleule = await createTestUser('accompagnante')
+    const marraineExFilleule = await createTestUser('accompagnant')
     await createTestParrainage(marraineExFilleule.id, marraine.id, {
       statut: 'abonnee',
       fingerprint: 'fp_test_match_t2',

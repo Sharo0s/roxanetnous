@@ -188,7 +188,7 @@ async function revokeFilleuleValidation(
 // Auth guard : tout export d'un fichier 'use server' devient un endpoint POST
 // public exploitable. Ce helper accepte un filleuleId arbitraire ; sans guard,
 // n'importe quel client authentifié peut révoquer la validation de n'importe
-// quelle accompagnante. On exige un secret partagé connu uniquement du webhook
+// quelle accompagnant. On exige un secret partagé connu uniquement du webhook
 // (PARRAINAGE_INTERNAL_SECRET) ou un appelant admin authentifié.
 export async function revokeFilleuleValidationFromWebhook(
   filleuleId: string,
@@ -932,7 +932,7 @@ export async function confirmParrainageOnSuccess(
   await supabaseAdmin.from('admin_actions_log').insert({
     admin_id: null,
     action_type: 'validation_par_parrainage',
-    target_type: 'accompagnante',
+    target_type: 'accompagnant',
     target_id: filleuleProfile.id,
     details: {
       parrainage_id: parrainage.id,

@@ -55,15 +55,15 @@ export function RegisterForm({ departementsOuverts }: RegisterFormProps = {}) {
   const initialEmail = searchParams.get('email') || ''
   const initialParrainageCode = (searchParams.get('parrainage_code') || '').toUpperCase()
 
-  // Story 5.A.3 : role aligne sur le nouvel enum. Accepte 'accompagnante' en input
+  // Story 5.A.3 : role aligne sur le nouvel enum. Accepte 'accompagnant' en input
   // (anciens liens) et le convertit en 'accompagnant'.
-  const normalizedInitialRole = initialRole === 'accompagnante' ? 'accompagnant' : initialRole
+  const normalizedInitialRole = initialRole === 'accompagnant' ? 'accompagnant' : initialRole
   const [role, setRole] = useState<'accompagnant' | 'accompagne' | null>(
     normalizedInitialRole === 'accompagnant' || normalizedInitialRole === 'accompagne' ? normalizedInitialRole : null
   )
   const stepsForRole = role === 'accompagnant' ? STEPS_ACCOMPAGNANTE : STEPS_ACCOMPAGNE
   const [step, setStep] = useState<Step>(
-    initialRole === 'accompagnant' || initialRole === 'accompagnante' || initialRole === 'accompagne' ? 'name' : 'role'
+    initialRole === 'accompagnant' || initialRole === 'accompagnant' || initialRole === 'accompagne' ? 'name' : 'role'
   )
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
@@ -340,7 +340,7 @@ export function RegisterForm({ departementsOuverts }: RegisterFormProps = {}) {
           </form>
         )}
 
-        {/* Step 4 : Parrainage (accompagnante uniquement) */}
+        {/* Step 4 : Parrainage (accompagnant uniquement) */}
         {role === 'accompagnant' && isVisible('parrainage') && (
           <form
             onSubmit={continueAfterParrainage}

@@ -156,7 +156,7 @@ export default async function AnnonceDetailPage({
               </p>
             </div>
           </div>
-          <FavoriButton annonceId={id} type="accompagnante" initialIsFavori={isFavori} />
+          <FavoriButton annonceId={id} type="accompagnant" initialIsFavori={isFavori} />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -270,7 +270,7 @@ export default async function AnnonceDetailPage({
             ) : null}
 
             <div className="text-center pt-2">
-              <SignalementButton cibleType="annonce_accompagnante" cibleId={id} />
+              <SignalementButton cibleType="annonce_accompagnant" cibleId={id} />
             </div>
           </div>
         </div>

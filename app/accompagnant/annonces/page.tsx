@@ -148,11 +148,11 @@ export default async function MesAnnoncesAccompagnante() {
                       <AnnonceStatusToggle
                         annonceId={annonce.id}
                         currentStatus={annonce.status}
-                        type="accompagnante"
+                        type="accompagnant"
                       />
                       <AnnonceDeleteButton
                         annonceId={annonce.id}
-                        type="accompagnante"
+                        type="accompagnant"
                       />
                     </div>
                   </div>

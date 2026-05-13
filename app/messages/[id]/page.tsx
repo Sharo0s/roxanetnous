@@ -83,7 +83,7 @@ export default async function ConversationPage({
     otherUser = auxProfile?.users || null
   }
 
-  // Recuperer le lien profil de l'interlocuteur (si accompagnante) - jamais pour conv admin
+  // Recuperer le lien profil de l'interlocuteur (si accompagnant) - jamais pour conv admin
   let otherProfileUrl: string | null = null
   if (!isAdminConv && userData.role === 'accompagne' && conversation.accompagnant_id) {
     const { data: auxAnnonce } = await supabase

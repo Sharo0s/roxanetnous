@@ -127,8 +127,8 @@ export function RevenusTable({ data }: {
 
 type MrrSegmentRow = {
   mois: string
-  accompagnante_mensuel: { count: number; mrr: number }
-  accompagnante_annuel: { count: number; mrr: number }
+  accompagnant_mensuel: { count: number; mrr: number }
+  accompagnant_annuel: { count: number; mrr: number }
   accompagne_mensuel: { count: number; mrr: number }
   accompagne_annuel: { count: number; mrr: number }
   total: number
@@ -159,12 +159,12 @@ export function MrrSegmentTable({ data }: { data: MrrSegmentRow[] }) {
                 <tr key={row.mois} className={`border-b last:border-0 hover:bg-accent/10 ${isZero ? 'text-gray-300' : ''}`}>
                   <td className={`px-4 py-3 ${isZero ? '' : 'font-medium'}`}>{formatMois(row.mois)}</td>
                   <td className="px-4 py-3 text-right">
-                    <span>{row.accompagnante_mensuel.count}</span>
-                    <span className="text-gray-400 ml-1 text-xs">({formatEur(row.accompagnante_mensuel.mrr)})</span>
+                    <span>{row.accompagnant_mensuel.count}</span>
+                    <span className="text-gray-400 ml-1 text-xs">({formatEur(row.accompagnant_mensuel.mrr)})</span>
                   </td>
                   <td className="px-4 py-3 text-right">
-                    <span>{row.accompagnante_annuel.count}</span>
-                    <span className="text-gray-400 ml-1 text-xs">({formatEur(row.accompagnante_annuel.mrr)})</span>
+                    <span>{row.accompagnant_annuel.count}</span>
+                    <span className="text-gray-400 ml-1 text-xs">({formatEur(row.accompagnant_annuel.mrr)})</span>
                   </td>
                   <td className="px-4 py-3 text-right">
                     <span>{row.accompagne_mensuel.count}</span>
@@ -234,7 +234,7 @@ const FEEDBACK_LABELS: Record<string, string> = {
 }
 
 const ROLE_LABELS: Record<string, string> = {
-  accompagnante: 'Accompagnant',
+  accompagnant: 'Accompagnant',
   accompagne: 'Accompagné',
   admin: 'Administrateur',
 }

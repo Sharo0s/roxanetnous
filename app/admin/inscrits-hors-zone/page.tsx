@@ -11,7 +11,7 @@ type SearchParams = {
 }
 
 const ROLE_LABELS: Record<string, string> = {
-  accompagnante: 'Accompagnant',
+  accompagnant: 'Accompagnant',
   accompagne: 'Bénéficiaire',
 }
 

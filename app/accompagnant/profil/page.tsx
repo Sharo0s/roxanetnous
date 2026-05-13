@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { AccompagnanteProfileForm } from '@/components/accompagnant/profile-form'
+import { AccompagnantProfileForm } from '@/components/accompagnant/profile-form'
 import { SecurityCredentialsForm } from '@/components/account/security-credentials-form'
 import { ExportDataButton } from '@/components/export-data-button'
 import { DeleteAccountButton } from '@/components/delete-account-button'
@@ -110,7 +110,7 @@ export default async function AccompagnanteProfilPage() {
         )}
 
         {/* FORMULAIRE PROFIL (inchange) */}
-        <AccompagnanteProfileForm
+        <AccompagnantProfileForm
           userInfo={{
             first_name: userData.first_name || '',
             last_name: userData.last_name || '',

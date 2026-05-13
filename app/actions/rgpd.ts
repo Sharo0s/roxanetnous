@@ -52,9 +52,9 @@ export async function exportUserData(): Promise<string> {
   const exportData = {
     export_date: new Date().toISOString(),
     user: userData,
-    profil_accompagnante: auxProfile,
+    profil_accompagnant: auxProfile,
     profil_accompagne: benProfile,
-    annonces_accompagnante: annoncesAuxData || [],
+    annonces_accompagnant: annoncesAuxData || [],
     annonces_accompagne: annoncesBenData || [],
     messages_envoyes: messages || [],
     abonnement: subscription,

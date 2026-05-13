@@ -24,7 +24,7 @@ describe('paywall : connecte sans abonnement (T7)', () => {
     await createTestAccompagneProfile(user.id)
 
     // Une accompagnante cible existe (sinon le code n'atteindrait pas le paywall)
-    const aux = await createTestUser('accompagnante')
+    const aux = await createTestUser('accompagnant')
     const auxProfile = await createTestAccompagnanteProfile(aux.id)
 
     mockSupabaseSession(user.id)

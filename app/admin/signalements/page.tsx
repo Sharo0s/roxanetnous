@@ -5,7 +5,7 @@ import type { Database } from '@/types/supabase'
 
 const CIBLE_TYPE_LABELS: Record<string, string> = {
   user: 'Utilisateur',
-  annonce_accompagnante: 'Annonce accompagnant',
+  annonce_accompagnant: 'Annonce accompagnant',
   annonce_accompagne: 'Annonce accompagné',
   message: 'Message',
 }

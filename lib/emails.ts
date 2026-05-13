@@ -11,7 +11,6 @@ const resend = new Resend(process.env.RESEND_API_KEY)
 
 const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || 'roxanetnous <onboarding@resend.dev>'
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'
-
 export async function sendWelcomeEmail(params: {
   email: string
   firstName: string
@@ -374,7 +373,7 @@ export async function sendFavoriDisponibleEmail(params: {
 export async function sendMatchingNotificationEmail(params: {
   email: string
   firstName: string
-  type: 'nouvelle_annonce_accompagne' | 'nouveau_profil_accompagnante'
+  type: 'nouvelle_annonce_accompagne' | 'nouveau_profil_accompagnant'
   annonceTitle: string
   annonceId: string
   score: number
@@ -874,7 +873,7 @@ export async function sendExpirationReminderEmail(params: {
   }
 }
 
-// Relance d'onboarding pour une accompagnante au statut 'a_completer'
+// Relance d'onboarding pour une accompagnant au statut 'a_completer'
 // (cron quotidien /api/cron/relance-profils-incomplets). Envoye a J+2 puis
 // J+7, jamais plus. Le mail liste dynamiquement les champs vides du profil
 // et inclut un lien d'opt-out signe HMAC (cf. lib/optout-token.ts).

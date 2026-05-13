@@ -75,7 +75,7 @@ export async function calculateAndUpdateBadges(userId: string): Promise<void> {
 export async function calculateAllBadges(): Promise<{ processed: number }> {
   const supabase = await createClient({ serviceRole: true })
 
-  // Tous les accompagnantes valides
+  // Tous les accompagnants valides
   const { data: profiles } = await supabase
     .from('accompagnants_profiles')
     .select('user_id')

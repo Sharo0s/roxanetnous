@@ -6,7 +6,7 @@ import { adminUpdateAnnonceStatus } from '@/app/actions/admin-annonces'
 type Props = {
   annonceId: string
   currentStatus: string
-  type: 'accompagnante' | 'accompagne'
+  type: 'accompagnant' | 'accompagne'
 }
 
 export function AdminAnnonceActions({ annonceId, currentStatus, type }: Props) {

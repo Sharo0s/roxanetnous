@@ -66,7 +66,7 @@ const ACTION_LABELS: Record<string, string> = {
 
 const TARGET_LABELS: Record<string, string> = {
   auxiliaire: 'un accompagnant',
-  accompagnante: 'un accompagnant',
+  accompagnant: 'un accompagnant',
   accompagne: 'un accompagné',
   parrainage: 'un parrainage',
   signalement: 'un signalement',

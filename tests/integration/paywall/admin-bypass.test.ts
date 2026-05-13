@@ -26,7 +26,7 @@ describe('paywall : admin bypass (T10)', () => {
   })
 
   it("permet a une accompagnante sans abonnement d envoyer un message dans une conversation admin", async () => {
-    const aux = await createTestUser('accompagnante')
+    const aux = await createTestUser('accompagnant')
     const auxProfile = await createTestAccompagnanteProfile(aux.id)
 
     const admin = await createTestUser('admin')

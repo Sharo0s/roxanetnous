@@ -5,7 +5,7 @@ import { deleteAnnonceAccompagnante, deleteAnnonceAccompagne } from '@/app/actio
 
 type Props = {
   annonceId: string
-  type: 'accompagnante' | 'accompagne'
+  type: 'accompagnant' | 'accompagne'
 }
 
 export function AnnonceDeleteButton({ annonceId, type }: Props) {
@@ -14,7 +14,7 @@ export function AnnonceDeleteButton({ annonceId, type }: Props) {
 
   async function handleDelete() {
     setLoading(true)
-    const action = type === 'accompagnante'
+    const action = type === 'accompagnant'
       ? deleteAnnonceAccompagnante
       : deleteAnnonceAccompagne
     const result = await action(annonceId)

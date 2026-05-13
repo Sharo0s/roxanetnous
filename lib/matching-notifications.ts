@@ -20,13 +20,13 @@ const MAX_NOTIFICATIONS = 20
 const MINIMUM_SCORE = 50
 
 export async function notifyMatchingUsers(params: {
-  annonceType: 'accompagnante' | 'accompagne'
+  annonceType: 'accompagnant' | 'accompagne'
   annonceId: string
 }): Promise<void> {
   const supabase = await createClient({ serviceRole: true })
 
   if (params.annonceType === 'accompagne') {
-    // Nouvelle annonce accompagne -> notifier les accompagnantes correspondants
+    // Nouvelle annonce accompagne -> notifier les accompagnants correspondants
     const { data: annonce } = await supabase
       .from('annonces_accompagnes')
       .select('id, titre, specialites_recherchees, ville, code_postal, latitude, longitude, diplome_requis, experience_min, disponibilites, accompagne_id')
@@ -50,7 +50,7 @@ export async function notifyMatchingUsers(params: {
       longitude: annonce.longitude ? Number(annonce.longitude) : undefined,
     }
 
-    // Recuperer les accompagnantes valides avec abonnement actif (whitelist departements_ouverts)
+    // Recuperer les accompagnants valides avec abonnement actif (whitelist departements_ouverts)
     const { data: auxProfiles } = await supabase
       .from('accompagnants_profiles')
       .select('user_id, specialites, ville, code_postal, experience, diplomes, disponibilites, rayon_km, latitude, longitude')
@@ -59,7 +59,7 @@ export async function notifyMatchingUsers(params: {
 
     if (!auxProfiles || auxProfiles.length === 0) return
 
-    // Filtrer les accompagnantes avec abonnement actif
+    // Filtrer les accompagnants avec abonnement actif
     const userIds = auxProfiles.map((p) => p.user_id).filter(Boolean)
     const { data: activeSubs } = await supabase
       .from('subscriptions')
@@ -114,7 +114,7 @@ export async function notifyMatchingUsers(params: {
       }
     }
   } else {
-    // Nouvelle annonce accompagnante -> notifier les accompagnes qui ont des annonces correspondantes
+    // Nouvelle annonce accompagnant -> notifier les accompagnes qui ont des annonces correspondantes
     const { data: auxAnnonce } = await supabase
       .from('annonces_accompagnants')
       .select(`
@@ -148,7 +148,7 @@ export async function notifyMatchingUsers(params: {
       specialites: auxProfile.specialites || [],
       ville: auxProfile.ville || auxAnnonce.ville || '',
       code_postal: auxProfile.code_postal || auxAnnonce.code_postal || '',
-      // Dette pre-existante : AccompagnanteProfile.experience attend string label
+      // Dette pre-existante : AccompagnantProfile.experience attend string label
       // (ex: '5_10') mais auxProfile.experience est un number en BDD. Conserve le
       // comportement existant ; correction differee story dediee Epic 6.
       experience: auxProfile.experience != null ? String(auxProfile.experience) : '',
@@ -202,7 +202,7 @@ export async function notifyMatchingUsers(params: {
         await sendMatchingNotificationEmail({
           email: userData.email,
           firstName: userData.first_name || '',
-          type: 'nouveau_profil_accompagnante',
+          type: 'nouveau_profil_accompagnant',
           annonceTitle: auxAnnonce.titre,
           annonceId: auxAnnonce.id,
           score: match.score,

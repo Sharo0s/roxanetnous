@@ -6,18 +6,18 @@ import type { Database } from '@/types/supabase'
 
 // Story 5.B.3 : whitelist stricte des valeurs URL pour empecher un faux 0
 // silencieux sur URL trafiquee (`?type=foo` ou `?type=Accompagnante`).
-// Pre-Story 5.B.3 : `params.type || 'accompagnante'` acceptait toute valeur
+// Pre-Story 5.B.3 : `params.type || 'accompagnant'` acceptait toute valeur
 // brute, puis le cast force `type` choisissait
 // l'embranchement `count head:true` -> page rendait "0 annonces" alors qu'il y en a.
-const TYPE_VALUES = ['accompagnante', 'accompagne'] as const
+const TYPE_VALUES = ['accompagnant', 'accompagne'] as const
 type AnnonceType = (typeof TYPE_VALUES)[number]
 
 function normalizeType(raw: string | undefined): { type: AnnonceType; fallbackApplied: boolean } {
-  if (!raw) return { type: 'accompagnante', fallbackApplied: false }
+  if (!raw) return { type: 'accompagnant', fallbackApplied: false }
   if ((TYPE_VALUES as readonly string[]).includes(raw)) {
     return { type: raw as AnnonceType, fallbackApplied: false }
   }
-  return { type: 'accompagnante', fallbackApplied: true }
+  return { type: 'accompagnant', fallbackApplied: true }
 }
 
 // Story 4.6 (D7) : cast applicatif chirurgical sur la forme retournee par
@@ -37,9 +37,9 @@ type RawAnnonceWithProfile = {
 
 function extractUser(
   annonce: RawAnnonceWithProfile,
-  type: 'accompagnante' | 'accompagne',
+  type: 'accompagnant' | 'accompagne',
 ): { first_name: string; last_name: string; email: string } | null {
-  if (type === 'accompagnante') return annonce.accompagnants_profiles?.users ?? null
+  if (type === 'accompagnant') return annonce.accompagnants_profiles?.users ?? null
   return annonce.accompagnes_profiles?.users ?? null
 }
 
@@ -57,7 +57,7 @@ export default async function AdminAnnoncesPage({
 
   // Charger les counts des deux types en parallele
   const [auxResult, benResult] = await Promise.all([
-    type === 'accompagnante'
+    type === 'accompagnant'
       ? supabaseAdmin
           .from('annonces_accompagnants')
           .select(`
@@ -85,8 +85,8 @@ export default async function AdminAnnoncesPage({
           .select('id', { count: 'exact', head: true }),
   ])
 
-  const rawAnnonces = (type === 'accompagnante' ? auxResult.data : benResult.data) || []
-  const auxCount = type === 'accompagnante' ? rawAnnonces.length : (auxResult.count ?? 0)
+  const rawAnnonces = (type === 'accompagnant' ? auxResult.data : benResult.data) || []
+  const auxCount = type === 'accompagnant' ? rawAnnonces.length : (auxResult.count ?? 0)
   const benCount = type === 'accompagne' ? rawAnnonces.length : (benResult.count ?? 0)
 
   // Transformer les donnees pour le composant client. Cast applicatif sur
@@ -125,9 +125,9 @@ export default async function AdminAnnoncesPage({
 
         <div className="flex gap-2 mb-6 flex-wrap">
           <Link
-            href="/admin/annonces?type=accompagnante"
+            href="/admin/annonces?type=accompagnant"
             className={`inline-flex items-center px-5 py-2 rounded-full text-sm font-medium transition ${
-              type === 'accompagnante'
+              type === 'accompagnant'
                 ? 'bg-accent border border-accent text-black'
                 : 'bg-white border border-[#e8dfd2] text-gray-700 hover:border-kraft'
             }`}

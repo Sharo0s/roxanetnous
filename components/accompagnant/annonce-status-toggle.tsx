@@ -6,7 +6,7 @@ import { updateAnnonceAccompagnanteStatus, updateAnnonceAccompagneStatus } from 
 type Props = {
   annonceId: string
   currentStatus: string
-  type: 'accompagnante' | 'accompagne'
+  type: 'accompagnant' | 'accompagne'
 }
 
 export function AnnonceStatusToggle({ annonceId, currentStatus, type }: Props) {
@@ -17,7 +17,7 @@ export function AnnonceStatusToggle({ annonceId, currentStatus, type }: Props) {
     setLoading(true)
     setError(null)
     const newStatus = currentStatus === 'publiee' ? 'archivee' : 'publiee'
-    const action = type === 'accompagnante'
+    const action = type === 'accompagnant'
       ? updateAnnonceAccompagnanteStatus
       : updateAnnonceAccompagneStatus
     const result = await action(annonceId, newStatus as 'publiee' | 'archivee')

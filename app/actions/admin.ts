@@ -97,7 +97,7 @@ export async function validateAccompagnante(
   await supabaseAdmin.from('admin_actions_log').insert({
     admin_id: user.id,
     action_type: decision,
-    target_type: 'accompagnante',
+    target_type: 'accompagnant',
     target_id: profileId,
     details: { motif: motif || null, decision },
   })
@@ -280,12 +280,12 @@ export async function markVisioToPlan(profileId: string): Promise<ValidationResu
   await supabaseAdmin.from('admin_actions_log').insert({
     admin_id: user.id,
     action_type: 'visio_planifiee',
-    target_type: 'accompagnante',
+    target_type: 'accompagnant',
     target_id: profileId,
     details: { planifie_le: new Date().toISOString() },
   })
 
-  // Création/récupération de la conversation admin <-> accompagnante et envoi
+  // Création/récupération de la conversation admin <-> accompagnant et envoi
   // du message de convocation visio. Exécuté post-réponse via after().
   after(async () => {
     try {
@@ -412,7 +412,7 @@ export async function markVisioRealisee(
   await supabaseAdmin.from('admin_actions_log').insert({
     admin_id: user.id,
     action_type: 'visio_realisee',
-    target_type: 'accompagnante',
+    target_type: 'accompagnant',
     target_id: profileId,
     details: { visio_date: new Date(visioDate).toISOString(), notes: notes?.trim() || null },
   })

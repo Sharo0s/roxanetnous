@@ -8,7 +8,7 @@ export type SignalementResult = {
 }
 
 export async function creerSignalement(data: {
-  cible_type: 'user' | 'annonce_accompagnante' | 'annonce_accompagne' | 'message'
+  cible_type: 'user' | 'annonce_accompagnant' | 'annonce_accompagne' | 'message'
   cible_id: string
   motif: string
   description: string

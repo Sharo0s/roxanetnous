@@ -1,7 +1,7 @@
 'use client'
 
 import { useRef, useState } from 'react'
-import { updateAccompagnanteProfile, updateUserInfo } from '@/app/actions/profile'
+import { updateAccompagnantProfile, updateUserInfo } from '@/app/actions/profile'
 import { uploadJustificatif } from '@/app/actions/accompagnante'
 import { Button } from '@/components/ui/button'
 import { CityAutocomplete } from '@/components/ui/city-autocomplete'
@@ -33,7 +33,7 @@ type Props = {
   departementsOuverts: string[]
 }
 
-export function AccompagnanteProfileForm({ userInfo, profile, departementsOuverts }: Props) {
+export function AccompagnantProfileForm({ userInfo, profile, departementsOuverts }: Props) {
   const [firstName, setFirstName] = useState(userInfo.first_name)
   const [lastName, setLastName] = useState(userInfo.last_name)
   const [phone, setPhone] = useState(userInfo.phone)
@@ -155,8 +155,8 @@ export function AccompagnanteProfileForm({ userInfo, profile, departementsOuvert
       return
     }
 
-    // Mise a jour du profil accompagnante
-    const profileResult = await updateAccompagnanteProfile({
+    // Mise a jour du profil accompagnant
+    const profileResult = await updateAccompagnantProfile({
       diplomes,
       experience,
       specialites,

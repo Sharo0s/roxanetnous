@@ -10,7 +10,7 @@ function track(table: string, id: string): void {
   tracker.push({ table, id })
 }
 
-export type TestRole = 'accompagnante' | 'accompagne' | 'admin'
+export type TestRole = 'accompagnant' | 'accompagne' | 'admin'
 
 export type TestUser = {
   id: string
@@ -45,7 +45,7 @@ export async function createTestUser(
   }
   const userId = authData.user.id
 
-  // Le role 'admin' n'est pas pris par le trigger (qui ne supporte que 'accompagnante'
+  // Le role 'admin' n'est pas pris par le trigger (qui ne supporte que 'accompagnant'
   // / 'accompagne'), on UPDATE explicitement. Idem first_name/last_name dans tous les cas.
   const { error: updateError } = await supabase
     .from('users')
@@ -101,7 +101,7 @@ export async function createTestSubscription(
 
 export type TestProfile = { id: string; userId: string }
 
-// Le trigger handle_new_user cree deja un profile pour les roles 'accompagnante'
+// Le trigger handle_new_user cree deja un profile pour les roles 'accompagnant'
 // et 'accompagne'. Ces helpers retournent le profile existant (UPDATE pour enrichir
 // les champs metier) plutot que d'INSERT en doublon.
 export async function createTestAccompagnanteProfile(

@@ -121,7 +121,7 @@ export async function getRepartitionRoles() {
   const { count: accompagnantes } = await supabase
     .from('users')
     .select('id', { count: 'exact', head: true })
-    .eq('role', 'accompagnante')
+    .eq('role', 'accompagnant')
 
   const { count: accompagnes } = await supabase
     .from('users')
@@ -241,10 +241,10 @@ export async function getMrrDetail() {
     roleMap.set(u.id, u.role)
   }
 
-  // Segments: accompagnante_mensuel, accompagnante_annuel, accompagne_mensuel, accompagne_annuel
+  // Segments: accompagnant_mensuel, accompagnant_annuel, accompagne_mensuel, accompagne_annuel
   const segments = {
-    accompagnante_mensuel: { count: 0, mrr: 0 },
-    accompagnante_annuel: { count: 0, mrr: 0 },
+    accompagnant_mensuel: { count: 0, mrr: 0 },
+    accompagnant_annuel: { count: 0, mrr: 0 },
     accompagne_mensuel: { count: 0, mrr: 0 },
     accompagne_annuel: { count: 0, mrr: 0 },
   }
@@ -256,7 +256,7 @@ export async function getMrrDetail() {
   let essaiAccompagnes = 0
 
   for (const s of subs || []) {
-    const role = roleMap.get(s.user_id) || 'accompagnante'
+    const role = roleMap.get(s.user_id) || 'accompagnant'
     const isAnnuel = s.plan_type === 'annual' || s.plan_type === 'annuel'
     const segmentKey = `${role}_${isAnnuel ? 'annuel' : 'mensuel'}` as keyof typeof segments
 
@@ -313,8 +313,8 @@ export async function getMrrParSegmentParMois() {
     const debutDuMois = new Date(year, month - 1, 1)
 
     const seg = {
-      accompagnante_mensuel: { count: 0, mrr: 0 },
-      accompagnante_annuel: { count: 0, mrr: 0 },
+      accompagnant_mensuel: { count: 0, mrr: 0 },
+      accompagnant_annuel: { count: 0, mrr: 0 },
       accompagne_mensuel: { count: 0, mrr: 0 },
       accompagne_annuel: { count: 0, mrr: 0 },
     }
@@ -327,7 +327,7 @@ export async function getMrrParSegmentParMois() {
         if (cancelledAt < debutDuMois) continue
       }
 
-      const role = roleMap.get(s.user_id) || 'accompagnante'
+      const role = roleMap.get(s.user_id) || 'accompagnant'
       const isAnnuel = s.plan_type === 'annual' || s.plan_type === 'annuel'
       const key = `${role}_${isAnnuel ? 'annuel' : 'mensuel'}` as keyof typeof seg
       if (seg[key]) {
@@ -336,7 +336,7 @@ export async function getMrrParSegmentParMois() {
       }
     }
 
-    const total = seg.accompagnante_mensuel.mrr + seg.accompagnante_annuel.mrr + seg.accompagne_mensuel.mrr + seg.accompagne_annuel.mrr
+    const total = seg.accompagnant_mensuel.mrr + seg.accompagnant_annuel.mrr + seg.accompagne_mensuel.mrr + seg.accompagne_annuel.mrr
 
     return { mois: m, ...seg, total }
   })

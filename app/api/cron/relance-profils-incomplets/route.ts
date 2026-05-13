@@ -1,4 +1,4 @@
-// Cron quotidien : rappel email aux accompagnantes inscrites mais qui n'ont
+// Cron quotidien : rappel email aux accompagnants inscrites mais qui n'ont
 // pas finalise leur onboarding (validation_status = 'a_completer').
 //
 // Cible :
@@ -57,7 +57,7 @@ export async function GET(request: NextRequest) {
     const windowEnd = new Date(now - (stage.daysAgo - 0.5) * ONE_DAY_MS).toISOString()
     const windowStart = new Date(now - (stage.daysAgo + 0.5) * ONE_DAY_MS).toISOString()
 
-    // Profils accompagnantes en a_completer, candidats relance.
+    // Profils accompagnants en a_completer, candidats relance.
     const { data: profiles, error } = await supabase
       .from('accompagnants_profiles')
       .select(`

@@ -75,7 +75,7 @@ export function InfiniteAnnoncesGrid({ annonces, badgesMap, userId, favorisIds =
                 <div className="absolute top-3 right-3">
                   <FavoriButton
                     annonceId={annonce.id}
-                    type="accompagnante"
+                    type="accompagnant"
                     initialIsFavori={favorisIds.includes(annonce.id)}
                   />
                 </div>
