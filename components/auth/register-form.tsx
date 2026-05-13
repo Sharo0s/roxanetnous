@@ -332,7 +332,7 @@ export function RegisterForm() {
                 </p>
               )}
               <p className="mt-2 text-xs text-gray-500">
-                Si une accompagnante validée vous a transmis un code, saisissez-le ici. Sa garantie remplace la visio et la vérification de documents : vous publierez vos annonces dès la souscription.
+                Vous avez un code transmis par un accompagnant déjà validé ? Saisissez-le ici. Sa caution remplace la visio et la vérification de vos documents : vous pourrez publier vos annonces dès la souscription à l&apos;abonnement.
               </p>
             </div>
 
