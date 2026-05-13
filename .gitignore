@@ -15,6 +15,9 @@
 /.next/
 /out/
 
+# SWC build cache (Next.js)
+/.swc/
+
 # Production
 /build
 
