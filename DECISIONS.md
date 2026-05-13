@@ -457,40 +457,46 @@ Les pages admin Server Components (`app/admin/`) consomment Supabase via 7 fichi
 
 ---
 
-## 2026-05-13 : Canal oncall = Sentry mobile app (decision F-Epic5-E1, revisee)
+## 2026-05-13 : Canal oncall = Email Sentry + push notifs iPhone Mail (decision F-Epic5-E1, revisee 2 fois)
 
-**Decision :** Pour le canal d'alertes oncall livre par story 5.E.1, le canal retenu est l'**application mobile Sentry native** (iOS / Android), avec push notifications sur exception critique en production.
+**Decision :** Pour le canal d'alertes oncall livre par story 5.E.1, le canal retenu est l'**email Sentry standard** avec **push notifications natives activees sur l'app Mail / Gmail de l'iPhone** de Sylvain.
 
-**Note revision 2026-05-13 (apres-midi)** : la decision initiale F-Epic5-E1 mentionnait Slack. Sylvain a indique ne pas utiliser Slack. Decision revisee vers Sentry mobile app, plus adaptee au cas d'usage (un seul dev oncall, pas besoin de plateforme de discussion d'equipe).
+**Historique decision (3 revisions le 2026-05-13) :**
 
-**Motivation :**
-- Sylvain est seul oncall sur roxanetnous : pas de rotation a orchestrer, pas de besoin de canal de discussion d'equipe.
-- L'app Sentry mobile fournit des push notifications natives iOS/Android, sans intermediaire OAuth.
-- Affichage direct de l'issue + stack trace dans l'app : pas besoin de cliquer un lien pour acceder au contexte de l'incident.
-- Gratuit, integre au compte Sentry existant (compte `roxanetnous@outlook.com`).
-- Setup minimal (~5 min) : installer app + se connecter + activer push notifications.
+1. **Decision initiale matin** : Slack. Annulee (Sylvain n'utilise pas Slack).
+2. **Decision revisee apres-midi** : Sentry mobile app native. **Annulee : l'app mobile Sentry n'existe pas** (verification web search 2026-05-13). C'etait une erreur de Claude qui aurait du verifier l'existence du produit avant de le recommander.
+3. **Decision finale** : email + push notifs systeme. Aligne sur le canal email Sentry deja actif depuis Epic 4 story 4.1.
+
+**Motivation finale :**
+- Sylvain est seul oncall : pas de besoin de plateforme tierce.
+- L'email Sentry est deja configure et envoie deja les alertes (Epic 4 story 4.1).
+- Push notifications iOS sur app Mail = equivalent fonctionnel a un canal push dedie, avec son + banniere + badge.
+- Zero integration tierce a maintenir : pas d'OAuth, pas d'app supplementaire, pas de webhook.
+- Setup minimal (~2 min) : verifier push notifs systeme iOS sur l'app Mail / Gmail.
+- Compatible offline / changement de phone : les emails restent accessibles meme apres factory reset, pas de re-configuration push tier.
 
 **Alternatives rejetees :**
-- **Slack** (decision initiale) : Sylvain n'utilise pas Slack. Aurait necessite la creation d'un workspace dedie + OAuth + channel + regles. Surcharge injustifiee.
-- **PagerDuty** : surfacage payant (~10$/utilisateur/mois) sans benefice pour un seul oncall.
-- **Opsgenie** : pareil + complexite UI superieure.
-- **Discord** : possible mais surfacage similaire a Slack (OAuth + channel) sans avantage.
-- **Telegram bot** : custom webhook a maintenir, surcharge integration.
-- **Email + push notifs email actives** : delais variables, risque de spam folder, dependance au client email.
-- **SMS via Twilio** : surcharge integration + cout par message.
+- **Slack** : non utilise.
+- **Sentry mobile app native** : n'existe pas (Sentry est un service web, pas une app dev mobile).
+- **PagerDuty / Opsgenie** : payants, surdimensionnes solo.
+- **Discord / Telegram** : surfacage OAuth sans benefice si email natif suffit.
+- **ntfy.sh / Pushover** : push pur via webhook, plus flexible mais surcharge setup pour un cas d'usage simple.
+- **SMS via Twilio** : cout par message.
 
 **Pattern d'integration :**
-- **App Sentry** : installer depuis App Store (iOS) ou Play Store (Android).
-- **Connexion** : compte `roxanetnous@outlook.com` (deja owner organisation Sentry `roxanetnous` en region `de.sentry.io`).
-- **Configuration push notifications** : Sentry web -> Settings -> Account -> Notifications -> Issue Alerts -> activer "Mobile" comme canal.
+- **Email Sentry** : deja actif. Verifier que `roxanetnous@outlook.com` est bien l'email destinataire dans Sentry Settings -> Account -> Notifications.
+- **Push notifs iPhone** : iOS Reglages -> Notifications -> Mail (ou Gmail) -> activer "Autoriser les notifications", "Sons", "Bannieres", "Badges". Si plusieurs comptes email, activer specifiquement pour le compte `roxanetnous@outlook.com`.
 - **Regles d'alerte Sentry** (Settings -> Alerts -> Create Alert Rule) :
-  1. Toute nouvelle exception non-resolved + tag `severity: 'critical'` -> push immediate mobile.
-  2. Seuil frequence > 10 exceptions/min sur n'importe quel tag -> push immediate mobile.
-  3. Erreur dans chemins critiques (`flow: 'webhook-stripe' | 'paywall' | 'parrainage' | 'email'`) non-resolved depuis > 5 min -> push immediate mobile.
-  4. Alertes non-critical (`severity: 'warning'`) -> digest quotidien 9h00 (email seulement, pas de push mobile).
-- **Test de bout en bout 5.E.1** : declencher exception intentionnelle taggee `severity: 'critical'` en preview env via Sentry SDK, mesurer delai reception push mobile (cible < 2 min).
+  1. Toute nouvelle exception non-resolved + tag `severity: 'critical'` -> Action : Send Email a `roxanetnous@outlook.com`. Frequency : immediate (5 min cooldown).
+  2. Seuil frequence > 10 exceptions/min sur n'importe quel tag -> Send Email immediate.
+  3. Erreur dans chemins critiques (`flow: 'webhook-stripe' | 'paywall' | 'parrainage' | 'email'`) non-resolved depuis > 5 min -> Send Email immediate.
+  4. Alertes non-critical (`severity: 'warning'`) -> Daily digest 9h00 (un seul email aggrege par jour, pas de push push individuel).
+- **Subject lines explicites** : utiliser dans le template Sentry des prefixes type `[CRITICAL]`, `[BURST]`, `[WEBHOOK]` pour identification rapide via banniere iPhone sans ouvrir l'email.
+- **Test de bout en bout 5.E.1** : declencher exception intentionnelle taggee `severity: 'critical'` en preview env via une route metier reelle, mesurer delai reception push notification iPhone (cible < 2 min).
 
-**Regle :** Le compte mobile Sentry est considere infrastructure critique (au meme niveau que le compte web Sentry). Verifier que les push notifications restent actives apres mises a jour OS / app. Documente dans `architecture-technique-roxanetnous-2026-02-09.md` section Observabilite & Monitoring a la livraison 5.E.1.
+**Regle :** L'integrite du canal email est consideree infrastructure critique. Verifier (a) que `roxanetnous@outlook.com` reste accessible (pas de spam folder Sentry), (b) que les push notifs iPhone restent actives apres mises a jour iOS, (c) que les alertes Sentry arrivent bien dans la boite principale (configurer une regle Outlook pour les marquer prioritaires si necessaire). Documente dans `architecture-technique-roxanetnous-2026-02-09.md` section Observabilite & Monitoring a la livraison 5.E.1.
+
+**Lecon apprise :** verifier l'existence d'un produit avant de le recommander dans un cadrage. Le ping-pong Slack -> Sentry mobile -> Email aurait pu etre evite avec un audit en amont (questions : "quelle plateforme de chat utilises-tu ?", "quelle est ta tolerance push notif vs email ?").
 
 ---
 

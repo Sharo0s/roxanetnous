@@ -56,7 +56,7 @@ Justification : Epic 5 est un chantier d'hardening transverse independant du go-
 **Pre-requis specifiques mini-epics (decisions actees 2026-05-13) :**
 
 - **5.A renommage** : strategie migration enum role decidee en story 5.A.1 (architecture review legere, pas de modif code/BDD).
-- **5.E observabilite oncall** : canal retenu = **Sentry mobile app** (decision Sylvain 2026-05-13, revisee). Justification : Sylvain seul oncall, app native iOS/Android gratuite, push notifications directes sans OAuth tiers. Note revision : la decision initiale mentionnait Slack mais Sylvain n'utilise pas Slack. Compte Sentry deja actif depuis Epic 4 story 4.1.
+- **5.E observabilite oncall** : canal retenu = **Email Sentry + push notifs iPhone Mail** (decision F-Epic5-E1 finale 2026-05-13, revisee 2 fois). Note historique : initialement Slack (annule, non utilise), puis Sentry mobile app (annule, n'existe pas comme produit). Canal final aligne sur l'email Sentry deja actif depuis Epic 4 story 4.1, avec push notifs OS iPhone pour effet equivalent push dedie. Setup minimal (~2 min).
 
 ## Periodemetre et hors-scope
 
@@ -804,40 +804,40 @@ So que send-waitlist puisse honorer des ouvertures de departements a forte audie
 
 ## Mini-epic 5.E : Observabilite oncall
 
-**Goal** : Completer l'instrumentation Sentry livree Epic 4 par un canal d'alertes oncall actif (Sentry mobile app native iOS / Android) pour notifier Sylvain sur les exceptions critiques en production, plutot que de dependre de la consultation passive du dashboard Sentry.
+**Goal** : Completer l'instrumentation Sentry livree Epic 4 par un canal d'alertes oncall actif : emails Sentry standards avec push notifications iPhone natives sur l'app Mail, pour notifier Sylvain sur les exceptions critiques en production, plutot que de dependre de la consultation passive du dashboard Sentry.
 
 **FRs couverts** : aucun direct. NFR4 (integrations sortantes), NFR5 (fiabilite : detection rapide incidents).
 
-**Pre-requis** : Sentry SDK livre Epic 4 story 4.1, compte Sentry actif. Decision F-Epic5-E1 (revisee 2026-05-13) : canal = Sentry mobile app (pas Slack ni autre tiers).
+**Pre-requis** : Sentry SDK livre Epic 4 story 4.1, compte Sentry actif. Decision F-Epic5-E1 (revisee 2 fois 2026-05-13) : canal = email Sentry + push iPhone Mail (Slack et Sentry mobile app annules - cf. DECISIONS.md).
 
-### Story 5.E.1 : Configuration Sentry mobile app + regles d'alerte
+### Story 5.E.1 : Configuration alertes Sentry email + push iPhone
 
 As Sylvain (admin/fondateur),
-I want recevoir un push notification mobile (iOS / Android via app Sentry native) lorsqu'une exception critique est enregistree dans Sentry en production,
+I want recevoir un email Sentry avec push notification iPhone (banniere + son) lorsqu'une exception critique est enregistree en production,
 So que je puisse intervenir sur les incidents prod sans avoir a consulter le dashboard Sentry passivement.
 
 **Acceptance Criteria :**
 
-**Given** un compte Sentry actif (Epic 4 story 4.1) et l'app mobile Sentry installee sur smartphone,
+**Given** un compte Sentry actif (Epic 4 story 4.1) avec email `roxanetnous@outlook.com`,
 **When** la story est implementee,
-**Then** la connexion mobile est etablie avec le compte `roxanetnous@outlook.com` (compte owner organisation Sentry `roxanetnous`),
-**And** les push notifications sont autorisees au niveau systeme (iOS Settings ou Android Settings),
-**And** dans Sentry web (Settings -> Account -> Notifications -> Issue Alerts), le canal "Mobile" est active.
+**Then** sur Sentry web (Settings -> Account -> Notifications -> Issue Alerts) le canal email est confirme actif,
+**And** sur iPhone (Reglages -> Notifications -> Mail ou Gmail), les push notifications sont activees pour le compte `roxanetnous@outlook.com` (Autoriser notifications + Sons + Bannieres + Badges),
+**And** optionnel : une regle Outlook marque les emails Sentry comme prioritaires (anti spam folder).
 
-**Given** l'app mobile configuree,
+**Given** le canal email + push configures,
 **When** les regles d'alerte Sentry sont definies (Settings -> Alerts -> Create Alert Rule),
-**Then** elles couvrent (a) toute nouvelle exception non-resolved + tag `severity: 'critical'`, (b) un seuil de frequence > 10 exceptions/min sur n'importe quel tag, (c) une erreur dans les chemins critiques (`flow: webhook-stripe | paywall | parrainage | email`) non-resolved depuis > 5 min,
-**And** les alertes non-critical (`severity: 'warning'`) sont aggregees en digest quotidien email a 9h00 (pas de push mobile pour ce niveau).
+**Then** elles couvrent 4 cas : (a) toute nouvelle exception non-resolved + tag `severity: 'critical'` -> Send Email immediate (5 min cooldown), (b) un seuil de frequence > 10 exceptions/min sur n'importe quel tag -> Send Email immediate, (c) une erreur dans les chemins critiques (`flow: webhook-stripe | paywall | parrainage | email`) non-resolved depuis > 5 min -> Send Email immediate, (d) alertes non-critical (`severity: 'warning'`) -> Daily digest 9h00 (un seul email aggrege par jour),
+**And** les subject lines email utilisent des prefixes `[CRITICAL]`, `[BURST]`, `[WEBHOOK]` pour identification rapide via banniere iPhone sans ouvrir.
 
 **Given** la configuration est en place,
 **When** un test manuel est effectue,
 **Then** declencher une erreur intentionnelle taggee `severity: 'critical'` en preview env (via une route metier reelle, l'endpoint /api/test-sentry ayant ete supprime story 5.C.2),
-**And** verifier reception du push mobile sous 2 minutes sur le smartphone.
+**And** verifier reception du push notification iPhone sous 2 minutes (banniere + son + badge).
 
 **Given** la story est livree,
 **When** un commit / changement de config Sentry est documente,
-**Then** la documentation `_bmad-output/planning-artifacts/architecture-technique-roxanetnous-2026-02-09.md` (section Observabilite & Monitoring) est mise a jour avec le canal mobile retenu,
-**And** DECISIONS.md ajoute une decision F-Epic5-E1 revisee (canal mobile + justification + alternatives rejetees),
+**Then** la documentation `_bmad-output/planning-artifacts/architecture-technique-roxanetnous-2026-02-09.md` (section Observabilite & Monitoring) est mise a jour avec le canal email+push retenu,
+**And** DECISIONS.md F-Epic5-E1 est consolide (final email + historique 2 revisions Slack/Sentry mobile),
 **And** le mini-epic 5.E est cloture (1/1 done).
 
 ---

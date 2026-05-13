@@ -239,11 +239,11 @@ development_status:
   5-d-2-audit-suppression-batch-limit-send-waitlist: backlog
 
   # Mini-epic 5.E - Observabilite oncall (1 story, parallele)
-  # 5.E.1 partie code/doc livree 2026-05-13. Decision F-Epic5-E1 revisee 2026-05-13
-  # apres-midi : canal = Sentry mobile app (pas Slack ni Discord ni tiers).
-  # Reste cote Sylvain : (1) installer app Sentry, (2) connexion compte, (3) push
-  # notifs systeme, (4) Sentry web -> activer canal Mobile, (5) creer 4 regles
-  # d'alerte, (6) test bout en bout preview env. Statut 'review' jusqu'a confirmation.
+  # 5.E.1 partie code/doc livree 2026-05-13. Decision F-Epic5-E1 revisee 2 fois
+  # 2026-05-13 : (1) Slack (annule, non utilise), (2) Sentry mobile app (annule,
+  # n'existe pas), (3) Email Sentry + push iPhone Mail (final). Setup reste
+  # cote Sylvain (~2 min) : iOS Reglages -> Notifications -> Mail -> activer
+  # push notifs pour roxanetnous@outlook.com + creer 4 regles d'alerte Sentry.
   5-e-1-coupling-sentry-plateforme-oncall: review
 
   epic-5-retrospective: optional
