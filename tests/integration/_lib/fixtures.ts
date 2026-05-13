@@ -176,7 +176,7 @@ export async function createTestConversation(
   const { data, error } = await supabase
     .from('conversations')
     .insert({
-      accompagnante_id: accompagnanteProfileId,
+      accompagnant_id: accompagnanteProfileId,
       accompagne_id: accompagneProfileId,
       admin_id: opts?.adminUserId ?? null,
     })

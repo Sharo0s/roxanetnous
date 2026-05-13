@@ -38,10 +38,10 @@ describe('paywall : abonne actif (T8)', () => {
     const supabase = getAdminClient()
     const { data: conv } = await supabase
       .from('conversations')
-      .select('id, accompagnante_id')
+      .select('id, accompagnant_id')
       .eq('id', result.conversationId!)
       .single()
     expect(conv).not.toBeNull()
-    expect(conv).toMatchObject({ accompagnante_id: auxProfile.id })
+    expect(conv).toMatchObject({ accompagnant_id: auxProfile.id })
   })
 })

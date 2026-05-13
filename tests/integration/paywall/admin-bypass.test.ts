@@ -15,7 +15,7 @@ import { getAdminClient } from '@/tests/integration/_lib/supabase-admin'
 // a l'admin (FR11quater - validation visio sans abonnement).
 //
 // Test : une accompagnante SANS abonnement peut envoyer un message dans une
-// conversation admin pure (accompagnante_id + admin_id, accompagne_id NULL).
+// conversation admin pure (accompagnant_id + admin_id, accompagne_id NULL).
 describe('paywall : admin bypass (T10)', () => {
   beforeAll(async () => {
     await cleanupAllFixtures()
@@ -31,14 +31,14 @@ describe('paywall : admin bypass (T10)', () => {
 
     const admin = await createTestUser('admin')
 
-    // Conversation admin pure : accompagnante_id + admin_id, accompagne_id NULL.
+    // Conversation admin pure : accompagnant_id + admin_id, accompagne_id NULL.
     // Pattern FR11quater : la convocation visio passe par cette conversation,
     // l'accompagnante n'a pas encore d'abonnement (validation en cours).
     const supabase = getAdminClient()
     const { data: conv, error } = await supabase
       .from('conversations')
       .insert({
-        accompagnante_id: auxProfile.id,
+        accompagnant_id: auxProfile.id,
         accompagne_id: null,
         admin_id: admin.id,
       })
