@@ -57,8 +57,6 @@ export default async function AccompagneDashboard() {
     .eq('user_id', user.id)
   const favorisCount = favorisCountRaw || 0
 
-  const profilIncomplet = !profile?.ville
-
   const subscriptionLabel = subscription.status === 'trialing'
     ? `Essai gratuit - Fin le ${subscription.trialEnd ? new Date(subscription.trialEnd).toLocaleDateString('fr-FR') : subscription.currentPeriodEnd ? new Date(subscription.currentPeriodEnd).toLocaleDateString('fr-FR') : '-'}`
     : subscribed && !subscription.cancelAt
@@ -104,7 +102,7 @@ export default async function AccompagneDashboard() {
               <h2 className="text-3xl md:text-4xl text-gray-900 italic mb-2 leading-tight">
                 {userData.first_name} {userData.last_name}
               </h2>
-              {profile?.ville ? (
+              {profile?.ville && (
                 <p className="text-sm text-gray-600 flex items-center justify-center md:justify-start gap-1.5">
                   <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -112,23 +110,6 @@ export default async function AccompagneDashboard() {
                   </svg>
                   {profile.ville}
                 </p>
-              ) : (
-                <Link
-                  href="/accompagne/profil"
-                  className="inline-flex items-center gap-1.5 text-sm font-medium text-black bg-accent/30 border border-kraft rounded-lg px-3 py-1.5 hover:bg-accent/50 transition"
-                >
-                  <svg className="w-3.5 h-3.5 flex-shrink-0 text-kraft" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M5.07 19h13.86c1.54 0 2.5-1.67 1.73-3L13.73 4a2 2 0 00-3.46 0L3.34 16c-.77 1.33.19 3 1.73 3z" />
-                  </svg>
-                  Renseignez votre ville pour des recommandations locales
-                </Link>
-              )}
-              {subscribed && profilIncomplet && (
-                <div className="mt-3 p-3 rounded-lg border border-kraft bg-accent/30 max-w-prose">
-                  <p className="text-sm text-black">
-                    Encore quelques détails pour profiter pleinement de la plateforme.
-                  </p>
-                </div>
               )}
             </div>
           </div>
