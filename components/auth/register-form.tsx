@@ -245,9 +245,9 @@ export function RegisterForm() {
                   : 'border-gray-200 hover:border-accent'
               }`}
             >
-              <p className="font-semibold text-sm">Vos compétences méritent que vous soyez trouvé(e)</p>
+              <p className="font-semibold text-sm">Une accompagnante</p>
               <p className={`text-xs mt-1 ${role === 'accompagnante' ? 'text-black/50' : 'text-gray-500'}`}>
-                Au bon moment, au bon endroit
+                Je propose mes services d&apos;accompagnement
               </p>
             </button>
             <button
@@ -259,9 +259,9 @@ export function RegisterForm() {
                   : 'border-gray-200 hover:border-accent'
               }`}
             >
-              <p className="font-semibold text-sm">Trouvez votre accompagnant</p>
+              <p className="font-semibold text-sm">Une personne à accompagner</p>
               <p className={`text-xs mt-1 ${role === 'accompagne' ? 'text-black/50' : 'text-gray-500'}`}>
-                créer votre mise en relation
+                Je cherche une accompagnante
               </p>
             </button>
           </div>
