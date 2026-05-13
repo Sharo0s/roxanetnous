@@ -693,7 +693,9 @@ export async function POST(request: NextRequest) {
       const newPriceId = subscription.items.data[0]?.price.id || null
       const newPlanType = newPriceId ? derivePlanType(newPriceId) : existing.plan_type
 
-      const cancellation = (subscription as any).cancellation_details
+      // cancellation_details n'est pas typee dans stripe v22.1.1 mais existe au runtime
+      // (Stripe API 2024-04-10+). Cast localise vers un shape minimal.
+      const cancellation = (subscription as unknown as { cancellation_details?: { reason?: string | null; comment?: string | null; feedback?: string | null } }).cancellation_details
       const updateData: Record<string, unknown> = {
         status: subscription.status === 'active' ? 'active' : subscription.status === 'past_due' ? 'past_due' : subscription.status === 'canceled' ? 'cancelled' : subscription.status,
         current_period_start: period.currentPeriodStart,
@@ -788,7 +790,9 @@ export async function POST(request: NextRequest) {
     case 'invoice.payment_failed': {
       const invoice = event.data.object as Stripe.Invoice
 
-      const subscriptionId = (invoice.parent as any)?.subscription_details?.subscription
+      // invoice.parent shape variable selon Stripe API version. Cast localise vers shape minimal.
+      const invoiceParent = invoice.parent as unknown as { subscription_details?: { subscription?: string | { id: string } } } | null
+      const subscriptionId = invoiceParent?.subscription_details?.subscription
       if (!subscriptionId) break
 
       const subId = typeof subscriptionId === 'string' ? subscriptionId : subscriptionId.id

@@ -8,6 +8,11 @@ import { AccompagneDashboardHeader } from '@/components/layout/accompagne-dashbo
 import { getUnreadCount } from '@/lib/unread-count'
 import { hasActiveSubscription } from '@/lib/subscription-helpers'
 
+type ConversationParticipantProfile = {
+  user_id: string
+  users: { first_name: string | null; last_name: string | null } | null
+} | null
+
 export default async function ConversationPage({
   params,
 }: {
@@ -50,10 +55,12 @@ export default async function ConversationPage({
 
   if (!conversation) redirect('/messages')
 
-  // Verifier que l'utilisateur fait partie de la conversation
-  const auxProfile = conversation.accompagnantes_profiles as any
-  const benProfile = conversation.accompagnes_profiles as any
-  const adminUserId = (conversation as any).admin_id as string | null
+  // Verifier que l'utilisateur fait partie de la conversation.
+  // Supabase generated types modelisent les relations 1-1 imbriquees comme tableaux,
+  // alors qu'avec `.single()` sur une FK unique le retour est un objet. Type local.
+  const auxProfile = conversation.accompagnantes_profiles as unknown as ConversationParticipantProfile
+  const benProfile = conversation.accompagnes_profiles as unknown as ConversationParticipantProfile
+  const adminUserId = conversation.admin_id as string | null
   const isAdminConv = !!adminUserId
 
   const isAux = auxProfile?.user_id === user.id
@@ -65,7 +72,7 @@ export default async function ConversationPage({
   }
 
   // Determiner l'interlocuteur a afficher
-  let otherUser: { first_name?: string; last_name?: string } | null = null
+  let otherUser: { first_name?: string | null; last_name?: string | null } | null = null
   if (isAux) {
     otherUser = isAdminConv
       ? { first_name: 'Équipe', last_name: 'roxanetnous' }

@@ -6,6 +6,10 @@ import { AccompagneDashboardHeader } from '@/components/layout/accompagne-dashbo
 import { LogoutButton } from '@/components/auth/logout-button'
 import { getUnreadCount } from '@/lib/unread-count'
 
+type ConvProfileWithUser = {
+  users: { first_name: string | null; last_name: string | null } | null
+} | null
+
 export default async function MessagesPage() {
   const supabase = await createClient()
 
@@ -141,11 +145,13 @@ export default async function MessagesPage() {
                 displayName = 'Équipe roxanetnous'
                 initials = 'RN'
               } else if (userData.role === 'accompagnante') {
-                const u = (conv.accompagnes_profiles as any)?.users
+                const profile = conv.accompagnes_profiles as unknown as ConvProfileWithUser
+                const u = profile?.users
                 displayName = `${u?.first_name || ''} ${u?.last_name || ''}`.trim() || 'Accompagné'
                 initials = `${u?.first_name?.[0] || ''}${u?.last_name?.[0] || ''}`
               } else {
-                const u = (conv.accompagnantes_profiles as any)?.users
+                const profile = conv.accompagnantes_profiles as unknown as ConvProfileWithUser
+                const u = profile?.users
                 displayName = `${u?.first_name || ''} ${u?.last_name || ''}`.trim() || 'Accompagnant'
                 initials = `${u?.first_name?.[0] || ''}${u?.last_name?.[0] || ''}`
               }

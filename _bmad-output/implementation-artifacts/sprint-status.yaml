@@ -188,7 +188,10 @@ development_status:
   5-b-3-validation-stricte-type-url-admin-annonces: backlog
 
   # Mini-epic 5.C - Hardening typage + nettoyage CI (4 stories, parallele de 5.A/5.B)
-  5-c-1-resorption-as-any-hors-admin: backlog
+  # 5.C.1 livre 2026-05-13 commit a venir : 14 as any resorbes hors admin (8 fichiers),
+  # 5 types locaux ajoutes pour relations Supabase 1-1, scripts/check-as-any-global.mjs
+  # cree + integre vercel.json buildCommand. tsc exit 0, lint:a11y-check 155 baseline.
+  5-c-1-resorption-as-any-hors-admin: done
   5-c-2-suppression-endpoint-test-sentry: backlog
   5-c-3-normalisation-ipv6-mapped-ipv4: backlog
   5-c-4-script-vercel-env-add-automatise: backlog

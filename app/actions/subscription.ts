@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { stripe, getStripePriceId, getTrialDays } from '@/lib/stripe'
 import type { PlanType } from '@/lib/stripe'
+import Stripe from 'stripe'
 import { redirect } from 'next/navigation'
 import { getSubscriptionStatus } from '@/lib/subscription-helpers'
 
@@ -66,7 +67,7 @@ export async function createCheckoutSession(formData: FormData): Promise<void> {
     }
   }
 
-  const sessionParams: Record<string, unknown> = {
+  const sessionParams: Stripe.Checkout.SessionCreateParams = {
     customer: customerId,
     mode: 'subscription',
     line_items: [{ price: priceId, quantity: 1 }],
@@ -86,13 +87,14 @@ export async function createCheckoutSession(formData: FormData): Promise<void> {
   // Propager la metadata sur la subscription pour qu'elle reste accessible aux
   // handlers webhook ultérieurs (customer.subscription.updated, etc.) — utile
   // notamment pour le rattrapage du fingerprint parrainage en mode trial.
-  const subscriptionData: Record<string, unknown> = { metadata }
+  type SubscriptionDataParam = NonNullable<Stripe.Checkout.SessionCreateParams['subscription_data']>
+  const subscriptionData: SubscriptionDataParam = { metadata }
   if (trialDays) {
     subscriptionData.trial_period_days = trialDays
   }
   sessionParams.subscription_data = subscriptionData
 
-  const session = await stripe.checkout.sessions.create(sessionParams as any)
+  const session = await stripe.checkout.sessions.create(sessionParams)
 
   if (!session.url) redirect(`${dashboardPath}/abonnement`)
 

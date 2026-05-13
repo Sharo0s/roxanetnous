@@ -13,6 +13,23 @@ import { getUnreadCount } from '@/lib/unread-count'
 import { isDepartementOuvert } from '@/lib/departements'
 import { hasActiveSubscription } from '@/lib/subscription-helpers'
 
+type AnnoncePublicProfile = {
+  user_id: string
+  diplomes: string[] | null
+  experience: number | null
+  specialites: string[] | null
+  description: string | null
+  ville: string | null
+  code_postal: string | null
+  rayon_km: number | null
+  permis_conduire: boolean | null
+  vehicule: boolean | null
+  langues: string[] | null
+  disponibilites: Record<string, unknown> | null
+  validation_status: string | null
+  users: { first_name: string | null; last_name: string | null } | null
+} | null
+
 export default async function AnnonceDetailPage({
   params,
 }: {
@@ -64,7 +81,7 @@ export default async function AnnonceDetailPage({
   if (!annonce) redirect('/recherche')
   if (!(await isDepartementOuvert(annonce.code_postal))) redirect('/recherche')
 
-  const profile = annonce.accompagnantes_profiles as any
+  const profile = annonce.accompagnantes_profiles as unknown as AnnoncePublicProfile
   const u = profile?.users
   const auxUserId = profile?.user_id
 
@@ -85,7 +102,7 @@ export default async function AnnonceDetailPage({
   const subscribed = userData?.role === 'accompagne'
 
   const diplomeLabel = (profile?.diplomes as string[] || []).map((d: string) => DIPLOMES.find((dp) => dp.value === d)?.label || d).join(', ')
-  const expLabel = formatExperienceLabel(profile?.experience)
+  const expLabel = formatExperienceLabel(profile?.experience != null ? String(profile.experience) : null)
   const specLabels = (profile?.specialites as string[] || []).map(
     (s: string) => SPECIALITES.find((sp) => sp.value === s)?.label || s
   )
@@ -132,7 +149,7 @@ export default async function AnnonceDetailPage({
                 <h1 className="text-2xl font-bold text-gray-900">
                   {u?.first_name} {u?.last_name?.[0]}.
                 </h1>
-                <BadgesDisplay badges={badgesMap[auxUserId]} />
+                <BadgesDisplay badges={auxUserId ? badgesMap[auxUserId] : undefined} />
               </div>
               <p className="text-black">
                 {diplomeLabel} — Expérience : {expLabel}

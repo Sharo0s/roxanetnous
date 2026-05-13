@@ -1,6 +1,19 @@
 import { createClient } from '@/lib/supabase/server'
 import { calculateMatchScore } from '@/lib/matching'
 import { sendMatchingNotificationEmail } from '@/lib/emails'
+
+type AccompagnanteMatchingProfile = {
+  user_id: string
+  specialites: string[] | null
+  ville: string | null
+  code_postal: string | null
+  experience: number | null
+  diplomes: string[] | null
+  disponibilites: Record<string, unknown> | null
+  rayon_km: number | null
+  latitude: number | null
+  longitude: number | null
+} | null
 import { getCodesPostauxFilterOr, isDepartementOuvert } from '@/lib/departements'
 
 const MAX_NOTIFICATIONS = 20
@@ -118,7 +131,8 @@ export async function notifyMatchingUsers(params: {
     // Defense en profondeur : ne pas notifier pour une annonce source hors zone
     if (!(await isDepartementOuvert(auxAnnonce.code_postal))) return
 
-    const auxProfile = auxAnnonce.accompagnantes_profiles as any
+    const auxProfile = auxAnnonce.accompagnantes_profiles as unknown as AccompagnanteMatchingProfile
+    if (!auxProfile) return
     const codesFilter = await getCodesPostauxFilterOr()
 
     // Recuperer les annonces accompagnes publiees (whitelist departements_ouverts)
@@ -134,7 +148,10 @@ export async function notifyMatchingUsers(params: {
       specialites: auxProfile.specialites || [],
       ville: auxProfile.ville || auxAnnonce.ville || '',
       code_postal: auxProfile.code_postal || auxAnnonce.code_postal || '',
-      experience: auxProfile.experience,
+      // Dette pre-existante : AccompagnanteProfile.experience attend string label
+      // (ex: '5_10') mais auxProfile.experience est un number en BDD. Conserve le
+      // comportement existant ; correction differee story dediee Epic 6.
+      experience: auxProfile.experience != null ? String(auxProfile.experience) : '',
       diplomes: auxProfile.diplomes || [],
       disponibilites: (auxAnnonce.disponibilites || auxProfile.disponibilites) as Record<string, string[]>,
       rayon_km: auxAnnonce.rayon_km || auxProfile.rayon_km || 10,

@@ -10,6 +10,8 @@ export type MessageResult = {
   conversationId?: string
 }
 
+type ConversationParticipantUserId = { user_id: string } | null
+
 export async function getOrCreateConversation(
   accompagnanteProfileId: string
 ): Promise<MessageResult> {
@@ -224,9 +226,10 @@ export async function sendMessage(
     return { error: 'Conversation non trouvée.' }
   }
 
-  const auxProfile = conversation.accompagnantes_profiles as any
-  const benProfile = conversation.accompagnes_profiles as any
-  const adminUserId = (conversation as any).admin_id as string | null
+  // Supabase generated types modelisent les relations 1-1 imbriquees comme tableaux.
+  const auxProfile = conversation.accompagnantes_profiles as unknown as ConversationParticipantUserId
+  const benProfile = conversation.accompagnes_profiles as unknown as ConversationParticipantUserId
+  const adminUserId = conversation.admin_id as string | null
 
   const isAux = auxProfile?.user_id === user.id
   const isBen = benProfile?.user_id === user.id
@@ -265,11 +268,11 @@ export async function sendMessage(
   // Determiner le destinataire : l'autre partie de la conversation
   let recipientUserId: string | null = null
   if (isAux) {
-    recipientUserId = benProfile?.user_id || adminUserId
+    recipientUserId = benProfile?.user_id ?? adminUserId
   } else if (isBen) {
-    recipientUserId = auxProfile?.user_id
+    recipientUserId = auxProfile?.user_id ?? null
   } else if (isAdmin) {
-    recipientUserId = auxProfile?.user_id
+    recipientUserId = auxProfile?.user_id ?? null
   }
 
   // Envoyer un email de notification au destinataire (non-bloquant)

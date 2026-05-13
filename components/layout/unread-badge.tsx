@@ -25,7 +25,7 @@ export function UnreadBadge({ userId, initialCount }: Props) {
           table: 'messages',
         },
         (payload) => {
-          const newMsg = payload.new as any
+          const newMsg = payload.new as { sender_id?: string }
           if (newMsg.sender_id !== userId) {
             setCount((prev) => prev + 1)
           }
