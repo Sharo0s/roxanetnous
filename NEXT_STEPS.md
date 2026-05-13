@@ -272,30 +272,39 @@ components/messages/
 
 ## 🔐 Variables d'environnement requises en production
 
-Ces variables doivent être configurées sur Vercel avant le go-live Bretagne. Le script `npm run check:env` (lancé au build via `vercel.json`) vérifie leur présence.
+Ces variables doivent être configurées sur Vercel avant le go-live Bretagne. Le script `npm run check:env` (lancé au build via `vercel.json`) vérifie leur présence, leur forme (shape regex / longueur min) et rejette les valeurs placeholder (`your_*`, `XXX*`, `changeme*`).
 
-**Comportement par environnement** (story 4.8) :
-- **Production** (`VERCEL_ENV=production`) : la build casse (exit 1) si une variable REQUIRED ou OPTIONAL_ON_PREVIEW est absente.
-- **Preview** (`VERCEL_ENV=preview`) : la build casse (exit 1) si une variable REQUIRED est absente. Les OPTIONAL_ON_PREVIEW sont tolérées absentes silencieusement.
-- **Dev local** (sans `VERCEL_ENV`) : silencieux.
+**Total : 14 REQUIRED + 5 OPTIONAL_ON_PREVIEW = 19 vars vérifiées.**
 
-### REQUIRED (obligatoires production ET preview)
+**Comportement par environnement** (story 4.8 + 7.A.2) :
+- **Production** (`VERCEL_ENV=production`) : la build casse (exit 1) si une variable REQUIRED ou OPTIONAL_ON_PREVIEW est absente, mal formée, ou contient un placeholder.
+- **Preview** (`VERCEL_ENV=preview`) : la build casse (exit 1) si une variable `requiredOnPreview` (NEXT_PUBLIC_SUPABASE_URL / NEXT_PUBLIC_SUPABASE_ANON_KEY) est absente OU si une var présente échoue au shape / placeholder check. Les autres REQUIRED et OPTIONAL_ON_PREVIEW sont tolérées absentes silencieusement.
+- **Dev local** (sans `VERCEL_ENV`) : silencieux, aucun check shape ni placeholder (préserve l'expérience locale avec `.env.local` incomplets).
+
+### REQUIRED (14 vars — obligatoires en production)
+
+Dont 2 également obligatoires en preview (`requiredOnPreview: true`, marquées ⚠ ci-dessous).
 
 - `ADMIN_NOTIFICATIONS_EMAIL` — destinataire des alertes anti-fraude parrainage.
-- `RESEND_API_KEY` — API Resend pour tous les emails transactionnels.
+- `RESEND_API_KEY` — API Resend pour tous les emails transactionnels (shape `re_*`).
+- `RESEND_FROM_EMAIL` — adresse expéditeur Resend production (sans : fallback sandbox `onboarding@resend.dev` -> bounces massifs). **Promu 7.A.2.**
 - `NEXT_PUBLIC_BASE_URL` — URL canonique de production (https://roxanetnous.fr).
-- `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` — paywall et webhook subscriptions.
+- ⚠ `NEXT_PUBLIC_SUPABASE_URL` — URL projet Supabase (assertion `!` runtime -> crash si absente). **Promu 7.A.2, requiredOnPreview.**
+- ⚠ `NEXT_PUBLIC_SUPABASE_ANON_KEY` — clé anon Supabase (assertion `!` runtime). **Promu 7.A.2, requiredOnPreview.**
+- `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` — paywall et webhook subscriptions (shape `sk_*` / `whsec_*`).
 - `SUPABASE_SERVICE_ROLE_KEY` — server actions admin.
-- `CRON_SECRET` — auth des routes `/api/cron/*`.
-- `PARRAINAGE_INTERNAL_SECRET` — auth du helper de révocation validation filleule (story 2.3).
-- `ENCRYPTION_KEY` — chiffrement justificatifs accompagnantes.
+- `CRON_SECRET` — auth des routes `/api/cron/*` (>=32 chars).
+- `PARRAINAGE_INTERNAL_SECRET` — auth du helper de révocation validation filleule (story 2.3, >=32 chars).
+- `ENCRYPTION_KEY` — chiffrement justificatifs accompagnants (64 hex chars).
+- `OPTOUT_TOKEN_SECRET` — HMAC liens opt-out emails de rappel (>=32 chars).
+- `SENTRY_AUTH_TOKEN` — token upload sourcemaps Sentry build-time (sans : stack traces minifiées silencieusement en prod). **Promu 7.A.2.**
 
-### OPTIONAL_ON_PREVIEW (obligatoires production uniquement)
+### OPTIONAL_ON_PREVIEW (5 vars — obligatoires production uniquement)
 
 - `NEXT_PUBLIC_SENTRY_DSN`, `SENTRY_DSN`, `SENTRY_ORG`, `SENTRY_PROJECT` — alerting Sentry transverse (story 4.1). Tolérées absentes en preview pour éviter la création d'un projet Sentry preview-only.
-- `RATE_LIMIT_HASH_SALT` — sel HMAC pour irréversibilité hash IP rate-limit (story 4.1 patch review). Toléré absent en preview (dégradation gracieuse SHA-256 non-salé, acceptable pour debug local).
+- `RATE_LIMIT_HASH_SALT` — sel HMAC pour irréversibilité hash IP rate-limit (story 4.1 patch review, >=32 chars). Toléré absent en preview (dégradation gracieuse SHA-256 non-salé, acceptable pour debug local).
 
-> **Note `SENTRY_AUTH_TOKEN`** — token upload sourcemaps (scope `project:releases`), variable build-time uniquement, **non vérifiée par `check:env`**. À configurer sur Vercel scope production via `vercel env add SENTRY_AUTH_TOKEN production`. Sans, sourcemaps non uploadées et stack traces Sentry restent minifiées (build reste OK).
+> **Promotion 7.A.2 :** `RESEND_FROM_EMAIL` + `SENTRY_AUTH_TOKEN` + `NEXT_PUBLIC_SUPABASE_URL` + `NEXT_PUBLIC_SUPABASE_ANON_KEY` désormais bloquantes en prod (étaient passées silencieusement avant 7.A.2). Pré-flight obligatoire avant chaque deploy : `vercel env ls --environment production` puis `npm run env:push` (dry-run).
 
 Voir aussi `TODO-LAUNCH.md` (checklist détaillée pré-go-live) et `.env.local.example` (template).
 
