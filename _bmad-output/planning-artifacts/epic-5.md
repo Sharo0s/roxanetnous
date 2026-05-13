@@ -35,7 +35,7 @@ Trois objectifs paralleles, non-bloquants pour le go-live Bretagne :
 
 2. **Hardening continu (5.B + 5.C + 5.D)** : solder les dettes accumulees en `deferred-work.md` (bugs latents messagerie, oracle de role) et les action items Epic 4 differes (resorption `as any` hors-admin, nettoyage CI, audits post-stabilisation 30j).
 
-3. **Observabilite oncall (5.E)** : completer l'instrumentation Sentry livree en Epic 4 story 4.1 par un coupling alertes oncall (PagerDuty ou Slack), pour automatiser la remontee critique au-dela de la dashboard Sentry passive.
+3. **Observabilite oncall (5.E)** : completer l'instrumentation Sentry livree en Epic 4 story 4.1 par un canal d'alertes oncall (Sentry mobile app native), pour automatiser la remontee critique au-dela de la dashboard Sentry passive.
 
 **Decisions de reference** : DECISIONS.md F6-F11 (Epic 4, ajoutees 2026-05-08), retrospective Epic 4 (`epic-4-retro-2026-05-08.md`, 15 AI Epic 5+ loges AI-4.4 a AI-4.15), memoire projet `project_renommage_accompagnante_todo`.
 
@@ -56,7 +56,7 @@ Justification : Epic 5 est un chantier d'hardening transverse independant du go-
 **Pre-requis specifiques mini-epics (decisions actees 2026-05-13) :**
 
 - **5.A renommage** : strategie migration enum role decidee en story 5.A.1 (architecture review legere, pas de modif code/BDD).
-- **5.E observabilite oncall** : plateforme retenue = **Slack** (decision Sylvain 2026-05-13). Justification : Sylvain seul oncall, integration Sentry native gratuite, push mobile app Slack equivalent fonctionnel a PagerDuty pour ce usage. Compte Sentry deja actif depuis Epic 4 story 4.1.
+- **5.E observabilite oncall** : canal retenu = **Sentry mobile app** (decision Sylvain 2026-05-13, revisee). Justification : Sylvain seul oncall, app native iOS/Android gratuite, push notifications directes sans OAuth tiers. Note revision : la decision initiale mentionnait Slack mais Sylvain n'utilise pas Slack. Compte Sentry deja actif depuis Epic 4 story 4.1.
 
 ## Periodemetre et hors-scope
 
@@ -804,34 +804,40 @@ So que send-waitlist puisse honorer des ouvertures de departements a forte audie
 
 ## Mini-epic 5.E : Observabilite oncall
 
-**Goal** : Completer l'instrumentation Sentry livree Epic 4 par un coupling vers une plateforme oncall (PagerDuty, Slack, ou Opsgenie) pour notifier Sylvain activement sur les exceptions critiques en production, plutot que de dependre de la consultation passive du dashboard Sentry.
+**Goal** : Completer l'instrumentation Sentry livree Epic 4 par un canal d'alertes oncall actif (Sentry mobile app native iOS / Android) pour notifier Sylvain sur les exceptions critiques en production, plutot que de dependre de la consultation passive du dashboard Sentry.
 
 **FRs couverts** : aucun direct. NFR4 (integrations sortantes), NFR5 (fiabilite : detection rapide incidents).
 
-**Pre-requis** : Sentry SDK livre Epic 4 story 4.1, compte Sentry actif. Sylvain decide la plateforme oncall avant demarrage.
+**Pre-requis** : Sentry SDK livre Epic 4 story 4.1, compte Sentry actif. Decision F-Epic5-E1 (revisee 2026-05-13) : canal = Sentry mobile app (pas Slack ni autre tiers).
 
-### Story 5.E.1 : Coupling Sentry -> plateforme oncall
+### Story 5.E.1 : Configuration Sentry mobile app + regles d'alerte
 
 As Sylvain (admin/fondateur),
-I want recevoir une notification active (push mobile, SMS, Slack) lorsqu'une exception critique est enregistree dans Sentry en production,
+I want recevoir un push notification mobile (iOS / Android via app Sentry native) lorsqu'une exception critique est enregistree dans Sentry en production,
 So que je puisse intervenir sur les incidents prod sans avoir a consulter le dashboard Sentry passivement.
 
 **Acceptance Criteria :**
 
-**Given** un compte Sentry actif (Epic 4 story 4.1) et une plateforme oncall choisie (PagerDuty, Slack, ou Opsgenie selon decision Sylvain en pre-requis story),
+**Given** un compte Sentry actif (Epic 4 story 4.1) et l'app mobile Sentry installee sur smartphone,
 **When** la story est implementee,
-**Then** l'integration native Sentry vers la plateforme est configuree (Sentry Settings -> Integrations -> <platform>),
-**And** un test manuel confirme : declencher une erreur intentionnelle taggee `severity: 'critical'` en preview env, verifier reception sur la plateforme oncall sous 2 minutes.
+**Then** la connexion mobile est etablie avec le compte `roxanetnous@outlook.com` (compte owner organisation Sentry `roxanetnous`),
+**And** les push notifications sont autorisees au niveau systeme (iOS Settings ou Android Settings),
+**And** dans Sentry web (Settings -> Account -> Notifications -> Issue Alerts), le canal "Mobile" est active.
 
-**Given** l'integration fonctionnelle,
-**When** les regles d'alerte Sentry sont definies,
-**Then** elles couvrent (a) toute nouvelle exception non-resolved + tag `severity: 'critical'`, (b) un seuil de frequence > 10 exceptions/min sur n'importe quel tag, (c) une erreur dans les chemins critiques (Stripe webhook, fraude parrainage, paiement),
-**And** les alertes non-critical (warnings) sont aggregees en digest quotidien plutot que push individuel.
+**Given** l'app mobile configuree,
+**When** les regles d'alerte Sentry sont definies (Settings -> Alerts -> Create Alert Rule),
+**Then** elles couvrent (a) toute nouvelle exception non-resolved + tag `severity: 'critical'`, (b) un seuil de frequence > 10 exceptions/min sur n'importe quel tag, (c) une erreur dans les chemins critiques (`flow: webhook-stripe | paywall | parrainage | email`) non-resolved depuis > 5 min,
+**And** les alertes non-critical (`severity: 'warning'`) sont aggregees en digest quotidien email a 9h00 (pas de push mobile pour ce niveau).
+
+**Given** la configuration est en place,
+**When** un test manuel est effectue,
+**Then** declencher une erreur intentionnelle taggee `severity: 'critical'` en preview env (via une route metier reelle, l'endpoint /api/test-sentry ayant ete supprime story 5.C.2),
+**And** verifier reception du push mobile sous 2 minutes sur le smartphone.
 
 **Given** la story est livree,
 **When** un commit / changement de config Sentry est documente,
-**Then** la documentation `_bmad-output/planning-artifacts/architecture-technique-roxanetnous-2026-02-09.md` (section Monitoring/Observabilite) est mise a jour avec la nouvelle integration,
-**And** DECISIONS.md ajoute une decision F-Epic5-E1 (plateforme retenue + justification),
+**Then** la documentation `_bmad-output/planning-artifacts/architecture-technique-roxanetnous-2026-02-09.md` (section Observabilite & Monitoring) est mise a jour avec le canal mobile retenu,
+**And** DECISIONS.md ajoute une decision F-Epic5-E1 revisee (canal mobile + justification + alternatives rejetees),
 **And** le mini-epic 5.E est cloture (1/1 done).
 
 ---

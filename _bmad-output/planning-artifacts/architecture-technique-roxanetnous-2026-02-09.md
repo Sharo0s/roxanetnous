@@ -3643,8 +3643,8 @@ serve(async (req) => {
 
 | Outil | Rôle | Statut |
 |---|---|---|
-| **Sentry** | Capture exceptions runtime (server, client, edge), traçage performance, alerting | Actif depuis Epic 4 story 4.1 (~2026-05-08) |
-| **Slack** | Notification active oncall sur exceptions critiques (push mobile) | Actif depuis Epic 5 story 5.E.1 (2026-05-13) |
+| **Sentry web** | Capture exceptions runtime (server, client, edge), traçage performance, alerting | Actif depuis Epic 4 story 4.1 (~2026-05-08) |
+| **Sentry mobile app** | Push notifications oncall sur exceptions critiques (iOS / Android) | Actif depuis Epic 5 story 5.E.1 (2026-05-13) |
 | **Vercel Analytics** | Métriques Web Vitals, trafic | Actif depuis Epic 1 |
 | **Vercel Logs** | Logs runtime fonctions serverless | Actif depuis Epic 1 |
 | **notifications_log** (Supabase) | Audit trail envois email + retries (cron retry) | Actif depuis Epic 3 story 3.5 |
@@ -3669,22 +3669,24 @@ Sentry.captureException(err, {
 - `severity` : 28 critical, 24 warning
 - `flow` : webhook-stripe (16), email (15), parrainage (13), admin (5), relance_onboarding_cron (2), test (2), notifications_log (1)
 
-### Coupling Sentry → Slack (oncall)
+### Canal oncall : Sentry mobile app
 
-**Plateforme retenue** : Slack (DECISIONS.md F-Epic5-E1 du 2026-05-13). Justification : Sylvain seul oncall, intégration native Sentry gratuite, app mobile Slack équivalente fonctionnellement à PagerDuty.
+**Canal retenu** : application mobile Sentry native iOS / Android (DECISIONS.md F-Epic5-E1 revisée du 2026-05-13). Justification : Sylvain seul oncall, app native gratuite, push notifications directes sans intermédiaire OAuth.
 
-**Configuration** (à effectuer dans le dashboard Sentry, hors code applicatif) :
+**Configuration** (à effectuer côté Sentry web + smartphone, hors code applicatif) :
 
-1. Sentry Settings → Integrations → Slack → Install Integration → OAuth Slack workspace.
-2. Créer channel dédié dans Slack workspace : `#sentry-prod-alerts` (ou nom équivalent).
-3. Configurer 4 règles d'alerte Sentry (Settings → Alerts → Create Alert Rule) :
+1. Installer **Sentry** depuis App Store (iOS) ou Play Store (Android).
+2. Se connecter avec le compte `roxanetnous@outlook.com` (owner organisation Sentry `roxanetnous` en région `de.sentry.io`).
+3. Autoriser les push notifications dans les settings de l'app mobile (iOS Settings → Notifications → Sentry → Allow, ou équivalent Android).
+4. Sur Sentry web : Settings → Account → Notifications → Issue Alerts → activer "Mobile" comme canal de notification.
+5. Configurer 4 règles d'alerte Sentry (Settings → Alerts → Create Alert Rule) :
 
 | # | Trigger | Action |
 |---|---|---|
-| 1 | Une nouvelle exception **non-resolved** avec tag `severity: critical` est enregistrée | Push immédiat dans `#sentry-prod-alerts` |
-| 2 | Fréquence > **10 exceptions/min** sur n'importe quel tag (sliding window) | Push immédiat dans `#sentry-prod-alerts` |
-| 3 | Exception dans `flow: webhook-stripe \| paywall \| parrainage \| email` non-resolved depuis > 5 min | Push immédiat dans `#sentry-prod-alerts` |
-| 4 | Toutes les alertes `severity: warning` | Digest quotidien 9h00 (Slack scheduled message) |
+| 1 | Une nouvelle exception **non-resolved** avec tag `severity: critical` est enregistrée | Push immédiat mobile (canal Sentry) |
+| 2 | Fréquence > **10 exceptions/min** sur n'importe quel tag (sliding window) | Push immédiat mobile |
+| 3 | Exception dans `flow: webhook-stripe \| paywall \| parrainage \| email` non-resolved depuis > 5 min | Push immédiat mobile |
+| 4 | Toutes les alertes `severity: warning` | Digest quotidien 9h00 (email seulement, pas de push mobile) |
 
 **Note** : les règles 1 et 3 se recouvrent partiellement (un critical sur un flow critique déclenche les 2). C'est intentionnel : redondance défensive sur les chemins argent / abonnement / fraude.
 
@@ -3694,14 +3696,14 @@ Procédure documentée pour valider l'intégration en preview env :
 
 1. Déployer en preview avec endpoint test `/api/test-sentry` (note : cet endpoint a été supprimé par story 5.C.2 ; pour les futurs tests utiliser une route métier réelle et déclencher une exception intentionnelle taggée critical).
 2. Trigger l'exception via curl ou navigateur sur preview.
-3. Mesurer délai réception push Slack mobile.
-4. **Cible** : < 2 min entre exception captée et notification reçue.
+3. Mesurer délai réception push mobile Sentry.
+4. **Cible** : < 2 min entre exception captée et notification reçue sur smartphone.
 
 ### Conformité
 
 - **Rétention logs 1 an** : Sentry plan retient les events 90j (gratuit) à 365j (Business). À aligner avec exigence NFR RGPD logs de sécurité 1 an.
 - **PII** : convention `extra: { keyHash: hashRateLimitKey(...) }` au lieu d'IP ou email brut (cf. story 4.5 hardening IP spoofing). Audit ponctuel via Sentry "Discover" pour détecter tout leak PII.
-- **Notifications channel Slack** : workspace + channel sont infrastructure critique (au même niveau que Sentry). Accès Slack = équivalent accès dashboard Sentry. À documenter dans la procédure de transmission compte fondateur.
+- **Compte mobile Sentry** : considéré infrastructure critique (au même niveau que le compte web Sentry). Vérifier que les push notifications restent actives après mises à jour OS / app. À documenter dans la procédure de transmission compte fondateur.
 
 ---
 
