@@ -200,13 +200,13 @@ export default async function RecherchePage({
           const auxProfile = a.accompagnants_profiles
           const { score, details } = calculateMatchScore(
             {
-              specialites: auxProfile.specialites || [],
-              ville: auxProfile.ville || a.ville,
-              code_postal: auxProfile.code_postal || a.code_postal,
+              specialites: auxProfile.specialites,
+              ville: auxProfile.ville ?? a.ville,
+              code_postal: auxProfile.code_postal ?? a.code_postal,
               experience: auxProfile.experience,
-              diplomes: auxProfile.diplomes || [],
-              disponibilites: (a.disponibilites || auxProfile.disponibilites) as Record<string, string[]>,
-              rayon_km: a.rayon_km || auxProfile.rayon_km || 10,
+              diplomes: auxProfile.diplomes,
+              disponibilites: (a.disponibilites || auxProfile.disponibilites) as Record<string, string[]> | null,
+              rayon_km: a.rayon_km ?? auxProfile.rayon_km,
               latitude: auxProfile.latitude ? Number(auxProfile.latitude) : undefined,
               longitude: auxProfile.longitude ? Number(auxProfile.longitude) : undefined,
             },

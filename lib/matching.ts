@@ -3,14 +3,20 @@
 
 import { haversineDistance } from '@/lib/geocoding'
 
+// Typage aligne sur la BDD prod 2026-05-13 (audit story 6.C.1) :
+// les colonnes accompagnants_profiles.* sont quasi toutes nullable (text,
+// arrays, jsonb). Le matching doit donc tolerer les valeurs absentes
+// plutot que de planter ou penaliser.
+export type ExperienceLevel = 'moins_3_ans' | '3_10_ans' | 'plus_10_ans'
+
 type AccompagnantProfile = {
-  specialites: string[]
-  ville: string
-  code_postal: string
-  experience: string
-  diplomes: string[]
+  specialites: string[] | null
+  ville: string | null
+  code_postal: string | null
+  experience: ExperienceLevel | string | null
+  diplomes: string[] | null
   disponibilites: Record<string, string[]> | null
-  rayon_km: number
+  rayon_km: number | null
   latitude?: number | null
   longitude?: number | null
 }
@@ -18,15 +24,15 @@ type AccompagnantProfile = {
 type MatchCriteria = {
   specialites_recherchees: string[]
   ville: string
-  code_postal?: string
-  experience_min?: string
-  diplome_requis?: string
+  code_postal?: string | null
+  experience_min?: ExperienceLevel | string | null
+  diplome_requis?: string | null
   disponibilites?: Record<string, string[]>
   latitude?: number | null
   longitude?: number | null
 }
 
-const EXPERIENCE_ORDER = ['moins_3_ans', '3_10_ans', 'plus_10_ans']
+const EXPERIENCE_ORDER: readonly ExperienceLevel[] = ['moins_3_ans', '3_10_ans', 'plus_10_ans']
 
 export function calculateMatchScore(
   accompagnant: AccompagnantProfile,
@@ -37,8 +43,9 @@ export function calculateMatchScore(
   // 1. Specialites (40 points max)
   // Nombre de specialites recherchees que l'accompagnant possede
   if (criteria.specialites_recherchees.length > 0) {
+    const auxSpecialites = accompagnant.specialites ?? []
     const matched = criteria.specialites_recherchees.filter((s) =>
-      accompagnant.specialites.includes(s)
+      auxSpecialites.includes(s)
     ).length
     details.specialites = Math.round((matched / criteria.specialites_recherchees.length) * 40)
   } else {
@@ -70,7 +77,11 @@ export function calculateMatchScore(
     } else {
       details.localisation = 0
     }
-  } else if (accompagnant.ville.toLowerCase() === criteria.ville.toLowerCase()) {
+  } else if (
+    accompagnant.ville &&
+    criteria.ville &&
+    accompagnant.ville.toLowerCase() === criteria.ville.toLowerCase()
+  ) {
     details.localisation = 25
   } else if (
     criteria.code_postal &&
@@ -83,9 +94,12 @@ export function calculateMatchScore(
   }
 
   // 3. Experience (15 points max)
-  if (criteria.experience_min) {
-    const requiredIndex = EXPERIENCE_ORDER.indexOf(criteria.experience_min)
-    const auxIndex = EXPERIENCE_ORDER.indexOf(accompagnant.experience)
+  // Si la donnee est absente d'un cote ou l'autre (criteria.experience_min absent
+  // OU accompagnant.experience null), on attribue le score max : symetrie avec
+  // l'absence de contrainte, ne pas penaliser une donnee manquante.
+  if (criteria.experience_min && accompagnant.experience) {
+    const requiredIndex = EXPERIENCE_ORDER.indexOf(criteria.experience_min as ExperienceLevel)
+    const auxIndex = EXPERIENCE_ORDER.indexOf(accompagnant.experience as ExperienceLevel)
     if (auxIndex >= requiredIndex) {
       details.experience = 15
     } else if (auxIndex === requiredIndex - 1) {
@@ -99,7 +113,7 @@ export function calculateMatchScore(
 
   // 4. Diplome (10 points max)
   if (criteria.diplome_requis) {
-    details.diplome = (accompagnant.diplomes || []).includes(criteria.diplome_requis) ? 10 : 3
+    details.diplome = (accompagnant.diplomes ?? []).includes(criteria.diplome_requis) ? 10 : 3
   } else {
     details.diplome = 10
   }

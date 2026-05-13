@@ -2,12 +2,12 @@ import { createClient } from '@/lib/supabase/server'
 import { calculateMatchScore } from '@/lib/matching'
 import { sendMatchingNotificationEmail } from '@/lib/emails'
 
-type AccompagnanteMatchingProfile = {
+type AccompagnantMatchingProfile = {
   user_id: string
   specialites: string[] | null
   ville: string | null
   code_postal: string | null
-  experience: number | null
+  experience: string | null
   diplomes: string[] | null
   disponibilites: Record<string, unknown> | null
   rayon_km: number | null
@@ -75,13 +75,13 @@ export async function notifyMatchingUsers(params: {
       .map((p) => {
         const { score } = calculateMatchScore(
           {
-            specialites: p.specialites || [],
-            ville: p.ville || '',
-            code_postal: p.code_postal || '',
+            specialites: p.specialites,
+            ville: p.ville,
+            code_postal: p.code_postal,
             experience: p.experience,
             diplomes: p.diplomes,
-            disponibilites: p.disponibilites as Record<string, string[]>,
-            rayon_km: p.rayon_km || 10,
+            disponibilites: p.disponibilites as Record<string, string[]> | null,
+            rayon_km: p.rayon_km,
             latitude: p.latitude ? Number(p.latitude) : undefined,
             longitude: p.longitude ? Number(p.longitude) : undefined,
           },
@@ -131,7 +131,7 @@ export async function notifyMatchingUsers(params: {
     // Defense en profondeur : ne pas notifier pour une annonce source hors zone
     if (!(await isDepartementOuvert(auxAnnonce.code_postal))) return
 
-    const auxProfile = auxAnnonce.accompagnants_profiles as unknown as AccompagnanteMatchingProfile
+    const auxProfile = auxAnnonce.accompagnants_profiles as unknown as AccompagnantMatchingProfile
     if (!auxProfile) return
     const codesFilter = await getCodesPostauxFilterOr()
 
@@ -145,14 +145,11 @@ export async function notifyMatchingUsers(params: {
     if (!benAnnonces || benAnnonces.length === 0) return
 
     const auxProfileData = {
-      specialites: auxProfile.specialites || [],
-      ville: auxProfile.ville || auxAnnonce.ville || '',
-      code_postal: auxProfile.code_postal || auxAnnonce.code_postal || '',
-      // Dette pre-existante : AccompagnantProfile.experience attend string label
-      // (ex: '5_10') mais auxProfile.experience est un number en BDD. Conserve le
-      // comportement existant ; correction differee story dediee Epic 6.
-      experience: auxProfile.experience != null ? String(auxProfile.experience) : '',
-      diplomes: auxProfile.diplomes || [],
+      specialites: auxProfile.specialites,
+      ville: auxProfile.ville || auxAnnonce.ville,
+      code_postal: auxProfile.code_postal || auxAnnonce.code_postal,
+      experience: auxProfile.experience,
+      diplomes: auxProfile.diplomes,
       disponibilites: (auxAnnonce.disponibilites || auxProfile.disponibilites) as Record<string, string[]>,
       rayon_km: auxAnnonce.rayon_km || auxProfile.rayon_km || 10,
       latitude: auxProfile.latitude ? Number(auxProfile.latitude) : undefined,
