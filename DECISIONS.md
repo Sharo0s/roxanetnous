@@ -710,3 +710,27 @@ Fenetre cutover estimee < 5 secondes (l'ALTER COLUMN TYPE sur 822 lignes est le 
 - **AC3 (test E2E) :** non execute (depend AC1).
 
 **Regle :** Au jour J (achat domaine), suivre la checklist memoire. Ne pas tenter de modifier `NEXT_PUBLIC_BASE_URL` avant que Resend ait valide le domaine sinon tous les emails partiront en erreur.
+
+
+---
+
+## 2026-05-13 : Cloture 6.D Playwright reportee Epic 7+ avec scope clarifie (decision F-Epic6-D)
+
+**Contexte :** Mini-epic 6.D (3 stories Playwright : 6.D.1 anti-fraude parrainage, 6.D.2 RGPD cascade, 6.D.3 matching) etait cadre comme "extension de la suite Playwright story 4.4".
+
+**Decouverte 2026-05-13 audit :** La story 4.4 (Epic 4) a livre des **tests Vitest integration**, PAS une suite Playwright fonctionnelle. Le seul code Playwright en place est `tests/a11y/` (6 specs axe-core scannant les violations a11y sur 7 parcours critiques). Aucune infra E2E (helpers login session, fixtures DB, page objects, config dedie) n existe.
+
+**Implication :** Le scope reel de 6.D est :
+1. Creer l infra E2E Playwright (config separee de a11y, helpers session, fixtures Supabase reset entre tests, seed parrainages/RGPD/matching).
+2. Ecrire les 3 scenarios applicatifs avec assertions BDD + UI.
+3. Integrer en CI GHA.
+
+Estimation realiste : **2-3 jours-dev**, pas "extension" comme le tech-spec le suggerait. Hors envergure d une soiree Epic 6.
+
+**Decision :** Reporter 6.D Epic 7+ avec scope clarifie.
+
+- **6.D.1 / 6.D.2 / 6.D.3** : reportees Epic 7+ comme un mini-epic dedie (creation infra + 3 scenarios). A reprioriser selon trafic prod : si peu d incidents anti-fraude/RGPD/matching observes 30j, peut etre encore reporte.
+- **Mitigation interim :** la couverture Vitest integration (story 4.4) couvre deja les flux paywall + Stripe webhook idempotence. Les flux 6.D ne sont pas non-couverts -- ils sont juste moins automatises a haut niveau.
+- **AI-4.11 / AI-4.12 / AI-4.13** restent ouverts comme action items deferes Epic 5 retro + Epic 6 retro.
+
+**Regle :** au moment ou Epic 7 reactive 6.D, prevoir explicitement le temps de l infra (1j) avant les scenarios applicatifs (0.5j par scenario). Ne pas le sous-estimer comme "extension".

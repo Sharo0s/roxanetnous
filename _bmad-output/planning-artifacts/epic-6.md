@@ -362,7 +362,13 @@ Total : **381 occurrences `accompagnante`** dans 82 fichiers TS/TSX (vs 1755 pre
 - AC1 : audit factuel des 18 helpers email + diff a 30j (nouveaux helpers ajoutes Epic 4/5/6 ?)
 - AC2 : decision Sylvain : centraliser (story dediee) OU confirmer rejet (mention dans DECISIONS.md)
 
-## Mini-epic 6.D : Suite Playwright (reportee Epic 5)
+## Mini-epic 6.D : Suite Playwright (REPORTE Epic 7+ apres decouverte 2026-05-13 - cf. DECISIONS.md F-Epic6-D)
+
+**Statut 2026-05-13 :** mini-epic 6.D reporte Epic 7+ apres audit. Le tech-spec prevoyait "extension de la suite Playwright 4.4" mais 4.4 a livre des tests Vitest integration, pas Playwright fonctionnel. Le scope reel necessite la creation de l'infra E2E (config, helpers session, fixtures, seeds, page objects) + les 3 scenarios = 2-3j-dev. Hors envergure soiree Epic 6.
+
+Cf. DECISIONS.md `F-Epic6-D` pour la decision complete + plan de reactivation Epic 7+.
+
+
 
 **Goal** : Etendre la suite Playwright story 4.4 avec les scenarios reportes (AI-4.11, AI-4.12, AI-4.13).
 
