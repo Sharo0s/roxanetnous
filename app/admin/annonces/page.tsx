@@ -4,6 +4,22 @@ import Link from 'next/link'
 import { AnnoncesSearchTable } from '@/components/admin/annonces-client'
 import type { Database } from '@/types/supabase'
 
+// Story 5.B.3 : whitelist stricte des valeurs URL pour empecher un faux 0
+// silencieux sur URL trafiquee (`?type=foo` ou `?type=Accompagnante`).
+// Pre-Story 5.B.3 : `params.type || 'accompagnante'` acceptait toute valeur
+// brute, puis le cast force `type` choisissait
+// l'embranchement `count head:true` -> page rendait "0 annonces" alors qu'il y en a.
+const TYPE_VALUES = ['accompagnante', 'accompagne'] as const
+type AnnonceType = (typeof TYPE_VALUES)[number]
+
+function normalizeType(raw: string | undefined): { type: AnnonceType; fallbackApplied: boolean } {
+  if (!raw) return { type: 'accompagnante', fallbackApplied: false }
+  if ((TYPE_VALUES as readonly string[]).includes(raw)) {
+    return { type: raw as AnnonceType, fallbackApplied: false }
+  }
+  return { type: 'accompagnante', fallbackApplied: true }
+}
+
 // Story 4.6 (D7) : cast applicatif chirurgical sur la forme retournee par
 // Supabase pour reconcilier les 2 branches de l'union annonce_aux/annonce_ben.
 // Tolere car (1) reflete fidelement la forme Supabase post-jointure imbriquee,
@@ -33,10 +49,11 @@ export default async function AdminAnnoncesPage({
   searchParams: Promise<{ type?: string }>
 }) {
   const params = await searchParams
+  const rawTypeParam = params.type
 
   // Story 4.6 (variante locale SCP) : cast localise au point d'appel.
   const supabaseAdmin = (await createClient({ serviceRole: true })) as unknown as SupabaseClient<Database>
-  const type = params.type || 'accompagnante'
+  const { type, fallbackApplied } = normalizeType(rawTypeParam)
 
   // Charger les counts des deux types en parallele
   const [auxResult, benResult] = await Promise.all([
@@ -77,7 +94,7 @@ export default async function AdminAnnoncesPage({
   // count head:true (forme `{ id }[]`). Le narrow vers RawAnnonceWithProfile[]
   // reflete la branche reellement utilisee (data:select fluide).
   const annonces = (rawAnnonces as RawAnnonceWithProfile[]).map((annonce) => {
-    const u = extractUser(annonce, type as 'accompagnante' | 'accompagne')
+    const u = extractUser(annonce, type)
     return {
       id: annonce.id,
       titre: annonce.titre,
@@ -86,7 +103,7 @@ export default async function AdminAnnoncesPage({
       status: annonce.status,
       created_at: annonce.created_at,
       auteur_nom: u ? `${u.first_name} ${u.last_name}` : '',
-      type: type as 'accompagnante' | 'accompagne',
+      type: type,
     }
   })
 
@@ -96,6 +113,15 @@ export default async function AdminAnnoncesPage({
           <div className="text-xs uppercase tracking-[0.18em] text-kraft mb-2">Espace admin</div>
           <h1 className="text-3xl md:text-4xl italic text-gray-900 leading-tight">Gestion des annonces</h1>
         </header>
+
+        {fallbackApplied && (
+          <div
+            role="status"
+            className="mb-6 rounded-2xl border border-amber-300 bg-amber-50 px-5 py-4 text-sm text-amber-900"
+          >
+            Filtre <code className="font-mono">type=&quot;{rawTypeParam}&quot;</code> inconnu. Affichage par défaut sur les annonces accompagnants.
+          </div>
+        )}
 
         <div className="flex gap-2 mb-6 flex-wrap">
           <Link
@@ -120,7 +146,7 @@ export default async function AdminAnnoncesPage({
           </Link>
         </div>
 
-        <AnnoncesSearchTable annonces={annonces} type={type as 'accompagnante' | 'accompagne'} />
+        <AnnoncesSearchTable annonces={annonces} type={type} />
       </div>
   )
 }

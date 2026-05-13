@@ -182,10 +182,24 @@ development_status:
   5-a-5-find-replace-global-copy-ui-emails-templates-resend: backlog
   5-a-6-tests-e2e-validation-a11y-documentation-decisions: backlog
 
-  # Mini-epic 5.B - Bugs latents deferred-work (3 stories, bloquee par 5.A merged)
-  5-b-1-fix-oracle-role-messagerie: backlog
-  5-b-2-fix-doublons-conversations-unique-constraint: backlog
-  5-b-3-validation-stricte-type-url-admin-annonces: backlog
+  # Mini-epic 5.B - Bugs latents deferred-work (3 stories)
+  # Re-evaluation 2026-05-13 : 5.B.1 et 5.B.3 ne touchent pas la BDD, donc
+  # demarrables des aujourd'hui (blocage "post-5.A merged" du cadrage initial
+  # etait trop conservateur). 5.B.2 touche BDD prod mais la table conversations
+  # est vide (audit MCP 2026-05-13) et les UNIQUE INDEX partiels sont DEJA en
+  # place en prod (conversations_unique_aux_acc, conversations_unique_aux_admin) ;
+  # 5.B.2 se reduit donc a la partie code (.maybeSingle + handle 23505 idempotent).
+  # 5.B.1 livre 2026-05-13 : PAYWALL_GENERIC_ERROR unifie + Sentry tag
+  # security:oracle-fix + scripts/check-oracle-paywall.mjs garde-fou CI.
+  5-b-1-fix-oracle-role-messagerie: done
+  # 5.B.2 livre 2026-05-13 : 3 server actions getOrCreateConversation* migrent
+  # vers .maybeSingle() + handle 23505 idempotent (refetch existing). UNIQUE
+  # INDEX partiels conversations_unique_aux_acc/aux_admin deja en prod, pas de
+  # migration BDD necessaire. Sentry captureException sur erreurs DB transitoires.
+  5-b-2-fix-doublons-conversations-unique-constraint: done
+  # 5.B.3 livre 2026-05-13 : whitelist TYPE_VALUES + normalizeType() + banner UI
+  # role=status pour signaler fallback. Suppression cast force `type as ...`.
+  5-b-3-validation-stricte-type-url-admin-annonces: done
 
   # Mini-epic 5.C - Hardening typage + nettoyage CI (4 stories, parallele de 5.A/5.B)
   # 5.C.1 livre 2026-05-13 commit a venir : 14 as any resorbes hors admin (8 fichiers),

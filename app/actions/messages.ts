@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+import * as Sentry from '@sentry/nextjs'
 import { sendNewMessageEmail } from '@/lib/emails'
 import { hasActiveSubscription } from '@/lib/subscription-helpers'
 
@@ -11,6 +12,16 @@ export type MessageResult = {
 }
 
 type ConversationParticipantUserId = { user_id: string } | null
+
+// Story 5.B.1 (AI-3.5 deferred-work) : message d'erreur paywall unifie et
+// generique pour empecher l'oracle d'enumeration du role d'un compte cible.
+// Avant : 'Abonnement requis pour contacter un accompagnant.' vs '... un beneficiaire.'
+// permettait a un attaquant connecte non-abonne de deduire le role d'un userId
+// arbitraire en testant getOrCreateConversation* et en lisant le texte d'erreur.
+// Apres : message generique unique, identique pour les 3 server actions.
+// Garde-fou CI : scripts/check-oracle-paywall.mjs grep ce literal pour
+// empecher la re-introduction d'un message differencie par role.
+const PAYWALL_GENERIC_ERROR = 'Abonnement requis pour contacter cet utilisateur.'
 
 export async function getOrCreateConversation(
   accompagnanteProfileId: string
@@ -50,13 +61,22 @@ export async function getOrCreateConversation(
     benProfile = newProfile
   }
 
-  // Verifier si une conversation existe deja
-  const { data: existing } = await supabase
+  // Story 5.B.2 : .maybeSingle() distingue clairement 0-row (creation a faire)
+  // vs erreur DB transitoire. La contrainte UNIQUE conversations_unique_aux_acc
+  // (deja en prod) garantit l'invariant 1 conversation = 1 paire.
+  const { data: existing, error: existingError } = await supabase
     .from('conversations')
     .select('id')
     .eq('accompagnante_id', accompagnanteProfileId)
     .eq('accompagne_id', benProfile.id)
-    .single()
+    .maybeSingle()
+
+  if (existingError) {
+    Sentry.captureException(existingError, {
+      tags: { flow: 'messaging', signal: 'getOrCreateConversation-existing-error', severity: 'warning' },
+    })
+    return { error: 'Erreur lors de la vérification de la conversation existante.' }
+  }
 
   if (existing) {
     return { conversationId: existing.id }
@@ -65,10 +85,16 @@ export async function getOrCreateConversation(
   // Story 3.6 : paywall sur ouverture conversation (apres check existence pour preserver idempotence D3)
   const subscribed = await hasActiveSubscription(user.id)
   if (!subscribed) {
-    return { error: 'Abonnement requis pour contacter un accompagnant.' }
+    Sentry.captureMessage('paywall-block:getOrCreateConversation', {
+      level: 'info',
+      tags: { flow: 'messaging', signal: 'oracle-fix', severity: 'warning', security: 'oracle-fix' },
+    })
+    return { error: PAYWALL_GENERIC_ERROR }
   }
 
-  // Creer la conversation
+  // Creer la conversation. Race condition possible si 2 appels concurrents :
+  // la contrainte UNIQUE rejette le 2eme avec code 23505, on retourne alors la
+  // conversation existante (idempotence preservee).
   const { data: conversation, error } = await supabase
     .from('conversations')
     .insert({
@@ -78,7 +104,24 @@ export async function getOrCreateConversation(
     .select('id')
     .single()
 
-  if (error || !conversation) {
+  if (error) {
+    // 23505 = unique_violation : race condition, refetch
+    if (error.code === '23505') {
+      const { data: refetched } = await supabase
+        .from('conversations')
+        .select('id')
+        .eq('accompagnante_id', accompagnanteProfileId)
+        .eq('accompagne_id', benProfile.id)
+        .maybeSingle()
+      if (refetched) return { conversationId: refetched.id }
+    }
+    Sentry.captureException(error, {
+      tags: { flow: 'messaging', signal: 'getOrCreateConversation-insert-error', severity: 'critical' },
+    })
+    return { error: 'Erreur lors de la création de la conversation.' }
+  }
+
+  if (!conversation) {
     return { error: 'Erreur lors de la création de la conversation.' }
   }
 
@@ -113,13 +156,20 @@ export async function getOrCreateConversationAsAccompagnante(
     return { error: 'Profil accompagnant introuvable.' }
   }
 
-  // Verifier si une conversation existe deja
-  const { data: existing } = await supabase
+  // Story 5.B.2 : .maybeSingle() distingue 0-row vs erreur DB.
+  const { data: existing, error: existingError } = await supabase
     .from('conversations')
     .select('id')
     .eq('accompagnante_id', auxProfile.id)
     .eq('accompagne_id', accompagneProfileId)
-    .single()
+    .maybeSingle()
+
+  if (existingError) {
+    Sentry.captureException(existingError, {
+      tags: { flow: 'messaging', signal: 'getOrCreateConversationAsAccompagnante-existing-error', severity: 'warning' },
+    })
+    return { error: 'Erreur lors de la vérification de la conversation existante.' }
+  }
 
   if (existing) {
     return { conversationId: existing.id }
@@ -128,10 +178,14 @@ export async function getOrCreateConversationAsAccompagnante(
   // Story 3.6 : paywall sur ouverture conversation (apres check existence pour preserver idempotence D3)
   const subscribed = await hasActiveSubscription(user.id)
   if (!subscribed) {
-    return { error: 'Abonnement requis pour contacter un beneficiaire.' }
+    Sentry.captureMessage('paywall-block:getOrCreateConversationAsAccompagnante', {
+      level: 'info',
+      tags: { flow: 'messaging', signal: 'oracle-fix', severity: 'warning', security: 'oracle-fix' },
+    })
+    return { error: PAYWALL_GENERIC_ERROR }
   }
 
-  // Creer la conversation
+  // Creer la conversation. Race condition handled via UNIQUE constraint (cf. 5.B.2 helper).
   const { data: conversation, error } = await supabase
     .from('conversations')
     .insert({
@@ -141,7 +195,23 @@ export async function getOrCreateConversationAsAccompagnante(
     .select('id')
     .single()
 
-  if (error || !conversation) {
+  if (error) {
+    if (error.code === '23505') {
+      const { data: refetched } = await supabase
+        .from('conversations')
+        .select('id')
+        .eq('accompagnante_id', auxProfile.id)
+        .eq('accompagne_id', accompagneProfileId)
+        .maybeSingle()
+      if (refetched) return { conversationId: refetched.id }
+    }
+    Sentry.captureException(error, {
+      tags: { flow: 'messaging', signal: 'getOrCreateConversationAsAccompagnante-insert-error', severity: 'critical' },
+    })
+    return { error: 'Erreur lors de la création de la conversation.' }
+  }
+
+  if (!conversation) {
     return { error: 'Erreur lors de la création de la conversation.' }
   }
 
@@ -188,7 +258,25 @@ export async function getOrCreateAdminConversation(
     .select('id')
     .single()
 
-  if (error || !conversation) {
+  if (error) {
+    // Story 5.B.2 : 23505 sur UNIQUE (accompagnante_id, admin_id) where admin_id IS NOT NULL.
+    if (error.code === '23505') {
+      const { data: refetched } = await supabase
+        .from('conversations')
+        .select('id')
+        .eq('accompagnante_id', accompagnanteProfileId)
+        .eq('admin_id', user.id)
+        .is('accompagne_id', null)
+        .maybeSingle()
+      if (refetched) return { conversationId: refetched.id }
+    }
+    Sentry.captureException(error, {
+      tags: { flow: 'messaging', signal: 'getOrCreateAdminConversation-insert-error', severity: 'critical' },
+    })
+    return { error: 'Erreur lors de la création de la conversation admin.' }
+  }
+
+  if (!conversation) {
     return { error: 'Erreur lors de la création de la conversation admin.' }
   }
 
