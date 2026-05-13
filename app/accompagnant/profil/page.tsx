@@ -5,7 +5,7 @@ import { AccompagnantProfileForm } from '@/components/accompagnant/profile-form'
 import { SecurityCredentialsForm } from '@/components/account/security-credentials-form'
 import { ExportDataButton } from '@/components/export-data-button'
 import { DeleteAccountButton } from '@/components/delete-account-button'
-import { AccompagnanteDashboardHeader } from '@/components/layout/accompagnante-dashboard-header'
+import { AccompagnantDashboardHeader } from '@/components/layout/accompagnant-dashboard-header'
 import { LogoutButton } from '@/components/auth/logout-button'
 import { getUnreadCount } from '@/lib/unread-count'
 import { getCodesDepartementsOuverts } from '@/lib/departements'
@@ -47,7 +47,7 @@ export default async function AccompagnanteProfilPage() {
 
   return (
     <main id="main-content" tabIndex={-1} className="min-h-screen bg-[#fefaf8] focus:outline-none">
-      <AccompagnanteDashboardHeader
+      <AccompagnantDashboardHeader
         firstName={userData.first_name}
         lastName={userData.last_name}
         unreadCount={unreadCount}

@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { getUnreadCount } from '@/lib/unread-count'
 import { getSubscriptionStatus } from '@/lib/subscription-helpers'
 import { SubscriptionBanner } from '@/components/accompagnant/subscription-banner'
-import { AccompagnanteDashboardHeader } from '@/components/layout/accompagnante-dashboard-header'
+import { AccompagnantDashboardHeader } from '@/components/layout/accompagnant-dashboard-header'
 import { DashboardPortrait } from '@/components/accompagnant/dashboard-portrait'
 import { DisponibleToggle } from '@/components/accompagnant/disponible-toggle'
 import { StatusBadge } from '@/components/accompagnant/status-badge'
@@ -121,7 +121,7 @@ export default async function AccompagnanteDashboard() {
   return (
     <main id="main-content" tabIndex={-1} className="min-h-screen bg-[#fefaf8] focus:outline-none">
       <h1 className="sr-only">Tableau de bord</h1>
-      <AccompagnanteDashboardHeader
+      <AccompagnantDashboardHeader
         firstName={userData.first_name}
         lastName={userData.last_name}
         unreadCount={unreadCount}

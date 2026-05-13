@@ -2,7 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { ModifierAnnonceForm } from '@/components/accompagnant/modifier-annonce-form'
-import { AccompagnanteDashboardHeader } from '@/components/layout/accompagnante-dashboard-header'
+import { AccompagnantDashboardHeader } from '@/components/layout/accompagnant-dashboard-header'
 import { LogoutButton } from '@/components/auth/logout-button'
 import { getUnreadCount } from '@/lib/unread-count'
 import { getCodesDepartementsOuverts } from '@/lib/departements'
@@ -48,7 +48,7 @@ export default async function ModifierAnnoncePage({
 
   return (
     <main id="main-content" tabIndex={-1} className="min-h-screen bg-[#fefaf8] focus:outline-none">
-      <AccompagnanteDashboardHeader
+      <AccompagnantDashboardHeader
         firstName={userData.first_name}
         lastName={userData.last_name}
         unreadCount={unreadCount}

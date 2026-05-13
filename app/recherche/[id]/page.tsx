@@ -7,7 +7,7 @@ import { FavoriButton } from '@/components/recherche/favori-button'
 import { SignalementButton } from '@/components/signalement-button'
 import { getBadges } from '@/lib/badges'
 import { BadgesDisplay } from '@/components/badges-display'
-import { AccompagnanteDashboardHeader } from '@/components/layout/accompagnante-dashboard-header'
+import { AccompagnantDashboardHeader } from '@/components/layout/accompagnant-dashboard-header'
 import { AccompagneDashboardHeader } from '@/components/layout/accompagne-dashboard-header'
 import { getUnreadCount } from '@/lib/unread-count'
 import { isDepartementOuvert } from '@/lib/departements'
@@ -112,7 +112,7 @@ export default async function AnnonceDetailPage({
   return (
     <main id="main-content" tabIndex={-1} className="min-h-screen bg-[#fefaf8] focus:outline-none">
       {userData?.role === 'accompagnant' ? (
-        <AccompagnanteDashboardHeader
+        <AccompagnantDashboardHeader
           firstName={userData.first_name}
           lastName={userData.last_name}
           unreadCount={unreadCount}

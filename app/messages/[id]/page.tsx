@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { ChatWindow } from '@/components/messages/chat-window'
 import { markMessagesAsRead } from '@/app/actions/messages'
-import { AccompagnanteDashboardHeader } from '@/components/layout/accompagnante-dashboard-header'
+import { AccompagnantDashboardHeader } from '@/components/layout/accompagnant-dashboard-header'
 import { AccompagneDashboardHeader } from '@/components/layout/accompagne-dashboard-header'
 import { getUnreadCount } from '@/lib/unread-count'
 import { hasActiveSubscription } from '@/lib/subscription-helpers'
@@ -124,7 +124,7 @@ export default async function ConversationPage({
     <main id="main-content" tabIndex={-1} className="min-h-screen bg-[#fefaf8] flex flex-col focus:outline-none">
       <h1 className="sr-only">Conversation avec {otherUserNameForHeading}</h1>
       {isAccompagnante ? (
-        <AccompagnanteDashboardHeader
+        <AccompagnantDashboardHeader
           firstName={userData.first_name}
           lastName={userData.last_name}
           unreadCount={unreadCount}

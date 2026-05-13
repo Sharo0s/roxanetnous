@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import { SPECIALITES, DIPLOMES, formatExperienceLabel } from '@/lib/constants'
-import { AccompagnanteDashboardHeader } from '@/components/layout/accompagnante-dashboard-header'
+import { AccompagnantDashboardHeader } from '@/components/layout/accompagnant-dashboard-header'
 import { LogoutButton } from '@/components/auth/logout-button'
 import { getUnreadCount } from '@/lib/unread-count'
 import { ContactAccompagneButton } from '@/components/messages/contact-accompagne-button'
@@ -70,7 +70,7 @@ export default async function DemandesAccompagnesPage({
   return (
     <main id="main-content" tabIndex={-1} className="min-h-screen bg-[#fefaf8] focus:outline-none">
       {isAccompagnante ? (
-        <AccompagnanteDashboardHeader
+        <AccompagnantDashboardHeader
           firstName={userData!.first_name}
           lastName={userData!.last_name}
           unreadCount={unreadCount}

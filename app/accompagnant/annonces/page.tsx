@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { AnnonceStatusToggle } from '@/components/accompagnant/annonce-status-toggle'
 import { AnnonceDeleteButton } from '@/components/annonce-delete-button'
 import { hasActiveSubscription } from '@/lib/subscription-helpers'
-import { AccompagnanteDashboardHeader } from '@/components/layout/accompagnante-dashboard-header'
+import { AccompagnantDashboardHeader } from '@/components/layout/accompagnant-dashboard-header'
 import { LogoutButton } from '@/components/auth/logout-button'
 import { getUnreadCount } from '@/lib/unread-count'
 
@@ -41,7 +41,7 @@ export default async function MesAnnoncesAccompagnante() {
 
   return (
     <main id="main-content" tabIndex={-1} className="min-h-screen bg-[#fefaf8] focus:outline-none">
-      <AccompagnanteDashboardHeader
+      <AccompagnantDashboardHeader
         firstName={userData.first_name}
         lastName={userData.last_name}
         unreadCount={unreadCount}

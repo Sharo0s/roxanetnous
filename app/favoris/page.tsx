@@ -2,7 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { SPECIALITES, DIPLOMES } from '@/lib/constants'
-import { AccompagnanteDashboardHeader } from '@/components/layout/accompagnante-dashboard-header'
+import { AccompagnantDashboardHeader } from '@/components/layout/accompagnant-dashboard-header'
 import { AccompagneDashboardHeader } from '@/components/layout/accompagne-dashboard-header'
 import { getUnreadCount } from '@/lib/unread-count'
 
@@ -47,7 +47,7 @@ export default async function FavorisPage() {
   return (
     <main id="main-content" tabIndex={-1} className="min-h-screen bg-[#fefaf8] focus:outline-none">
       {userData.role === 'accompagnant' ? (
-        <AccompagnanteDashboardHeader
+        <AccompagnantDashboardHeader
           firstName={userData.first_name}
           lastName={userData.last_name}
           unreadCount={unreadCount}

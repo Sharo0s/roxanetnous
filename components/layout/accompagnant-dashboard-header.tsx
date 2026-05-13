@@ -26,7 +26,7 @@ const links: LinkDef[] = [
   { href: '/accompagnant/profil', label: 'Profil', key: 'profil' },
 ]
 
-export function AccompagnanteDashboardHeader({ firstName, lastName, unreadCount, currentPage = 'dashboard' }: Props) {
+export function AccompagnantDashboardHeader({ firstName, lastName, unreadCount, currentPage = 'dashboard' }: Props) {
   const [menuOpen, setMenuOpen] = useState(false)
 
   return (
