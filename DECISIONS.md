@@ -498,6 +498,13 @@ Les pages admin Server Components (`app/admin/`) consomment Supabase via 7 fichi
 
 **Lecon apprise :** verifier l'existence d'un produit avant de le recommander dans un cadrage. Le ping-pong Slack -> Sentry mobile -> Email aurait pu etre evite avec un audit en amont (questions : "quelle plateforme de chat utilises-tu ?", "quelle est ta tolerance push notif vs email ?").
 
+**Resultat livraison 2026-05-13 (test bout-en-bout reussi)** :
+- 4 alert rules creees dans Sentry web (critical immediate, burst >10/min, chemins critiques flow, daily digest warnings).
+- Push notifications iOS Mail activees sur le compte `roxanetnous@outlook.com`.
+- Test bout-en-bout : declenchement exception preview env -> email Sentry recu -> banniere iPhone Mail affichee. Delai < 2 min conforme.
+- Story 5.E.1 cloturee `done` dans sprint-status.yaml.
+- Mini-epic 5.E entierement livre (1/1 story done).
+
 ---
 
 ## 2026-05-13 : Strategie migration enum role `accompagnante` -> `accompagnant` = cutover atomique avec valeur orpheline differee (decision F12)
