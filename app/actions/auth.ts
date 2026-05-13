@@ -9,6 +9,7 @@ import { stripe } from '@/lib/stripe'
 import { getSubscriptionStatus } from '@/lib/subscription-helpers'
 import { createParrainageRelation } from '@/app/actions/parrainage'
 import { getClientIp } from '@/lib/get-client-ip'
+import { geocodeAddress } from '@/lib/geocoding'
 
 export type AuthResult = {
   error?: string
@@ -27,9 +28,15 @@ export async function signup(formData: FormData): Promise<AuthResult> {
   const firstName = formData.get('firstName') as string
   const lastName = formData.get('lastName') as string
   const rawRole = formData.get('role')
+  const ville = ((formData.get('ville') as string | null) || '').trim()
+  const codePostal = ((formData.get('code_postal') as string | null) || '').trim()
 
   if (!email || !password || !firstName || !lastName || !rawRole) {
     return { error: 'Tous les champs sont requis.' }
+  }
+
+  if (!ville || !/^\d{5}$/.test(codePostal)) {
+    return { error: 'Ville et code postal valides requis.' }
   }
 
   // Validation runtime du rôle : interdit toute valeur hors whitelist
@@ -103,6 +110,27 @@ export async function signup(formData: FormData): Promise<AuthResult> {
       await supabaseAdmin.auth.admin.deleteUser(authData.user.id)
       return { error: 'Erreur lors de la création du profil. Veuillez réessayer.' }
     }
+  }
+
+  // Persistance de la localisation dans le profil (créé par le trigger
+  // handle_new_user). Géocodage best-effort : si l'API tombe, on stocke quand
+  // même ville+CP pour ne pas bloquer l'inscription ; le matching tombera sur
+  // le fallback ville-exacte/département en attendant.
+  const geo = await geocodeAddress(ville, codePostal)
+  const profileTable = role === 'accompagnante' ? 'accompagnantes_profiles' : 'accompagnes_profiles'
+  const { error: profileError } = await supabaseAdmin
+    .from(profileTable)
+    .update({
+      ville,
+      code_postal: codePostal,
+      latitude: geo?.lat ?? null,
+      longitude: geo?.lng ?? null,
+    })
+    .eq('user_id', authData.user.id)
+
+  if (profileError) {
+    console.error('Erreur update profil avec localisation:', profileError.message)
+    // Non bloquant : l'utilisateur pourra compléter dans /profil si besoin.
   }
 
   // Parrainage (accompagnante uniquement) : si un code valide est fourni,

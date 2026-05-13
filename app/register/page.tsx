@@ -1,7 +1,9 @@
 import { Suspense } from 'react'
 import { RegisterForm } from '@/components/auth/register-form'
+import { getCodesDepartementsOuverts } from '@/lib/departements'
 
-export default function RegisterPage() {
+export default async function RegisterPage() {
+  const departementsOuverts = await getCodesDepartementsOuverts()
   return (
     <main
       id="main-content"
@@ -10,7 +12,7 @@ export default function RegisterPage() {
     >
       <h1 className="sr-only">Créer un compte</h1>
       <Suspense>
-        <RegisterForm />
+        <RegisterForm departementsOuverts={departementsOuverts} />
       </Suspense>
     </main>
   )

@@ -52,11 +52,17 @@ type Props = {
   }
   departementsOuverts: string[]
   userEmail: string
+  initialVille?: string
+  initialCodePostal?: string
 }
 
-export function OnboardingClient({ parrainage, departementsOuverts, userEmail }: Props) {
+export function OnboardingClient({ parrainage, departementsOuverts, userEmail, initialVille = '', initialCodePostal = '' }: Props) {
   const [step, setStep] = useState(0)
-  const [data, setData] = useState<OnboardingData>(initialData)
+  const [data, setData] = useState<OnboardingData>({
+    ...initialData,
+    ville: initialVille,
+    code_postal: initialCodePostal,
+  })
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [uploads, setUploads] = useState<{ cv: boolean; diplomes: Record<string, boolean> }>({ cv: false, diplomes: {} })

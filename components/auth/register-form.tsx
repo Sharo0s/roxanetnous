@@ -6,12 +6,13 @@ import { signup } from '@/app/actions/auth'
 import { validateCode } from '@/app/actions/parrainage'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { CityAutocomplete } from '@/components/ui/city-autocomplete'
 import Link from 'next/link'
 
-type Step = 'role' | 'name' | 'parrainage' | 'email' | 'password'
+type Step = 'role' | 'name' | 'localisation' | 'parrainage' | 'email' | 'password'
 
-const STEPS_ACCOMPAGNANTE: Step[] = ['role', 'name', 'parrainage', 'email', 'password']
-const STEPS_ACCOMPAGNE: Step[] = ['role', 'name', 'email', 'password']
+const STEPS_ACCOMPAGNANTE: Step[] = ['role', 'name', 'localisation', 'parrainage', 'email', 'password']
+const STEPS_ACCOMPAGNE: Step[] = ['role', 'name', 'localisation', 'email', 'password']
 
 type ParrainageState =
   | { status: 'idle' }
@@ -44,7 +45,11 @@ const PARRAINAGE_ERRORS: Record<
     'Trop de tentatives de validation depuis votre adresse. Patientez quelques minutes avant de réessayer.',
 }
 
-export function RegisterForm() {
+type RegisterFormProps = {
+  departementsOuverts?: string[]
+}
+
+export function RegisterForm({ departementsOuverts }: RegisterFormProps = {}) {
   const searchParams = useSearchParams()
   const initialRole = searchParams.get('role')
   const initialEmail = searchParams.get('email') || ''
@@ -59,6 +64,8 @@ export function RegisterForm() {
   )
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
+  const [ville, setVille] = useState('')
+  const [codePostal, setCodePostal] = useState('')
   const [parrainageCode, setParrainageCode] = useState(initialParrainageCode)
   const [parrainageState, setParrainageState] = useState<ParrainageState>({
     status: 'idle',
@@ -99,6 +106,12 @@ export function RegisterForm() {
   function submitName(e: React.FormEvent) {
     e.preventDefault()
     if (!firstName.trim() || !lastName.trim()) return
+    setStep('localisation')
+  }
+
+  function submitLocalisation(e: React.FormEvent) {
+    e.preventDefault()
+    if (!ville.trim() || !/^\d{5}$/.test(codePostal.trim())) return
     setStep(role === 'accompagnante' ? 'parrainage' : 'email')
   }
 
@@ -161,6 +174,8 @@ export function RegisterForm() {
     formData.set('firstName', firstName.trim())
     formData.set('lastName', lastName.trim())
     formData.set('role', role!)
+    formData.set('ville', ville.trim())
+    formData.set('code_postal', codePostal.trim())
     if (role === 'accompagnante' && parrainageCode.trim()) {
       formData.set('parrainage_code', parrainageCode.trim())
     }
@@ -291,7 +306,35 @@ export function RegisterForm() {
           </form>
         )}
 
-        {/* Step 3 : Parrainage (accompagnante uniquement) */}
+        {/* Step 3 : Localisation (ville + code postal) */}
+        {isVisible('localisation') && (
+          <form onSubmit={submitLocalisation} className="space-y-4 animate-fade-in">
+            <div>
+              <p className="text-sm text-gray-600 mb-3">
+                Renseignez votre ville pour des recommandations locales.
+              </p>
+              <CityAutocomplete
+                ville={ville}
+                codePostal={codePostal}
+                onVilleChange={setVille}
+                onCodePostalChange={setCodePostal}
+                required
+                departementsOuverts={departementsOuverts}
+              />
+            </div>
+            {isCurrent('localisation') && (
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={!ville.trim() || !/^\d{5}$/.test(codePostal.trim())}
+              >
+                Continuer
+              </Button>
+            )}
+          </form>
+        )}
+
+        {/* Step 4 : Parrainage (accompagnante uniquement) */}
         {role === 'accompagnante' && isVisible('parrainage') && (
           <form
             onSubmit={continueAfterParrainage}
