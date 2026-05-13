@@ -582,3 +582,90 @@ Fenetre cutover estimee : < 5 secondes.
 
 **Regle :** La memoire projet `project_renommage_accompagnante_todo` peut etre marquee `done` ou supprimee. La regle CLAUDE.md ligne 6 (interdiction `accompagnante` dans la copy nouvelle) reste applicable et durcie. Le code metier historique au feminin (noms de tables `*_accompagnantes`, helpers components/layout) reste en place jusqu'a une story Epic 6 dediee si justifiee.
 
+---
+
+## 2026-05-13 : Plan migration BDD residuel Epic 6 mini-epic 6.A (decisions F-Epic6-A1-a/b/c)
+
+**Contexte :** Story 6.A.1 produit le tech-spec `_bmad-output/planning-artifacts/tech-spec-6-a-renommage.md` qui detaille la migration BDD residuelle Epic 6 (3 tables encore au feminin + 1 enum value orpheline + 1 RPC orpheline + 14 contraintes historiques).
+
+**Re-audit MCP BDD prod 2026-05-13** confirme l'inventaire et **revele deux corrections critiques** :
+
+- **Postgres prod = 17.6 mais `ALTER TYPE ... DROP VALUE` n'est PAS implementee** (test BEGIN/ROLLBACK = `ERROR: 0A000: dropping an enum value is not implemented`). Le pattern recreate-enum d'Epic 5 D2 reste obligatoire (decision F-Epic6-A1-d).
+- **Bug latent decouvert dans le trigger `handle_new_user`** : reference encore `'accompagnante'` + insere dans `accompagnantes_profiles`. Tout signup d'accompagnant depuis Epic 5 cutover devrait etre mal route. 0 cas observe en prod (aucun signup accompagnant en 1 jour) mais bug arme. Fix integre dans 6.A.2 (decision F-Epic6-A1-e).
+- 3 tables a renommer : `accompagnantes_profiles` (818 lignes), `annonces_accompagnantes` (796 lignes), `accompagne_accompagnantes` (0 ligne).
+- Enum value orpheline : `'accompagnante'` (0 user actif, 818 users sur `'accompagnant'`).
+- RPC orpheline : `get_or_create_conversation(p_accompagnante_id uuid, p_accompagne_id uuid)` (0 caller TS).
+- 11 policies RLS sur les 3 tables (vs 10 annoncees epic-6.md) - les references aux tables sont par OID donc RENAME TABLE preserve la fonctionnalite ; recreation cosmetique pour rafraichir le texte SQL.
+- 14 contraintes historiques (PK + UNIQUE + FK + CHECK) portent encore les anciens noms `auxiliaires_*` / `beneficiaire_*` / `accompagnantes_*`.
+- Aucune policy RLS ne reference `is_accompagnant()` ni `is_accompagne()` (verifie via pg_policies). DROP/CREATE de ces helpers safe.
+- Une seule colonne typee `user_role` : `users.role` (verifie information_schema.columns). Recreate-enum reste contenu sur cette colonne (822 lignes a reecrire, ~200 ms).
+
+### Decision F-Epic6-A1-a : Embarquer le rename de `accompagne_accompagnantes` (table vide) dans 6.A.2
+
+**Choix :** rename inclus dans la meme migration unique 6.A.2.
+
+**Justification :** table vide (0 ligne) -> operation triviale (sub-seconde, metadata pure). Embarquer coute negligeable et evite un report Epic 7+ pour une operation ridiculement petite. Coherence terminologique totale post-Epic 6 = zero residu feminin BDD.
+
+### Decision F-Epic6-A1-b : Renommer toutes les contraintes BDD historiques (14 contraintes)
+
+**Choix :** renommer les 14 contraintes PK + UNIQUE + FK + CHECK qui portent encore les anciens noms `auxiliaires_*` / `beneficiaire_*` / `accompagnantes_*` dans la migration 6.A.2.
+
+**Justification :** operation metadata pure (< 100 ms cumule). Aligne le schema BDD avec la terminologie cible. Eclaircit les messages d'erreur runtime (`auxiliaires_profiles_user_id_fkey violated` n'est plus deroutant). Aligne avec l'esprit Epic 6 = solder la dette terminologique residuelle.
+
+### Decision F-Epic6-A1-c : Migration directe en prod, sans branche Supabase preview
+
+**Choix :** `apply_migration` directement sur la BDD prod dans une fenetre hors heures de pointe (nuit FR ou matin tres tot, pas dimanche soir).
+
+**Justification :** toutes les operations de la migration sont du DDL metadata pur (RENAME table/contraintes, DROP VALUE Postgres 17 natif, DROP FUNCTION, DROP/CREATE policies cosmetiques). Cutover estime < 1 seconde. Postgres 17 garantit la transactionnalite DDL (tout passe ou tout roule). Le snapshot pre-cutover (snapshot-6-a-2-pre-cutover.md) + le rollback explicite (rollback-6-a-2.sql) couvrent le risque residuel. Pattern Epic 5 (cutover < 5 sec sans branche preview) deja eprouve avec succes.
+
+### Decision F-Epic6-A1-d : Pattern recreate-enum (Postgres 17 ne supporte PAS DROP VALUE)
+
+**Choix :** recreate-enum complet (CREATE TYPE v2 + DROP helpers + ALTER COLUMN + DROP TYPE v1 + RENAME v2 + CREATE helpers) pour supprimer la valeur orpheline `'accompagnante'`.
+
+**Justification :** test 2026-05-13 confirme que Postgres 17.6 leve `ERROR: 0A000: dropping an enum value is not implemented` sur `ALTER TYPE user_role DROP VALUE 'accompagnante'`. Le pattern d'Epic 5 D2 reste obligatoire. 822 lignes a reecrire sur `users.role` (seule colonne typee user_role), estime < 200 ms. Operation transactionnelle (tout passe ou tout roule).
+
+### Decision F-Epic6-A1-e : Fix trigger `handle_new_user` dans la meme migration 6.A.2
+
+**Choix :** `CREATE OR REPLACE FUNCTION public.handle_new_user()` integre dans la migration 6.A.2 avec body corrige (`IF v_role_text IN ('accompagnant', 'accompagne')` + INSERT INTO `accompagnants_profiles`).
+
+**Justification :** la migration 6.A.2 renomme `accompagnantes_profiles` -> `accompagnants_profiles`, donc le trigger actuel se casserait immediatement post-rename (insert dans une table inexistante). Le fix est indispensable au moment du cutover, pas optionnel. En plus, le trigger actuel route mal les signups d'accompagnant (bug latent depuis Epic 5, 0 cas observe en prod mais arme).
+
+**Pas de re-routing data necessaire** : audit 2026-05-13 confirme 0 user mal route en prod.
+
+**Strategie cutover atomique** unique migration transactionnelle qui execute dans l'ordre :
+
+1. Guard explicite : refus si `users.role = 'accompagnante'` existe encore (race condition improbable).
+2. RENAME 3 tables (`accompagnantes_profiles` -> `accompagnants_profiles`, etc.).
+3. RENAME 14 contraintes historiques.
+4. DROP + CREATE des 11 policies RLS (cosmetique : rafraichir le texte SQL des `qual`/`with_check`).
+5. Pattern recreate-enum (decision F-Epic6-A1-d) :
+   - CREATE TYPE user_role_v2 AS ENUM ('accompagnant','accompagne','admin')
+   - DROP FUNCTION is_accompagnant + is_accompagne (verifies safe : aucune dependance pg_depend ni policy RLS)
+   - ALTER TABLE users ALTER COLUMN role TYPE user_role_v2 USING role::text::user_role_v2 (~200 ms)
+   - DROP TYPE user_role + ALTER TYPE user_role_v2 RENAME TO user_role
+   - CREATE FUNCTION is_accompagnant + is_accompagne (corps preserves a l'identique, cf. audit pg_get_functiondef)
+6. CREATE OR REPLACE FUNCTION handle_new_user avec body corrige (decision F-Epic6-A1-e).
+7. `DROP FUNCTION public.get_or_create_conversation(uuid, uuid)`.
+
+Fenetre cutover estimee < 5 secondes (l'ALTER COLUMN TYPE sur 822 lignes est le seul cout non-metadata).
+
+**Plan rollback par mode de defaillance** (7 modes documentes tech-spec 6.A.1 section D9) :
+
+1. Guard refuse -> transaction rollback automatique, investigation.
+2. RENAME TABLE lock contention -> lock_timeout 5s + retry hors heures pointe.
+3. Policy recreation incorrecte -> revert via migration inverse depuis snapshot DDL.
+4. Types Supabase regen casse build TS (6.A.3) -> revert commit 6.A.3, BDD reste migree.
+5. DROP FUNCTION RPC casse un caller insoupconne -> recreer depuis snapshot D8.6.
+6. ALTER COLUMN TYPE echoue (row pathologique) -> transaction rollback, investiguer row.
+7. Trigger `handle_new_user` recree incorrectement -> CREATE OR REPLACE depuis snapshot D8.7 + re-pointer vers la nouvelle table.
+
+**Snapshot pre-cutover obligatoire** : `_bmad-output/implementation-artifacts/snapshot-6-a-2-pre-cutover.md` doit etre cree avant `apply_migration` 6.A.2 (DDL replay-able pour les 11 policies + 14 contraintes + RPC body + enum + counts).
+
+**Hors scope 6.A confirme :**
+
+- Renommage des noms de policies `aux_*` -> `acc_*` : reporte Epic 7 si volonte de coherence accrue (faible valeur).
+- Libelles diplomes `accompagnante en gerontologie` / `accompagnante de vie` : **JAMAIS renommes** (terminologie metier officielle figee).
+- Renommage `is_accompagne()` : deja masculin, hors scope.
+
+**Regle :** Stories 6.A.2 a 6.A.5 ne peuvent demarrer qu'apres validation Sylvain du tech-spec et apres snapshot pre-cutover persiste. 6.B.1 (fix tests integration paywall) doit etre execute apres 6.A.2 et avant 6.A merge final pour ne pas casser la CI integration.
+

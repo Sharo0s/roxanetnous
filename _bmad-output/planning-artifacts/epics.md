@@ -1,12 +1,15 @@
 ---
-stepsCompleted: ['index-only-rétroactif']
+stepsCompleted: ['index-only-rétroactif', 'epic-6-ajoute-2026-05-13']
 inputDocuments:
   - prd.md
   - ../../DECISIONS.md
   - ../../docs/mvp-coverage.md
   - epic-3.md
+  - epic-4.md
+  - epic-5.md
+  - epic-6.md
 workflowType: 'epics-index'
-note: 'Index minimaliste créé rétroactivement 2026-05-06 pour compatibilité avec bmad-sprint-planning. Les Epic 1 et Epic 2 sont reconstitués depuis l''historique BMad. Epic 3 cadré formellement dans epic-3.md.'
+note: 'Index minimaliste créé rétroactivement 2026-05-06 pour compatibilité avec bmad-sprint-planning. Les Epic 1 et Epic 2 sont reconstitués depuis l''historique BMad. Epic 3, 4, 5 cadrés formellement. Epic 6 cadré 2026-05-13 (audit MCP fait, checkpoint review en attente).'
 created: '2026-05-06'
 ---
 
@@ -29,7 +32,8 @@ Cet index recense les épics du projet roxanetnous. Il a été créé rétroacti
 | 2 | Programme parrainage + Accessibilité transverse (NFR a11y) | livré | 2026-04-18 → 2026-05-06 | parrainage (sans FR explicite, intégré aux annonces et abonnement) ; NFR a11y WCAG 2.2 AA | `epic-2-retro-2026-05-04.md` + tech-specs 2.1-2.4 + rétros 2.5/2.6/2.7 |
 | 3 | Lancement Bretagne (déploiement progressif géographique + clarifications produit) | livré | 2026-05-06 → 2026-05-07 | FR16, FR45–FR48, FR6 (audit) | `epic-3.md` + `../implementation-artifacts/epic-3-retro-2026-05-07.md` |
 | 4 | Hardening pré-go-live Bretagne (Sentry, schema logNotification, email queue, tests métier, debt résolution) | livré 2026-05-08 | 2026-05-07 → 2026-05-08 | NFR fiabilité + NFR sécurité + NFR testabilité + dette technique Epic 2/3 | `epic-4.md` + `../implementation-artifacts/epic-4-retro-2026-05-08.md` |
-| 5 | Cohérence éditoriale + hardening continu post-Bretagne (renommage `accompagnante` → `accompagnant`, bugs latents messagerie, hardening typage transverse, audits 30j, observabilité oncall) | cadré 2026-05-13, en attente déblocage audits 7j | démarrage post-2026-05-15 | FR1-2, FR4-5, FR7, FR11-12, FR16-19, FR27-29, FR45-46, FR48 (impacts indirects) + NFR2, NFR4-6 | `epic-5.md` |
+| 5 | Cohérence éditoriale + hardening continu post-Bretagne (renommage `accompagnante` → `accompagnant`, bugs latents messagerie, hardening typage transverse, audits 30j, observabilité oncall) | livré 2026-05-13 | 2026-05-13 (1 jour) | FR1-2, FR4-5, FR7, FR11-12, FR16-19, FR27-29, FR45-46, FR48 (impacts indirects) + NFR2, NFR4-6 | `epic-5.md` + `../implementation-artifacts/epic-5-retro-2026-05-13.md` |
+| 6 | Finalisation renommage (BDD résiduel + code) + hardening Epic 5 reporté + bugs latents OCR/tests | cadré 2026-05-13, checkpoint review en attente | démarrage post-checkpoint Sylvain | FR1, FR7, FR11-12, FR16-19, FR27-29 + NFR2, NFR5, NFR6 | `epic-6.md` |
 
 ## Note de méthode
 
@@ -39,7 +43,9 @@ L'Epic 3 est le premier épic du projet à bénéficier d'un cadrage BMad formel
 
 L'Epic 4 « Hardening pré-go-live Bretagne » a été cadré formellement le 2026-05-07 à la suite de la rétrospective Epic 3. Il regroupe **4 stories ordre 1 bloquantes go-live** (4.1 Sentry + rate-limit, 4.2 fix schema logNotification, 4.3 email queue durable, 4.4 tests métier critiques) et **7 stories ordre 2 différées** (4.5 à 4.11). Le toggle admin du premier département Bretagne en production est conditionné à la livraison des 4 stories ordre 1. Épic clos 2026-05-08, retro livrée.
 
-L'Epic 5 « Cohérence éditoriale + hardening continu post-Bretagne » a été cadré formellement le 2026-05-13 via le skill `bmad-create-epics-and-stories`. Il regroupe **5 mini-epics et 16 stories** : 5.A renommage `accompagnante` → `accompagnant` (6 stories, séquentiel strict), 5.B bugs latents `deferred-work` (3 stories), 5.C hardening typage + nettoyage CI (4 stories), 5.D audits post-stabilisation 30j (2 stories conditionnelles ~2026-06-08), 5.E observabilité oncall (1 story). **Pré-requis bloquants** hérités Epic 4 : audits 7j Sentry + GHA (ETA ~2026-05-15) + toggle admin Bretagne. Démarrage sprint conditionné à ces 3 conditions. Source : `epic-5.md`.
+L'Epic 5 « Cohérence éditoriale + hardening continu post-Bretagne » a été cadré formellement le 2026-05-13 via le skill `bmad-create-epics-and-stories`. Il regroupe **5 mini-epics et 16 stories** : 5.A renommage `accompagnante` → `accompagnant` (6 stories, séquentiel strict), 5.B bugs latents `deferred-work` (3 stories), 5.C hardening typage + nettoyage CI (4 stories), 5.D audits post-stabilisation 30j (2 stories conditionnelles ~2026-06-08), 5.E observabilité oncall (1 story). **Pré-requis bloquants** hérités Epic 4 : audits 7j Sentry + GHA (ETA ~2026-05-15) + toggle admin Bretagne. Démarrage sprint conditionné à ces 3 conditions. Source : `epic-5.md`. **Livré le même jour 2026-05-13** : 15/16 stories DONE en 1 journée (rétro `../implementation-artifacts/epic-5-retro-2026-05-13.md`), schéma BDD aligné masculin neutre, 2 stories 5.D différées à Epic 6 (déclencheur calendrier ~2026-06-08). Cadence non-extrapolable.
+
+L'Epic 6 « Finalisation renommage + hardening Epic 5 reporté » a été cadré le 2026-05-13 (audit MCP BDD prod fait, inventaire code résiduel fait, checkpoint review en attente Sylvain). Il regroupe **5 mini-epics et ~17 stories** : 6.A renommage BDD résiduel + code (5 stories : 3 tables encore au féminin + enum value orpheline + RPC orpheline + composant `AccompagnanteDashboardHeader` + 381 occurrences TS), 6.B bugs latents révélés par audit (3 stories : tests intégration paywall cassés + inserts `lib/ocr.ts` vers table inexistante + backward-compat email à fin de vie), 6.C hardening dette Epic 5 reporté (4 stories : `lib/matching.ts` typage + switch domaine Supabase conditionnel + seed UTF-8 départements + centralisation helpers email reconsidérée), 6.D suite Playwright reportée Epic 5 (3 stories : anti-fraude parrainage + RGPD cascade + matching), 6.E audits 30j post-Epic 4 (2 stories conditionnelles calendrier ~2026-06-08 : 5.D.1 cron notify-waitlist-retry + 5.D.2 BATCH_LIMIT send-waitlist). **Aucun pré-requis bloquant**. Source : `epic-6.md`.
 
 ## Pointeurs croisés
 
