@@ -12,6 +12,12 @@ export type AnnonceResult = {
   success?: boolean
 }
 
+// Story 7.A.9 (AC4) : whitelist applicative pour les toggles de status d'annonce.
+// Filet de securite runtime aligne sur le typage TS `status: 'publiee' | 'archivee'`
+// (defense en profondeur contre un appel HTTP direct `... as any`).
+const ALLOWED_TOGGLE_STATUSES = ['publiee', 'archivee'] as const
+type AllowedToggleStatus = (typeof ALLOWED_TOGGLE_STATUSES)[number]
+
 export async function createAnnonceAccompagnante(data: {
   description: string
   ville: string
@@ -156,6 +162,12 @@ export async function updateAnnonceAccompagnanteStatus(
   annonceId: string,
   status: 'publiee' | 'archivee'
 ): Promise<AnnonceResult> {
+  // Story 7.A.9 (AC4) : whitelist applicative en tete -- fail-fast avant tout
+  // round-trip BDD ou check session pour un appel out-of-band.
+  if (!ALLOWED_TOGGLE_STATUSES.includes(status as AllowedToggleStatus)) {
+    return { error: 'Statut invalide.' }
+  }
+
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
@@ -168,6 +180,23 @@ export async function updateAnnonceAccompagnanteStatus(
     .single()
 
   if (!profile) return { error: 'Profil non trouvé.' }
+
+  // Story 7.A.9 (AC2/AC3) : early-return idempotent `publiee -> publiee` avant le
+  // check abonnement pour eviter de paywaller un no-op et empecher le bump frauduleux
+  // de `published_at` (vector de fraude au classement sur le tri du feed).
+  const { data: current, error: currentErr } = await supabase
+    .from('annonces_accompagnants')
+    .select('status')
+    .eq('id', annonceId)
+    .eq('accompagnant_id', profile.id)
+    .maybeSingle()
+
+  if (currentErr) return { error: 'Erreur lors de la mise à jour.' }
+  if (!current) return { error: 'Annonce introuvable.' }
+
+  if (current.status === 'publiee' && status === 'publiee') {
+    return { success: true }
+  }
 
   // Story 3.6 : paywall asymetrique sur toggle (D5) : reactivation 'publiee' = re-publication implicite => paywall.
   // Archivage 'archivee' = retrait => pas de paywall (droit utilisateur).
@@ -460,6 +489,12 @@ export async function updateAnnonceAccompagneStatus(
   annonceId: string,
   status: 'publiee' | 'archivee'
 ): Promise<AnnonceResult> {
+  // Story 7.A.9 (AC4) : whitelist applicative en tete -- symetrie avec
+  // updateAnnonceAccompagnanteStatus.
+  if (!ALLOWED_TOGGLE_STATUSES.includes(status as AllowedToggleStatus)) {
+    return { error: 'Statut invalide.' }
+  }
+
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
@@ -472,6 +507,22 @@ export async function updateAnnonceAccompagneStatus(
     .single()
 
   if (!profile) return { error: 'Profil non trouvé.' }
+
+  // Story 7.A.9 (AC2/AC3) : early-return idempotent `publiee -> publiee` avant le
+  // check abonnement -- symetrie stricte avec updateAnnonceAccompagnanteStatus.
+  const { data: current, error: currentErr } = await supabase
+    .from('annonces_accompagnes')
+    .select('status')
+    .eq('id', annonceId)
+    .eq('accompagne_id', profile.id)
+    .maybeSingle()
+
+  if (currentErr) return { error: 'Erreur lors de la mise à jour.' }
+  if (!current) return { error: 'Annonce introuvable.' }
+
+  if (current.status === 'publiee' && status === 'publiee') {
+    return { success: true }
+  }
 
   // Story 3.6 : paywall asymetrique sur toggle (D5) : reactivation 'publiee' = re-publication => paywall.
   // Archivage 'archivee' = retrait => pas de paywall (droit utilisateur).
