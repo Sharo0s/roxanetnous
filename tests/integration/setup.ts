@@ -42,6 +42,7 @@ vi.mock('@sentry/nextjs', () => ({
       setLevel: vi.fn(),
     })
   }),
+  addBreadcrumb: vi.fn(),
   setTag: vi.fn(),
   setExtra: vi.fn(),
   setContext: vi.fn(),

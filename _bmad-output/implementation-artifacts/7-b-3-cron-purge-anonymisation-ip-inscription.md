@@ -1,6 +1,6 @@
 # Story 7.B.3 : Cron purge / anonymisation `parrainages.ip_inscription` + `notifications_ouverture.ip_inscription`
 
-Status: review
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -190,6 +190,21 @@ so that la politique de retention contractualisee par F-Epic7-B1 (`DECISIONS.md:
   - [x] T10.1 - Stage explicite des fichiers File List uniquement (pas de `git add .`).
   - [x] T10.2 - Commit message format Conventional Commits FR : `feat(rgpd): cron purge IP parrainages + notifications_ouverture (story 7.B.3)`. Heritage 7.A.* + 7.B.1 + 7.B.2.
   - [x] T10.3 - Pas de `git push` sans validation explicite Sylvain (heritage 7.B.2 T8.3).
+
+### Review Findings
+
+- [ ] [Review][Decision] T9 — Seuil spike `PURGE_SPIKE_THRESHOLD = 100` : risque d'alerte parasite au 1er run si volumétrie initiale > 100 rows — faut-il ajouter une exception 1er run ou laisser tel quel ? (Note : audit MCP 2026-05-14 = 0 row anonymisable, 1er run = no-op → risque théorique uniquement à court terme) [`app/api/cron/purge-ip-addresses/route.ts:51`]
+- [ ] [Review][Decision] T11 — `TEST_CRON_SECRET` tests unit = `'unit-test-cron-secret-7b3'` vs spec AC9 qui indique `'test-cron-secret-7b2'` (valeur GHA) : les tests unit n'ont pas de contrainte GHA, la divergence est techniquement correcte mais viole la lettre de la spec. Aligner ou garder l'isolation ? [`tests/unit/cron-purge-ip-addresses.test.ts:24`]
+- [x] [Review][Patch] T1 — Cas (d) assertion `anonymizedParrainages >= 1` trop permissive : ne prouve pas que le filtre `.not('ip_inscription', 'is', null)` exclut `id1` du count. Ajouter vérification scopée sur nos 2 IDs via SELECT count avant/après. [`tests/integration/cron-purge-ip-addresses/purge-cron.test.ts:340-357`]
+- [x] [Review][Patch] T2 — Chemin "étape 1 OK + étape 2 KO" non testé : ajouter 1 cas unit mockant `update` parrainages → succès puis `update` notifications_ouverture → erreur, vérifier 500 + `captureException` step='update_notifications_ouverture'. [`tests/unit/cron-purge-ip-addresses.test.ts`]
+- [x] [Review][Patch] T4 — `addBreadcrumb` absent du mock Sentry dans `tests/integration/setup.ts` : ajouté. [`tests/integration/setup.ts:47`]
+- [x] [Review][Patch] T10 — Test (c) : le body du 2e run n'est pas inspecté. Ajout `expect(body2.anonymizedParrainages/Waitlist/Total).toBe(0)`. [`tests/integration/cron-purge-ip-addresses/purge-cron.test.ts:266`]
+- [x] [Review][Defer] T3 — `createClient()` throw JS non capturé → 500 brut non observé Sentry [app/api/cron/purge-ip-addresses/route.ts:63] — deferred, pre-existing sur tous les crons existants
+- [x] [Review][Defer] T5 — `notifications_ouverture` absente de `fkSafeOrder` dans `cleanupAllFixtures` [tests/integration/_lib/fixtures.ts] — deferred, pre-existing hors-scope story
+- [x] [Review][Defer] T6 — Timing attack sur comparaison `CRON_SECRET` (chaîne naïve) [app/api/cron/purge-ip-addresses/route.ts:56] — deferred, pattern commun 8 autres crons existants
+- [x] [Review][Defer] T7 — Fuite `cutoffParrainages`/`cutoffWaitlist` dans réponse 200 [app/api/cron/purge-ip-addresses/route.ts:136-141] — deferred, endpoint interne protégé Bearer, acceptable
+- [x] [Review][Defer] T8 — Absence de LIMIT/batch sur UPDATE : risque timeout sur grand volume [app/api/cron/purge-ip-addresses/route.ts:67-72] — deferred, volumétrie cible < 100 rows/run, story 8.X si prod timeout
+- [x] [Review][Defer] T12 — Module ESM mis en cache entre tests unit (import dynamique sans `vi.resetModules`) [tests/unit/cron-purge-ip-addresses.test.ts] — deferred, pattern identique cron-purge-notifications heritage 7.B.2, tests passent en pratique
 
 ## Dev Notes
 

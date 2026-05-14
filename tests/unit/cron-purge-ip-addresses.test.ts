@@ -5,6 +5,7 @@
 // cas (iii) couvert ici en plus -- cf. AC9).
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
+import type { Mock } from 'vitest'
 import { NextRequest } from 'next/server'
 
 const { mockCreateClient } = vi.hoisted(() => ({
@@ -71,5 +72,43 @@ describe('GET /api/cron/purge-ip-addresses (auth)', () => {
     const body = (await res.json()) as { error: string }
     expect(body).toEqual({ error: 'Non autorise' })
     expect(mockCreateClient).not.toHaveBeenCalled()
+  })
+})
+
+describe('GET /api/cron/purge-ip-addresses (erreur partielle)', () => {
+  it('(iv) etape 1 OK + etape 2 KO -> 500 + captureException step=update_notifications_ouverture', async () => {
+    const Sentry = await import('@sentry/nextjs')
+    const mockCaptureException = Sentry.captureException as Mock
+
+    // Supabase mock : etape 1 (parrainages) reussit, etape 2 (notifications_ouverture) echoue.
+    const mockUpdateNotNull = vi.fn().mockReturnValue({ data: [{ id: 'abc' }], error: null })
+    const mockUpdateWithError = vi.fn().mockReturnValue({ data: null, error: { message: 'simulated_error', code: '42P01' } })
+
+    let callCount = 0
+    const mockFrom = vi.fn().mockImplementation(() => ({
+      update: vi.fn().mockReturnValue({
+        lt: vi.fn().mockReturnValue({
+          not: vi.fn().mockReturnValue({
+            select: callCount++ === 0 ? mockUpdateNotNull : mockUpdateWithError,
+          }),
+        }),
+      }),
+    }))
+    mockCreateClient.mockResolvedValue({ from: mockFrom })
+
+    const { GET } = await import('@/app/api/cron/purge-ip-addresses/route')
+    const req = new NextRequest('http://localhost/api/cron/purge-ip-addresses', {
+      headers: { authorization: `Bearer ${TEST_CRON_SECRET}` },
+    })
+    const res = await GET(req)
+    expect(res.status).toBe(500)
+    const body = (await res.json()) as { error: string }
+    expect(body).toEqual({ error: 'Purge failed' })
+    expect(mockCaptureException).toHaveBeenCalledWith(
+      expect.objectContaining({ message: 'simulated_error' }),
+      expect.objectContaining({
+        extra: expect.objectContaining({ step: 'update_notifications_ouverture' }),
+      }),
+    )
   })
 })
