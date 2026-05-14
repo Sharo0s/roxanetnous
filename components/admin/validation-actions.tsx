@@ -102,14 +102,13 @@ export function ValidationActions({ profileId, status }: Props) {
             </Button>
           )}
           <Button
-            variant="outline"
             onClick={openConversation}
             disabled={chatPending}
             aria-label="Discuter avec la personne par messagerie"
           >
             {chatPending ? 'Ouverture…' : 'Discuter avec la personne'}
           </Button>
-          <Button variant="outline" onClick={() => setAction('a_completer')}>
+          <Button onClick={() => setAction('a_completer')}>
             Demander un complément
           </Button>
           <Button variant="destructive" onClick={() => setAction('refuse')}>
