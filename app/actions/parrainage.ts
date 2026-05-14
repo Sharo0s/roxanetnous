@@ -405,7 +405,7 @@ export async function validateCode(rawCode: string): Promise<ValidationCodeResul
   // vide et la marraine apparaît comme non validée.
   const { data: marraine } = await supabaseAdmin
     .from('users')
-    .select('first_name, accompagnants_profiles!auxiliaires_profiles_user_id_fkey(validation_status)')
+    .select('first_name, accompagnants_profiles!accompagnants_profiles_user_id_fkey(validation_status)')
     .eq('id', row.user_id)
     .maybeSingle()
 
