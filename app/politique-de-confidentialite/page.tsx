@@ -66,7 +66,10 @@ export default function PolitiqueConfidentialitePage() {
               <li>Données de compte : conservées tant que le compte est actif</li>
               <li>Documents justificatifs : conservés pendant la durée de validité du profil</li>
               <li>Données de paiement (Stripe) : selon la politique de Stripe et les obligations légales</li>
-              <li>Logs de notification : 12 mois</li>
+              <li>Logs de notification email (<code>notifications_log</code>) : 18 mois maximum, puis suppression définitive</li>
+              <li>Adresses IP d&apos;inscription (parrainages) : anonymisées après 2 ans</li>
+              <li>Adresses IP des demandes d&apos;alerte d&apos;ouverture départementale : anonymisées après 6 mois</li>
+              <li>Journal d&apos;actions administratives : conservation indéfinie à fin d&apos;audit conformité</li>
               <li>Après suppression du compte : toutes les données sont supprimées immédiatement</li>
             </ul>
           </section>
