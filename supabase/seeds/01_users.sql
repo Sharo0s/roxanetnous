@@ -33,9 +33,20 @@ UPDATE public.users SET role = 'accompagnant', first_name = 'Seed', last_name = 
   WHERE id = '00000000-0000-0000-0000-000000000005';
 
 -- 2. UPDATE accompagnants_profiles : valide les profils (le trigger les cree
---    en validation_status = 'en_attente' par defaut).
+--    en validation_status = 'a_completer' par defaut depuis migration 2026-05-10).
+--    Note : la migration 20260510234500 ajoute le CHECK constraint
+--    `accompagnants_profiles_completion_check` qui exige que tout profil hors
+--    'a_completer' ait ville + code_postal + experience + specialites (>=1)
+--    + diplomes (>=1) renseignes. On remplit donc tous ces champs en plus
+--    de validation_status = 'valide'.
 UPDATE public.accompagnants_profiles
-  SET validation_status = 'valide', adresse = 'Seed Address Bretagne'
+  SET validation_status = 'valide',
+      adresse = 'Seed Address Bretagne',
+      ville = 'Rennes',
+      code_postal = '35000',
+      experience = 'Seed experience accompagnant 5 ans',
+      specialites = ARRAY['Personnes agees'],
+      diplomes = ARRAY['DEAES']
   WHERE user_id IN (
     '00000000-0000-0000-0000-000000000002',
     '00000000-0000-0000-0000-000000000004',
