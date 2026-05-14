@@ -525,7 +525,7 @@ function StatusBadge({ status, source }: { status: string; source?: string | nul
 
   const labels: Record<string, string> = {
     en_attente: 'En attente',
-    visio_a_planifier: 'En attente de visio',
+    visio_a_planifier: 'Visio à planifier',
     visio_realisee: 'Visio réalisée',
     valide: 'Validé',
     refuse: 'Refusé',

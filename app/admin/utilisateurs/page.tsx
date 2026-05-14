@@ -95,7 +95,10 @@ export default async function AdminUtilisateursPage() {
 
   // Compter par statut de validation
   const enAttenteCount = accompagnantes.filter(
-    (a) => a.validation_status === 'en_attente'
+    (a) =>
+      a.validation_status === 'en_attente' ||
+      a.validation_status === 'visio_a_planifier' ||
+      a.validation_status === 'visio_realisee'
   ).length
   const validesCount = accompagnantes.filter(
     (a) => a.validation_status === 'valide'

@@ -33,12 +33,18 @@ const FEEDBACK_LABELS: Record<string, string> = {
 
 const VALIDATION_LABELS: Record<string, string> = {
   en_attente: 'En attente',
-  visio_a_planifier: 'En attente de visio',
+  visio_a_planifier: 'Visio à planifier',
   visio_realisee: 'Visio réalisée',
   valide: 'Validé',
   refuse: 'Refusé',
   a_completer: 'À compléter',
 }
+
+const META_FILTER_LABELS: Record<string, string> = {
+  a_traiter: 'À traiter',
+}
+
+const A_TRAITER_STATUSES = ['en_attente', 'visio_a_planifier', 'visio_realisee']
 
 const ROLE_LABELS: Record<string, string> = {
   accompagnant: 'Accompagnant',
@@ -72,7 +78,7 @@ export function UtilisateursClient({
 }) {
   const searchParams = useSearchParams()
   const initialStatus = searchParams.get('statut') || 'tous'
-  const validStatuses = ['tous', 'en_attente', 'visio_a_planifier', 'visio_realisee', 'valide', 'refuse', 'a_completer']
+  const validStatuses = ['tous', 'a_traiter', 'en_attente', 'visio_a_planifier', 'visio_realisee', 'valide', 'refuse', 'a_completer']
   const [tab, setTab] = useState<Tab>('accompagnantes')
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState<string>(
@@ -91,7 +97,9 @@ export function UtilisateursClient({
           u.ville?.toLowerCase().includes(q)
       )
     }
-    if (statusFilter !== 'tous') {
+    if (statusFilter === 'a_traiter') {
+      result = result.filter((u) => u.validation_status != null && A_TRAITER_STATUSES.includes(u.validation_status))
+    } else if (statusFilter !== 'tous') {
       result = result.filter((u) => u.validation_status === statusFilter)
     }
     return result
@@ -165,12 +173,12 @@ export function UtilisateursClient({
             <p className="italic text-3xl text-gray-900 mt-1">{accompagnantes.length}</p>
           </button>
           <button
-            onClick={() => setStatusFilter('en_attente')}
+            onClick={() => setStatusFilter('a_traiter')}
             className={`bg-white rounded-2xl border p-5 text-left transition ${
-              statusFilter === 'en_attente' ? 'border-kraft' : 'border-[#e8dfd2] hover:border-kraft'
+              statusFilter === 'a_traiter' ? 'border-kraft' : 'border-[#e8dfd2] hover:border-kraft'
             }`}
           >
-            <p className="text-[11px] uppercase tracking-[0.12em] text-kraft font-medium">En attente</p>
+            <p className="text-[11px] uppercase tracking-[0.12em] text-kraft font-medium">À traiter</p>
             <p className="italic text-3xl text-gray-900 mt-1">{enAttenteCount}</p>
           </button>
           <button
@@ -216,7 +224,7 @@ export function UtilisateursClient({
       {/* Filtre statut accompagnants */}
       {tab === 'accompagnantes' && (
         <div className="flex gap-2 mb-6 flex-wrap">
-          {['tous', 'en_attente', 'visio_a_planifier', 'visio_realisee', 'valide', 'refuse', 'a_completer'].map((s) => (
+          {['tous', 'a_traiter', 'en_attente', 'visio_a_planifier', 'visio_realisee', 'valide', 'refuse', 'a_completer'].map((s) => (
             <button
               key={s}
               onClick={() => setStatusFilter(s)}
@@ -226,7 +234,7 @@ export function UtilisateursClient({
                   : 'bg-white border border-[#e8dfd2] text-gray-700 hover:border-kraft'
               }`}
             >
-              {s === 'tous' ? 'Tous' : VALIDATION_LABELS[s]}
+              {s === 'tous' ? 'Tous' : META_FILTER_LABELS[s] || VALIDATION_LABELS[s]}
             </button>
           ))}
         </div>
@@ -297,7 +305,7 @@ function AccompagnantesTable({
                   <td className="px-4 py-3">
                     {u.validation_status ? (
                       <span
-                        className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                        className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap ${
                           VALIDATION_STYLES[u.validation_status] || 'bg-gray-100 text-gray-600'
                         }`}
                         title={
