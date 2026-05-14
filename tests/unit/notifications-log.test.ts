@@ -167,3 +167,77 @@ describe('logNotification', () => {
     expect(optsArg.extra.hasUserId).toBe(true)
   })
 })
+
+// Story 7.A.11 (F-Epic7-A11) : validation runtime UUID sur params.userId.
+// Throw early *avant le try* si format invalide -> remonte au caller, n'est pas
+// avale par le catch Sentry du helper. Defense en profondeur : aucun call-site
+// connu n'exerce le cas 'undefined' literal a la livraison (audit AC7).
+describe('logNotification > userId validation', () => {
+  beforeEach(() => {
+    mockInsert.mockReset()
+    mockCaptureException.mockReset()
+    mockAddBreadcrumb.mockReset()
+    mockCreateClient.mockReset()
+  })
+
+  it('(uuid-a) UUID v4 minuscule valide : INSERT normal, pas de throw, pas de Sentry', async () => {
+    mockSupabaseInsertResult({ error: null })
+
+    await logNotification({ ...baseParams, userId: 'd1d1c054-ddc0-452e-8347-e6b5fa3799e2' })
+
+    expect(mockInsert).toHaveBeenCalledTimes(1)
+    const payload = mockInsert.mock.calls[0]?.[0] as { user_id: string | null }
+    expect(payload.user_id).toBe('d1d1c054-ddc0-452e-8347-e6b5fa3799e2')
+    expect(mockCaptureException).not.toHaveBeenCalled()
+  })
+
+  it('(uuid-b) UUID v4 majuscule valide : regex case-insensitive, payload preserve la casse', async () => {
+    mockSupabaseInsertResult({ error: null })
+
+    await logNotification({ ...baseParams, userId: 'D1D1C054-DDC0-452E-8347-E6B5FA3799E2' })
+
+    expect(mockInsert).toHaveBeenCalledTimes(1)
+    const payload = mockInsert.mock.calls[0]?.[0] as { user_id: string | null }
+    expect(payload.user_id).toBe('D1D1C054-DDC0-452E-8347-E6B5FA3799E2')
+    expect(mockCaptureException).not.toHaveBeenCalled()
+  })
+
+  it("(uuid-c) userId === 'undefined' literal : throw avant try, mockInsert jamais appele", async () => {
+    await expect(logNotification({ ...baseParams, userId: 'undefined' })).rejects.toThrow(/UUID/)
+
+    expect(mockInsert).not.toHaveBeenCalled()
+    expect(mockCreateClient).not.toHaveBeenCalled()
+    expect(mockCaptureException).not.toHaveBeenCalled()
+  })
+
+  it("(uuid-d) userId === '' empty string : falsy short-circuit, INSERT avec user_id=null", async () => {
+    mockSupabaseInsertResult({ error: null })
+
+    await logNotification({ ...baseParams, userId: '' })
+
+    expect(mockInsert).toHaveBeenCalledTimes(1)
+    const payload = mockInsert.mock.calls[0]?.[0] as { user_id: string | null }
+    expect(payload.user_id).toBeNull()
+    expect(mockCaptureException).not.toHaveBeenCalled()
+  })
+
+  it('(uuid-e) userId omis (undefined) : INSERT avec user_id=null', async () => {
+    mockSupabaseInsertResult({ error: null })
+
+    const { email, type, subject, status } = baseParams
+    await logNotification({ email, type, subject, status })
+
+    expect(mockInsert).toHaveBeenCalledTimes(1)
+    const payload = mockInsert.mock.calls[0]?.[0] as { user_id: string | null }
+    expect(payload.user_id).toBeNull()
+    expect(mockCaptureException).not.toHaveBeenCalled()
+  })
+
+  it("(uuid-f) userId === 'not-a-uuid' : throw avant try, mockInsert jamais appele", async () => {
+    await expect(logNotification({ ...baseParams, userId: 'not-a-uuid' })).rejects.toThrow(/UUID/)
+
+    expect(mockInsert).not.toHaveBeenCalled()
+    expect(mockCreateClient).not.toHaveBeenCalled()
+    expect(mockCaptureException).not.toHaveBeenCalled()
+  })
+})

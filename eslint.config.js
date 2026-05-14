@@ -53,6 +53,7 @@ export default [
       '_bmad/**',
       'public/**',
       '.vercel/**',
+      '.claude/worktrees/**',
       'supabase/migrations/**',
       'next-env.d.ts',
     ],

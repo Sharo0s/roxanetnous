@@ -13,12 +13,15 @@
 // sur le partial UNIQUE INDEX `notifications_log_unique_sent_by_hour`
 // (status='sent') -> succes idempotent silent-skip + breadcrumb info Sentry,
 // pas de captureException critique. Heritage DECISIONS.md F5/F6/F7.
-// Story 7.A.11 (futur, mini-epic 7.A) ajoutera un garde-fou CI
-// `scripts/check-no-direct-notifications-log-insert.mjs` pour empecher
-// les bypass + une validation UUID stricte sur `userId` en amont du try.
+// Story 7.A.11 (2026-05-14 / decision F-Epic7-A11) : garde-fou CI
+// `scripts/check-no-direct-notifications-log-insert.mjs` + validation runtime
+// regex UUID sur `params.userId` (throw early avant le try si format invalide,
+// propage au caller plutot que d'etre avalee par le catch Sentry du helper).
 
 import * as Sentry from '@sentry/nextjs'
 import { createClient } from '@/lib/supabase/server'
+
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
 export type NotificationLogStatus =
   | 'pending'
@@ -37,6 +40,14 @@ export async function logNotification(params: {
   status: NotificationLogStatus
   error?: string
 }) {
+  // Story 7.A.11 : validation runtime UUID en amont du try -> propage au caller
+  // si format invalide (ex: 'undefined' literal accidentel via String(undefined)).
+  // Volontairement hors du try pour eviter d'etre avale par le catch Sentry.
+  if (params.userId && !UUID_REGEX.test(params.userId)) {
+    throw new Error(
+      `logNotification: userId invalid format (expected UUID v4, got: "${params.userId}")`,
+    )
+  }
   try {
     const supabase = await createClient({ serviceRole: true })
     const { error: insertError } = await supabase.from('notifications_log').insert({

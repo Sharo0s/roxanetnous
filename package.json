@@ -16,6 +16,7 @@
     "check:as-any-global": "node scripts/check-as-any-global.mjs",
     "check:oracle-paywall": "node scripts/check-oracle-paywall.mjs",
     "check:rls-helpers": "node scripts/check-rls-helpers-security-definer.mjs",
+    "check:no-direct-notifications-log-insert": "node scripts/check-no-direct-notifications-log-insert.mjs",
     "env:push": "node scripts/vercel-env-push.mjs",
     "env:push:apply": "node scripts/vercel-env-push.mjs --apply",
     "check:types:supabase": "node scripts/check-types-supabase.mjs",

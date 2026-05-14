@@ -1,5 +1,5 @@
 {
-  "buildCommand": "npm run check:env && npm run lint:a11y-check && npm run check:ip-spoofing && npm run check:as-any-admin && npm run check:as-any-global && npm run check:oracle-paywall && npm run check:rls-helpers && next build",
+  "buildCommand": "npm run check:env && npm run lint:a11y-check && npm run check:ip-spoofing && npm run check:as-any-admin && npm run check:as-any-global && npm run check:oracle-paywall && npm run check:rls-helpers && npm run check:no-direct-notifications-log-insert && next build",
   "crons": [
     {
       "path": "/api/cron/update-badges",
