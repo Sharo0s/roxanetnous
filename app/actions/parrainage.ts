@@ -110,6 +110,19 @@ async function revokeFilleuleValidation(
   raison: string,
   context: { adminId?: string | null; parrainageId?: string; marraineId?: string } = {},
 ): Promise<void> {
+  // Story 7.A.7 (F-Epic7-A7) : `parrainageId` est REQUIS car il alimente
+  // `target_id` du log `admin_actions_log` (cf. ligne ~172 plus bas) qui doit
+  // satisfaire le CHECK XOR `target_id_xor` (exactement un de target_id /
+  // target_id_text renseigne, sinon Postgres 23514). Les 2 callers existants
+  // (admin-parrainages.ts:201 et webhooks/stripe/route.ts:218) passent toujours
+  // un parrainageId issu d'une row BDD `parrainages.id` -> precondition garantie
+  // par construction. Fail-loud ici previent toute regression future.
+  if (!context.parrainageId) {
+    throw new Error(
+      'revokeFilleuleValidation: context.parrainageId requis pour log admin_actions_log (CHECK XOR target_id_xor)',
+    )
+  }
+
   const supabaseAdmin = await createClient({ serviceRole: true })
 
   const { data: profile } = await supabaseAdmin
@@ -173,7 +186,7 @@ async function revokeFilleuleValidation(
     admin_id: context.adminId ?? null,
     action_type: 'parrainage_fraude_confirmee',
     target_type: 'parrainage',
-    target_id: context.parrainageId ?? null,
+    target_id: context.parrainageId,
     details: {
       via: raison,
       filleule_id: filleuleId,

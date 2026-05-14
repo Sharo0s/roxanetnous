@@ -792,3 +792,37 @@ Estimation realiste : **2-3 jours-dev**, pas "extension" comme le tech-spec le s
 **Tests :** `tests/unit/notifications-log.test.ts` (4 cas mocks Supabase + Sentry) + `tests/integration/notifications-log/idempotence-partial-unique-index.test.ts` (5 cas BDD bout-en-bout : authentifie / anonyme / variation subject / status non-sent / cross-hour).
 
 **Regle :** toute future table avec exigence d idempotence doit declarer un UNIQUE INDEX partial sur la cle metier + capture `23505` cote helper applicatif (pattern aligne F5/F6/F7). Le helper centralise est l unique point d entree (anti-pattern check-before-insert applicatif interdit). Si granularite 1h ne convient pas (cas legitime resend intra-heure), differencier le `subject` au lieu de relacher la contrainte (pattern existant `sendNewMessageEmail` qui inclut `senderFirstName`).
+
+
+---
+
+## 2026-05-14 : CHECK XOR sur `admin_actions_log.target_id` / `target_id_text` (decision F-Epic7-A7)
+
+**Contexte :** Story 7.A.7 (mini-epic 7.A hardening securite). Heritage story 3.5 D1 : la migration `20260506130000_admin_actions_log_target_id_text.sql` a ajoute `target_id_text TEXT NULL` pour absorber les identifiants non-UUID (toggleDepartement/toggleRegion ouvrant un dpt hors-Bretagne avec `target_id_text: code`). Cette migration a explicitement reconnu une dette technique : "Pas de CHECK BDD du type `(target_id IS NULL) <> (target_id_text IS NULL)` car les lignes historiques ont `target_id NOT NULL` et un CHECK retroactif les invaliderait" (commentaire migration L15-17). Resultat : mutex APPLICATIF uniquement, aucun garde-fou BDD pour empecher un futur call-site mal ecrit de shipper (target_id NULL ET target_id_text NULL) OU (target_id NOT NULL ET target_id_text NOT NULL). Memoire `project_admin_actions_log_target_id_bug` anticipait precisement : `target_id NOT NULL` interdit `target_id: null` -> 2 call-sites dpt/region planteraient 23502 au premier toggle reel (jamais exerce en prod, 0 row dpt/region sur 85 total au 2026-05-14).
+
+**Decision :** option (a) **CHECK BDD `(target_id IS NULL) <> (target_id_text IS NULL)` + DROP NOT NULL sur `target_id`** via pattern Postgres standard `NOT VALID + VALIDATE`.
+
+- **Rationale** : invariant metier "chaque ligne porte exactement une reference cible (UUID OU TEXT, jamais les deux, jamais aucun)" exprime cote BDD plutot que reposer sur la discipline du code applicatif (29 call-sites INSERT direct, aucun helper centralise). Aligne sur DECISIONS.md F5 (idempotence + invariants BDD). Audit MCP prod 2026-05-14 : 85 rows toutes uuid_only, 0 row violant l invariant -> cutover sans backfill, VALIDATE scan < 1 seconde.
+
+- **Pattern NOT VALID + VALIDATE justifie** (vs CHECK direct AccessExclusiveLock long pour grosses tables) :
+  1. **Heritage Postgres standard** : documente comme bonne pratique pour CHECK retroactifs sur tables existantes (`ALTER TABLE` docs Postgres).
+  2. **Reentrant safe** : si VALIDATE echoue (row historique viole), la NOT VALID phase a deja pose la contrainte qui bloque les futurs INSERT violants -> on peut backfiller en paix puis re-VALIDATE. Avec CHECK direct, echec laisse la table sans contrainte -> INSERT pourrissants continuent.
+  3. **Pattern pour stories futures** : si une autre table grossit a 1M+ rows et necessite un CHECK, le pattern evite un AccessExclusiveLock long. Convention etablie ici beneficie aux stories futures.
+
+- **DROP NOT NULL sur `target_id` justifie** :
+  1. **Redondance contractuelle** : le CHECK XOR impose deja "exactement un des deux renseigne". Garder NOT NULL forcerait target_id = NOT NULL ET target_id_text = NULL -> 100% uuid_only -> interdit le legitime cas dpt/region.
+  2. **Conformite realite applicative** : les 2 call-sites dpt/region posent `target_id: null` (intention applicative validee 3.5). Garder NOT NULL ferait peter ces call-sites au premier toggle reel (bug latent decouvert 2026-05-06).
+  3. **Symetrie BDD** : target_id_text NULL-able depuis 3.5. Avoir target_id NOT NULL + target_id_text NULL creerait une asymetrie awkward. Apres DROP NOT NULL, les deux colonnes sont NULL-able et le CHECK XOR garantit l invariant.
+
+- **Alternative consideree** : helper centralise `logAdminAction(params)` sur le modele DECISIONS.md F6 (`logNotification`). **REJETEE pour cette story** :
+  1. **Scope explosif** : 29 call-sites a refactorer + 2-3 jours de dev + 5+ tests integration. Story 7.A.7 cadree 0.25j-dev (epic-7.md ligne 264). Centralisation = chantier dedie Epic 8+.
+  2. **Pas de benefice runtime additionnel vs CHECK BDD** : le CHECK XOR couvre uniformement les 29 call-sites cote BDD. Un helper apporterait idempotence (mais admin_actions_log est append-only audit trail, idempotence PAS un requirement), observabilite (mais 23514 sera deja capture par le catch outer-most de chaque call-site + monitor Sentry global), validation runtime (UUID format target_id, action_type whitelist : candidat valeur ajoutee, hors scope cette story).
+  3. **Candidat deferred-work.md propre** : Epic 8+ si une exigence emergente apparait (observabilite specifique audit trail RGPD, alerting si non-admin tente un INSERT, idempotence retry-safe).
+
+- **Refactor preventif 1 call-site** : `app/actions/parrainage.ts:176` (`target_id: context.parrainageId ?? null`). Option A appliquee (fail-loud `if (!context.parrainageId) throw`) car audit des 2 callers (`admin-parrainages.ts:201` + `webhooks/stripe/route.ts:218`) montre que parrainageId est TOUJOURS passe non-null (issu d une row BDD `parrainages.id`). Les 28 autres call-sites posent un `target_id: <uuid_variable_garanti>` -> zero touch.
+
+**Migration :** `20260514xxxxxx_admin_actions_log_target_id_xor_check.sql` (DO IF NOT EXISTS + ADD CONSTRAINT NOT VALID + VALIDATE + ALTER COLUMN target_id DROP NOT NULL + 3 COMMENT ON). Apply via MCP. Volumetrie 85 rows, scan < 1 sec.
+
+**Tests :** `tests/integration/admin-actions-log/check-xor-target-id.test.ts` couvre 4 cas (a-d) : INSERT UUID OK / INSERT TEXT OK / les deux NULL rejete 23514 / les deux NOT NULL rejete 23514.
+
+**Regle :** tout invariant metier de type "X XOR Y" sur une table BDD doit etre exprime via CHECK BDD avec pattern NOT VALID + VALIDATE quand des lignes historiques existent. Ne pas reposer uniquement sur le mutex applicatif. Cette regle cloture la dette technique reconnue par story 3.5 D1.
