@@ -1,7 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useTransition } from 'react'
+import { useRouter } from 'next/navigation'
 import { validateAccompagnante, markVisioToPlan, markVisioRealisee } from '@/app/actions/admin'
+import { getOrCreateAdminConversation } from '@/app/actions/messages'
 import { Button } from '@/components/ui/button'
 
 type Status = 'en_attente' | 'visio_a_planifier' | 'visio_realisee' | string
@@ -14,12 +16,27 @@ type Props = {
 type Action = 'valide' | 'refuse' | 'a_completer' | 'visio_a_planifier' | 'visio_realisee'
 
 export function ValidationActions({ profileId, status }: Props) {
+  const router = useRouter()
   const [action, setAction] = useState<Action | null>(null)
   const [motif, setMotif] = useState('')
   const [visioDate, setVisioDate] = useState('')
   const [visioNotes, setVisioNotes] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [chatPending, startChatTransition] = useTransition()
+  const [chatError, setChatError] = useState<string | null>(null)
+
+  function openConversation() {
+    setChatError(null)
+    startChatTransition(async () => {
+      const result = await getOrCreateAdminConversation(profileId)
+      if (result?.error || !result?.conversationId) {
+        setChatError(result?.error || 'Impossible d’ouvrir la conversation.')
+        return
+      }
+      router.push(`/admin/messages/${result.conversationId}`)
+    })
+  }
 
   async function handleSubmit() {
     if (!action) return
@@ -63,6 +80,11 @@ export function ValidationActions({ profileId, status }: Props) {
     return (
       <div className="bg-white rounded-xl border p-6">
         <h3 className="font-semibold mb-4">Décision</h3>
+        {chatError && (
+          <div role="alert" className="mb-4 p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
+            {chatError}
+          </div>
+        )}
         <div className="flex flex-wrap gap-3">
           {status === 'en_attente' && (
             <Button onClick={() => setAction('visio_a_planifier')}>
@@ -79,6 +101,14 @@ export function ValidationActions({ profileId, status }: Props) {
               Valider le profil
             </Button>
           )}
+          <Button
+            variant="outline"
+            onClick={openConversation}
+            disabled={chatPending}
+            aria-label="Discuter avec la personne par messagerie"
+          >
+            {chatPending ? 'Ouverture…' : 'Discuter avec la personne'}
+          </Button>
           <Button variant="outline" onClick={() => setAction('a_completer')}>
             Demander un complément
           </Button>
