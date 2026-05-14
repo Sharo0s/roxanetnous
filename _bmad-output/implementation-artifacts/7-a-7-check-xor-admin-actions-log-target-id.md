@@ -1,6 +1,6 @@
 # Story 7.A.7 : CHECK XOR sur `admin_actions_log.target_id` / `target_id_text`
 
-Status: review
+Status: done
 
 <!-- Story 7 du mini-epic 7.A (hardening securite transverse) - Item C7 de l'inventaire dettes Epic 7. Source : `deferred-work.md` ligne 175 (review story 3.5, 2026-05-07) + memoire `project_admin_actions_log_target_id_bug.md` (decouverte 2026-05-06 pendant cadrage story 3.5). Cadrage `epic-7.md` lignes 242-265. Heritage : story 3.5 (ajout colonne `target_id_text` via migration `20260506130000_admin_actions_log_target_id_text.sql` + refactor des 2 INSERT call-sites dpt/region) + DECISIONS.md F-Epic6-A1-b (renommage contraintes BDD historiques, pattern audit pre-migration MCP) + DECISIONS.md F5 (idempotence niveau BDD + invariants exprimes en CHECK quand applicable). Cette story termine la dette technique introduite volontairement en 3.5 : transformer le mutex applicatif `target_id` XOR `target_id_text` en invariant BDD verifie par Postgres. -->
 
@@ -563,6 +563,24 @@ Total : 4 lignes modifiees (1 header + 3 structurelles). Diff structurel attendu
 |---|---|---|
 | 2026-05-14 | claude-opus-4-7 | Story 7.A.7 creee status ready-for-dev via bmad-create-story. CHECK XOR target_id / target_id_text + DROP NOT NULL target_id. 21 AC : audit MCP pre/post (AC1-AC2 + AC6-AC7), migration NOT VALID + VALIDATE + DROP NOT NULL + 3 COMMENT (AC3-AC5), regen types (AC8-AC9), refactor 1 call-site parrainage.ts:176 (AC10-AC12), 4 tests integration (AC13-AC15), garde-fous CI (AC16-AC19), decision DECISIONS.md F-Epic7-A7 (AC20), audit Sentry J+7 (AC21). Estimation 0,25j-dev cadrage epic-7.md, realiste 0.3-0.4j-dev. Audit MCP 2026-05-14 : 85 rows 100% uuid_only, 0 row dpt/region, cutover safe. Source : deferred-work.md ligne 175 + epic-7.md lignes 242-265 + memoire project_admin_actions_log_target_id_bug. |
 | 2026-05-14 | claude-opus-4-7 | Story 7.A.7 livree via bmad-dev-story. Migration `20260514124223_admin_actions_log_target_id_xor_check.sql` apply MCP success premiere tentative. Audits MCP pre/post tous OK : `target_id_xor` VALIDATED, `target_id` nullable=YES, 0 row corrompue, 2 INSERT rejets fonctionnels confirmes (both-null + both-set) avec code 23514. types/supabase.ts regen MCP : 3 lignes structurelles modifiees (Row+Insert+Update `target_id: string` -> `string | null`) + header L5 maj. `app/actions/parrainage.ts` refactore : option A retenue (audit grep des 2 callers confirme `parrainageId` toujours non-null), throw fail-loud ajoute en tete de `revokeFilleuleValidation` lignes 113-122 + simplification ligne 189 `?? null` supprime. Audit grep AC11 post-modif : 27 occurrences `target_id:` total (24 UUID + 2 dpt/region null + 1 refactore), 28 autres call-sites inchanges (`toggleDepartement`/`toggleRegion` deja conformes XOR). Nouveau test integration `tests/integration/admin-actions-log/check-xor-target-id.test.ts` (135 lignes, 4 cas a/b/c/d). DECISIONS.md F-Epic7-A7 ajoutee ~50 lignes (rationale + pattern NOT VALID + VALIDATE justifie + DROP NOT NULL justifie + helper centralise rejete + regle pattern futur "tout invariant X XOR Y -> CHECK BDD"). Validations locales toutes vertes : tsc 0, lint 195 warnings (= baseline 7.A.6), lint:a11y-check 155 baseline preserve, check:as-any-global/admin/oracle-paywall/ip-spoofing tous exit 0, a11y:axe:check 0 delta Critical/Serious sur 7 parcours (regle CLAUDE.md durcie), test:unit 49/49 verts en 1.02s. test:integration delegue GHA workflow integration-tests.yml au push branche (heritage `feedback_test_local_supabase`). 7 fichiers touches (3 nouveaux + 4 modifies) ~285 lignes nettes. AC1-AC20 satisfaits cote dev, AC21 (audit Sentry J+7 calendrier passif) deferre Sylvain post-merge ~2026-05-21 + maj memoires `project_epic_7_cadrage` + `project_admin_actions_log_target_id_bug` post-merge. |
+
+### Review Findings
+
+- [x] [Review][Defer] Call-sites `marraine_id` nullable XOR violation — `app/actions/admin-parrainages.ts:167` et `app/api/cron/confirm-parrainages/route.ts:250` : `marraine_id` nullable (ON DELETE SET NULL) → XOR violation 23514 si marraine supprime son compte. Risque pré-existant, désormais détectable via 23514 Sentry. Candidat guard explicite dans Epic 8+ `logAdminAction`. — deferred, pre-existing
+
+- [x] [Review][Patch] `VALIDATE CONSTRAINT` exécuté inconditionnellement même si `ADD CONSTRAINT` a été skippé — commentaire idempotence déjà présent ligne 48, migration correcte, dismiss [`supabase/migrations/20260514124223_admin_actions_log_target_id_xor_check.sql`]
+
+- [x] [Review][Patch] `target_type: 'invalid'` remplacé par `'parrainage'` dans les cas (c) et (d) [`tests/integration/admin-actions-log/check-xor-target-id.test.ts`]
+
+- [x] [Review][Defer] Double INSERT `parrainage_fraude_confirmee` sur même `parrainageId` — doublon audit trail pré-existant, non causé par cette story [`app/actions/parrainage.ts` + `app/actions/admin-parrainages.ts`] — deferred, pre-existing
+
+- [x] [Review][Defer] Le type TS `Insert` n'encode pas l'invariant XOR — les deux champs optionnels permettent un `{action_type, target_type}` sans les deux cibles, silencieusement invalide au runtime [`types/supabase.ts`] — deferred, pre-existing debt
+
+- [x] [Review][Defer] `cleanupLocalActions` ne vérifie pas l'erreur Supabase — IDs perdus si DELETE échoue, repose sur cascade FK [`tests/integration/admin-actions-log/check-xor-target-id.test.ts`] — deferred, test infra minor
+
+- [x] [Review][Defer] Throw `Error` générique dans le fail-loud guard — pas de type structuré pour distinguer de autres erreurs dans un catch générique [`app/actions/parrainage.ts`] — deferred, pre-existing pattern
+
+- [x] [Review][Defer] Rows de test (a)+(b) non trackées par `cleanupAllFixtures` global — reposent sur la cascade FK `admin_id` qui est nullable [`tests/integration/admin-actions-log/check-xor-target-id.test.ts`] — deferred, test infra minor
 
 ## DoD a11y
 

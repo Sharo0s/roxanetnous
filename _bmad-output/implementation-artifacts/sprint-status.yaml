@@ -269,7 +269,7 @@ development_status:
   7-a-4-aggreger-n-plus-1-unread-counts-admin-messages: done
   7-a-5-unifier-message-erreur-soft-paywall-messagerie: done
   7-a-6-idempotence-lognotification: done
-  7-a-7-check-xor-admin-actions-log-target-id: review
+  7-a-7-check-xor-admin-actions-log-target-id: done
   7-a-8-investigation-is-accompagnant-security-definer: backlog
   7-a-9-toggle-publiee-idempotent-whitelist-status-annonces: backlog
   7-a-10-cleanup-polish-resend-singleton-specialites-fallback: backlog

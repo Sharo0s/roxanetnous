@@ -92,7 +92,7 @@ describe('admin_actions_log - CHECK XOR target_id / target_id_text (story 7.A.7)
       .insert({
         admin_id: admin.id,
         action_type: actionType,
-        target_type: 'invalid',
+        target_type: 'parrainage',
         target_id: null,
         target_id_text: null,
       })
@@ -116,7 +116,7 @@ describe('admin_actions_log - CHECK XOR target_id / target_id_text (story 7.A.7)
       .insert({
         admin_id: admin.id,
         action_type: actionType,
-        target_type: 'invalid',
+        target_type: 'parrainage',
         target_id: target.id,
         target_id_text: 'both-set',
       })
