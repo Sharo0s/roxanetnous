@@ -17,7 +17,11 @@
       "mcp__plugin_vercel_vercel__list_teams",
       "mcp__vercel__list_deployments",
       "mcp__sentry__search_issues",
-      "mcp__sentry__search_docs"
+      "mcp__sentry__search_docs",
+      "Skill(bmad-create-story)",
+      "Skill(bmad-create-story:*)",
+      "Skill(bmad-code-review)",
+      "Skill(bmad-code-review:*)"
     ]
   },
   "enableAllProjectMcpServers": true,

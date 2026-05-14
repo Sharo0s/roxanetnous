@@ -1,6 +1,6 @@
 # Story 7.A.9 : Toggle `publiee` idempotent + whitelist status annonces
 
-Status: review
+Status: done
 
 <!-- Story 9 du mini-epic 7.A (hardening securite transverse) - Source : reviews 3.6 deferred-work.md lignes 215-216. Cadrage epic-7.md lignes 288-304. -->
 
@@ -282,9 +282,20 @@ Resultat : `[]` (0 row).
 - `_bmad-output/implementation-artifacts/7-a-9-toggle-publiee-idempotent-whitelist-status-annonces.md` (modifie : status, tasks coches, Dev Agent Record renseigne, change log)
 - `_bmad-output/implementation-artifacts/sprint-status.yaml` (modifie : statut story 7.A.9 `ready-for-dev -> in-progress -> review`)
 
+### Review Findings
+
+- [x] [Review][Decision] Statut `suspendue` : un user abonne peut lever sa propre suspension via la Server Action — `updateAnnonceAccompagnanteStatus(id, 'publiee')` : whitelist passe (`publiee` valide), SELECT lit `current.status='suspendue'` != `'publiee'` donc pas d'early-return, check abonnement actif passe, UPDATE ecrase `suspendue` par `publiee`. Aucun guard `if (current.status === 'suspendue') return { error: ... }` present. Vecteur : appel HTTP direct ou double-clic apres suspension admin. Decide si on ajoute un guard ou si c'est un non-probleme (RLS cote admin vs action user). [app/actions/annonces.ts:~197 et ~523]
+- [x] [Review][Defer] Race condition TOCTOU SELECT->UPDATE sur `archivee->publiee` en appels concurrents [app/actions/annonces.ts:187-225 et 513-551] — deferred, pre-existing
+- [x] [Review][Defer] `archivee -> archivee` : pas d'early-return, UPDATE inutile execute (bumpera un futur `updated_at` trigger si ajoute) [app/actions/annonces.ts:197-199] — deferred, pre-existing
+- [x] [Review][Defer] Pas de `revalidatePath` sur le chemin idempotent (asymetrie cache Next.js si la fonction non-idempotente revalide) [app/actions/annonces.ts] — deferred, pre-existing
+- [x] [Review][Defer] `annonceId` non valide format UUID avant injection dans `.eq()` (validation prevue story 7.A.11) [app/actions/annonces.ts:~163 et ~490] — deferred, pre-existing
+- [x] [Review][Defer] Tracker module-level `_fixtures.ts` pollue entre runs en `vitest --watch` (tracker vide au re-import mais rows orphelines restent en BDD) [tests/integration/annonces-toggle/_fixtures.ts:9] — deferred, pre-existing
+- [x] [Review][Defer] Pas de test paywall `archivee->publiee` sans abonnement actif (regression paywall asymetrique non detectee par cette suite) [tests/integration/annonces-toggle/idempotence-publiee.test.ts] — deferred, pre-existing
+
 ### Change Log
 
 - 2026-05-14 : implementation 7.A.9 -- whitelist applicative + early-return idempotent `publiee -> publiee` sur les 2 Server Actions toggle d'annonce. Audit MCP confirme ENUM BDD `annonce_status` suffit (pas de CHECK ajoute). 5 tests integration nouveau dossier `tests/integration/annonces-toggle/`. Acquit dettes deferred-work.md lignes 215-216. Story `ready-for-dev -> review`.
+- 2026-05-14 : code review -- 1 decision_needed (suspension levable), 6 deferred, 6 dismissed.
 
 ## DoD a11y
 

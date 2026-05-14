@@ -31,7 +31,6 @@ export async function sendContactMessage(formData: FormData): Promise<{ error?: 
     return { error: 'Adresse email invalide.' }
   }
 
-  const fullName = `${firstname} ${lastname}`
   const emailSubject = `Contact roxanetnous : ${subject}`
 
   try {

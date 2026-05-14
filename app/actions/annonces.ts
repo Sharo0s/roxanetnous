@@ -198,6 +198,12 @@ export async function updateAnnonceAccompagnanteStatus(
     return { success: true }
   }
 
+  // Review 7.A.9/7.A.10 : empeche un utilisateur de re-publier une annonce suspendue par un admin.
+  // L'archivage reste autorise (droit utilisateur, cf. Story 3.6 commentaire ci-dessous).
+  if (current.status === 'suspendue' && status === 'publiee') {
+    return { error: 'Cette annonce est suspendue par un administrateur.' }
+  }
+
   // Story 3.6 : paywall asymetrique sur toggle (D5) : reactivation 'publiee' = re-publication implicite => paywall.
   // Archivage 'archivee' = retrait => pas de paywall (droit utilisateur).
   if (status === 'publiee') {
@@ -522,6 +528,12 @@ export async function updateAnnonceAccompagneStatus(
 
   if (current.status === 'publiee' && status === 'publiee') {
     return { success: true }
+  }
+
+  // Review 7.A.9/7.A.10 : empeche un utilisateur de re-publier une annonce suspendue par un admin.
+  // L'archivage reste autorise (droit utilisateur, cf. Story 3.6 commentaire ci-dessous).
+  if (current.status === 'suspendue' && status === 'publiee') {
+    return { error: 'Cette annonce est suspendue par un administrateur.' }
   }
 
   // Story 3.6 : paywall asymetrique sur toggle (D5) : reactivation 'publiee' = re-publication => paywall.

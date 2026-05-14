@@ -20,8 +20,12 @@
 // RetryableError epuise -> `retry-exhausted`) et reproduit le signal via
 // Sentry.
 //
-// Decision D5 : le step instancie son propre client Resend (~5ms de surcout
-// negligeable, isolation propre vs le singleton de lib/emails.ts).
+// Decision D5 (revisitee story 7.A.10 - 2026-05-14, cf. deferred-work.md:250) :
+// le client Resend est desormais instancie au scope module (singleton fork-safe,
+// Resend SDK = wrapper fetch stateless). Le surcout cumule (~5ms x batch x
+// retries = ~4s CPU pire cas Ile-de-France) est supprime. La justification
+// historique « isolation propre vs singleton lib/emails.ts » est conservee
+// ci-dessous pour tracabilite mais ne s'applique plus.
 //
 // Code review 2026-05-08 P11/P7 : route le catch global selon `error
 // instanceof FatalError` pour distinguer `failed` (validation/recipient,
@@ -52,6 +56,7 @@ import {
 } from '@/lib/email-templates'
 
 const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || 'roxanetnous <onboarding@resend.dev>'
+const resend = new Resend(process.env.RESEND_API_KEY)
 
 export type SendEmailTemplate = 'ouverture_confirmation' | 'ouverture_notification'
 
@@ -150,8 +155,6 @@ async function sendEmailViaResend(payload: SendEmailPayload) {
   const html = payload.template === 'ouverture_confirmation'
     ? renderOuvertureConfirmationHtml(payload.variables)
     : renderOuvertureNotificationHtml(payload.variables)
-
-  const resend = new Resend(process.env.RESEND_API_KEY)
 
   // idempotencyKey : utilisation du stepId stable across retries (cf. doc
   // bundled idempotency.mdx). Resend deduplique cote serveur les requetes
