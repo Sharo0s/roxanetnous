@@ -754,3 +754,41 @@ Estimation realiste : **2-3 jours-dev**, pas "extension" comme le tech-spec le s
 **Tests :** `tests/integration/admin-messages/liste-conversations-avec-unread.test.ts` couvre 5 cas (a-e) : visibilite admin + filtre admin_id IS NOT NULL + pagination + unread=0 + garde-fou is_admin.
 
 **Regle :** tout futur agregation admin ou multi-row (planning, signalements, etc.) qui generera un N+1 doit suivre ce pattern (RPC SECURITY DEFINER + check role + REVOKE PUBLIC/anon + GRANT authenticated + types regen MCP) au lieu de boucles applicatives.
+
+
+---
+
+## 2026-05-14 : Idempotence helper `logNotification` via partial UNIQUE INDEX BDD (decision F-Epic7-A6)
+
+**Contexte :** Story 7.A.6 (mini-epic 7.A hardening securite). Le helper `lib/notifications-log.ts:logNotification` (unique point d entree INSERT autorise par F6) executait un INSERT sec sans contrainte d unicite cote BDD. Resend deduplique cote serveur via `idempotencyKey = stepId` (story 4.3) MAIS uniquement pour les retries du meme step ; un nouveau runId Workflow DevKit genere un nouveau stepId -> Resend ne deduplique plus -> BDD log doublons. 4 patterns de double-emission identifies : double-click utilisateur Stripe, retry admin batch, cron retry safety-net (story 4.3 fallback 30j), retry middleware Next.js sur 5xx transient. Audit MCP prod 2026-05-14 : 29 rows total, 2 groupes de doublons historiques constates (1 `validation_a_completer` 15:37+15:47 + 1 `subscription_confirm` 13:26+13:34, tous status='sent' meme `sylvainmalard@outlook.com`).
+
+**Decision :** option (a) **partial UNIQUE INDEX BDD sur `notifications_log` rows status='sent'** + capture code Postgres 23505 cote helper applicatif (silent-skip + breadcrumb info Sentry).
+
+- **Cle metier :** `(COALESCE(user_id::text, email), type, subject, date_trunc('hour', COALESCE(sent_at, created_at)))` WHERE `status = 'sent'`. Justification de chaque champ :
+  - `COALESCE(user_id, email)` : couvre flows visiteurs anonymes (user_id NULL : waitlist + contact_form) ET flows authentifies. Email garanti not-empty par convention helper.
+  - `type` : separe les flows metier (welcome != subscription_confirm != new_message).
+  - `subject` : separe variations intra-flow (`new_message de Marie` vs `new_message de Jean` partagent type, subject differencie).
+  - `date_trunc('hour', ...)` : autorise meme email a J+1, J+2 (newsletters, rappels recurrents) ; interdit 2 emissions dans la meme heure. Granularite 1h vs 1j retenue car 1j bloquerait des resends legitimes admin H+2/H+3.
+  - `WHERE status = 'sent'` : partial index. Statuts non-sent (`pending`, `failed`, `error`, `retry-scheduled`, `retry-exhausted`, `lost`) restent libres pour preserver l audit trail du cycle de vie (`pending` -> `sent` reste 2 rows distinctes pour observabilite).
+
+- **Option (b) `idempotency_key` applicatif SHA-256 explicitement REJETEE :**
+  1. Viole DECISIONS.md F5 (idempotence niveau BDD obligatoire via UNIQUE INDEX + capture 23505).
+  2. Duplication logique : 51+ call-sites n ont aucune notion de hash idempotency ; le calcul cote helper rendrait l option (a) strictement equivalente sans la complexite hash.
+  3. Risque divergence : un futur call-site bypass `logNotification` (malgre F6 + futur garde-fou 7.A.11) shipperait sans hash et la deduplication serait skippee silencieusement. Le partial UNIQUE INDEX BDD est robuste a ce bypass (s applique cote BDD, pas cote helper).
+  4. Pas de hash naturel cross-flow : 17+ helpers `sendXxxEmail` ont des params heterogenes ; canonical serialisation deterministe non triviale. Le tuple BDD `(user_id|email, type, subject, hour)` est la materialisation naturelle de l identite metier.
+
+- **Helper applicatif (`lib/notifications-log.ts`) :** capture `{ error: insertError }` du `.insert()`, branche `if (code === '23505') addBreadcrumb info return` (succes idempotent, PAS captureException) ; sinon throw vers le catch externe + Sentry captureException severity warning. Signature publique `Promise<void>` preservee (aucun call-site ne consomme la valeur de retour, refactor 51+ call-sites sans ROI).
+
+- **Backfill historique :** 2 lignes DELETE preservant la plus ancienne par `created_at` dans chaque groupe :
+  - DELETE `74f2a044-8b7a-4a00-a5f7-f15e2fc3dfca` (validation_a_completer 2026-02-17 15:47, preserve `e153132d` 15:37).
+  - DELETE `2136233e-2849-4556-9332-f11ae6db450a` (subscription_confirm 2026-02-18 13:34, preserve `3e4c567b` 13:26).
+
+- **Trade-off accepte :** la granularite 1h fait perdre les legitimes resends intra-heure (ex : admin modifie un parametre puis re-valide a 5 min d intervalle echoue au 2eme logNotification cote BDD). Resend a quand meme envoye le 1er email -> pas d impact utilisateur final, juste un audit trail manquant. Cas extremement rare (volumetrie prod 2026-05-14 : 2 doublons sur 29 rows = 6.9% historiques, dont la majorite sont des double-clicks ou retries pathologiques).
+
+- **Hors scope (decoupage volontaire) :** garde-fou CI `scripts/check-no-direct-notifications-log-insert.mjs` -> story 7.A.11 (mini-epic 7.A item C11). Validation UUID `userId` -> story 7.A.11 AC3.
+
+**Migration :** `20260514xxxxxx_notifications_log_partial_unique_idempotency.sql` (DELETE backfill + CREATE UNIQUE INDEX IF NOT EXISTS + COMMENT ON INDEX). Apply via MCP. Volumetrie 29 rows -> 27 attendues.
+
+**Tests :** `tests/unit/notifications-log.test.ts` (4 cas mocks Supabase + Sentry) + `tests/integration/notifications-log/idempotence-partial-unique-index.test.ts` (5 cas BDD bout-en-bout : authentifie / anonyme / variation subject / status non-sent / cross-hour).
+
+**Regle :** toute future table avec exigence d idempotence doit declarer un UNIQUE INDEX partial sur la cle metier + capture `23505` cote helper applicatif (pattern aligne F5/F6/F7). Le helper centralise est l unique point d entree (anti-pattern check-before-insert applicatif interdit). Si granularite 1h ne convient pas (cas legitime resend intra-heure), differencier le `subject` au lieu de relacher la contrainte (pattern existant `sendNewMessageEmail` qui inclut `senderFirstName`).
