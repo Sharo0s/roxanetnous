@@ -9,9 +9,11 @@
 --   - SECURITY DEFINER : la RPC lit pg_proc/pg_namespace qui ne sont pas exposes
 --     a authenticated/anon en lecture directe. DEFINER pour acceder a ces vues
 --     systeme via les droits du proprietaire.
---   - REVOKE PUBLIC + REVOKE anon : pas d enumeration anonyme du schema interne.
---   - GRANT EXECUTE TO authenticated, service_role : le script CI s authentifie
---     via service_role. authenticated autorise pour debug local et tests.
+--   - REVOKE PUBLIC + REVOKE anon + REVOKE authenticated : least-privilege strict.
+--     Seul service_role (utilise par le script CI) peut appeler cette RPC.
+--     (decision code review 7.A.8 : exposer pg_proc a authenticated = surface inutile)
+--   - VOLATILE (non STABLE) : lit pg_proc qui peut changer sous DDL concurrent ;
+--     STABLE autoriserait le planner a cacher l ancien resultat dans la meme tx.
 --   - Scope strict : la RPC retourne UNIQUEMENT prosecdef pour les 3 helpers
 --     `is_admin / is_accompagne / is_accompagnant`. Pas de schema introspection
 --     elargie.
@@ -19,7 +21,7 @@
 CREATE OR REPLACE FUNCTION public.get_rls_helpers_security_definer()
 RETURNS TABLE (proname text, prosecdef boolean)
 LANGUAGE sql
-STABLE
+VOLATILE
 SECURITY DEFINER
 SET search_path = public, pg_catalog
 AS $$
@@ -33,7 +35,7 @@ $$;
 
 REVOKE ALL ON FUNCTION public.get_rls_helpers_security_definer() FROM PUBLIC;
 REVOKE ALL ON FUNCTION public.get_rls_helpers_security_definer() FROM anon;
-GRANT EXECUTE ON FUNCTION public.get_rls_helpers_security_definer() TO authenticated;
+REVOKE ALL ON FUNCTION public.get_rls_helpers_security_definer() FROM authenticated;
 GRANT EXECUTE ON FUNCTION public.get_rls_helpers_security_definer() TO service_role;
 
 COMMENT ON FUNCTION public.get_rls_helpers_security_definer() IS

@@ -8,8 +8,8 @@
 // + authenticatedClientFor (signInWithPassword + client anon) pour exposer auth.uid()
 // cote PostgREST RPC + cleanupAllFixtures afterAll.
 
-import { afterAll, beforeAll, describe, expect, it } from 'vitest'
-import { createClient as createSupabaseClient } from '@supabase/supabase-js'
+import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
+import { createClient as createSupabaseClient, type SupabaseClient } from '@supabase/supabase-js'
 import type { Database } from '@/types/supabase'
 import { createTestUser, cleanupAllFixtures } from '@/tests/integration/_lib/fixtures'
 
@@ -34,8 +34,17 @@ async function authenticatedClientFor(email: string, password: string) {
 }
 
 describe('rls-helpers : is_accompagnant() coherence DEFINER (story 7.A.8)', () => {
+  let currentClient: SupabaseClient<Database> | null = null
+
   beforeAll(async () => {
     await cleanupAllFixtures()
+  })
+
+  afterEach(async () => {
+    if (currentClient) {
+      await currentClient.auth.signOut()
+      currentClient = null
+    }
   })
 
   afterAll(async () => {
@@ -44,9 +53,9 @@ describe('rls-helpers : is_accompagnant() coherence DEFINER (story 7.A.8)', () =
 
   it('(a) user role=accompagnant -> rpc is_accompagnant() retourne true', async () => {
     const user = await createTestUser('accompagnant')
-    const client = await authenticatedClientFor(user.email, user.password)
+    currentClient = await authenticatedClientFor(user.email, user.password)
 
-    const { data, error } = await client.rpc('is_accompagnant')
+    const { data, error } = await currentClient.rpc('is_accompagnant')
 
     expect(error).toBeNull()
     expect(data).toBe(true)
@@ -54,9 +63,9 @@ describe('rls-helpers : is_accompagnant() coherence DEFINER (story 7.A.8)', () =
 
   it('(b) user role=accompagne -> rpc is_accompagnant() retourne false', async () => {
     const user = await createTestUser('accompagne')
-    const client = await authenticatedClientFor(user.email, user.password)
+    currentClient = await authenticatedClientFor(user.email, user.password)
 
-    const { data, error } = await client.rpc('is_accompagnant')
+    const { data, error } = await currentClient.rpc('is_accompagnant')
 
     expect(error).toBeNull()
     expect(data).toBe(false)
@@ -64,9 +73,9 @@ describe('rls-helpers : is_accompagnant() coherence DEFINER (story 7.A.8)', () =
 
   it('(c) user role=admin -> rpc is_accompagnant() retourne false', async () => {
     const user = await createTestUser('admin')
-    const client = await authenticatedClientFor(user.email, user.password)
+    currentClient = await authenticatedClientFor(user.email, user.password)
 
-    const { data, error } = await client.rpc('is_accompagnant')
+    const { data, error } = await currentClient.rpc('is_accompagnant')
 
     expect(error).toBeNull()
     expect(data).toBe(false)

@@ -1,6 +1,6 @@
 # Story 7.A.8 : Investigation `is_accompagnant()` SECURITY DEFINER
 
-Status: review
+Status: done
 
 <!-- Story 8 du mini-epic 7.A (hardening securite transverse) - Item C8 de l'inventaire dettes Epic 7. Source : retro Epic 6 AI-6.A.4 + cadrage epic-7.md lignes 269-285. Heritage direct : migration 6.A.2 part 2 `20260513150100_renommage_accompagnante_part2_backfill_rename_rls.sql:70-76` + migration 6.A.M residuelle `20260513194300_renommage_residuel_accompagnante_epic6.sql:197-206`. Cette story acquitte la dette AI-6.A.4 logguee a la cloture Epic 6 : "is_accompagnant() preservee a l'identique 6.A.2 par principe de moindre surprise ; incoherence avec is_admin / is_accompagne (DEFINER) a investiguer Epic 7+". -->
 
@@ -449,6 +449,15 @@ Deferre Sylvain post-merge, ~2026-05-21. Verifier 0 erreur Postgres `42501` (ins
 ### Change Log
 
 - 2026-05-14 : Story 7.A.8 implementee (decision F-Epic7-A8 option b). ALTER FUNCTION public.is_accompagnant() SECURITY DEFINER + COMMENT ON applique via MCP. Garde-fou meta `check:rls-helpers` cree + chaine vercel.json. Test integration 3 cas cree. Validations locales toutes vertes (tsc 0, lint 195, a11y 155, axe 0 delta, test:unit 49/49). Audit Sentry J+7 ~2026-05-21 deferre Sylvain post-merge.
+
+### Review Findings
+
+- [x] [Review][Decision] GRANT EXECUTE TO authenticated sur la RPC `get_rls_helpers_security_definer` — résolu : REVOKE authenticated appliqué via MCP (least-privilege service_role uniquement). [supabase/migrations/20260514140000_get_rls_helpers_security_definer_rpc.sql:34-37]
+- [x] [Review][Decision] Migration `20260514140000_get_rls_helpers_security_definer_rpc.sql` hors périmètre AC — accepté (pivot technique documenté, nécessaire suite HTTP 404 /pg/meta Supabase SaaS).
+- [x] [Review][Patch] RPC `get_rls_helpers_security_definer` déclarée STABLE → VOLATILE — corrigé dans fichier SQL + ALTER appliqué via MCP. [supabase/migrations/20260514140000_get_rls_helpers_security_definer_rpc.sql:5]
+- [x] [Review][Patch] Sessions auth non déconnectées après chaque `it()` — corrigé : `afterEach` avec `currentClient.auth.signOut()` ajouté. [tests/integration/rls-helpers/is-accompagnant-coherence.test.ts]
+- [x] [Review][Patch] Pas de `afterEach` dans le test d'intégration — corrigé : `afterEach` + tracker `currentClient` ajoutés. [tests/integration/rls-helpers/is-accompagnant-coherence.test.ts]
+- [x] [Review][Patch] Timestamp `xxxxxx` dans DECISIONS.md ligne 849 → `20260514130000` corrigé. [DECISIONS.md:849]
 
 ## DoD a11y
 

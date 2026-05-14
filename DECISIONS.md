@@ -846,7 +846,7 @@ Estimation realiste : **2-3 jours-dev**, pas "extension" comme le tech-spec le s
 - Defense-in-depth : un helper INVOKER ne peut pas etre detourne pour escalader des droits. **Non pertinent ici** : le corps est un SELECT simple filtre par `auth.uid()` (pas de parametre user-controlled, pas de vecteur d injection).
 - Inertie : 0 site l utilise, 0 incident. **Insuffisant** car le helper existe et invite a etre utilise (memoires Epic 6 le mentionnent comme "helper RLS"), donc la coherence prime sur l inertie.
 
-**Migration :** `20260514xxxxxx_is_accompagnant_security_definer.sql` (ALTER FUNCTION + COMMENT ON). Apply via MCP. Pas de regen types structurel (DEFINER ne change pas le contrat PostgREST exterieur).
+**Migration :** `20260514130000_is_accompagnant_security_definer.sql` (ALTER FUNCTION + COMMENT ON). Apply via MCP. Pas de regen types structurel (DEFINER ne change pas le contrat PostgREST exterieur).
 
 **Garde-fou meta :** `scripts/check-rls-helpers-security-definer.mjs` (nouveau, chainage `vercel.json buildCommand` apres `check:as-any-admin`). Assert via `@supabase/supabase-js` service_role que les 3 helpers `is_admin / is_accompagne / is_accompagnant` ont `prosecdef=true`. Exit 1 + message si divergence. Verrouille la regression : toute future migration qui dropperait et recreerait l un des 3 helpers sans clause `SECURITY DEFINER` declenchera un fail-fast en CI.
 
