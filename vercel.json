@@ -32,6 +32,10 @@
     {
       "path": "/api/cron/purge-notifications",
       "schedule": "0 1 * * *"
+    },
+    {
+      "path": "/api/cron/purge-ip-addresses",
+      "schedule": "0 7 * * *"
     }
   ]
 }
