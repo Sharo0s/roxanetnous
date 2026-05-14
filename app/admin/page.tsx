@@ -210,7 +210,7 @@ export default async function AdminDashboard() {
 
             {visiosCount > 0 && (
               <SectionCard
-                href="/admin/validation"
+                href="/admin/utilisateurs"
                 label="Visios à planifier"
                 meta="accompagnants en attente de créneau"
                 value={visiosCount}
