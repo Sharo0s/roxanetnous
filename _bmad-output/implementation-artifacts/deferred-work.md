@@ -1,5 +1,17 @@
 # Deferred Work
 
+## Deferred from: code review of 7-b-2-cron-purge-notifications-log-18-mois (2026-05-14)
+
+- **T2 — Timing attack sur comparaison `===` du secret** [`app/api/cron/purge-notifications/route.ts:42`] — Pré-existant dans tous les crons du projet. Risque théorique faible côté Vercel cron interne.
+- **T3 — DELETE étape 1 sans restriction de statut** [`app/api/cron/purge-notifications/route.ts:53-54`] — Intentionnel et documenté (commentaire l.12 + DECISIONS.md F-Epic7-B1). Cas exotique futur hors scope.
+- **T5 — Absence de transaction entre les deux DELETE** [`app/api/cron/purge-notifications/route.ts:51-74`] — Idempotence par construction assumée et documentée, pattern commun aux autres crons.
+- **T9 — `SUPABASE_SERVICE_ROLE_KEY` non-null assertion sans guard** [`lib/supabase/server.ts`] — Pré-existant hors scope 7.B.2. Candidat hardening global.
+- **T12 — Drift 30.44j/mois vs calendaire (~2 sem sur 18 mois)** [`app/api/cron/purge-notifications/route.ts:34`] — Accepté et documenté explicitement dans le commentaire (l.24) et la spec AC3. Candidate upgrade : RPC Postgres si précision calendaire requise.
+
+## Deferred from: code review of 7-b-1-politique-ttl-formalisee-decisions (2026-05-14)
+
+- **Cascade `departements_ouverts → notifications_ouverture` peut détruire les IPs avant le TTL 6 mois sans trace d'anonymisation** [`supabase/migrations/20260506120000_waitlist_departements.sql:9`] — Si un admin ferme un département, les rows `notifications_ouverture` sont hard-deleted via CASCADE avant que le cron 7.B.3 n'ait pu anonymiser `ip_inscription`. L'audit RGPD montrerait "supprimé par cascade" plutôt qu'"anonymisé par TTL". Pré-existant, hors scope 7.B.1. À reconsidérer si volume waitlist devient significatif (tag `notified_at IS NULL` pour basculer en `ON DELETE RESTRICT`).
+
 ## Deferred from: code review of 7-a-10-cleanup-polish-resend-singleton-specialites-fallback (2026-05-14)
 
 - Race condition SELECT/UPDATE non atomique sur le guard `suspendue` dans les deux jumelles toggle : le check `current.status === 'suspendue'` et l'UPDATE final ne sont pas atomiques (pas de `WHERE status != 'suspendue'` dans l'UPDATE, pas de transaction). Un admin peut suspendre entre les deux operations. Pre-existant, pattern structurel de toutes les Server Actions du projet [app/actions/annonces.ts]

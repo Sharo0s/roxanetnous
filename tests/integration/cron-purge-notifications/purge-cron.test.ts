@@ -127,13 +127,17 @@ describe('Cron purge-notifications (story 7.B.2)', () => {
 
     // Seed 2 old rows.
     const oldSentAt = new Date(Date.now() - 19 * 30.44 * ONE_DAY_MS).toISOString()
-    const { error: insErr } = await supabase
+    const { data: oldData, error: insErr } = await supabase
       .from('notifications_log')
       .insert([
         { user_id: user.id, email: user.email, type, subject: `${subjectPrefix} old 1`, status: 'sent', sent_at: oldSentAt },
         { user_id: user.id, email: user.email, type, subject: `${subjectPrefix} old 2`, status: 'sent', sent_at: oldSentAt },
       ])
+      .select('id')
     expect(insErr).toBeNull()
+    // Tracker de securite : si le cron echoue, le afterEach nettoyera ces rows.
+    const oldIds = (oldData ?? []).map((r) => r.id)
+    seededIds.push(...oldIds)
 
     const { GET } = await import('@/app/api/cron/purge-notifications/route')
 
@@ -141,24 +145,34 @@ describe('Cron purge-notifications (story 7.B.2)', () => {
     // orphelines residant en BDD).
     await GET(buildAuthedRequest())
 
-    // Verifier que nos rows ne sont plus la.
+    // Verifier que nos rows ne sont plus la (verification ciblee sur nos IDs).
     const { data: afterFirst } = await supabase
       .from('notifications_log')
       .select('id')
-      .eq('user_id', user.id)
-      .eq('type', type)
+      .in('id', oldIds)
     expect(afterFirst).toHaveLength(0)
+    // Retirer les oldIds du tracker (purges par le cron, plus besoin de cleanup).
+    oldIds.forEach((id) => {
+      const idx = seededIds.indexOf(id)
+      if (idx !== -1) seededIds.splice(idx, 1)
+    })
 
     // Snapshot count pre-2e run.
     const { count: countPre } = await supabase
       .from('notifications_log')
       .select('id', { count: 'exact', head: true })
 
-    // 2e run : doit etre no-op (toutes rows eligibles deja purgees).
+    // 2e run : doit etre no-op sur nos rows (deja purgees).
+    // On verifie via SELECT cible sur nos IDs plutot qu un purgedCount global
+    // (BDD peut ne pas etre vierge -- d autres rows eligibles peuvent exister).
     const response2 = await GET(buildAuthedRequest())
     expect(response2.status).toBe(200)
-    const body2 = (await response2.json()) as { purgedCount: number }
-    expect(body2.purgedCount).toBe(0)
+
+    const { data: afterSecond } = await supabase
+      .from('notifications_log')
+      .select('id')
+      .in('id', oldIds)
+    expect(afterSecond).toHaveLength(0)
 
     const { count: countPost } = await supabase
       .from('notifications_log')

@@ -1,6 +1,6 @@
 # Story 7.B.2 : Cron purge `notifications_log` > 18 mois
 
-Status: review
+Status: review (patches code-review appliqués 2026-05-14, en attente validation GHA)
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -340,6 +340,18 @@ Les 2 lignes pertinentes (`Stockage IP brut sans TTL ni purge -- RGPD` L204 et `
 - `_bmad-output/implementation-artifacts/7-b-2-cron-purge-notifications-log-18-mois.md` (modifie : tasks T1-T7 cochees + Dev Agent Record renseigne + DoD a11y coches)
 
 **Aucun fichier sous `supabase/migrations/`** (AC13 valide, confirme `git status`).
+
+## Review Findings
+
+- [x] [Review][Patch] **T1 — Auth bypass si `CRON_SECRET` non défini** [`app/api/cron/purge-notifications/route.ts:42`] — Fix appliqué : `const secret = process.env.CRON_SECRET; if (!secret || authHeader !== \`Bearer ${secret}\`)`.
+- [x] [Review][Patch] **T4 — `purgedCount` plafonné PostgREST (≤ 1000) + alerte spike jamais déclenchée** [`app/api/cron/purge-notifications/route.ts:55,74`] — Fix appliqué : `.select('id', { count: 'exact', head: true })` + utilisation de `count` pour le décompte.
+- [x] [Review][Patch] **T6 — Test intégration cas (b) : `oldIds` non trackés + assert `purgedCount === 0` fragile** [`tests/integration/cron-purge-notifications/purge-cron.test.ts:131-166`] — Fix appliqué : tracker `oldIds` dans `seededIds` + assert remplacé par vérification ciblée SELECT sur les IDs du test.
+- [x] [Review][Patch] **T7 — Désynchronisation `CRON_SECRET` GHA ≠ `beforeAll` test intégration** [`.github/workflows/integration-tests.yml:63`] — Fix appliqué : valeur GHA alignée sur `'test-cron-secret-7b2'` (identique au `beforeAll`).
+- [x] [Review][Defer] **T2 — Timing attack sur comparaison `===` du secret** [`route.ts:42`] — deferred, pre-existing dans tous les crons du projet
+- [x] [Review][Defer] **T3 — DELETE étape 1 sans restriction de statut** [`route.ts:53-54`] — deferred, intentionnel et documenté (commentaire l.12 + DECISIONS.md F-Epic7-B1)
+- [x] [Review][Defer] **T5 — Absence de transaction entre les deux DELETE** [`route.ts:51-74`] — deferred, idempotence par construction assumée et documentée, pattern commun aux autres crons
+- [x] [Review][Defer] **T9 — `SUPABASE_SERVICE_ROLE_KEY` non-null assertion sans guard** [`lib/supabase/server.ts`] — deferred, pre-existing hors scope 7.B.2
+- [x] [Review][Defer] **T12 — Drift 30.44j/mois vs calendaire (~2 sem sur 18 mois)** [`route.ts:34`] — deferred, accepté et documenté explicitement (commentaire l.24 + spec AC3)
 
 ## DoD a11y
 

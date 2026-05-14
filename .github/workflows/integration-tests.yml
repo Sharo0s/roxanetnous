@@ -62,7 +62,7 @@ jobs:
           STRIPE_SECRET_KEY: sk_test_dummy_for_integration_tests
           STRIPE_WEBHOOK_SECRET: whsec_test_secret_for_integration_tests
           PARRAINAGE_INTERNAL_SECRET: parrainage_internal_secret_for_integration_tests
-          CRON_SECRET: test-cron-secret-7b2-integration-fixture-32chars
+          CRON_SECRET: test-cron-secret-7b2
 
       - name: Stop Supabase
         if: always()
