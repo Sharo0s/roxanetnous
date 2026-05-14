@@ -137,17 +137,6 @@ export default async function AdminUtilisateurDetailPage({
         <span aria-hidden="true">&larr;</span> Retour aux utilisateurs
       </Link>
 
-      {/* Actions de validation (accompagnant en cycle de validation) */}
-      {auxProfile && (
-        auxProfile.validation_status === 'en_attente' ||
-        auxProfile.validation_status === 'visio_a_planifier' ||
-        auxProfile.validation_status === 'visio_realisee'
-      ) && (
-        <div className="mb-8">
-          <ValidationActions profileId={auxProfile.id} status={auxProfile.validation_status} />
-        </div>
-      )}
-
       {/* En-tete utilisateur */}
       <div className="bg-white rounded-2xl border border-[#e8dfd2] overflow-hidden mb-8">
         <div className="bg-accent/20 px-6 py-5">
@@ -194,6 +183,17 @@ export default async function AdminUtilisateurDetailPage({
           )}
         </div>
       </div>
+
+      {/* Actions de validation (accompagnant en cycle de validation) */}
+      {auxProfile && (
+        auxProfile.validation_status === 'en_attente' ||
+        auxProfile.validation_status === 'visio_a_planifier' ||
+        auxProfile.validation_status === 'visio_realisee'
+      ) && (
+        <div className="mb-8">
+          <ValidationActions profileId={auxProfile.id} status={auxProfile.validation_status} />
+        </div>
+      )}
 
       {/* Bloc visio realisee */}
       {auxProfile?.visio_date && (
