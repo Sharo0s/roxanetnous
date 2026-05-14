@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll, afterAll } from 'vitest'
+import { describe, it, expect, beforeAll, beforeEach, afterAll } from 'vitest'
 import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 import type { Database } from '@/types/supabase'
 import {
@@ -21,6 +21,14 @@ import { getAdminClient } from '@/tests/integration/_lib/supabase-admin'
 
 describe('admin-messages : RPC get_admin_conversations_with_unread (T-7A4)', () => {
   beforeAll(async () => {
+    await cleanupAllFixtures()
+  })
+
+  // Fix-CI 2026-05-14 : la RPC retourne TOUTES les conv admin globalement (pas
+  // filtrees par p_current_user_id) : sans cleanup inter-cas, les conv creees
+  // au cas (a) polluent les assertions length des cas (b)(c)(d). cleanupAllFixtures
+  // entre chaque cas garantit l isolation BDD.
+  beforeEach(async () => {
     await cleanupAllFixtures()
   })
 
