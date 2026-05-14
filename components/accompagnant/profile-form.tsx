@@ -75,16 +75,21 @@ export function AccompagnantProfileForm({ userInfo, profile, departementsOuverts
     if (!file) return
     setUploadingCv(true)
     setError(null)
-    const formData = new FormData()
-    formData.set('file', file)
-    formData.set('type', 'cv')
-    const result = await uploadJustificatif(formData)
-    if (result?.error) {
-      setError(result.error)
-    } else {
-      setCvFileName(file.name)
+    try {
+      const formData = new FormData()
+      formData.set('file', file)
+      formData.set('type', 'cv')
+      const result = await uploadJustificatif(formData)
+      if (result?.error) {
+        setError(result.error)
+      } else {
+        setCvFileName(file.name)
+      }
+    } catch {
+      setError("Erreur lors de l'upload. Verifiez la taille (max 10 Mo) et reessayez.")
+    } finally {
+      setUploadingCv(false)
     }
-    setUploadingCv(false)
   }
 
   async function handleDiplomeUpload(e: React.ChangeEvent<HTMLInputElement>, diplomeValue: string) {
@@ -92,16 +97,21 @@ export function AccompagnantProfileForm({ userInfo, profile, departementsOuverts
     if (!file) return
     setUploadingDiplome(diplomeValue)
     setError(null)
-    const formData = new FormData()
-    formData.set('file', file)
-    formData.set('type', `diplome:${diplomeValue}`)
-    const result = await uploadJustificatif(formData)
-    if (result?.error) {
-      setError(result.error)
-    } else {
-      setDiplomeFileNames((prev) => ({ ...prev, [diplomeValue]: file.name }))
+    try {
+      const formData = new FormData()
+      formData.set('file', file)
+      formData.set('type', `diplome:${diplomeValue}`)
+      const result = await uploadJustificatif(formData)
+      if (result?.error) {
+        setError(result.error)
+      } else {
+        setDiplomeFileNames((prev) => ({ ...prev, [diplomeValue]: file.name }))
+      }
+    } catch {
+      setError("Erreur lors de l'upload. Verifiez la taille (max 10 Mo) et reessayez.")
+    } finally {
+      setUploadingDiplome(null)
     }
-    setUploadingDiplome(null)
   }
 
   async function handlePermisUpload(e: React.ChangeEvent<HTMLInputElement>) {
@@ -109,16 +119,21 @@ export function AccompagnantProfileForm({ userInfo, profile, departementsOuverts
     if (!file) return
     setUploadingPermis(true)
     setError(null)
-    const formData = new FormData()
-    formData.set('file', file)
-    formData.set('type', 'permis')
-    const result = await uploadJustificatif(formData)
-    if (result?.error) {
-      setError(result.error)
-    } else {
-      setPermisFileName(file.name)
+    try {
+      const formData = new FormData()
+      formData.set('file', file)
+      formData.set('type', 'permis')
+      const result = await uploadJustificatif(formData)
+      if (result?.error) {
+        setError(result.error)
+      } else {
+        setPermisFileName(file.name)
+      }
+    } catch {
+      setError("Erreur lors de l'upload. Verifiez la taille (max 10 Mo) et reessayez.")
+    } finally {
+      setUploadingPermis(false)
     }
-    setUploadingPermis(false)
   }
 
   function toggleSpecialite(value: string) {

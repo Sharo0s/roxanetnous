@@ -30,27 +30,33 @@ export function StepDiplome({ data, onChange, onUpload, onUploadsChange, isFille
     const file = e.target.files?.[0]
     if (!file || !onUpload) return
     setUploading('cv')
-    const success = await onUpload(file, 'cv')
-    if (success) {
-      setCvFileName(file.name)
-      setCvUploaded(true)
-      notifyUploads(true, diplomesUploaded)
+    try {
+      const success = await onUpload(file, 'cv')
+      if (success) {
+        setCvFileName(file.name)
+        setCvUploaded(true)
+        notifyUploads(true, diplomesUploaded)
+      }
+    } finally {
+      setUploading(null)
     }
-    setUploading(null)
   }
 
   async function handleDiplomeUpload(e: React.ChangeEvent<HTMLInputElement>, diplomeValue: string) {
     const file = e.target.files?.[0]
     if (!file || !onUpload) return
     setUploading(`diplome:${diplomeValue}`)
-    const success = await onUpload(file, `diplome:${diplomeValue}`)
-    if (success) {
-      setDiplomeFileNames((prev) => ({ ...prev, [diplomeValue]: file.name }))
-      const updated = { ...diplomesUploaded, [diplomeValue]: true }
-      setDiplomesUploaded(updated)
-      notifyUploads(cvUploaded, updated)
+    try {
+      const success = await onUpload(file, `diplome:${diplomeValue}`)
+      if (success) {
+        setDiplomeFileNames((prev) => ({ ...prev, [diplomeValue]: file.name }))
+        const updated = { ...diplomesUploaded, [diplomeValue]: true }
+        setDiplomesUploaded(updated)
+        notifyUploads(cvUploaded, updated)
+      }
+    } finally {
+      setUploading(null)
     }
-    setUploading(null)
   }
 
   function toggleDiplome(value: string) {

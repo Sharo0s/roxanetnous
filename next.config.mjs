@@ -4,6 +4,14 @@ import { withWorkflow } from '@workflow/next'
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  experimental: {
+    serverActions: {
+      // L'UI accepte jusqu'a 10 Mo (justificatifs CV/diplomes/identite/permis).
+      // 11mb laisse la marge pour l'encodage FormData ; sinon Next throw silencieusement
+      // et l'UI client reste bloquee sur "Upload en cours...".
+      bodySizeLimit: '11mb',
+    },
+  },
   images: {
     remotePatterns: [
       {

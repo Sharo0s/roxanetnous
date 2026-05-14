@@ -13,11 +13,14 @@ export function StepJustificatifs({ onUpload }: Props) {
 
   async function handleFile(file: File) {
     setUploading(true)
-    const success = await onUpload(file, 'identite')
-    if (success) {
-      setIdentiteFile(file.name)
+    try {
+      const success = await onUpload(file, 'identite')
+      if (success) {
+        setIdentiteFile(file.name)
+      }
+    } finally {
+      setUploading(false)
     }
-    setUploading(false)
   }
 
   return (

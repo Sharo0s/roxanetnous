@@ -21,12 +21,15 @@ export function StepLocalisation({ data, onChange, onUpload, onPermisUploaded, d
     const file = e.target.files?.[0]
     if (!file || !onUpload) return
     setUploading(true)
-    const success = await onUpload(file, 'permis')
-    if (success) {
-      setUploadedFileName(file.name)
-      onPermisUploaded?.(true)
+    try {
+      const success = await onUpload(file, 'permis')
+      if (success) {
+        setUploadedFileName(file.name)
+        onPermisUploaded?.(true)
+      }
+    } finally {
+      setUploading(false)
     }
-    setUploading(false)
   }
   return (
     <div className="space-y-6">

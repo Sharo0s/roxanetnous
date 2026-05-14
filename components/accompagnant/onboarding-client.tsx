@@ -150,12 +150,17 @@ export function OnboardingClient({ parrainage, departementsOuverts, userEmail, i
     const formData = new FormData()
     formData.set('file', file)
     formData.set('type', type)
-    const result = await uploadJustificatif(formData)
-    if (result?.error) {
-      setError(result.error)
+    try {
+      const result = await uploadJustificatif(formData)
+      if (result?.error) {
+        setError(result.error)
+        return false
+      }
+      return true
+    } catch {
+      setError("Erreur lors de l'upload. Verifiez la taille (max 10 Mo) et reessayez.")
       return false
     }
-    return true
   }
 
   return (
