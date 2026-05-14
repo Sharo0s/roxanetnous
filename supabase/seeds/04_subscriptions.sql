@@ -4,7 +4,7 @@
 
 BEGIN;
 
--- 1. Subscription active future (user 2 = accompagnante validee, abonnement OK).
+-- 1. Subscription active future (user 2 = accompagnant valide, abonnement OK).
 INSERT INTO public.subscriptions (
   id,
   user_id,

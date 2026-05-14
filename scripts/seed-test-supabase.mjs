@@ -55,16 +55,16 @@ const PG_URL =
 
 const SEED_USERS = [
   { id: '00000000-0000-0000-0000-000000000001', role: 'admin', label: 'Admin' },
-  { id: '00000000-0000-0000-0000-000000000002', role: 'accompagnante', label: 'Accompagnante' },
+  { id: '00000000-0000-0000-0000-000000000002', role: 'accompagnant', label: 'Accompagnante' },
   { id: '00000000-0000-0000-0000-000000000003', role: 'accompagne', label: 'Accompagne' },
-  { id: '00000000-0000-0000-0000-000000000004', role: 'accompagnante', label: 'Marraine' },
-  { id: '00000000-0000-0000-0000-000000000005', role: 'accompagnante', label: 'Filleule' },
+  { id: '00000000-0000-0000-0000-000000000004', role: 'accompagnant', label: 'Marraine' },
+  { id: '00000000-0000-0000-0000-000000000005', role: 'accompagnant', label: 'Filleule' },
 ]
 
 const SEED_FILES = [
   '01_users.sql',
   '02_parrainages.sql',
-  '03_waitlist.sql',
+  '03_notifications_ouverture.sql',
   '04_subscriptions.sql',
 ]
 
