@@ -15,6 +15,7 @@
     "check:as-any-admin": "node scripts/check-as-any-admin.mjs",
     "check:as-any-global": "node scripts/check-as-any-global.mjs",
     "check:oracle-paywall": "node scripts/check-oracle-paywall.mjs",
+    "check:rls-helpers": "node scripts/check-rls-helpers-security-definer.mjs",
     "env:push": "node scripts/vercel-env-push.mjs",
     "env:push:apply": "node scripts/vercel-env-push.mjs --apply",
     "check:types:supabase": "node scripts/check-types-supabase.mjs",

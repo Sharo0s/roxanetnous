@@ -826,3 +826,30 @@ Estimation realiste : **2-3 jours-dev**, pas "extension" comme le tech-spec le s
 **Tests :** `tests/integration/admin-actions-log/check-xor-target-id.test.ts` couvre 4 cas (a-d) : INSERT UUID OK / INSERT TEXT OK / les deux NULL rejete 23514 / les deux NOT NULL rejete 23514.
 
 **Regle :** tout invariant metier de type "X XOR Y" sur une table BDD doit etre exprime via CHECK BDD avec pattern NOT VALID + VALIDATE quand des lignes historiques existent. Ne pas reposer uniquement sur le mutex applicatif. Cette regle cloture la dette technique reconnue par story 3.5 D1.
+
+## 2026-05-14 : Alignement `is_accompagnant()` SECURITY DEFINER (decision F-Epic7-A8)
+
+**Contexte :** Story 7.A.8 (mini-epic 7.A hardening securite). Acquit AI-6.A.4 retro Epic 6 : la migration 6.A.2 part 2 (`20260513150100_renommage_accompagnante_part2_backfill_rename_rls.sql:70-76`) a recree le helper RLS `public.is_accompagnant()` SANS clause `SECURITY DEFINER` (CREATE FUNCTION par defaut = SECURITY INVOKER). La migration 6.A.M residuelle (`20260513194300_renommage_residuel_accompagnante_epic6.sql:197-206`) a propage le drift en pretendant "preserver le corps a l identique" (promesse non tenue : le snapshot 7 portait sur `is_accompagnante()` deja INVOKER depuis 2026-04-04 part 1). Audit MCP 2026-05-14 : `is_admin.prosecdef=true`, `is_accompagne.prosecdef=true`, `is_accompagnant.prosecdef=false` -> drift involontaire des le 2026-05-13.
+
+**Decouverte non triviale :** audit MCP 2026-05-14 confirme **0 policy RLS / 0 fonction Postgres / 0 vue / 0 trigger** en BDD prod appelle `is_accompagnant()`. Cote app : `grep -rn is_accompagnant app/ lib/` = 0 hit. Le helper est structurellement orphelin depuis sa creation. Le cadrage epic-7.md ligne 282 mentionnait "14 policies RLS qui utilisent is_accompagnant" : chiffre factuellement faux (artefact heuristique). Le risque adresse n est donc **pas runtime regression** mais **dette de coherence + piege futur**.
+
+**Test fonctionnel pre-migration (AC4) :** `SET LOCAL request.jwt.claims TO '{"sub":"<uid>","role":"authenticated"}'; SELECT public.is_accompagnant();` sous 3 roles -> (a) accompagnant=true, (b) accompagne=false, (c) admin=false. Aucune anomalie runtime en INVOKER actuel (la policy `users_select_own` autorise `auth.uid()=id`, donc le helper INVOKER lit bien sa propre ligne).
+
+**Decision :** option (b) **`ALTER FUNCTION public.is_accompagnant() SECURITY DEFINER`** + `COMMENT ON FUNCTION` auto-documenting. Rationale 4 points :
+
+1. **Coherence transversale (POLA)** : aligner les 3 helpers jumeaux. Tout futur dev branchant `is_accompagnant()` dans une policy RLS s attend a un comportement aligne sur `is_admin`/`is_accompagne` (deja DEFINER). L incoherence actuelle est un piege silencieux.
+2. **Symetrie avec `is_accompagne`** : meme corps (`SELECT EXISTS FROM users WHERE id = auth.uid() AND role = X`), meme volatility (STABLE), meme langage (SQL). Aucune justification metier au statut INVOKER different.
+3. **Cout migration ~0** : 1 ligne SQL DDL atomique, pas de scan table, pas de regression possible (0 site qui changerait de comportement). Cutover < 100 ms. Idempotent (no-op si deja DEFINER, pas besoin de wrap `DO IF NOT EXISTS`).
+4. **Piege futur evite** : si Epic 7.A.9 / 8 cablerait `is_accompagnant()` dans une policy RLS (ex : table annonces filtrage), DEFINER garantit que la sous-requete `users` lit toujours via les droits du proprietaire de la fonction (postgres) sans dependre des droits du caller -> pas de recursion RLS sur `public.users`.
+
+**Alternative consideree (rejetee) :** option (a) garder INVOKER + `COMMENT ON FUNCTION` justifiant. Arguments examines :
+- Defense-in-depth : un helper INVOKER ne peut pas etre detourne pour escalader des droits. **Non pertinent ici** : le corps est un SELECT simple filtre par `auth.uid()` (pas de parametre user-controlled, pas de vecteur d injection).
+- Inertie : 0 site l utilise, 0 incident. **Insuffisant** car le helper existe et invite a etre utilise (memoires Epic 6 le mentionnent comme "helper RLS"), donc la coherence prime sur l inertie.
+
+**Migration :** `20260514xxxxxx_is_accompagnant_security_definer.sql` (ALTER FUNCTION + COMMENT ON). Apply via MCP. Pas de regen types structurel (DEFINER ne change pas le contrat PostgREST exterieur).
+
+**Garde-fou meta :** `scripts/check-rls-helpers-security-definer.mjs` (nouveau, chainage `vercel.json buildCommand` apres `check:as-any-admin`). Assert via `@supabase/supabase-js` service_role que les 3 helpers `is_admin / is_accompagne / is_accompagnant` ont `prosecdef=true`. Exit 1 + message si divergence. Verrouille la regression : toute future migration qui dropperait et recreerait l un des 3 helpers sans clause `SECURITY DEFINER` declenchera un fail-fast en CI.
+
+**Tests :** `tests/integration/rls-helpers/is-accompagnant-coherence.test.ts` couvre 3 cas (a-c) : (a) `createTestUser('accompagnant').rpc('is_accompagnant') === true`, (b) `accompagne === false`, (c) `admin === false`. Cale la regression fonctionnelle.
+
+**Regle pattern futur :** tout helper RLS `is_<role>()` cree dans `public` doit etre declare `STABLE SECURITY DEFINER` sauf justification ecrite (DECISIONS.md). Le defaut SECURITY INVOKER est un piege silencieux quand la sous-requete touche `public.users` (recursion RLS potentielle). Checklist a ajouter au gabarit de toute migration touchant un helper RLS role-based. Le garde-fou `check:rls-helpers` verrouille cette regle au build.
