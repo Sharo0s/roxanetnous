@@ -278,9 +278,12 @@ export default async function AdminDashboard() {
               <span className="text-right tabular-nums">{repartition.accompagnes} · {pctBen.toFixed(0)} %</span>
             </div>
             {incompletsCount > 0 && (
-              <p className="text-xs text-gray-500 mt-3 pt-3 border-t border-[#f3ebde]">
+              <Link
+                href="/admin/utilisateurs?statut=a_completer"
+                className="block text-xs text-gray-500 mt-3 pt-3 border-t border-[#f3ebde] hover:text-gray-800 transition"
+              >
                 Dont <span className="tabular-nums">{incompletsCount}</span> profil{incompletsCount > 1 ? 's' : ''} accompagnant{incompletsCount > 1 ? 's' : ''} incomplet{incompletsCount > 1 ? 's' : ''} (onboarding non finalisé).
-              </p>
+              </Link>
             )}
           </div>
 

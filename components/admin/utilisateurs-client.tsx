@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from 'react'
 import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
 import type { AccompagnanteRow, AccompagneRow } from '@/app/admin/utilisateurs/page'
 import { formatExperienceLabel } from '@/lib/constants'
 import { GrantSubscriptionModal } from './grant-subscription-modal'
@@ -69,9 +70,14 @@ export function UtilisateursClient({
   diplomeLabels: Record<string, string>
   annulations?: AnnulationRow[]
 }) {
+  const searchParams = useSearchParams()
+  const initialStatus = searchParams.get('statut') || 'tous'
+  const validStatuses = ['tous', 'en_attente', 'visio_a_planifier', 'visio_realisee', 'valide', 'refuse', 'a_completer']
   const [tab, setTab] = useState<Tab>('accompagnantes')
   const [search, setSearch] = useState('')
-  const [statusFilter, setStatusFilter] = useState<string>('tous')
+  const [statusFilter, setStatusFilter] = useState<string>(
+    validStatuses.includes(initialStatus) ? initialStatus : 'tous'
+  )
 
   const filteredAccompagnantes = useMemo(() => {
     let result = accompagnantes
