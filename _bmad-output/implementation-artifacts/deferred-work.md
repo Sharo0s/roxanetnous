@@ -1,5 +1,11 @@
 # Deferred Work
 
+## Deferred from: code review of story 7.A.6 (2026-05-14)
+
+- **Absorption 23505 aveugle dans `logNotification`** [`lib/notifications-log.ts:57`] — Tout code 23505 est silent-skip sans vérification du nom de contrainte. Si un futur UNIQUE INDEX est ajouté sur `notifications_log`, son 23505 serait silencieux. Candidat 7.A.11 : enrichir le breadcrumb avec `constraint_name` extrait de `insertError.details` ou `insertError.hint`.
+- **Cast `insertError as { code?: string }` sans type guard runtime** [`lib/notifications-log.ts:57`] — Pattern stable (SDK Supabase expose `.code` de manière constante, déjà validé story 3.4) mais non garanti contractuellement. Candidat hardening si le SDK change de format d'erreur.
+- **`Sentry.captureException` peut throw dans le catch `logNotification`** [`lib/notifications-log.ts:76`] — Pré-existant avant 7.A.6. Si le SDK Sentry est indisponible, une exception propagera hors du catch vers le caller. Candidat hardening commun avec story 7.A.3 defer (`safeSentryCapture`).
+
 ## Deferred from: code review of story 7.A.5 (2026-05-14)
 
 - **`sendMessage` conversation fetch : `error` DB non capturee, alias "non trouvee"** [`app/actions/messages.ts:376-391`] — Pre-existant avant 7.A.5 : le destructuring omet `error` sur la query `.single()`. Une erreur DB transitoire renvoie "Conversation non trouvee" au lieu d'un vrai message d'erreur, sans Sentry capture. Candidat hardening messagerie.

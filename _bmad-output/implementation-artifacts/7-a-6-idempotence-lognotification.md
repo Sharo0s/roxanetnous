@@ -1,6 +1,6 @@
 # Story 7.A.6 : Idempotence `logNotification`
 
-Status: review
+Status: done
 
 <!-- Story 6 du mini-epic 7.A (hardening securite transverse) - Item C6 de l'inventaire dettes Epic 7. Source : `deferred-work.md` ligne 230 (review story 4.2, 2026-05-07) + ligne 250 (review story 4.3, 2026-05-08 - confirmation idempotency_key applicatif Workflow DevKit insuffisant entre runs). Cadrage `epic-7.md` lignes 223-238. Heritage : story 4.2 (schema notifications_log etendu user_id NULLABLE + status 7 valeurs) + story 4.3 (queue durable at-least-once delivery + idempotencyKey=stepId cote Resend uniquement) + DECISIONS.md F5 (idempotence niveau BDD via UNIQUE INDEX + ON CONFLICT - pattern projet impose). Cette story livre le tuple BDD manquant : partial UNIQUE INDEX sur rows `status='sent'` + ON CONFLICT DO NOTHING cote helper applicatif. -->
 
@@ -552,6 +552,14 @@ claude-opus-4-7 (1M context)
 | Date | Auteur | Description |
 |---|---|---|
 | 2026-05-14 | claude-opus-4-7 | Story 7.A.6 implementation complete (Tasks 1-7). Migration partial UNIQUE INDEX `notifications_log_unique_sent_by_hour` apply via MCP, helper `logNotification` capture code 23505 silent-skip + breadcrumb info Sentry. Validations CI locales toutes vertes (49/49 unit, lint baseline beneficiaire, a11y 0 delta Critical/Serious). DECISIONS.md F-Epic7-A6 ajoutee. Status: ready-for-dev -> in-progress -> review. Reste Sylvain : commit + push + GHA integration-tests + code-review + log calendrier audit Sentry J+7 + maj memoires post-merge (Task 8). |
+
+### Review Findings
+
+- [x] [Review][Patch] Cleanup tests intégration (b) par colonne `email` trop large — risque de supprimer des rows hors-scope [`tests/integration/notifications-log/idempotence-partial-unique-index.test.ts:27-30`] — Le `DELETE IN (email)` supprime toutes les rows correspondant à ces emails, y compris potentielles rows avec `user_id IS NOT NULL`. Remplacer par `.delete().eq('user_id', null).in('email', localNotificationEmails)` pour limiter au cas anonyme.
+- [x] [Review][Defer] Absorption 23505 aveugle — tout 23505 silencieux, pas seulement l'index ciblé [`lib/notifications-log.ts:57`] — Si un futur UNIQUE INDEX est ajouté sur `notifications_log`, son 23505 sera silent-skip sans distinction. Candidat 7.A.11 : logguer `constraint_name` dans le breadcrumb data. — deferred, pre-existing potential
+- [x] [Review][Defer] Expression d'index `COALESCE(sent_at, created_at)` instable si `sent_at` est mis à jour post-insert [`supabase/migrations/20260514075401_notifications_log_partial_unique_idempotency.sql:47-50`] — Risque uniquement si un UPDATE futur modifie `sent_at`. Write-once dans le helper actuel. — deferred, theoretical
+- [x] [Review][Defer] Cast `insertError as { code?: string }` sans type guard runtime [`lib/notifications-log.ts:57`] — SDK Supabase expose `.code` de manière stable ; pattern déjà validé story 3.4. Risque faible. — deferred, pre-existing pattern
+- [x] [Review][Defer] `Sentry.captureException` peut throw dans le catch externe — défense en profondeur brisée [`lib/notifications-log.ts:76`] — Pré-existant avant 7.A.6 (catch existait déjà). Risque SDK down = extrêmement rare. — deferred, pre-existing
 
 ## DoD a11y
 

@@ -25,7 +25,7 @@ async function cleanupLocalNotifications() {
     localNotificationIds.length = 0
   }
   if (localNotificationEmails.length > 0) {
-    await supabase.from('notifications_log').delete().in('email', localNotificationEmails)
+    await supabase.from('notifications_log').delete().eq('user_id', null).in('email', localNotificationEmails)
     localNotificationEmails.length = 0
   }
 }
