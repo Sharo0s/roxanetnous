@@ -173,12 +173,18 @@ export async function createTestConversation(
   opts?: { adminUserId?: string | null },
 ): Promise<TestConversation> {
   const supabase = getAdminClient()
+  // CHECK constraint `conversations_participant_xor` (migration 20260418145317) impose
+  // un XOR strict : (accompagne_id IS NOT NULL AND admin_id IS NULL) OR
+  // (accompagne_id IS NULL AND admin_id IS NOT NULL). Une conversation est SOIT
+  // accompagnant<->accompagne SOIT accompagnant<->admin, jamais les deux. Quand
+  // adminUserId est fourni, on force accompagne_id a null pour respecter le XOR.
+  const adminUserId = opts?.adminUserId ?? null
   const { data, error } = await supabase
     .from('conversations')
     .insert({
       accompagnant_id: accompagnanteProfileId,
-      accompagne_id: accompagneProfileId,
-      admin_id: opts?.adminUserId ?? null,
+      accompagne_id: adminUserId === null ? accompagneProfileId : null,
+      admin_id: adminUserId,
     })
     .select('id')
     .single()
