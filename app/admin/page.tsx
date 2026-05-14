@@ -10,6 +10,11 @@ import {
   getParrainagesStats,
   getDerniereActionAdmin,
 } from '@/lib/admin-stats'
+import { DIPLOMES, formatExperienceLabel } from '@/lib/constants'
+
+const DIPLOME_LABELS: Record<string, string> = Object.fromEntries(
+  DIPLOMES.map((d) => [d.value, d.label])
+)
 
 function formatEur(n: number) {
   return n.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' EUR'
@@ -160,7 +165,7 @@ export default async function AdminDashboard() {
                           </span>
                         </div>
                         <p className="text-xs text-gray-500 mt-1 truncate">
-                          {profile.ville} ({profile.code_postal}) · {(profile.diplomes as string[] | null || []).join(', ') || '—'} · {profile.experience || '—'}
+                          {profile.ville} ({profile.code_postal}) · {((profile.diplomes as string[] | null) || []).map((d) => DIPLOME_LABELS[d] || d).join(', ') || '—'} · {formatExperienceLabel(profile.experience)}
                         </p>
                         <p className="text-xs text-gray-400 mt-0.5">
                           Arrivé {ageLabel(profile.created_at)}
