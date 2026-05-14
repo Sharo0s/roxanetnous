@@ -30,7 +30,9 @@ const PAYWALL_GENERIC_ERROR = 'Abonnement requis pour echanger des messages.'
 function safeSentryCapture(fn: () => void): void {
   try {
     fn()
-  } catch {}
+  } catch (e) {
+    console.error('[safeSentryCapture] Sentry SDK error:', e)
+  }
 }
 
 export async function getOrCreateConversation(
@@ -112,7 +114,15 @@ export async function getOrCreateConversation(
   }
 
   // Story 3.6 : paywall sur ouverture conversation (apres check existence pour preserver idempotence D3)
-  const subscribed = await hasActiveSubscription(user.id)
+  let subscribed: boolean
+  try {
+    subscribed = await hasActiveSubscription(user.id)
+  } catch (e) {
+    safeSentryCapture(() => Sentry.captureException(e instanceof Error ? e : new Error(String(e)), {
+      tags: { flow: 'messaging', signal: 'subscription-check-error', severity: 'critical' },
+    }))
+    return { error: PAYWALL_GENERIC_ERROR }
+  }
   if (!subscribed) {
     safeSentryCapture(() => Sentry.captureMessage('paywall-block:getOrCreateConversation', {
       level: 'info',
@@ -227,7 +237,15 @@ export async function getOrCreateConversationAsAccompagnante(
   }
 
   // Story 3.6 : paywall sur ouverture conversation (apres check existence pour preserver idempotence D3)
-  const subscribed = await hasActiveSubscription(user.id)
+  let subscribed: boolean
+  try {
+    subscribed = await hasActiveSubscription(user.id)
+  } catch (e) {
+    safeSentryCapture(() => Sentry.captureException(e instanceof Error ? e : new Error(String(e)), {
+      tags: { flow: 'messaging', signal: 'subscription-check-error', severity: 'critical' },
+    }))
+    return { error: PAYWALL_GENERIC_ERROR }
+  }
   if (!subscribed) {
     safeSentryCapture(() => Sentry.captureMessage('paywall-block:getOrCreateConversationAsAccompagnante', {
       level: 'info',
@@ -407,7 +425,15 @@ export async function sendMessage(
   // 7.A.5 unifie le message avec getOrCreateConversation* (PAYWALL_GENERIC_ERROR) +
   // ajoute la capture Sentry symetrique pour observabilite serveur.
   if (!isAdmin && adminUserId === null) {
-    const subscribed = await hasActiveSubscription(user.id)
+    let subscribed: boolean
+    try {
+      subscribed = await hasActiveSubscription(user.id)
+    } catch (e) {
+      safeSentryCapture(() => Sentry.captureException(e instanceof Error ? e : new Error(String(e)), {
+        tags: { flow: 'messaging', signal: 'subscription-check-error', severity: 'critical' },
+      }))
+      return { error: PAYWALL_GENERIC_ERROR }
+    }
     if (!subscribed) {
       safeSentryCapture(() => Sentry.captureMessage('paywall-block:sendMessage', {
         level: 'info',

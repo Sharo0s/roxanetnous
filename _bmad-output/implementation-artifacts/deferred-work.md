@@ -1,5 +1,12 @@
 # Deferred Work
 
+## Deferred from: code review of story 7.A.5 (2026-05-14)
+
+- **`sendMessage` conversation fetch : `error` DB non capturee, alias "non trouvee"** [`app/actions/messages.ts:376-391`] — Pre-existant avant 7.A.5 : le destructuring omet `error` sur la query `.single()`. Une erreur DB transitoire renvoie "Conversation non trouvee" au lieu d'un vrai message d'erreur, sans Sentry capture. Candidat hardening messagerie.
+- **`check-oracle-paywall.mjs` : blocs `/* */` multi-lignes non filtres** [`scripts/check-oracle-paywall.mjs`] — Pre-existant dans le script original. Un commentaire JSDoc contenant `contacter [role]` declencherait un faux positif CONTACT_RE. Ajouter un suivi d'etat "dans un bloc /* */" pour filtrer correctement.
+- **Race condition refetch null sans diagnostic Sentry distinct (23505 + refetch still null)** [`app/actions/messages.ts:138-157,250-266,335-352`] — Apres un 23505 + refetch qui retourne `data: null, error: null` (row supprimee entre INSERT et refetch), aucun signal Sentry specifique. Ajouter un `safeSentryCapture` avec signal distinct `'refetch-null-after-23505'` pour tracer ce cas limite.
+- **Test `message-unifie-anti-oracle.test.ts` n'exerce pas accompagnant comme sender dans `sendMessage`** [`tests/integration/paywall/message-unifie-anti-oracle.test.ts`] — Cas (c) teste uniquement l'accompagne comme sender. Un futur refactor qui exemptait `isAux` du paywall ne serait pas detecte. Ajouter scenario `(e)` : accompagnant abonnement expire + conv existante + sendMessage.
+
 ## Deferred from: code review of 7-a-4-aggreger-n-plus-1-unread-counts-admin-messages (2026-05-14)
 
 - F6 — Sous-requête corrélée COUNT sans index composite `(conversation_id, sender_id, read_at)` dans `get_admin_conversations_with_unread` : l'index `idx_messages_conversation` couvre le lookup mais pas le filtre `sender_id + read_at`. Candidat optimisation si volumétrie messages dépasse 10k [supabase/migrations/20260513230753_admin_messages_rpc_unread_aggregation.sql:40]

@@ -1,6 +1,6 @@
 # Story 7.A.5 : Unifier message d'erreur soft paywall messagerie (anti-oracle)
 
-Status: review
+Status: done
 
 <!-- Story 5 du mini-epic 7.A (hardening securite transverse) - Item C5 de l'inventaire dettes Epic 7. Source : `deferred-work.md` ligne 199 (review story 3.6, 2026-05-07). Cadrage `epic-7.md` lignes 206-219. Heritage : story 5.B.1 a deja unifie 2 des 3 surfaces server cote `getOrCreateConversation*` (cf. `app/actions/messages.ts:24` PAYWALL_GENERIC_ERROR). Cette story termine le travail : (a) reformule le literal partage selon le wording cadrage epic-7.md, (b) etend `PAYWALL_GENERIC_ERROR` a `sendMessage` (ligne 409 actuellement non-unifie), (c) durcit le garde-fou CI `scripts/check-oracle-paywall.mjs`, (d) ajoute le test integration cible AC3. -->
 
@@ -343,6 +343,17 @@ claude-opus-4-7 (bmad-dev-story, 2026-05-14)
 
 **Sprint status** :
 - `_bmad-output/implementation-artifacts/sprint-status.yaml` (7.A.5 : ready-for-dev -> in-progress -> review)
+
+### Review Findings
+
+- [x] [Review][Patch] `safeSentryCapture` catch vide : exceptions Sentry avalees silencieusement sans log [app/actions/messages.ts:30-34] — Ajouter `console.error('[safeSentryCapture]', e)` dans le catch pour rendre les pannes Sentry visibles dans les logs Vercel.
+- [x] [Review][Patch] `hasActiveSubscription` peut throw et briser le contrat anti-oracle shape [app/actions/messages.ts:115,236,416] — Wrapper les 3 appels `hasActiveSubscription` dans un try/catch ; sur exception retourner `{ error: PAYWALL_GENERIC_ERROR }` (preserve l'anti-oracle) + safeSentryCapture log.
+- [x] [Review][Patch] `CONST_RE` dans check-oracle-paywall.mjs ne couvre pas les template literals (backtick) [scripts/check-oracle-paywall.mjs:63] — Ajouter le backtick dans la classe de caracteres : `['"\`]`.
+- [x] [Review][Patch] AC12(c) : `'conversationId' in resC === false` manquant dans le test anti-oracle [tests/integration/paywall/message-unifie-anti-oracle.test.ts:84] — Ajouter `expect('conversationId' in resC).toBe(false)` apres les assertions existantes du cas (c).
+- [x] [Review][Defer] `sendMessage` conversation fetch : `error` DB non capture → alias "non trouvee" [app/actions/messages.ts:376-391] — deferred, pre-existant avant 7.A.5
+- [x] [Review][Defer] `check-oracle-paywall.mjs` : blocs `/* */` multi-lignes non filtres (risque faux positif CONTACT_RE) [scripts/check-oracle-paywall.mjs] — deferred, pre-existant dans le script original
+- [x] [Review][Defer] Race condition refetch null sans diagnostic Sentry distinct (23505 + refetch still null) [app/actions/messages.ts:138-157] — deferred, amelioration observabilite mineure
+- [x] [Review][Defer] Test cas (c) n'exerce pas l'accompagnant comme sender dans sendMessage [tests/integration/paywall/message-unifie-anti-oracle.test.ts] — deferred, couverture incomplete, non-bloquant
 
 ### Change Log
 

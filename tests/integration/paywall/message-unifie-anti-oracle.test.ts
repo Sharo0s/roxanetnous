@@ -83,6 +83,7 @@ describe('paywall : message unifie anti-oracle (Story 7.A.5)', () => {
 
     expect(resC).toEqual({ error: EXPECTED_PAYWALL_ERROR })
     expect(Object.keys(resC).length).toBe(1)
+    expect('conversationId' in resC).toBe(false)
 
     // -- Assertion croisee (d) : JSON.stringify strictement identique --
     // Contrat anti-oracle : un attaquant comparant les 3 reponses ne peut

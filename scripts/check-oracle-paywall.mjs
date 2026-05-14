@@ -60,7 +60,7 @@ if (matches.length > 0) {
 
 // AC5 Story 7.A.5 : verifier que la constante PAYWALL_GENERIC_ERROR existe + value attendue.
 // Empeche une suppression silencieuse de la constante OU son renommage en literal differencie.
-const CONST_RE = /const\s+PAYWALL_GENERIC_ERROR\s*=\s*['"]Abonnement requis pour echanger des messages\.['"]/
+const CONST_RE = /const\s+PAYWALL_GENERIC_ERROR\s*=\s*['"`]Abonnement requis pour echanger des messages\.['"`]/
 if (!CONST_RE.test(source)) {
   console.error('[check-oracle-paywall] ERREUR : constante PAYWALL_GENERIC_ERROR absente ou valeur differente du literal Story 7.A.5.')
   console.error('  Attendu : const PAYWALL_GENERIC_ERROR = \'Abonnement requis pour echanger des messages.\'')
