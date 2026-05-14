@@ -7,6 +7,8 @@
 - **T5 — Absence de transaction entre les deux DELETE** [`app/api/cron/purge-notifications/route.ts:51-74`] — Idempotence par construction assumée et documentée, pattern commun aux autres crons.
 - **T9 — `SUPABASE_SERVICE_ROLE_KEY` non-null assertion sans guard** [`lib/supabase/server.ts`] — Pré-existant hors scope 7.B.2. Candidat hardening global.
 - **T12 — Drift 30.44j/mois vs calendaire (~2 sem sur 18 mois)** [`app/api/cron/purge-notifications/route.ts:34`] — Accepté et documenté explicitement dans le commentaire (l.24) et la spec AC3. Candidate upgrade : RPC Postgres si précision calendaire requise.
+- **N4 — Rows `sent_at` non-null mais `created_at` > 18 mois jamais purgées (retry tardif)** [`app/api/cron/purge-notifications/route.ts:51-56`] — Cas théorique : retry tardif → `sent_at` récent + `created_at` ancien → aucune des 2 étapes DELETE ne la prend. Intentionnel per DECISIONS.md F-Epic7-B1 (TTL basé sur `sent_at`). Candidat clarification politique si cas produit observé.
+- **N5 — Pas de limite batch sur DELETE (risque timeout volumétrie extrême)** [`app/api/cron/purge-notifications/route.ts:52-75`] — Volumétrie < 50 rows/run (audit MCP 2026-05-14). Candidat `.limit(5000)` + flag `hasMore` en story 8.X si timeout prod observé.
 
 ## Deferred from: code review of 7-b-1-politique-ttl-formalisee-decisions (2026-05-14)
 
