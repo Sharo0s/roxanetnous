@@ -63,6 +63,7 @@ export function AccompagnantDashboardHeader({ firstName, lastName, unreadCount, 
               )}
             </Link>
           ))}
+          <LogoutButton />
         </nav>
 
         {/* Burger mobile */}

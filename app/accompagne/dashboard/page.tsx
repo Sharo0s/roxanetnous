@@ -6,7 +6,6 @@ import { getSubscriptionStatus } from '@/lib/subscription-helpers'
 import { AccompagneSubscriptionBanner } from '@/components/accompagne/subscription-banner'
 import { AccompagneDashboardHeader } from '@/components/layout/accompagne-dashboard-header'
 import { DashboardPortrait } from '@/components/accompagnant/dashboard-portrait'
-import { LogoutButton } from '@/components/auth/logout-button'
 
 export default async function AccompagneDashboard() {
   const supabase = await createClient()
@@ -313,8 +312,6 @@ export default async function AccompagneDashboard() {
           <Link href="/politique-de-confidentialite" className="hover:text-gray-800">Confidentialité</Link>
           <span aria-hidden="true">·</span>
           <Link href="/cgu" className="hover:text-gray-800">Conditions</Link>
-          <span aria-hidden="true">·</span>
-          <LogoutButton />
         </div>
       </div>
     </main>

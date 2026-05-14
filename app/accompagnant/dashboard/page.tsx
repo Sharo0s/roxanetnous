@@ -8,7 +8,6 @@ import { AccompagnantDashboardHeader } from '@/components/layout/accompagnant-da
 import { DashboardPortrait } from '@/components/accompagnant/dashboard-portrait'
 import { DisponibleToggle } from '@/components/accompagnant/disponible-toggle'
 import { StatusBadge } from '@/components/accompagnant/status-badge'
-import { LogoutButton } from '@/components/auth/logout-button'
 import { SPECIALITES } from '@/lib/constants'
 import { getCodesPostauxFilterOr } from '@/lib/departements'
 
@@ -516,8 +515,6 @@ export default async function AccompagnanteDashboard() {
           <Link href="/politique-de-confidentialite" className="hover:text-gray-800">Confidentialité</Link>
           <span aria-hidden="true">·</span>
           <Link href="/cgu" className="hover:text-gray-800">Conditions</Link>
-          <span aria-hidden="true">·</span>
-          <LogoutButton />
         </div>
       </div>
     </main>
