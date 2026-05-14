@@ -2,6 +2,7 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import type { Database } from '@/types/supabase'
+import * as Sentry from '@sentry/nextjs'
 
 export default async function AdminMessagesPage() {
   const supabase = await createClient()
@@ -11,32 +12,16 @@ export default async function AdminMessagesPage() {
   // Story 4.6 (variante locale SCP) : cast localise au point d'appel.
   const supabaseAdmin = (await createClient({ serviceRole: true })) as unknown as SupabaseClient<Database>
 
-  const { data: conversations } = await supabaseAdmin
-    .from('conversations')
-    .select(`
-      id,
-      last_message_at,
-      accompagnant_id,
-      admin_id,
-      accompagnants_profiles:accompagnant_id (
-        user_id,
-        users!user_id (first_name, last_name, email)
-      )
-    `)
-    .not('admin_id', 'is', null)
-    .order('last_message_at', { ascending: false, nullsFirst: false })
-
-  const unreadCounts: Record<string, number> = {}
-  if (conversations) {
-    for (const conv of conversations) {
-      const { count } = await supabaseAdmin
-        .from('messages')
-        .select('id', { count: 'exact', head: true })
-        .eq('conversation_id', conv.id)
-        .neq('sender_id', user.id)
-        .is('read_at', null)
-      unreadCounts[conv.id] = count || 0
-    }
+  // Story 7.A.4 : 1 round-trip via RPC SECURITY DEFINER (vs N+1 boucle COUNT).
+  const { data: rows, error: rpcError } = await supabaseAdmin.rpc('get_admin_conversations_with_unread', {
+    p_current_user_id: user.id,
+    p_limit: 100,
+    p_offset: 0,
+  })
+  if (rpcError) {
+    Sentry.captureException(rpcError, {
+      tags: { flow: 'admin_messages_load', rpc: 'get_admin_conversations_with_unread', severity: 'critical' },
+    })
   }
 
   return (
@@ -46,22 +31,21 @@ export default async function AdminMessagesPage() {
         <h1 className="text-3xl md:text-4xl italic text-gray-900 leading-tight">Messages avec les accompagnants</h1>
       </header>
 
-      {!conversations || conversations.length === 0 ? (
+      {!rows || rows.length === 0 ? (
         <div className="bg-white rounded-2xl border border-[#e8dfd2] p-10 text-center text-gray-500 italic">
           Aucune conversation active.
         </div>
       ) : (
         <ul className="space-y-2">
-          {conversations.map((conv) => {
-            const aux = conv.accompagnants_profiles?.users
-            const unread = unreadCounts[conv.id] || 0
-            const fullName = `${aux?.first_name || ''} ${aux?.last_name || ''}`.trim() || 'Accompagnant'
-            const initials = `${aux?.first_name?.[0] || ''}${aux?.last_name?.[0] || ''}`
+          {rows.map((row) => {
+            const unread = Number(row.unread_count) || 0
+            const fullName = `${row.accompagnant_first_name || ''} ${row.accompagnant_last_name || ''}`.trim() || 'Accompagnant'
+            const initials = `${row.accompagnant_first_name?.[0] || ''}${row.accompagnant_last_name?.[0] || ''}`
 
             return (
-              <li key={conv.id}>
+              <li key={row.conversation_id}>
                 <Link
-                  href={`/admin/messages/${conv.id}`}
+                  href={`/admin/messages/${row.conversation_id}`}
                   className="flex items-center justify-between bg-white rounded-2xl border border-[#e8dfd2] px-5 py-4 hover:border-kraft transition gap-4"
                 >
                   <div className="flex items-center gap-4 min-w-0 flex-1">
@@ -71,11 +55,11 @@ export default async function AdminMessagesPage() {
                     <div className="min-w-0">
                       <p className="font-medium text-gray-900 truncate">{fullName}</p>
                       <p className="text-xs text-gray-500 mt-0.5">
-                        {aux?.email}
-                        {conv.last_message_at && (
+                        {row.accompagnant_email}
+                        {row.last_message_at && (
                           <>
                             {' · '}
-                            {new Date(conv.last_message_at).toLocaleDateString('fr-FR', {
+                            {new Date(row.last_message_at).toLocaleDateString('fr-FR', {
                               day: 'numeric',
                               month: 'short',
                               hour: '2-digit',

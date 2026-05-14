@@ -1300,6 +1300,18 @@ export type Database = {
     }
     Functions: {
       generate_unique_parrainage_code: { Args: never; Returns: string }
+      get_admin_conversations_with_unread: {
+        Args: { p_current_user_id: string; p_limit?: number; p_offset?: number }
+        Returns: {
+          accompagnant_email: string
+          accompagnant_first_name: string
+          accompagnant_last_name: string
+          accompagnant_user_id: string
+          conversation_id: string
+          last_message_at: string
+          unread_count: number
+        }[]
+      }
       has_active_subscription: { Args: never; Returns: boolean }
       is_accompagnant: { Args: never; Returns: boolean }
       is_accompagne: { Args: never; Returns: boolean }

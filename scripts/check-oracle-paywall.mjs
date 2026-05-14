@@ -58,5 +58,24 @@ if (matches.length > 0) {
   process.exit(1)
 }
 
+// AC5 Story 7.A.5 : verifier que la constante PAYWALL_GENERIC_ERROR existe + value attendue.
+// Empeche une suppression silencieuse de la constante OU son renommage en literal differencie.
+const CONST_RE = /const\s+PAYWALL_GENERIC_ERROR\s*=\s*['"]Abonnement requis pour echanger des messages\.['"]/
+if (!CONST_RE.test(source)) {
+  console.error('[check-oracle-paywall] ERREUR : constante PAYWALL_GENERIC_ERROR absente ou valeur differente du literal Story 7.A.5.')
+  console.error('  Attendu : const PAYWALL_GENERIC_ERROR = \'Abonnement requis pour echanger des messages.\'')
+  process.exit(1)
+}
+
+// AC6 Story 7.A.5 : verifier que le retour { error: PAYWALL_GENERIC_ERROR } est utilise >=3x (3 call sites).
+// Empeche un retour partiel a un literal differencie sur l'un des 3 call sites.
+const USAGE_RE = /return\s+\{\s*error:\s*PAYWALL_GENERIC_ERROR/g
+const usageMatches = source.match(USAGE_RE) || []
+if (usageMatches.length < 3) {
+  console.error(`[check-oracle-paywall] ERREUR : PAYWALL_GENERIC_ERROR utilise ${usageMatches.length}x dans return error, attendu >=3 (cf. Story 7.A.5 AC6).`)
+  console.error('  Verifier que les 3 server actions paywall (getOrCreateConversation, getOrCreateConversationAsAccompagnante, sendMessage) partagent toutes la constante.')
+  process.exit(1)
+}
+
 console.log('[check-oracle-paywall] OK : aucun message paywall messagerie expose le role cible.')
 process.exit(0)

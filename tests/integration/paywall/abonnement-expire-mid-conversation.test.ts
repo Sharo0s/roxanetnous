@@ -15,6 +15,10 @@ import { getAdminClient } from '@/tests/integration/_lib/supabase-admin'
 // T9 (epic-4.md AC3 #4) : abonnement expire en cours d'echange.
 // (a) lecture historique OK (2 messages preexistants visibles), (b) sendMessage
 // retourne erreur paywall, (c) count messages reste a 2 (aucune insertion).
+// Story 7.A.5 (2026-05-14) : sendMessage utilise maintenant PAYWALL_GENERIC_ERROR
+// 'Abonnement requis pour echanger des messages.' (cross-flow avec
+// getOrCreateConversation*) pour eliminer le demi-oracle sur l'existence d'une
+// conversation. Cf. message-unifie-anti-oracle.test.ts pour assertion croisee.
 describe('paywall : abonnement expire mid-conversation (T9)', () => {
   beforeAll(async () => {
     await cleanupAllFixtures()
@@ -54,7 +58,7 @@ describe('paywall : abonnement expire mid-conversation (T9)', () => {
     mockSupabaseSession(accompagne.id)
     const result = await sendMessage(conv.id, 'Tentative apres expiration')
     expect(result).toEqual({
-      error: 'Abonnement requis pour envoyer un message.',
+      error: 'Abonnement requis pour echanger des messages.',
     })
 
     // (c) count messages reste a 2

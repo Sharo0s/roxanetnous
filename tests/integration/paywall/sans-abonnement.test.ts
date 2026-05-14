@@ -14,6 +14,9 @@ import {
 // actions (PAYWALL_GENERIC_ERROR) pour empecher l'oracle d'enumeration du role.
 // Story 7.A.1 (2026-05-13) aligne ce test avec le message unifie (l'ancien literal
 // 'contacter une accompagnante' tombait sous le coup du garde-fou check-oracle-paywall).
+// Story 7.A.5 (2026-05-14) reformule le literal en 'Abonnement requis pour echanger
+// des messages.' (wording cadrage epic-7.md plus generique, couvre ouverture + envoi)
+// et l'etend a sendMessage (cf. message-unifie-anti-oracle.test.ts pour le test cross-flow).
 describe('paywall : connecte sans abonnement (T7)', () => {
   beforeAll(async () => {
     await cleanupAllFixtures()
@@ -35,7 +38,7 @@ describe('paywall : connecte sans abonnement (T7)', () => {
 
     const result = await getOrCreateConversation(auxProfile.id)
     expect(result).toEqual({
-      error: 'Abonnement requis pour contacter cet utilisateur.',
+      error: 'Abonnement requis pour echanger des messages.',
     })
   })
 })

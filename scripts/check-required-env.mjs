@@ -21,8 +21,12 @@
 
 const HEX_64 = /^[0-9a-f]{64}$/i
 const STRIPE_SK = /^sk_(test|live)_[A-Za-z0-9]+$/
-const STRIPE_WHSEC = /^whsec_[A-Za-z0-9]+$/
-const RESEND_KEY = /^re_[A-Za-z0-9_]+$/
+// Underscore tolere apres `whsec_` au cas ou Stripe ajoute un prefixe interne
+// (`whsec_test_xxx`, `whsec_snap_xxx`) lors d'une rotation future.
+const STRIPE_WHSEC = /^whsec_[A-Za-z0-9_]+$/
+// Underscore + dash tolere : superset urlsafe-base64, robuste a un changement
+// futur de format des cles Resend.
+const RESEND_KEY = /^re_[A-Za-z0-9_-]+$/
 const EMAIL_BASIC = /^[^@\s]+@[^@\s]+\.[^@\s]+$/
 // Format Resend "Display Name <addr@dom>" (espace tolere, contenu ASCII commun).
 const EMAIL_DISPLAY = /^[^<>]+<[^@\s<>]+@[^@\s<>]+\.[^@\s<>]+>$/
@@ -89,7 +93,21 @@ const OPTIONAL_ON_PREVIEW = [
 ]
 
 // Anti-placeholder : valeurs copiees-collees depuis .env.local.example.
-const PLACEHOLDER_RE = /^(your_|xxx|changeme|placeholder|exemple|example)/i
+// `(?:_|$)` apres chaque token : bloque `xxx` seul ET `xxx_quelquechose`,
+// sans bloquer `Example Company` (RESEND_FROM_EMAIL display name) ou
+// `example-corp` (SENTRY_ORG) qui contiennent un espace ou un tiret apres.
+const PLACEHOLDER_RE = /^(your_|xxx(?:_|$)|changeme(?:_|$)|placeholder(?:_|$)|exemple(?:_|$)|example(?:_|$))/i
+
+// Story 7.A.3 : variables interdites en production si valeur literale `true`.
+// `SKIP_E2E_TESTS=true` court-circuite `npm run test:integration` dans le
+// buildCommand `vercel.json` via `(test "$SKIP_E2E_TESTS" = "true" || ...)`.
+// On attrape strictement la valeur qui a effet runtime (pas `1` / `yes` / `on`
+// que le test shell n'interprete pas comme truthy). Comparaison insensible a
+// la casse pour robustesse defensive (cf. AC3 story 7.A.3).
+const FORBIDDEN_IN_PROD_IF_TRUE = ['SKIP_E2E_TESTS']
+
+const isTruthy = (rawValue) =>
+  String(rawValue).trim().toLowerCase() === 'true'
 
 const vercelEnv = process.env.VERCEL_ENV
 
@@ -98,10 +116,20 @@ const isMissing = (v) => {
   return !raw || String(raw).trim() === ''
 }
 
-const truncate = (s) => (s.length > 20 ? `${s.slice(0, 20)}...` : s)
+// Tronque agressivement pour minimiser l'exposition en logs build Vercel : si
+// un secret reel passait le check placeholder par accident, on ne veut pas
+// reveler plus de quelques chars en clair. 8 chars suffisent a identifier un
+// placeholder connu (`your_...`, `XXX_...`) sans liberer d'entropie utile.
+const truncate = (s) => (s.length > 8 ? `${s.slice(0, 8)}...` : s)
 
 // Retourne un tableau de messages d'erreur pour les checks "shape" + "placeholder"
 // appliques aux vars presentes uniquement. Vide si tout est conforme.
+//
+// Ordre IMPORTANT : placeholder check AVANT shape check. Un placeholder
+// `your_supabase_anon_key` (22 chars) violerait aussi le shape minLength(40),
+// mais le message "looks like a placeholder" est plus informatif pour le dev
+// que "invalid shape (min 40 chars)". Le test (j) de check-required-env.test.ts
+// verrouille cet ordre.
 function validatePresent(vars, envLabel) {
   const errors = []
   for (const v of vars) {
@@ -138,7 +166,32 @@ const allRequired = REQUIRED
 const previewRequired = REQUIRED.filter((v) => v.requiredOnPreview === true)
 const allTracked = [...REQUIRED, ...OPTIONAL_ON_PREVIEW]
 
+// Assertion top-level : empeche qu'un refactor declare la meme var dans
+// REQUIRED ET OPTIONAL_ON_PREVIEW (validation 2x + 2 messages d'erreur identiques).
+const trackedNames = allTracked.map((v) => v.name)
+if (new Set(trackedNames).size !== trackedNames.length) {
+  const dupes = trackedNames.filter((n, i) => trackedNames.indexOf(n) !== i)
+  console.error(`ERROR (check-required-env config): duplicate var declaration(s): ${dupes.join(', ')}`)
+  process.exit(2)
+}
+
 if (vercelEnv === 'production') {
+  // Fail-fast story 7.A.3 : exit AVANT les checks REQUIRED/OPTIONAL/shape pour
+  // que le message apparaisse en premier dans les logs build Vercel. Une var
+  // interdite est un signal plus grave qu'une var manquante (regression scope).
+  const forbidden = FORBIDDEN_IN_PROD_IF_TRUE.filter((name) => {
+    const raw = process.env[name]
+    return raw != null && isTruthy(raw)
+  })
+  if (forbidden.length > 0) {
+    for (const name of forbidden) {
+      console.error(
+        `ERROR (production): ${name}=true is forbidden in production. Tests integration must always run on prod builds.`,
+      )
+    }
+    process.exit(1)
+  }
+
   const missing = allRequired.filter(isMissing)
   const missingOptional = OPTIONAL_ON_PREVIEW.filter(isMissing)
   const shapeErrors = validatePresent(allTracked, 'production')

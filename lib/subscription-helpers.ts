@@ -52,10 +52,12 @@ export async function hasActiveSubscription(userId: string): Promise<boolean> {
     .maybeSingle()
 
   if (error) {
-    Sentry.captureException(error, {
-      tags: { flow: 'subscription_check', severity: 'critical' },
-    })
-    throw new Error('subscription check failed')
+    try {
+      Sentry.captureException(error, {
+        tags: { flow: 'subscription_check', severity: 'critical' },
+      })
+    } catch {}
+    throw new Error('subscription check failed', { cause: error })
   }
 
   if (!data) return false

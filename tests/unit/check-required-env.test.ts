@@ -169,4 +169,111 @@ describe('check-required-env.mjs', () => {
     expect(result.exitCode).toBe(1)
     expect(result.stderr).toMatch(/NEXT_PUBLIC_SUPABASE_ANON_KEY.*placeholder/i)
   })
+
+  // Cas limites de longueur : verifient l'absence d'off-by-one dans minLength.
+  // Suffit de couvrir N-1 (refus) et N (accept) pour 3 vars de longueurs differentes.
+
+  it('(k) CRON_SECRET 31 chars en prod => exit 1 shape (just under 32)', async () => {
+    const result = await runCheck({
+      VERCEL_ENV: 'production',
+      ...VALID,
+      CRON_SECRET: 'a'.repeat(31),
+    })
+    expect(result.exitCode).toBe(1)
+    expect(result.stderr).toMatch(/CRON_SECRET.*invalid shape/i)
+  })
+
+  it('(l) CRON_SECRET 32 chars en prod => exit 0 (boundary min)', async () => {
+    const result = await runCheck({
+      VERCEL_ENV: 'production',
+      ...VALID,
+      CRON_SECRET: 'a'.repeat(32),
+    })
+    expect(result.exitCode).toBe(0)
+  })
+
+  it('(m) SENTRY_AUTH_TOKEN 19 chars en prod => exit 1 shape (just under 20)', async () => {
+    const result = await runCheck({
+      VERCEL_ENV: 'production',
+      ...VALID,
+      SENTRY_AUTH_TOKEN: 'a'.repeat(19),
+    })
+    expect(result.exitCode).toBe(1)
+    expect(result.stderr).toMatch(/SENTRY_AUTH_TOKEN.*invalid shape/i)
+  })
+
+  it('(n) SUPABASE_SERVICE_ROLE_KEY 39 chars en prod => exit 1 shape (just under 40)', async () => {
+    const result = await runCheck({
+      VERCEL_ENV: 'production',
+      ...VALID,
+      SUPABASE_SERVICE_ROLE_KEY: 'a'.repeat(39),
+    })
+    expect(result.exitCode).toBe(1)
+    expect(result.stderr).toMatch(/SUPABASE_SERVICE_ROLE_KEY.*invalid shape/i)
+  })
+
+  // Story 7.A.3 : garde-fou SKIP_E2E_TESTS=true interdit en VERCEL_ENV=production.
+  // Le buildCommand vercel.json reconnait UNIQUEMENT la valeur literale `"true"`
+  // via `test "$SKIP_E2E_TESTS" = "true"` ; l'assertion script attrape donc strictement
+  // cette valeur (insensible a la casse), et tolere les variantes inactives `1` / `yes`.
+
+  it('(o) prod + SKIP_E2E_TESTS=true => exit 1 + message forbidden (fail-fast)', async () => {
+    const result = await runCheck({
+      VERCEL_ENV: 'production',
+      ...VALID,
+      SKIP_E2E_TESTS: 'true',
+    })
+    expect(result.exitCode).toBe(1)
+    expect(result.stderr).toMatch(
+      /SKIP_E2E_TESTS=true is forbidden in production/,
+    )
+  })
+
+  it('(p) prod + SKIP_E2E_TESTS non set + VALID => exit 0 (cas nominal prod)', async () => {
+    const result = await runCheck({
+      VERCEL_ENV: 'production',
+      ...VALID,
+    })
+    expect(result.exitCode).toBe(0)
+    expect(result.stdout).toContain('OK')
+  })
+
+  it('(q) preview + SKIP_E2E_TESTS=true => exit 0 (preview tolere le skip)', async () => {
+    const result = await runCheck({
+      VERCEL_ENV: 'preview',
+      NEXT_PUBLIC_SUPABASE_URL: VALID.NEXT_PUBLIC_SUPABASE_URL,
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: VALID.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+      SKIP_E2E_TESTS: 'true',
+    })
+    expect(result.exitCode).toBe(0)
+  })
+
+  it('(r) dev local (VERCEL_ENV undefined) + SKIP_E2E_TESTS=true => exit 0 silencieux', async () => {
+    const result = await runCheck({
+      VERCEL_ENV: undefined,
+      SKIP_E2E_TESTS: 'true',
+    })
+    expect(result.exitCode).toBe(0)
+  })
+
+  it('(s) prod + SKIP_E2E_TESTS=True (uppercase) => exit 1 (insensible casse)', async () => {
+    const result = await runCheck({
+      VERCEL_ENV: 'production',
+      ...VALID,
+      SKIP_E2E_TESTS: 'True',
+    })
+    expect(result.exitCode).toBe(1)
+    expect(result.stderr).toMatch(
+      /SKIP_E2E_TESTS=true is forbidden in production/,
+    )
+  })
+
+  it('(t) prod + SKIP_E2E_TESTS=false => exit 0 (valeur neutre toleree)', async () => {
+    const result = await runCheck({
+      VERCEL_ENV: 'production',
+      ...VALID,
+      SKIP_E2E_TESTS: 'false',
+    })
+    expect(result.exitCode).toBe(0)
+  })
 })

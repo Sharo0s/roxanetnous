@@ -43,9 +43,18 @@ describe("paywall : erreur Supabase transitoire sur hasActiveSubscription (T-7A1
 
     vi.mocked(createClient).mockResolvedValue(fakeClient as never)
 
-    await expect(hasActiveSubscription('user-id-irrelevant')).rejects.toThrow(
-      /subscription check failed/i,
-    )
+    // Egalite stricte du message sanitise (pas de leak BDD dans le throw).
+    // La cause originale est preservee via Error.cause (ES2022) pour conserver
+    // la stack PostgrestError debuggable.
+    let thrown: unknown
+    try {
+      await hasActiveSubscription('user-id-irrelevant')
+    } catch (e) {
+      thrown = e
+    }
+    expect(thrown).toBeInstanceOf(Error)
+    expect((thrown as Error).message).toBe('subscription check failed')
+    expect((thrown as Error).cause).toBe(transientError)
 
     expect(Sentry.captureException).toHaveBeenCalledTimes(1)
     const captureCall = vi.mocked(Sentry.captureException).mock.calls[0]

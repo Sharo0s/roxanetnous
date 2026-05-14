@@ -734,3 +734,23 @@ Estimation realiste : **2-3 jours-dev**, pas "extension" comme le tech-spec le s
 - **AI-4.11 / AI-4.12 / AI-4.13** restent ouverts comme action items deferes Epic 5 retro + Epic 6 retro.
 
 **Regle :** au moment ou Epic 7 reactive 6.D, prevoir explicitement le temps de l infra (1j) avant les scenarios applicatifs (0.5j par scenario). Ne pas le sous-estimer comme "extension".
+
+
+---
+
+## 2026-05-14 : RPC `get_admin_conversations_with_unread` pour eliminer N+1 admin messages (decision F-Epic7-A4)
+
+**Contexte :** Story 7.A.4 (mini-epic 7.A hardening securite). La page `app/admin/messages/page.tsx` boucle `for (const conv of conversations)` avec 1 requete COUNT par conversation -> 1 LIST + N COUNT round-trips. Avec 50+ conversations admin, latence p50 estimee >2s, p95 timeout Vercel possible. Pre-existant a story 4.6 (boucle non touchee par le diff, revelee par le typage propre post-resorption `as any`). Volumetrie prod actuelle : 0 conversation admin (audit MCP 2026-05-14), donc story preventive avant prise de trafic.
+
+**Decision :** nouvelle RPC `public.get_admin_conversations_with_unread(p_current_user_id uuid, p_limit int, p_offset int)` SECURITY DEFINER + check `is_admin()` upfront.
+
+- **Rationale** : pattern projet etabli (`try_consume_rate_limit`, `merge_parrainage_flag_suspicion`, 4 RPC parrainage), typage strict via `types/supabase.ts` regenere, gain p50 attendu >70% sur 50+ conv (mesure preview Vercel avec dataset seed).
+- **Defense en profondeur** : check `is_admin()` interne empeche un futur appel accidentel depuis un client `authenticated` non-admin (test integration cas (e) couvre exception 42501).
+- **Alternative consideree** : aggregation PostgREST `messages!conversation_id(count)` avec filtres embedded - rejetee car comportement count + filtres embedded non-deterministe selon version PostgREST (cf. story 7.A.4 Dev Notes AC5), risque de typage `as any` casse les garde-fous `check:as-any-global`.
+- **Verrou** : `check:as-any-global` bloque toute regression `as any` autour du nouveau RPC call (script integre vercel.json buildCommand depuis story 5.C.1).
+
+**Migration :** `20260513230753_admin_messages_rpc_unread_aggregation.sql` (CREATE OR REPLACE FUNCTION + REVOKE PUBLIC/anon + GRANT authenticated). Apply via MCP. BDD prod vide, idempotent, pas de cutover risque.
+
+**Tests :** `tests/integration/admin-messages/liste-conversations-avec-unread.test.ts` couvre 5 cas (a-e) : visibilite admin + filtre admin_id IS NOT NULL + pagination + unread=0 + garde-fou is_admin.
+
+**Regle :** tout futur agregation admin ou multi-row (planning, signalements, etc.) qui generera un N+1 doit suivre ce pattern (RPC SECURITY DEFINER + check role + REVOKE PUBLIC/anon + GRANT authenticated + types regen MCP) au lieu de boucles applicatives.

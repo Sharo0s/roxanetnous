@@ -13,15 +13,25 @@ export type MessageResult = {
 
 type ConversationParticipantUserId = { user_id: string } | null
 
-// Story 5.B.1 (AI-3.5 deferred-work) : message d'erreur paywall unifie et
-// generique pour empecher l'oracle d'enumeration du role d'un compte cible.
-// Avant : 'Abonnement requis pour contacter un accompagnant.' vs '... un beneficiaire.'
-// permettait a un attaquant connecte non-abonne de deduire le role d'un userId
-// arbitraire en testant getOrCreateConversation* et en lisant le texte d'erreur.
-// Apres : message generique unique, identique pour les 3 server actions.
-// Garde-fou CI : scripts/check-oracle-paywall.mjs grep ce literal pour
-// empecher la re-introduction d'un message differencie par role.
-const PAYWALL_GENERIC_ERROR = 'Abonnement requis pour contacter cet utilisateur.'
+// Story 5.B.1 + 7.A.5 : message d'erreur paywall unifie et generique pour empecher
+// l'oracle d'enumeration du role d'un compte cible.
+// Story 5.B.1 (2026-05-13) : unification getOrCreateConversation + getOrCreateConversationAsAccompagnante.
+// Story 7.A.5 (2026-05-14) : (a) reformulation 'contacter cet utilisateur' -> 'echanger des messages'
+// (wording cadrage epic-7.md plus generique : couvre l'ouverture ET l'envoi),
+// (b) extension a sendMessage (precedemment 'Abonnement requis pour envoyer un message.'
+// laissait un demi-oracle d'existence de conversation).
+// Garde-fou CI : scripts/check-oracle-paywall.mjs verifie (1) le literal exact,
+// (2) >=3 call sites (return { error: PAYWALL_GENERIC_ERROR }), (3) zero mention de role.
+const PAYWALL_GENERIC_ERROR = 'Abonnement requis pour echanger des messages.'
+
+// Wrapper defensif : Sentry.captureException/Message peut throw si le SDK est mal
+// initialise ou si la queue est saturee. On ne veut pas qu'un Sentry cassé masque
+// l'erreur applicative ou casse le flux server action.
+function safeSentryCapture(fn: () => void): void {
+  try {
+    fn()
+  } catch {}
+}
 
 export async function getOrCreateConversation(
   accompagnanteProfileId: string
@@ -40,9 +50,9 @@ export async function getOrCreateConversation(
     .maybeSingle()
 
   if (userDataError) {
-    Sentry.captureException(userDataError, {
+    safeSentryCapture(() => Sentry.captureException(userDataError, {
       tags: { flow: 'messaging', signal: 'profile-lookup-error', severity: 'critical' },
-    })
+    }))
     return { error: 'Impossible de vérifier votre profil.' }
   }
 
@@ -58,9 +68,9 @@ export async function getOrCreateConversation(
     .maybeSingle()
 
   if (benLookupError) {
-    Sentry.captureException(benLookupError, {
+    safeSentryCapture(() => Sentry.captureException(benLookupError, {
       tags: { flow: 'messaging', signal: 'profile-lookup-error', severity: 'critical' },
-    })
+    }))
     return { error: 'Impossible de vérifier votre profil.' }
   }
 
@@ -72,9 +82,9 @@ export async function getOrCreateConversation(
       .maybeSingle()
 
     if (createError || !newProfile) {
-      Sentry.captureException(createError ?? new Error('insert accompagnes_profiles returned no row'), {
+      safeSentryCapture(() => Sentry.captureException(createError ?? new Error('insert accompagnes_profiles returned no row'), {
         tags: { flow: 'messaging', signal: 'profile-lookup-error', severity: 'critical' },
-      })
+      }))
       return { error: 'Erreur lors de la création du profil.' }
     }
     benProfile = newProfile
@@ -91,9 +101,9 @@ export async function getOrCreateConversation(
     .maybeSingle()
 
   if (existingError) {
-    Sentry.captureException(existingError, {
+    safeSentryCapture(() => Sentry.captureException(existingError, {
       tags: { flow: 'messaging', signal: 'getOrCreateConversation-existing-error', severity: 'warning' },
-    })
+    }))
     return { error: 'Erreur lors de la vérification de la conversation existante.' }
   }
 
@@ -104,10 +114,10 @@ export async function getOrCreateConversation(
   // Story 3.6 : paywall sur ouverture conversation (apres check existence pour preserver idempotence D3)
   const subscribed = await hasActiveSubscription(user.id)
   if (!subscribed) {
-    Sentry.captureMessage('paywall-block:getOrCreateConversation', {
+    safeSentryCapture(() => Sentry.captureMessage('paywall-block:getOrCreateConversation', {
       level: 'info',
       tags: { flow: 'messaging', signal: 'oracle-fix', severity: 'warning', security: 'oracle-fix' },
-    })
+    }))
     return { error: PAYWALL_GENERIC_ERROR }
   }
 
@@ -126,17 +136,24 @@ export async function getOrCreateConversation(
   if (error) {
     // 23505 = unique_violation : race condition, refetch
     if (error.code === '23505') {
-      const { data: refetched } = await supabase
+      const { data: refetched, error: refetchError } = await supabase
         .from('conversations')
         .select('id')
         .eq('accompagnant_id', accompagnanteProfileId)
         .eq('accompagne_id', benProfile.id)
         .maybeSingle()
       if (refetched) return { conversationId: refetched.id }
+      if (refetchError) safeSentryCapture(() => Sentry.captureException(refetchError, {
+        tags: { flow: 'messaging', signal: 'getOrCreateConversation-refetch-error', severity: 'critical' },
+      }))
     }
-    Sentry.captureException(error, {
-      tags: { flow: 'messaging', signal: 'getOrCreateConversation-insert-error', severity: 'critical' },
-    })
+    // Si 23505 atteint sans refetch resolu (race de suppression entre insert et
+    // refetch), on degrade la severity : ce n'est pas un incident critical, c'est
+    // un cas limite normal.
+    const severity = error.code === '23505' ? 'warning' : 'critical'
+    safeSentryCapture(() => Sentry.captureException(error, {
+      tags: { flow: 'messaging', signal: 'getOrCreateConversation-insert-error', severity },
+    }))
     return { error: 'Erreur lors de la création de la conversation.' }
   }
 
@@ -163,9 +180,9 @@ export async function getOrCreateConversationAsAccompagnante(
     .maybeSingle()
 
   if (userDataError) {
-    Sentry.captureException(userDataError, {
+    safeSentryCapture(() => Sentry.captureException(userDataError, {
       tags: { flow: 'messaging', signal: 'profile-lookup-error', severity: 'critical' },
-    })
+    }))
     return { error: 'Impossible de vérifier votre profil.' }
   }
 
@@ -180,9 +197,9 @@ export async function getOrCreateConversationAsAccompagnante(
     .maybeSingle()
 
   if (auxLookupError) {
-    Sentry.captureException(auxLookupError, {
+    safeSentryCapture(() => Sentry.captureException(auxLookupError, {
       tags: { flow: 'messaging', signal: 'profile-lookup-error', severity: 'critical' },
-    })
+    }))
     return { error: 'Impossible de vérifier votre profil.' }
   }
 
@@ -199,9 +216,9 @@ export async function getOrCreateConversationAsAccompagnante(
     .maybeSingle()
 
   if (existingError) {
-    Sentry.captureException(existingError, {
+    safeSentryCapture(() => Sentry.captureException(existingError, {
       tags: { flow: 'messaging', signal: 'getOrCreateConversationAsAccompagnante-existing-error', severity: 'warning' },
-    })
+    }))
     return { error: 'Erreur lors de la vérification de la conversation existante.' }
   }
 
@@ -212,10 +229,10 @@ export async function getOrCreateConversationAsAccompagnante(
   // Story 3.6 : paywall sur ouverture conversation (apres check existence pour preserver idempotence D3)
   const subscribed = await hasActiveSubscription(user.id)
   if (!subscribed) {
-    Sentry.captureMessage('paywall-block:getOrCreateConversationAsAccompagnante', {
+    safeSentryCapture(() => Sentry.captureMessage('paywall-block:getOrCreateConversationAsAccompagnante', {
       level: 'info',
       tags: { flow: 'messaging', signal: 'oracle-fix', severity: 'warning', security: 'oracle-fix' },
-    })
+    }))
     return { error: PAYWALL_GENERIC_ERROR }
   }
 
@@ -231,17 +248,21 @@ export async function getOrCreateConversationAsAccompagnante(
 
   if (error) {
     if (error.code === '23505') {
-      const { data: refetched } = await supabase
+      const { data: refetched, error: refetchError } = await supabase
         .from('conversations')
         .select('id')
         .eq('accompagnant_id', auxProfile.id)
         .eq('accompagne_id', accompagneProfileId)
         .maybeSingle()
       if (refetched) return { conversationId: refetched.id }
+      if (refetchError) safeSentryCapture(() => Sentry.captureException(refetchError, {
+        tags: { flow: 'messaging', signal: 'getOrCreateConversationAsAccompagnante-refetch-error', severity: 'critical' },
+      }))
     }
-    Sentry.captureException(error, {
-      tags: { flow: 'messaging', signal: 'getOrCreateConversationAsAccompagnante-insert-error', severity: 'critical' },
-    })
+    const severity = error.code === '23505' ? 'warning' : 'critical'
+    safeSentryCapture(() => Sentry.captureException(error, {
+      tags: { flow: 'messaging', signal: 'getOrCreateConversationAsAccompagnante-insert-error', severity },
+    }))
     return { error: 'Erreur lors de la création de la conversation.' }
   }
 
@@ -268,9 +289,9 @@ export async function getOrCreateAdminConversation(
     .maybeSingle()
 
   if (userDataError) {
-    Sentry.captureException(userDataError, {
+    safeSentryCapture(() => Sentry.captureException(userDataError, {
       tags: { flow: 'messaging', signal: 'profile-lookup-error', severity: 'critical' },
-    })
+    }))
     return { error: 'Impossible de vérifier votre profil.' }
   }
 
@@ -289,9 +310,9 @@ export async function getOrCreateAdminConversation(
     .maybeSingle()
 
   if (existingError) {
-    Sentry.captureException(existingError, {
+    safeSentryCapture(() => Sentry.captureException(existingError, {
       tags: { flow: 'messaging', signal: 'getOrCreateAdminConversation-existing-error', severity: 'warning' },
-    })
+    }))
     return { error: 'Erreur lors de la vérification de la conversation existante.' }
   }
 
@@ -312,7 +333,7 @@ export async function getOrCreateAdminConversation(
   if (error) {
     // Story 5.B.2 : 23505 sur UNIQUE (accompagnant_id, admin_id) where admin_id IS NOT NULL.
     if (error.code === '23505') {
-      const { data: refetched } = await supabase
+      const { data: refetched, error: refetchError } = await supabase
         .from('conversations')
         .select('id')
         .eq('accompagnant_id', accompagnanteProfileId)
@@ -320,10 +341,14 @@ export async function getOrCreateAdminConversation(
         .is('accompagne_id', null)
         .maybeSingle()
       if (refetched) return { conversationId: refetched.id }
+      if (refetchError) safeSentryCapture(() => Sentry.captureException(refetchError, {
+        tags: { flow: 'messaging', signal: 'getOrCreateAdminConversation-refetch-error', severity: 'critical' },
+      }))
     }
-    Sentry.captureException(error, {
-      tags: { flow: 'messaging', signal: 'getOrCreateAdminConversation-insert-error', severity: 'critical' },
-    })
+    const severity = error.code === '23505' ? 'warning' : 'critical'
+    safeSentryCapture(() => Sentry.captureException(error, {
+      tags: { flow: 'messaging', signal: 'getOrCreateAdminConversation-insert-error', severity },
+    }))
     return { error: 'Erreur lors de la création de la conversation admin.' }
   }
 
@@ -378,11 +403,17 @@ export async function sendMessage(
     return { error: 'Accès non autorisé à cette conversation.' }
   }
 
-  // Story 3.6 : paywall envoi message (D1 = skip si conversation contient un admin OU sender admin)
+  // Story 3.6 + 7.A.5 : paywall envoi message (D1 = skip si conversation contient un admin OU sender admin).
+  // 7.A.5 unifie le message avec getOrCreateConversation* (PAYWALL_GENERIC_ERROR) +
+  // ajoute la capture Sentry symetrique pour observabilite serveur.
   if (!isAdmin && adminUserId === null) {
     const subscribed = await hasActiveSubscription(user.id)
     if (!subscribed) {
-      return { error: 'Abonnement requis pour envoyer un message.' }
+      safeSentryCapture(() => Sentry.captureMessage('paywall-block:sendMessage', {
+        level: 'info',
+        tags: { flow: 'messaging', signal: 'oracle-fix', severity: 'warning', security: 'oracle-fix' },
+      }))
+      return { error: PAYWALL_GENERIC_ERROR }
     }
   }
 

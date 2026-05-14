@@ -306,6 +306,14 @@ Dont 2 également obligatoires en preview (`requiredOnPreview: true`, marquées 
 
 > **Promotion 7.A.2 :** `RESEND_FROM_EMAIL` + `SENTRY_AUTH_TOKEN` + `NEXT_PUBLIC_SUPABASE_URL` + `NEXT_PUBLIC_SUPABASE_ANON_KEY` désormais bloquantes en prod (étaient passées silencieusement avant 7.A.2). Pré-flight obligatoire avant chaque deploy : `vercel env ls --environment production` puis `npm run env:push` (dry-run).
 
+### Garde-fou anti-skip tests (7.A.3)
+
+La variable `SKIP_E2E_TESTS=true` est **interdite en VERCEL_ENV=production**. `check:env` exit 1 si elle est définie à `true` en prod (insensible à la casse). Cas d'usage légitimes :
+
+- **Preview Vercel** : `SKIP_E2E_TESTS=true` toléré (les tests intégration tournent en GHA workflow `integration-tests.yml`, pas en build Vercel preview - cf. story 4.7 seeds Supabase + DECISIONS.md).
+- **Dev local** : `SKIP_E2E_TESTS=true` toléré (pas de Docker requis pour la majorité des dev cycles).
+- **Production** : interdit. Toute régression de scope Vercel (copy-paste depuis preview, refactor mal vérifié) déclenche un build fail explicite plutôt qu'un deploy silencieux sans tests.
+
 Voir aussi `TODO-LAUNCH.md` (checklist détaillée pré-go-live) et `.env.local.example` (template).
 
 ---
