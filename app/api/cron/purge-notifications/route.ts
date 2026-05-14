@@ -49,13 +49,11 @@ export async function GET(request: NextRequest) {
   const supabase = await createClient({ serviceRole: true })
 
   // Etape 1 : rows avec sent_at non-null < cutoff (statuts 'sent' historiquement).
-  // Utilise count:'exact' pour obtenir le decompte reel sans etre plafonné par
-  // la page size PostgREST (default ~1000 rows sur .select('id')).
-  const { count: deletedSentCount, error: errSent } = await supabase
+  const { data: deletedSent, error: errSent } = await supabase
     .from('notifications_log')
     .delete()
     .lt('sent_at', cutoff)
-    .select('id', { count: 'exact', head: true })
+    .select('id')
 
   if (errSent) {
     Sentry.captureException(errSent, {
@@ -69,12 +67,12 @@ export async function GET(request: NextRequest) {
   // Couvre les statuts non-'sent' (pending|failed|error|lost|retry-scheduled|
   // retry-exhausted). Le partial UNIQUE INDEX `WHERE status='sent'` (7.A.6) ne
   // gene pas le DELETE ici.
-  const { count: deletedAgedCount, error: errAged } = await supabase
+  const { data: deletedAged, error: errAged } = await supabase
     .from('notifications_log')
     .delete()
     .is('sent_at', null)
     .lt('created_at', cutoff)
-    .select('id', { count: 'exact', head: true })
+    .select('id')
 
   if (errAged) {
     Sentry.captureException(errAged, {
@@ -84,7 +82,9 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Purge failed' }, { status: 500 })
   }
 
-  const purgedCount = (deletedSentCount ?? 0) + (deletedAgedCount ?? 0)
+  const deletedSentCount = deletedSent?.length ?? 0
+  const deletedAgedCount = deletedAged?.length ?? 0
+  const purgedCount = deletedSentCount + deletedAgedCount
   const durationMs = Date.now() - startedAt
 
   // Breadcrumb info systematique (signal vital "le cron tourne"), meme sur no-op.
@@ -110,8 +110,8 @@ export async function GET(request: NextRequest) {
 
   return NextResponse.json({
     purgedCount,
-    deletedSent: deletedSentCount ?? 0,
-    deletedAged: deletedAgedCount ?? 0,
+    deletedSent: deletedSentCount,
+    deletedAged: deletedAgedCount,
     cutoff,
   })
 }
