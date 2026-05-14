@@ -144,7 +144,7 @@ export default async function AdminDashboard() {
                 return (
                   <Link
                     key={profile.id}
-                    href={`/admin/validation/${profile.id}`}
+                    href={`/admin/utilisateurs/${profile.user_id}`}
                     className={`block rounded-2xl border p-4 transition hover:-translate-y-0.5 ${
                       priority
                         ? 'border-kraft bg-[#f3ebde] hover:border-[#a8714f]'
