@@ -20,14 +20,17 @@ export default function MentionsLegalesPage() {
         <div className="space-y-8 text-gray-700 text-sm leading-relaxed">
           <section>
             <h2 className="text-lg font-semibold text-black mb-2">Éditeur du site</h2>
-            <p>[Nom de la société ou de l&apos;entrepreneur individuel]</p>
-            <p>[Forme juridique - ex: SAS, SARL, auto-entrepreneur]</p>
-            <p>[Adresse du siège social]</p>
-            <p>[Numéro SIRET]</p>
-            <p>[Numéro de TVA intracommunautaire]</p>
+            <p>RoxanetNous</p>
+            <p>Forme juridique : auto-entrepreneur</p>
+            <p>Site : roxanetnous.fr</p>
+            <p>Numéro SIREN : 103949004</p>
             <p>Email : roxanetnous@outlook.com</p>
-            <p>Téléphone : [numéro]</p>
-            <p>Directeur de la publication : [Nom du responsable]</p>
+            <p>Responsable / Directrice de la publication : Roxane Le Dherve</p>
+          </section>
+
+          <section>
+            <h2 className="text-lg font-semibold text-black mb-2">Conception et réalisation</h2>
+            <p>Nysia</p>
           </section>
 
           <section>
