@@ -79,11 +79,11 @@ export default async function HomePage() {
 
       {/* ===== BANDEAU OFFRE ===== */}
       {launchOfferActive && (
-        <div className="overflow-hidden bg-black">
-          <div className="animate-marquee whitespace-nowrap py-3 text-base font-bold text-accent">
+        <div className="overflow-hidden bg-accent">
+          <div className="animate-marquee whitespace-nowrap py-3 text-base font-bold text-black">
             {Array.from({ length: 6 }).map((_, i) => (
               <span key={i} className="mx-12">
-                OFFRE DE LANCEMENT — 1 MOIS OFFERT POUR LES PREMIERS INSCRITS
+                Offre de lancement : 1 mois offert pour toute inscription
               </span>
             ))}
           </div>
