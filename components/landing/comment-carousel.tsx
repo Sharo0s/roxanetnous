@@ -25,7 +25,7 @@ const STEPS = [
   {
     n: '04',
     t: 'Mise en relation',
-    d: 'Publiez votre annonce, nous vous recommandons les profils les plus compatibles. Premiers contacts en quelques jours.',
+    d: 'Publiez votre annonce, nous vous recommandons les profils les plus compatibles.',
     src: '/carousel-4.png',
   },
 ] as const
