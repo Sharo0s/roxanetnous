@@ -3,7 +3,6 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { ParrainageView } from '@/components/accompagnant/parrainage-view'
 import { AccompagnantDashboardHeader } from '@/components/layout/accompagnant-dashboard-header'
-import { LogoutButton } from '@/components/auth/logout-button'
 import { getUnreadCount } from '@/lib/unread-count'
 
 type FilleuleStatut = 'inscrite' | 'abonnee' | 'confirme' | 'fraude' | 'bloque'
@@ -108,8 +107,6 @@ export default async function AccompagnanteParrainagePage() {
           <Link href="/politique-de-confidentialite" className="hover:text-gray-800">Confidentialité</Link>
           <span aria-hidden="true">·</span>
           <Link href="/cgu" className="hover:text-gray-800">Conditions</Link>
-          <span aria-hidden="true">·</span>
-          <LogoutButton />
         </div>
 
       </div>

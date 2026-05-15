@@ -4,7 +4,6 @@ import Link from 'next/link'
 import { getSubscriptionStatus, getPaymentMethod, getInvoices, getSubscriptionAmount } from '@/lib/subscription-helpers'
 import { SubscriptionPageContent } from '@/components/abonnement/subscription-page-content'
 import { AccompagneDashboardHeader } from '@/components/layout/accompagne-dashboard-header'
-import { LogoutButton } from '@/components/auth/logout-button'
 import { getUnreadCount } from '@/lib/unread-count'
 
 export default async function AbonnementAccompagnePage({
@@ -83,8 +82,6 @@ export default async function AbonnementAccompagnePage({
           <Link href="/politique-de-confidentialite" className="hover:text-gray-800">Confidentialité</Link>
           <span aria-hidden="true">·</span>
           <Link href="/cgu" className="hover:text-gray-800">Conditions</Link>
-          <span aria-hidden="true">·</span>
-          <LogoutButton />
         </div>
 
       </div>

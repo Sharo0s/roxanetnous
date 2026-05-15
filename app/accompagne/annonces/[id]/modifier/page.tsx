@@ -3,7 +3,6 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { ModifierAnnonceAccompagneForm } from '@/components/accompagne/modifier-annonce-form'
 import { AccompagneDashboardHeader } from '@/components/layout/accompagne-dashboard-header'
-import { LogoutButton } from '@/components/auth/logout-button'
 import { getUnreadCount } from '@/lib/unread-count'
 import { getCodesDepartementsOuverts } from '@/lib/departements'
 import { hasActiveSubscription } from '@/lib/subscription-helpers'
@@ -84,8 +83,6 @@ export default async function ModifierAnnonceAccompagnePage({
           <Link href="/politique-de-confidentialite" className="hover:text-gray-800">Confidentialité</Link>
           <span aria-hidden="true">·</span>
           <Link href="/cgu" className="hover:text-gray-800">Conditions</Link>
-          <span aria-hidden="true">·</span>
-          <LogoutButton />
         </div>
 
       </div>

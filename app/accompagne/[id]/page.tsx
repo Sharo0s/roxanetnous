@@ -4,7 +4,6 @@ import Link from 'next/link'
 import { SPECIALITES } from '@/lib/constants'
 import { AccompagnantDashboardHeader } from '@/components/layout/accompagnant-dashboard-header'
 import { ContactAccompagneButton } from '@/components/messages/contact-accompagne-button'
-import { LogoutButton } from '@/components/auth/logout-button'
 import { getUnreadCount } from '@/lib/unread-count'
 import { hasActiveSubscription } from '@/lib/subscription-helpers'
 import { isDepartementOuvert } from '@/lib/departements'
@@ -227,8 +226,6 @@ export default async function ProfilAccompagnePage({
           <Link href="/politique-de-confidentialite" className="hover:text-gray-800">Confidentialité</Link>
           <span aria-hidden="true">·</span>
           <Link href="/cgu" className="hover:text-gray-800">Conditions</Link>
-          <span aria-hidden="true">·</span>
-          <LogoutButton />
         </div>
 
       </div>

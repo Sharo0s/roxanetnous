@@ -2,7 +2,6 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { AccompagneDashboardHeader } from '@/components/layout/accompagne-dashboard-header'
-import { LogoutButton } from '@/components/auth/logout-button'
 import { getUnreadCount } from '@/lib/unread-count'
 import { NouvelleAnnonceAccompagneForm } from '@/components/accompagne/nouvelle-annonce-form'
 import { getCodesDepartementsOuverts } from '@/lib/departements'
@@ -62,8 +61,6 @@ export default async function NouvelleAnnonceAccompagne() {
           <Link href="/politique-de-confidentialite" className="hover:text-gray-800">Confidentialité</Link>
           <span aria-hidden="true">·</span>
           <Link href="/cgu" className="hover:text-gray-800">Conditions</Link>
-          <span aria-hidden="true">·</span>
-          <LogoutButton />
         </div>
 
       </div>

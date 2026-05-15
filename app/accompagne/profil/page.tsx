@@ -6,7 +6,6 @@ import { SecurityCredentialsForm } from '@/components/account/security-credentia
 import { ExportDataButton } from '@/components/export-data-button'
 import { DeleteAccountButton } from '@/components/delete-account-button'
 import { AccompagneDashboardHeader } from '@/components/layout/accompagne-dashboard-header'
-import { LogoutButton } from '@/components/auth/logout-button'
 import { getUnreadCount } from '@/lib/unread-count'
 
 export default async function AccompagneProfilPage() {
@@ -83,8 +82,6 @@ export default async function AccompagneProfilPage() {
           <Link href="/politique-de-confidentialite" className="hover:text-gray-800">Confidentialité</Link>
           <span aria-hidden="true">·</span>
           <Link href="/cgu" className="hover:text-gray-800">Conditions</Link>
-          <span aria-hidden="true">·</span>
-          <LogoutButton />
         </div>
 
       </div>

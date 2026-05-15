@@ -5,7 +5,6 @@ import { AnnonceStatusToggle } from '@/components/accompagnant/annonce-status-to
 import { AnnonceDeleteButton } from '@/components/annonce-delete-button'
 import { SPECIALITES } from '@/lib/constants'
 import { AccompagneDashboardHeader } from '@/components/layout/accompagne-dashboard-header'
-import { LogoutButton } from '@/components/auth/logout-button'
 import { getUnreadCount } from '@/lib/unread-count'
 import { hasActiveSubscription } from '@/lib/subscription-helpers'
 
@@ -177,8 +176,6 @@ export default async function MesAnnoncesAccompagne() {
           <Link href="/politique-de-confidentialite" className="hover:text-gray-800">Confidentialité</Link>
           <span aria-hidden="true">·</span>
           <Link href="/cgu" className="hover:text-gray-800">Conditions</Link>
-          <span aria-hidden="true">·</span>
-          <LogoutButton />
         </div>
 
       </div>
