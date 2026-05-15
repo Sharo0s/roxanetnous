@@ -353,14 +353,14 @@ export default async function RecherchePage({
 
                       <div className="flex flex-wrap gap-1 mb-2">
                         {specs.map((s: string) => (
-                          <span key={s} className="px-2.5 py-0.5 bg-kraft text-black rounded-full text-xs">
+                          <span key={s} className="px-2.5 py-0.5 bg-[#f4c8a2] text-black rounded-full text-xs">
                             {SPECIALITES.find((sp) => sp.value === s)?.label || s}
                           </span>
                         ))}
                         {(profile?.specialites?.length || 0) > 3 && (
-                          <span className="px-2.5 py-0.5 bg-kraft text-black rounded-full text-xs cursor-default relative group">
+                          <span className="px-2.5 py-0.5 bg-[#f4c8a2] text-black rounded-full text-xs cursor-default relative group">
                             +{profile.specialites.length - 3}
-                            <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block bg-kraft text-black text-xs rounded-lg px-3 py-2 whitespace-nowrap z-50">
+                            <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block bg-[#f4c8a2] text-black text-xs rounded-lg px-3 py-2 whitespace-nowrap z-50">
                               {(profile.specialites as string[]).slice(3).map((s: string) => SPECIALITES.find((sp) => sp.value === s)?.label || s).join(', ')}
                             </span>
                           </span>
