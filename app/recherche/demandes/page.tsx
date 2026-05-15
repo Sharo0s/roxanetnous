@@ -39,7 +39,12 @@ export default async function DemandesAccompagnesPage({
 
   let query = supabase
     .from('annonces_accompagnes')
-    .select('*')
+    .select(`
+      *,
+      accompagnes_profiles!inner (
+        users:user_id (first_name)
+      )
+    `)
     .eq('status', 'publiee')
     .or(codesFilter)
     .order('published_at', { ascending: false })
@@ -130,6 +135,13 @@ export default async function DemandesAccompagnesPage({
                 ? DIPLOMES.find((d) => d.value === annonce.diplome_requis)?.label
                 : null
               const expLabel = annonce.experience_min ? formatExperienceLabel(annonce.experience_min) : null
+              const accompagneProfile = (annonce as unknown as {
+                accompagnes_profiles?: { users?: { first_name?: string | null } | { first_name?: string | null }[] | null }
+              }).accompagnes_profiles
+              const accompagneUser = Array.isArray(accompagneProfile?.users)
+                ? accompagneProfile?.users[0]
+                : accompagneProfile?.users
+              const accompagneFirstName = accompagneUser?.first_name ?? null
 
               return (
                 <article
@@ -181,6 +193,8 @@ export default async function DemandesAccompagnesPage({
                             ? 'Besoins ++'
                             : 'Besoins +++'
                       }
+                      accompagneProfileId={annonce.accompagne_id}
+                      accompagneFirstName={accompagneFirstName}
                     />
                     {isAccompagnante && (
                       <ContactAccompagneButton accompagneProfileId={annonce.accompagne_id} subscribed={subscribed} />

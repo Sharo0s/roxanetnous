@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useId, useRef, useState } from 'react'
+import Link from 'next/link'
 
 type Props = {
   titre: string
@@ -12,6 +13,8 @@ type Props = {
   diplomeLabel: string | null
   experienceLabel: string | null
   niveauDependanceLabel: string
+  accompagneProfileId: string
+  accompagneFirstName: string | null
 }
 
 export function DemandeDetailModal({
@@ -24,6 +27,8 @@ export function DemandeDetailModal({
   diplomeLabel,
   experienceLabel,
   niveauDependanceLabel,
+  accompagneProfileId,
+  accompagneFirstName,
 }: Props) {
   const [open, setOpen] = useState(false)
   const titleId = useId()
@@ -81,6 +86,12 @@ export function DemandeDetailModal({
             <h2 id={titleId} className="italic text-xl text-gray-900 mb-1.5">
               {titre}
             </h2>
+            {accompagneFirstName && (
+              <p className="text-sm text-gray-700 mb-1">
+                <span className="text-gray-500">Publié par</span>{' '}
+                <span className="font-medium text-gray-900">{accompagneFirstName}</span>
+              </p>
+            )}
             <p className="text-sm text-gray-600 mb-4">
               {ville} {codePostal && `(${codePostal})`}
               <span className="text-gray-400 mx-1">·</span>
@@ -115,7 +126,13 @@ export function DemandeDetailModal({
               <span>{niveauDependanceLabel}</span>
             </div>
 
-            <div className="flex justify-end">
+            <div className="flex flex-wrap justify-between gap-2">
+              <Link
+                href={`/accompagne/${accompagneProfileId}`}
+                className="px-4 py-2 text-sm font-medium bg-accent text-black rounded-lg hover:opacity-90 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring focus-visible:ring-offset-2"
+              >
+                Voir le profil complet
+              </Link>
               <button
                 type="button"
                 onClick={() => setOpen(false)}
