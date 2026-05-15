@@ -226,9 +226,6 @@ export default async function HomePage() {
           <div className="max-w-6xl mx-auto">
             <Reveal>
               <div className="text-center mb-10">
-                <span className="inline-block text-[11px] uppercase tracking-[0.2em] text-kraft font-medium mb-3">
-                  Pour vous
-                </span>
                 <h2 className="text-3xl md:text-4xl text-gray-900 italic leading-tight mb-3">
                   Pour qui
                 </h2>
@@ -344,9 +341,6 @@ export default async function HomePage() {
           <div className="max-w-3xl mx-auto">
             <Reveal>
               <div className="text-center mb-10">
-                <span className="inline-block text-[11px] uppercase tracking-[0.2em] text-kraft font-medium mb-3">
-                  Tarifs
-                </span>
                 <h2 className="text-3xl md:text-4xl text-gray-900 italic leading-tight mb-3">
                   Un tarif unique, simple
                 </h2>
@@ -406,9 +400,6 @@ export default async function HomePage() {
           <div className="max-w-6xl mx-auto">
             <Reveal>
               <div className="text-center mb-10">
-                <span className="inline-block text-[11px] uppercase tracking-[0.2em] text-kraft font-medium mb-3">
-                  Questions
-                </span>
                 <h2 className="text-3xl md:text-4xl text-gray-900 italic leading-tight">
                   Questions fréquentes
                 </h2>
@@ -466,9 +457,6 @@ export default async function HomePage() {
                   style={{ background: 'radial-gradient(circle at top right, #faecd9 0%, transparent 70%)' }}
                 />
                 <div className="relative text-center">
-                  <span className="inline-block text-[11px] uppercase tracking-[0.2em] text-kraft font-medium mb-3">
-                    Contact
-                  </span>
                   <h2 className="text-3xl md:text-4xl text-gray-900 italic leading-tight mb-3">
                     Une question ?
                   </h2>
