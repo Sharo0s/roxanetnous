@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { Inter, Playfair_Display } from 'next/font/google'
+import { Cormorant_Garamond, Inter, Playfair_Display } from 'next/font/google'
 import './globals.css'
 import { CookieBanner } from '@/components/cookie-banner'
 import { LastSeenTracker } from '@/components/last-seen-tracker'
@@ -16,6 +16,13 @@ const inter = Inter({
   subsets: ['latin'],
   weight: ['300', '400', '500'],
   variable: '--font-body',
+  display: 'swap',
+})
+
+const cormorant = Cormorant_Garamond({
+  subsets: ['latin'],
+  weight: ['400'],
+  variable: '--font-cormorant',
   display: 'swap',
 })
 
@@ -56,7 +63,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="fr" className={`${playfair.variable} ${inter.variable}`}>
+    <html lang="fr" className={`${playfair.variable} ${inter.variable} ${cormorant.variable}`}>
       <body className={inter.className}>
         <a
           href="#main-content"
