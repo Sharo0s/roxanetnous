@@ -1,6 +1,6 @@
 # Story 7.B.1 : Politique TTL formalisee DECISIONS.md
 
-Status: review
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -95,6 +95,26 @@ so that les crons de purge `7.B.2` (notifications_log >18 mois) et `7.B.3` (anon
     - Aucune modification de `_bmad-output/planning-artifacts/audit-cookies-2026-05-07.md` (audit fige).
     - Aucune migration du nom `waitlist_departements` dans epic-7.md (epic est fige post-cadrage, la note BDD AC2 suffit pour signaler la divergence au dev agent + reviewer).
 
+## Review Findings
+
+- [x] [Review][Decision] **F3 — `email_anonymise` dans `admin_actions_log` (TTL indéfini) → résolu : email tronqué** — Décision B : `target_id_text` reçoit l'email tronqué (ex: `f***@domain.com`) + `target_type = 'rgpd_request'` ajouté. Minimisation PII préservée, trace exploitable. [DECISIONS.md - section Implications techniques]
+
+- [x] [Review][Decision] **F4 — Procédure droit-à-l'oubli `notifications_ouverture` : DELETE → UPDATE anonymisation** — Décision B : remplacé par `UPDATE notifications_ouverture SET ip_inscription = NULL WHERE lower(email) = lower($1)`. Cohérent avec la politique in-place, préserve email/code_departement pour le cron de notification. [DECISIONS.md - section Implications techniques]
+
+- [x] [Review][Decision] **F5 — Modification 12→18 mois prospective** — Décision A : annoté dans DECISIONS section Motivation. Aucune row > 12 mois au 2026-05-14, impact nul. [DECISIONS.md - section Motivation]
+
+- [x] [Review][Decision] **F6 — `<code>notifications_log</code>` retiré de la page publique** — Décision A : texte brut "Logs de notification email". [app/politique-de-confidentialite/page.tsx:69]
+
+- [x] [Review][Patch] **F1 — Pattern cron 7.B.2 corrigé pour inclure les rows `sent_at IS NULL`** — Pattern mis à jour dans DECISIONS.md. [DECISIONS.md - section Implications techniques]
+
+- [x] [Review][Patch] **F2 — `target_type = 'rgpd_request'` ajouté à la procédure trace** — Colonne NOT NULL désormais documentée dans la procédure manuelle. [DECISIONS.md - section Implications techniques]
+
+- [x] [Review][Patch] **F7 — Section "Méthode de purge par table" ajoutée dans DECISIONS.md** — Section dédiée ajoutée entre Decision et Motivation avec 4 bullets par table. [DECISIONS.md - decision F-Epic7-B1]
+
+- [x] [Review][Patch] **F9 — Annotation interne reformulée en prose finale** — `(pas une cascade user, mais a documenter)` remplacé par la prose finale. [DECISIONS.md - section Implications techniques]
+
+- [x] [Review][Defer] **F11 — Cascade `departements_ouverts → notifications_ouverture` peut détruire les IPs avant le TTL 6 mois** [supabase/migrations/20260506120000_waitlist_departements.sql:9] — pré-existant, hors scope 7.B.1 ; à documenter dans deferred-work si le volume waitlist devient significatif
+
 ## Tasks / Subtasks
 
 - [x] **T1 - Recolter et confirmer la volumetrie BDD** (AC: #2, #7)
@@ -134,12 +154,10 @@ so that les crons de purge `7.B.2` (notifications_log >18 mois) et `7.B.3` (anon
   - [x] T6.2 - Renseigner `Dev Agent Record > Completion Notes` avec la liste explicite hors-scope (AC10) + le pointeur sur F-Epic7-B1 (`Voir DECISIONS.md ## 2026-05-14`) + le rappel "stories 7.B.2 et 7.B.3 deverrouillees".
   - [x] T6.3 - Renseigner `Dev Agent Record > File List` avec les fichiers touches : `DECISIONS.md`, `app/politique-de-confidentialite/page.tsx`, `_bmad-output/implementation-artifacts/deferred-work.md`, `_bmad-output/implementation-artifacts/sprint-status.yaml`. **Aucun fichier sous `supabase/migrations/`** (sinon AC6 viole).
 
-- [ ] **T7 - Commit livraison** (AC: #8, #9)
-  - [ ] T7.1 - Stage explicite des fichiers de la File List uniquement (pas de `git add .`).
-  - [ ] T7.2 - Commit message format heritage Epic 7 (convention `feat`/`docs`/`fix` + scope) : `docs(rgpd): formalise politique TTL retention donnees personnelles (story 7.B.1)`. **Pre-requis CLAUDE.md** : execution `npm run a11y:axe:check` exit 0 confirmee avant le commit (regle durcie 2026-05-06).
-  - [ ] T7.3 - Pas de `git push` ni `gh pr create` sans validation explicite Sylvain (regle generale operations risquees -> demander confirmation).
-
-> En attente de validation Sylvain pour creer le commit (T7).
+- [x] **T7 - Commit livraison** (AC: #8, #9)
+  - [x] T7.1 - Stage explicite des fichiers de la File List uniquement (pas de `git add .`). 5 fichiers staged.
+  - [x] T7.2 - Commit message format heritage Epic 7 : `docs(rgpd): formalise politique TTL retention donnees personnelles (story 7.B.1)`. Pre-requis CLAUDE.md respecte (`npm run a11y:axe:check` exit 0 confirme en T5.3). Commit `3c94ae3` sur `main` (ahead 1).
+  - [ ] T7.3 - Pas de `git push` ni `gh pr create` sans validation explicite Sylvain. **En attente decision Sylvain post-review.**
 
 ## Dev Notes
 
@@ -319,7 +337,7 @@ Toutes les preconditions methode anonymisation in-place (`UPDATE ... SET ip_insc
 
 ## Change Log
 
-- **2026-05-14** : Story livree (Status `review`). 4 fichiers modifies (DECISIONS.md, app/politique-de-confidentialite/page.tsx, deferred-work.md, sprint-status.yaml). 0 fichier sous supabase/migrations/. Audit MCP volumetrie 4 tables PII (0 row purgeable a date). Validations locales : lint 193 warnings (sous baseline) / lint:a11y-check 155 baseline preserve / a11y:axe:check 0 delta Critical/Serious / test:unit 59/59 verts / check:no-direct-notifications-log-insert OK / build OK. Stories 7.B.2 et 7.B.3 deverrouillees.
+- **2026-05-14** : Story livree (Status `review`), commit `3c94ae3` sur `main`. 5 fichiers : DECISIONS.md (append F-Epic7-B1 ~85 lignes), app/politique-de-confidentialite/page.tsx (1 bullet -> 4 bullets alignes), deferred-work.md (2 lignes barrees L200+L247), sprint-status.yaml (transition ready-for-dev -> review), story file (tasks cochees + Dev Agent Record + Change Log + DoD a11y). 0 fichier sous supabase/migrations/. Audit MCP volumetrie 4 tables PII (0 row purgeable a date). Validations locales : lint 193 warnings (sous baseline) / lint:a11y-check 155 baseline preserve / a11y:axe:check 0 delta Critical/Serious / test:unit 59/59 verts / check:no-direct-notifications-log-insert OK / build OK. Stories 7.B.2 et 7.B.3 deverrouillees.
 
 ## DoD a11y
 
