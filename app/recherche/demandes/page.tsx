@@ -5,6 +5,7 @@ import { AccompagnantDashboardHeader } from '@/components/layout/accompagnant-da
 import { LogoutButton } from '@/components/auth/logout-button'
 import { getUnreadCount } from '@/lib/unread-count'
 import { ContactAccompagneButton } from '@/components/messages/contact-accompagne-button'
+import { DemandeDetailModal } from '@/components/recherche/demande-detail-modal'
 import { getCodesPostauxFilterOr } from '@/lib/departements'
 import { hasActiveSubscription } from '@/lib/subscription-helpers'
 
@@ -163,11 +164,28 @@ export default async function DemandesAccompagnesPage({
                     <span>{annonce.niveau_dependance === 'besoins_plus' ? 'Besoins +' : annonce.niveau_dependance === 'besoins_plus_plus' ? 'Besoins ++' : 'Besoins +++'}</span>
                   </div>
 
-                  {isAccompagnante && (
-                    <div className="mt-auto">
+                  <div className={`mt-auto grid gap-2 ${isAccompagnante ? 'grid-cols-2' : 'grid-cols-1'}`}>
+                    <DemandeDetailModal
+                      titre={annonce.titre}
+                      ville={annonce.ville}
+                      codePostal={annonce.code_postal}
+                      dateDebut={annonce.date_debut}
+                      description={annonce.description}
+                      specialitesLabels={specLabels}
+                      diplomeLabel={diplomeLabel ?? null}
+                      experienceLabel={expLabel ?? null}
+                      niveauDependanceLabel={
+                        annonce.niveau_dependance === 'besoins_plus'
+                          ? 'Besoins +'
+                          : annonce.niveau_dependance === 'besoins_plus_plus'
+                            ? 'Besoins ++'
+                            : 'Besoins +++'
+                      }
+                    />
+                    {isAccompagnante && (
                       <ContactAccompagneButton accompagneProfileId={annonce.accompagne_id} subscribed={subscribed} />
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </article>
               )
             })}
