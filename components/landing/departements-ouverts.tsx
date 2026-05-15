@@ -110,9 +110,14 @@ export async function DepartementsOuverts() {
                 <span className="italic text-gray-900 ml-2 text-base">{total}</span>
                 <span className="text-gray-500 ml-1">département{total > 1 ? 's' : ''} ouvert{total > 1 ? 's' : ''}</span>
               </h2>
-              <span className="text-sm text-kraft hover:text-gray-900">
-                <span className="group-open:hidden">Voir la couverture →</span>
-                <span className="hidden group-open:inline">Masquer ↑</span>
+              <span className="flex items-center gap-2 text-sm text-kraft hover:text-gray-900">
+                <span className="group-open:hidden">Voir la couverture</span>
+                <span className="hidden group-open:inline">Masquer</span>
+                <span className="inline-flex items-center justify-center w-9 h-9 rounded-full bg-[#f4c8a3] shrink-0">
+                  <svg className="group-open:rotate-180 transition-transform" width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true">
+                    <path d="M2 3.5L5 6.5L8 3.5" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </span>
               </span>
             </summary>
             <div className="mt-3 pt-3 border-t border-[#e8dfd2]">

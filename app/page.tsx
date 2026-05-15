@@ -338,7 +338,7 @@ export default async function HomePage() {
             <div>
               {[
                 { n: '01', t: 'Inscription', d: "Créez votre compte en tant qu'accompagnant ou accompagné." },
-                { n: '02', t: 'Justificatifs', d: "Accompagnants : déposez vos diplômes et pièce d'identité. Accompagnés : décrivez votre besoin." },
+                { n: '02', t: 'Justificatifs', d: "Accompagnants : déposez votre CV et pièce d'identité. Accompagnés : décrivez votre besoin." },
                 { n: '03', t: 'Validation', d: 'Notre équipe vérifie manuellement chaque profil accompagnant, sous 48h.' },
                 { n: '04', t: 'Mise en relation', d: 'Publiez votre annonce, nous vous recommandons les profils les plus compatibles. Premiers contacts en quelques jours.' },
               ].map((s, i) => (
