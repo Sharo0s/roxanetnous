@@ -253,20 +253,6 @@ export function RegisterForm({ departementsOuverts }: RegisterFormProps = {}) {
           <div className="grid grid-cols-2 gap-3">
             <button
               type="button"
-              onClick={() => selectRole('accompagne')}
-              className={`p-4 rounded-lg border-2 text-left transition ${
-                role === 'accompagne'
-                  ? 'border-accent bg-accent text-black'
-                  : 'border-gray-200 hover:border-accent'
-              }`}
-            >
-              <p className="font-semibold text-sm">Une personne à accompagner</p>
-              <p className={`text-xs mt-1 ${role === 'accompagne' ? 'text-black/70' : 'text-gray-500'}`}>
-                Je propose mes services d&apos;accompagnement
-              </p>
-            </button>
-            <button
-              type="button"
               onClick={() => selectRole('accompagnant')}
               className={`p-4 rounded-lg border-2 text-left transition ${
                 role === 'accompagnant'
@@ -274,8 +260,22 @@ export function RegisterForm({ departementsOuverts }: RegisterFormProps = {}) {
                   : 'border-gray-200 hover:border-accent'
               }`}
             >
-              <p className="font-semibold text-sm">Un accompagnant</p>
+              <p className="font-semibold text-sm">Une personne à accompagner</p>
               <p className={`text-xs mt-1 ${role === 'accompagnant' ? 'text-black/70' : 'text-gray-500'}`}>
+                Je propose mes services d&apos;accompagnement
+              </p>
+            </button>
+            <button
+              type="button"
+              onClick={() => selectRole('accompagne')}
+              className={`p-4 rounded-lg border-2 text-left transition ${
+                role === 'accompagne'
+                  ? 'border-accent bg-accent text-black'
+                  : 'border-gray-200 hover:border-accent'
+              }`}
+            >
+              <p className="font-semibold text-sm">Un accompagnant</p>
+              <p className={`text-xs mt-1 ${role === 'accompagne' ? 'text-black/70' : 'text-gray-500'}`}>
                 Je cherche une personne de confiance
               </p>
             </button>
