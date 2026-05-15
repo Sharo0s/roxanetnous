@@ -1,6 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import Link from 'next/link'
 import { getSubscriptionStatus, getPaymentMethod, getInvoices, getSubscriptionAmount } from '@/lib/subscription-helpers'
 import { SubscriptionPageContent } from '@/components/abonnement/subscription-page-content'
 import { AccompagneDashboardHeader } from '@/components/layout/accompagne-dashboard-header'
@@ -76,13 +75,6 @@ export default async function AbonnementAccompagnePage({
           searchParams={params}
         />
 
-        <div className="mt-16 pt-6 border-t border-[#e8dfd2] flex flex-wrap justify-center items-center gap-x-6 gap-y-2 text-xs text-gray-500">
-          <Link href="/cgu" className="hover:text-gray-800">Aide</Link>
-          <span aria-hidden="true">·</span>
-          <Link href="/politique-de-confidentialite" className="hover:text-gray-800">Confidentialité</Link>
-          <span aria-hidden="true">·</span>
-          <Link href="/cgu" className="hover:text-gray-800">Conditions</Link>
-        </div>
 
       </div>
     </main>

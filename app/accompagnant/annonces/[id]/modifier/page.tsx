@@ -75,14 +75,6 @@ export default async function ModifierAnnoncePage({
 
         <ModifierAnnonceForm annonce={annonce} departementsOuverts={departementsOuverts} />
 
-        {/* FOOTER */}
-        <div className="mt-16 pt-6 border-t border-[#e8dfd2] flex flex-wrap justify-center items-center gap-x-6 gap-y-2 text-xs text-gray-500">
-          <Link href="/cgu" className="hover:text-gray-800">Aide</Link>
-          <span aria-hidden="true">·</span>
-          <Link href="/politique-de-confidentialite" className="hover:text-gray-800">Confidentialité</Link>
-          <span aria-hidden="true">·</span>
-          <Link href="/cgu" className="hover:text-gray-800">Conditions</Link>
-        </div>
 
       </div>
     </main>
