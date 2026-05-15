@@ -1,6 +1,5 @@
 import Link from 'next/link'
 import Image from 'next/image'
-import { Footer } from '@/components/footer'
 import { ContactForm } from '@/components/contact-form'
 import { HeroCarte } from '@/components/landing/hero-carte'
 import { AnimatedCounter } from '@/components/landing/animated-counter'
@@ -470,7 +469,6 @@ export default async function HomePage() {
           </div>
         </section>
       </main>
-      <Footer />
     </div>
   )
 }

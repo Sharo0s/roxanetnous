@@ -1,5 +1,4 @@
 import Link from 'next/link'
-import { Footer } from '@/components/footer'
 
 export default function PolitiqueConfidentialitePage() {
   return (
@@ -165,7 +164,6 @@ export default function PolitiqueConfidentialitePage() {
           </section>
         </div>
       </main>
-      <Footer />
     </div>
   )
 }

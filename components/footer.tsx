@@ -48,7 +48,10 @@ export function Footer() {
           <div aria-hidden="true" className="hidden md:block w-px h-8 bg-[#f4c8a3]" />
 
           <p className="text-sm text-gray-500 text-center md:text-right">
-            roxanetnous · {new Date().getFullYear()}
+            roxanetnous · {(() => {
+              const currentYear = new Date().getFullYear()
+              return currentYear > 2026 ? `2026 - ${currentYear}` : '2026'
+            })()}
           </p>
         </div>
       </div>

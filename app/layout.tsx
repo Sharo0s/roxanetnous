@@ -3,6 +3,7 @@ import { Cormorant_Garamond, Inter, Playfair_Display } from 'next/font/google'
 import './globals.css'
 import { CookieBanner } from '@/components/cookie-banner'
 import { LastSeenTracker } from '@/components/last-seen-tracker'
+import { Footer } from '@/components/footer'
 
 const playfair = Playfair_Display({
   subsets: ['latin'],
@@ -72,6 +73,7 @@ export default function RootLayout({
           Aller au contenu principal
         </a>
         {children}
+        <Footer />
         <LastSeenTracker />
         <CookieBanner />
       </body>

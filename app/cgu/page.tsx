@@ -1,5 +1,4 @@
 import Link from 'next/link'
-import { Footer } from '@/components/footer'
 
 export default function CGUPage() {
   return (
@@ -135,7 +134,6 @@ export default function CGUPage() {
           <p className="text-gray-500 pt-4">Dernière mise à jour : février 2026</p>
         </div>
       </main>
-      <Footer />
     </div>
   )
 }
