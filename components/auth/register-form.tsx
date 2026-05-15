@@ -274,7 +274,7 @@ export function RegisterForm({ departementsOuverts }: RegisterFormProps = {}) {
                   : 'border-gray-200 hover:border-accent'
               }`}
             >
-              <p className="font-semibold text-sm">Un accompagnement</p>
+              <p className="font-semibold text-sm">Un accompagnant</p>
               <p className={`text-xs mt-1 ${role === 'accompagnant' ? 'text-black/70' : 'text-gray-500'}`}>
                 Je cherche une personne de confiance
               </p>
