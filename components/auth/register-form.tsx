@@ -262,7 +262,7 @@ export function RegisterForm({ departementsOuverts }: RegisterFormProps = {}) {
             >
               <p className="font-semibold text-sm">Une personne à accompagner</p>
               <p className={`text-xs mt-1 ${role === 'accompagne' ? 'text-black/70' : 'text-gray-500'}`}>
-                Je cherche un accompagnant
+                Je propose mes services d&apos;accompagnement
               </p>
             </button>
             <button
@@ -276,7 +276,7 @@ export function RegisterForm({ departementsOuverts }: RegisterFormProps = {}) {
             >
               <p className="font-semibold text-sm">Un accompagnant</p>
               <p className={`text-xs mt-1 ${role === 'accompagnant' ? 'text-black/70' : 'text-gray-500'}`}>
-                Je propose mes services d&apos;accompagnement
+                Je cherche un accompagnant
               </p>
             </button>
           </div>
