@@ -6,6 +6,7 @@ import { HeroCarte } from '@/components/landing/hero-carte'
 import { AnimatedCounter } from '@/components/landing/animated-counter'
 import { Reveal } from '@/components/landing/reveal'
 import { DepartementsOuverts } from '@/components/landing/departements-ouverts'
+import { CommentCarousel } from '@/components/landing/comment-carousel'
 import { HeaderAuthLink } from '@/components/layout/header-auth-link'
 import { createClient } from '@/lib/supabase/server'
 
@@ -335,24 +336,9 @@ export default async function HomePage() {
                 </p>
               </div>
             </Reveal>
-            <div>
-              {[
-                { n: '01', t: 'Inscription', d: "Créez votre compte en tant qu'accompagnant ou accompagné." },
-                { n: '02', t: 'Justificatifs', d: "Accompagnants : déposez votre CV et pièce d'identité. Accompagnés : décrivez votre besoin." },
-                { n: '03', t: 'Validation', d: 'Notre équipe vérifie manuellement chaque profil accompagnant, sous 48h.' },
-                { n: '04', t: 'Mise en relation', d: 'Publiez votre annonce, nous vous recommandons les profils les plus compatibles. Premiers contacts en quelques jours.' },
-              ].map((s, i) => (
-                <Reveal key={s.n} delay={i * 80}>
-                  <div className="grid grid-cols-[60px_1fr] md:grid-cols-[80px_1fr] gap-4 md:gap-6 items-start py-6 border-b border-[#e8dfd2] last:border-b-0">
-                    <div className="italic text-3xl md:text-4xl text-kraft leading-none">{s.n}</div>
-                    <div>
-                      <h3 className="text-lg md:text-xl text-gray-900 italic mb-1.5">{s.t}</h3>
-                      <p className="text-sm md:text-base text-gray-600 leading-relaxed">{s.d}</p>
-                    </div>
-                  </div>
-                </Reveal>
-              ))}
-            </div>
+            <Reveal>
+              <CommentCarousel />
+            </Reveal>
           </div>
         </section>
 
