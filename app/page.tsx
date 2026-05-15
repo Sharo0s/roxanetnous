@@ -325,9 +325,6 @@ export default async function HomePage() {
           <div className="max-w-3xl mx-auto">
             <Reveal>
               <div className="text-center mb-10">
-                <span className="inline-block text-[11px] uppercase tracking-[0.2em] text-kraft font-medium mb-3">
-                  Étape par étape
-                </span>
                 <h2 className="text-3xl md:text-4xl text-gray-900 italic leading-tight mb-3">
                   Comment ça marche
                 </h2>
