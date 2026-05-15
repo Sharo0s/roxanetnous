@@ -1,7 +1,7 @@
 'use client'
 
 import Image from 'next/image'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useState } from 'react'
 
 const STEPS = [
   {
@@ -45,7 +45,6 @@ const POSITION_CLASSES: Record<Position, string> = {
 
 export function CommentCarousel() {
   const [current, setCurrent] = useState(0)
-  const trackRef = useRef<HTMLDivElement>(null)
   const count = STEPS.length
 
   const go = useCallback(
@@ -60,17 +59,6 @@ export function CommentCarousel() {
     if (diff === count - 1) return 'prev'
     return 'hidden'
   }
-
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'ArrowLeft') go(-1)
-      else if (e.key === 'ArrowRight') go(1)
-    }
-    const el = trackRef.current
-    if (!el) return
-    el.addEventListener('keydown', onKey)
-    return () => el.removeEventListener('keydown', onKey)
-  }, [go])
 
   return (
     <div
@@ -89,9 +77,7 @@ export function CommentCarousel() {
       </button>
 
       <div
-        ref={trackRef}
-        tabIndex={0}
-        className="relative w-full max-w-[900px] aspect-[3/2] mx-auto overflow-visible focus:outline-none"
+        className="relative w-full max-w-[900px] aspect-[3/2] mx-auto overflow-visible"
         aria-live="polite"
       >
         {STEPS.map((s, i) => {
@@ -102,8 +88,7 @@ export function CommentCarousel() {
             <div
               key={s.n}
               className={`absolute top-1/2 w-[42%] max-lg:w-[58%] max-sm:w-[68%] aspect-[3/4] rounded-xl overflow-hidden transition-all duration-700 ease-[cubic-bezier(0.4,0,0.2,1)] will-change-transform ${POSITION_CLASSES[pos]}`}
-              onClick={isSide ? () => setCurrent(i) : undefined}
-              aria-hidden={!isCurrent}
+              aria-hidden={pos === 'hidden'}
               aria-roledescription="slide"
               aria-label={`Étape ${i + 1} sur ${count} : ${s.t}`}
             >
@@ -143,6 +128,14 @@ export function CommentCarousel() {
                   {s.d}
                 </p>
               </div>
+              {isSide && (
+                <button
+                  type="button"
+                  onClick={() => setCurrent(i)}
+                  aria-label={`Aller a l'etape ${i + 1} : ${s.t}`}
+                  className="absolute inset-0 z-10 cursor-pointer bg-transparent border-0 p-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-kraft focus-visible:ring-offset-2 focus-visible:ring-offset-[#faf7f2] rounded-xl"
+                />
+              )}
             </div>
           )
         })}
