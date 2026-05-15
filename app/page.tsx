@@ -152,7 +152,7 @@ export default async function HomePage() {
                 </Link>
               </div>
               {((accompagnantesCount || 0) > 0 || (accompagnesCount || 0) > 0 || villesUniques.size > 0) && (
-                <div className="flex flex-wrap gap-8">
+                <div className="hidden flex flex-wrap gap-8">
                   {(accompagnantesCount || 0) > 0 && (
                     <AnimatedCounter end={accompagnantesCount || 0} label={`accompagnant${(accompagnantesCount || 0) > 1 ? 's' : ''}`} />
                   )}
