@@ -157,27 +157,20 @@ describe('Cron purge-notifications (story 7.B.2)', () => {
       if (idx !== -1) seededIds.splice(idx, 1)
     })
 
-    // Snapshot count pre-2e run.
-    const { count: countPre } = await supabase
-      .from('notifications_log')
-      .select('id', { count: 'exact', head: true })
-
     // 2e run : doit etre no-op sur nos rows (deja purgees).
-    // On verifie via SELECT cible sur nos IDs plutot qu un purgedCount global
-    // (BDD peut ne pas etre vierge -- d autres rows eligibles peuvent exister).
     const response2 = await GET(buildAuthedRequest())
     expect(response2.status).toBe(200)
+    const body2 = (await response2.json()) as { purgedCount: number }
+    // AC8-b : purgedCount = 0 (nos rows sont deja absentes, rien d autre a purger
+    // dans ce test isole -- la BDD de test ne contient pas de rows eligibles
+    // residuelles au moment de ce run).
+    expect(body2.purgedCount).toBe(0)
 
     const { data: afterSecond } = await supabase
       .from('notifications_log')
       .select('id')
       .in('id', oldIds)
     expect(afterSecond).toHaveLength(0)
-
-    const { count: countPost } = await supabase
-      .from('notifications_log')
-      .select('id', { count: 'exact', head: true })
-    expect(countPost).toBe(countPre)
   })
 
   it('(c) sent_at IS NULL + created_at 19 mois old : 2 rows purgees (branche aged-null)', async () => {
@@ -214,6 +207,8 @@ describe('Cron purge-notifications (story 7.B.2)', () => {
     expect(insErr).toBeNull()
     const insertedIds = (rows ?? []).map((r) => r.id)
     expect(insertedIds).toHaveLength(2)
+    // Tracker de securite : si le cron echoue, afterEach nettoyera ces rows.
+    seededIds.push(...insertedIds)
 
     const { GET } = await import('@/app/api/cron/purge-notifications/route')
     const response = await GET(buildAuthedRequest())

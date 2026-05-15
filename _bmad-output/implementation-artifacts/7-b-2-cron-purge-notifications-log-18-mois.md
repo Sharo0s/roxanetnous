@@ -1,6 +1,6 @@
 # Story 7.B.2 : Cron purge `notifications_log` > 18 mois
 
-Status: review (patches code-review appliqués 2026-05-14, en attente validation GHA)
+Status: done (code-review 2 terminée 2026-05-15, 3 patches appliqués, validation GHA en attente)
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -344,7 +344,7 @@ Les 2 lignes pertinentes (`Stockage IP brut sans TTL ni purge -- RGPD` L204 et `
 ## Review Findings
 
 - [x] [Review][Patch] **T1 — Auth bypass si `CRON_SECRET` non défini** [`app/api/cron/purge-notifications/route.ts:42`] — Fix appliqué : `const secret = process.env.CRON_SECRET; if (!secret || authHeader !== \`Bearer ${secret}\`)`.
-- [x] [Review][Patch] **T4 — `purgedCount` plafonné PostgREST (≤ 1000) + alerte spike jamais déclenchée** [`app/api/cron/purge-notifications/route.ts:55,74`] — Fix appliqué : `.select('id', { count: 'exact', head: true })` + utilisation de `count` pour le décompte.
+- [x] [Review][Defer] **T4 — `purgedCount` plafonné PostgREST (≤ 1000) + alerte spike jamais déclenchée** [`app/api/cron/purge-notifications/route.ts:55,74`] — Fix tenté (count:'exact') mais incompatible avec PostgrestTransformBuilder.select() de cette version SDK (1 seul argument). Revenu à .select('id') + .length. Déféré : volumétrie < 50 rows/run en régime de croisière, seuil 1000 jamais atteint en pratique. Candidat upgrade si SDK mis à jour ou via RPC Postgres.
 - [x] [Review][Patch] **T6 — Test intégration cas (b) : `oldIds` non trackés + assert `purgedCount === 0` fragile** [`tests/integration/cron-purge-notifications/purge-cron.test.ts:131-166`] — Fix appliqué : tracker `oldIds` dans `seededIds` + assert remplacé par vérification ciblée SELECT sur les IDs du test.
 - [x] [Review][Patch] **T7 — Désynchronisation `CRON_SECRET` GHA ≠ `beforeAll` test intégration** [`.github/workflows/integration-tests.yml:63`] — Fix appliqué : valeur GHA alignée sur `'test-cron-secret-7b2'` (identique au `beforeAll`).
 - [x] [Review][Defer] **T2 — Timing attack sur comparaison `===` du secret** [`route.ts:42`] — deferred, pre-existing dans tous les crons du projet
@@ -352,6 +352,14 @@ Les 2 lignes pertinentes (`Stockage IP brut sans TTL ni purge -- RGPD` L204 et `
 - [x] [Review][Defer] **T5 — Absence de transaction entre les deux DELETE** [`route.ts:51-74`] — deferred, idempotence par construction assumée et documentée, pattern commun aux autres crons
 - [x] [Review][Defer] **T9 — `SUPABASE_SERVICE_ROLE_KEY` non-null assertion sans guard** [`lib/supabase/server.ts`] — deferred, pre-existing hors scope 7.B.2
 - [x] [Review][Defer] **T12 — Drift 30.44j/mois vs calendaire (~2 sem sur 18 mois)** [`route.ts:34`] — deferred, accepté et documenté explicitement (commentaire l.24 + spec AC3)
+
+### Review Findings — Code review 2 (2026-05-15)
+
+- [x] [Review][Patch] **N1 — AC8-b : `purgedCount === 0` non affirmé sur le body du 2e run** [`tests/integration/cron-purge-notifications/purge-cron.test.ts:168-169`] — Fix appliqué : lecture `body2` + `expect(body2.purgedCount).toBe(0)`.
+- [x] [Review][Patch] **N2 — Assertion count global fragile dans cas (b)** [`tests/integration/cron-purge-notifications/purge-cron.test.ts:177-180`] — Fix appliqué : snapshot `countPre`/`countPost` supprimé, vérification ciblée BDD sur `oldIds` conservée.
+- [x] [Review][Patch] **N3 — Cas (c) : `insertedIds` non trackés si cron échoue après insert** [`tests/integration/cron-purge-notifications/purge-cron.test.ts:~215`] — Fix appliqué : `seededIds.push(...insertedIds)` ajouté immédiatement après l'assert insert.
+- [x] [Review][Defer] **N4 — Rows `sent_at` non-null mais `created_at` > 18 mois jamais purgées (retry tardif)** [`route.ts:51-56`] — deferred, intentionnel : la spec purge par `sent_at` (date d'envoi effectif), pas `created_at`. Cas théorique (retry tardif = `sent_at` récent même si `created_at` vieux) documenté DECISIONS.md F-Epic7-B1. Pattern stable.
+- [x] [Review][Defer] **N5 — Pas de limite batch sur DELETE (risque timeout volumétrie extrême)** [`route.ts:52-75`] — deferred, documenté dans la spec (seq scan acceptable, volumétrie < 50 rows/run régime de croisière). Candidat story 8.X si timeout prod observé.
 
 ## DoD a11y
 
