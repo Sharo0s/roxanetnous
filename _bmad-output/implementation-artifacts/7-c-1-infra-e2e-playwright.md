@@ -1,6 +1,6 @@
 # Story 7.C.1 : Infra E2E Playwright
 
-Status: in-progress
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -333,7 +333,7 @@ claude-opus-4-7[1m]
 
 ### Review Findings
 
-- [ ] [Review][Decision] AC8 non satisfait avant merge : 2 run-ids GHA E2E verts non documentes — patches F1-F3 corriges, pousser puis lancer `gh workflow run e2e-tests.yml` x2 et documenter les run-ids ici avant merge. [AC8]
+- [x] [Review][Decision] AC8 satisfait : 2 runs GHA consecutifs verts — run-id `25959452604` (success) + run-id `25959454988` (success). [AC8]
 - [x] [Review][Patch] Email seed `accompagnant` errone : `SEED_USERS_CREDENTIALS` attend `seed-accompagnant@test.local` mais `seed-test-supabase.mjs:58` generait `seed-accompagnante@test.local` (label `'Accompagnante'` non mis a jour post-rename Epic 5) — smoke test echouait systematiquement en CI. Corrige : `label: 'Accompagnant'`. [scripts/seed-test-supabase.mjs:58]
 - [x] [Review][Patch] `setup.ts` : garde-fou silencieux si `SUPABASE_URL` est absent (undefined) — `if (!value) return` bypassait la protection sans erreur meme en CI=true. Corrige : throw/process.exit(1) si variable absente. [tests/e2e/setup.ts]
 - [x] [Review][Patch] `assertLocalPgUrl` contournable avec scheme `postgres://` (sans `ql`) : la regex `/^postgresql:/` ne transformait pas ce prefixe court. Corrige : `/^postgres(?:ql)?:/`. [tests/e2e/_lib/fixtures.ts]
