@@ -247,7 +247,7 @@ export function RegisterForm({ departementsOuverts }: RegisterFormProps = {}) {
 
         {/* Step 1 : Role */}
         <div className="animate-fade-in">
-          <label className="block text-lg font-bold mb-3" style={{ color: '#f4c8a3' }}>
+          <label className="block text-lg font-bold mb-3 text-kraft">
             Je cherche
           </label>
           <div className="grid grid-cols-2 gap-3">

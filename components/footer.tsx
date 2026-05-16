@@ -21,7 +21,7 @@ export function Footer() {
               className="opacity-70 group-hover:opacity-100 transition"
             />
             <span
-              className="text-sm text-gray-400 group-hover:text-gray-600 transition"
+              className="text-sm text-gray-600 group-hover:text-gray-800 transition"
               style={{ fontFamily: "var(--font-cormorant), serif" }}
             >
               Conçu et géré par Nysia

@@ -8,6 +8,7 @@
 
 # Playwright
 /playwright-report/
+/playwright-e2e-report/
 /test-results/
 /.playwright/
 

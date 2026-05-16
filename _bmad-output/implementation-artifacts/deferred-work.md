@@ -372,3 +372,8 @@ Tous ces findings concernent du code **strictement preserve** depuis HEAD (verif
 - **Fuite TTL (`cutoffParrainages`/`cutoffWaitlist`) dans réponse 200** [`app/api/cron/purge-ip-addresses/route.ts:136-141`] — Un appelant autorisé obtient les dates de coupure exactes. Endpoint interne protégé Bearer, acceptable en l'état.
 - **Absence de LIMIT/batch sur UPDATE : risque timeout si volumétrie croît** [`app/api/cron/purge-ip-addresses/route.ts:67-72`] — Volumétrie cible < 100 rows/run (audit MCP 2026-05-14). À ré-évaluer en story 8.X si timeout prod observé.
 - **Module ESM mis en cache entre tests unit (import dynamique sans `vi.resetModules`)** [`tests/unit/cron-purge-ip-addresses.test.ts`] — Pattern identique héritage `cron-purge-notifications.test.ts` (7.B.2). Tests passent en pratique car `process.env.CRON_SECRET` est lu à l'exécution, pas au chargement du module.
+
+
+## Deferred from: code review of 7-c-1-infra-e2e-playwright (2026-05-16)
+
+- **`NEXT_PUBLIC_SUPABASE_ANON_KEY` absent du bloc `env:` explicite du step "Run Playwright E2E"** [`.github/workflows/e2e-tests.yml`] — Cle injectee via `GITHUB_ENV` uniquement (pattern identique a `integration-tests.yml` de reference). Si le step "Capture Supabase keys" est absent dans un futur workflow copie-colle, la cle manquante provoque des 401 silencieux. Candidat a rendre explicite dans un hardening GHA.

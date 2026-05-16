@@ -55,7 +55,7 @@ const PG_URL =
 
 const SEED_USERS = [
   { id: '00000000-0000-0000-0000-000000000001', role: 'admin', label: 'Admin' },
-  { id: '00000000-0000-0000-0000-000000000002', role: 'accompagnant', label: 'Accompagnante' },
+  { id: '00000000-0000-0000-0000-000000000002', role: 'accompagnant', label: 'Accompagnant' },
   { id: '00000000-0000-0000-0000-000000000003', role: 'accompagne', label: 'Accompagne' },
   { id: '00000000-0000-0000-0000-000000000004', role: 'accompagnant', label: 'Marraine' },
   { id: '00000000-0000-0000-0000-000000000005', role: 'accompagnant', label: 'Filleule' },
