@@ -260,7 +260,7 @@ claude-opus-4-7
 - **Schema correction** : l AC3 d origine ecrivait `blacklist_suspicion JSONB '{flags:["meme_ip"]}'`. La BDD utilise en realite `flag_suspicion TEXT csv` (migration `20260428130104` L34). Le test colle a la verite du code. Tracer dans une retro si le libelle AC3 doit etre amende dans `epic-7.md`.
 - **Cleanup** : `afterAll` appelle `resetEphemeralRows()` (heritage 7.C.1) + DELETE specifique sur `admin_actions_log` via `details->>'marker' = 'e2e-test'` (table non geree par `resetEphemeralRows`). Marker pose explicitement dans le test AC2.
 - **Validation pre-commit** : tous les checks AC7 verts en local (lint, lint:a11y-check, a11y:axe:check, test:unit, check:no-direct-notifications-log-insert, build). Voir transcript GHA pour les 2 runs e2e-tests.yml (AC6) — run-ids ajoutes apres push.
-- **Run-ids GHA `e2e-tests.yml`** : a renseigner post-push (T5.7).
+- **Run-ids GHA `e2e-tests.yml` (AC6 satisfait)** : Run1 [25959964819](https://github.com/Sharo0s/roxanetnous/actions/runs/25959964819) success 3m26s + Run2 [25959966527](https://github.com/Sharo0s/roxanetnous/actions/runs/25959966527) success 3m31s. Les 2 runs consecutifs verts post-merge (2026-05-16 ~10:50 UTC) valident l infra E2E + les 3 scenarios anti-fraude (smoke 7.C.1 + 3 tests 7.C.2 = 4 tests verts).
 
 ### File List
 
