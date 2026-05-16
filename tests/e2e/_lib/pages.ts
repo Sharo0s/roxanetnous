@@ -1,7 +1,8 @@
 import { expect, type Page } from '@playwright/test'
 
 // Page objects minimaux pour la story 7.C.1 (infra E2E).
-// 7.C.2/3/4 ajouteront a la demande : DashboardAccompagnantPage, MessagesPage,
+// 7.C.2 a ajoute OnboardingPage (bypass visio filleule).
+// 7.C.3/4 ajouteront a la demande : DashboardAccompagnantPage, MessagesPage,
 // AdminPage, ParrainagePage, etc.
 
 export class LandingPage {
@@ -42,5 +43,22 @@ export class LoginPage {
 
   async expectRedirectTo(pathPattern: RegExp | string): Promise<void> {
     await expect(this.page).toHaveURL(pathPattern, { timeout: 15_000 })
+  }
+}
+
+// Story 7.C.2 : PO minimal pour /accompagnant/onboarding cote filleule.
+// Seules les assertions UI du bypass visio passent ici ; aucune logique metier.
+// Source : components/accompagnant/onboarding-client.tsx:179-190 (message bypass).
+export class OnboardingPage {
+  constructor(private readonly page: Page) {}
+
+  async goto(): Promise<void> {
+    await this.page.goto('/accompagnant/onboarding')
+  }
+
+  async expectBypassMessage(): Promise<void> {
+    await expect(
+      this.page.getByText(/pas de pièces justificatives ni de visio/i),
+    ).toBeVisible({ timeout: 10_000 })
   }
 }
