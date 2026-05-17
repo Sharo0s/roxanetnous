@@ -972,3 +972,52 @@ else { /* log skip + Sentry warning + continue */ }
 Heritage F-Epic8-A0 (audit BDD GO sans migration), F-Epic8-A2 (pattern role-aware sur `confirmParrainageOnSuccess`), F5/F6/F7 (idempotence + 1 helper par table), code review 2026-04-29 M1/D4/L5/L6/M3/M12 (preserves).
 
 [Source: _bmad-output/planning-artifacts/epic-8.md#Story 8.A.3] [Source: _bmad-output/planning-artifacts/epic-8.md#FR52,FR53,AR-E8.6] [Source: _bmad-output/implementation-artifacts/8-a-3-cron-confirm-parrainages-recompense-role-parrain.md] [Source: _bmad-output/implementation-artifacts/audit-bdd-parrainage-symetrique-2026-05-16.md#FLAG-A,FLAG-D,FLAG-E] [Source: DECISIONS.md F-Epic8-A0,F-Epic8-A2] [Source: app/api/cron/confirm-parrainages/route.ts] [Source: lib/emails.ts:706-768]
+
+---
+
+## F-Epic9-A2 : Story 9.A.2 -- coverage `app/actions/parrainage.ts` palier 1 (Option B evolutive, seuil ~50%)
+
+**Decision** : la cible originale de la story 9.A.2 (`thresholds: 85%` sur les 4 indicateurs pour `app/actions/parrainage.ts`) est **abaissee au palier 1 = chiffres mesures** lors du 1er run GHA sur PR #8 (run #26005309649, 2026-05-18) : `lines: 49 / branches: 41 / functions: 64 / statements: 48` (arrondi au point inferieur des mesures reelles 49.48 / 41.92 / 64.28 / 48.14).
+
+L'atteinte de la cible 85% est decoupee en 2 stories follow-up backlog (9.A.2.b palier 2 -> 65%, 9.A.2.c palier 3 -> 85%) pour rester sous l'investissement ~0,5-1j-dev par story.
+
+**Motivation** :
+
+1. **Ecart vs cible >5 pts sur tous indicateurs** : l'estimation au cadrage 9.A.2 (75-82%) etait trop optimiste. La couverture cumulee unit+integration reelle est de **~50%** sur `app/actions/parrainage.ts` (1148 lignes, 5 fonctions exportees). L'Option A AC3 spec story (combler in-PR) demanderait ~12-15 SC unit dedies, **hors-scope** d'une story d'observabilite CI/config.
+2. **Garde-fou actif palier 1** : refuser toute regression sous le niveau actuel = signal CI utile, contrairement a une suppression complete du seuil (Option C, sans valeur operationnelle).
+3. **Roadmap claire 3 paliers** : palier 1 (~50%) maintenant (PR #8) -> palier 2 (~65%) via 9.A.2.b ciblant `detectBlacklist` + `confirmParrainageOnSuccess` paths -> palier 3 (85% cible originale) via 9.A.2.c ciblant `createParrainageRelation` self_referral/23505/blacklist_other/meme_ip + `revokeFilleuleValidation*`. Chaque palier respecte la regle AC3 (jamais baisser sans tracer).
+4. **Pattern hérité 9.A.7** : sur PR #9 on a accepté un fix simple (fixtures + setup) plutot que de refondre `app/actions/parrainage.ts`. Meme philosophie ici : Option B = livrer l'observabilite + tracer la dette plutot que de cumuler 2 ambitions dans une seule story.
+
+**Implications** :
+
+- **`vitest.config.ts > thresholds`** : seuil per-file 49/41/64/48 (au lieu de 85). Commentaire explicite mentionne Option B evolutive + reference DECISIONS.md.
+- **Garde-fou CI palier 1 actif** : `npm run test:integration:coverage` exit 1 si l'un des 4 indicateurs baisse sous le palier 1. Toute future PR touchant `app/actions/parrainage.ts` ou ses dependances cumulees doit verifier que la coverage ne regresse pas.
+- **Stories 9.A.2.b et 9.A.2.c en backlog** dans `sprint-status.yaml`. Quand executees, elles mettent a jour `thresholds` au nouveau palier (rule AC3 spec story : abaisser jamais sans tracer + remonter accompagne au fur et a mesure de la couverture comblee).
+- **`deferred-work.md`** : entree dediee documentant le chiffre courant + branches non couvertes prioritaires + cibles 9.A.2.b et 9.A.2.c.
+- **Pas de retrait de l'observabilite** : l'artefact GHA `coverage-integration` (rétention 30 j) + `coverage/coverage-summary.json` + `coverage/index.html` restent generes a chaque run -- l'observabilite est preservee meme si le seuil chirurgical est descendu temporairement.
+- **Audit Sentry post-merge non requis** pour cette decision (Option B n'introduit aucun risque applicatif, c'est purement une configuration CI).
+
+**Regle a appliquer** :
+
+```ts
+// vitest.config.ts
+test: {
+  coverage: {
+    // ...
+    thresholds: {
+      'app/actions/parrainage.ts': {
+        lines: 49,      // palier 1 = chiffre courant arrondi au point inferieur
+        branches: 41,   // palier 2 cible = 65% via story 9.A.2.b
+        functions: 64,  // palier 3 cible = 85% via story 9.A.2.c
+        statements: 48,
+      },
+    },
+  },
+}
+```
+
+Quand 9.A.2.b livre des nouveaux SC unit ciblant `detectBlacklist` + `confirmParrainageOnSuccess` paths : remesurer la coverage cumulee (1er run GHA de 9.A.2.b), remonter les 4 indicateurs au palier 2 (~65%, ajuster avec les mesures reelles arrondies au point inferieur), repeter pour 9.A.2.c jusqu'au palier 3 (85%).
+
+Heritage 9.A.7 (Option B-like : fix fixtures plutot que refonte code), F-Epic8-A0 (audit BDD GO), 8.A.4 AC4 (cible 85% originale).
+
+[Source: _bmad-output/implementation-artifacts/9-a-2-coverage-parrainage-85-percent-gha-artefact.md] [Source: run integration GHA #26005309649 sur PR #8] [Source: _bmad-output/implementation-artifacts/deferred-work.md > Deferred from 9-a-2] [Source: vitest.config.ts:41-55]

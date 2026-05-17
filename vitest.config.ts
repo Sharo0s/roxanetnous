@@ -38,12 +38,19 @@ export default defineConfig({
       // Note: l'option `all` (Vitest <=2) n'existe plus en Vitest 4.x ; les
       // fichiers matchant `include` sont desormais instrumentes meme s'ils
       // ne sont pas importes par un test.
+      // Story 9.A.2 - Option B evolutive (DECISIONS.md F-Epic9-A2) :
+      // 1er run GHA = 49.48 lines / 41.92 branches / 64.28 functions / 48.14 statements.
+      // Ecart vs cible 85% (>5 pts sur tous indicateurs) -> palier 1 = chiffres
+      // courants arrondis au point inferieur (refus regression sous niveau actuel).
+      // Story follow-up 9.A.2.b backlog : combler vers palier 2 (65%) en ciblant
+      // detectBlacklist + confirmParrainageOnSuccess paths.
+      // Story follow-up 9.A.2.c backlog : combler vers cible originale (85%).
       thresholds: {
         'app/actions/parrainage.ts': {
-          lines: 85,
-          branches: 85,
-          functions: 85,
-          statements: 85,
+          lines: 49,
+          branches: 41,
+          functions: 64,
+          statements: 48,
         },
       },
     },

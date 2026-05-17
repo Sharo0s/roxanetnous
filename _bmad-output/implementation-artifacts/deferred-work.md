@@ -1,5 +1,12 @@
 # Deferred Work
 
+## Deferred from: implementation of 9-a-2-coverage-parrainage-85-percent-gha-artefact (2026-05-18)
+
+- **Couverture `app/actions/parrainage.ts` cumulee unit+integration = ~50%** (1er run GHA #26005309649 sur PR #8 : lines 49.48 / branches 41.92 / functions 64.28 / statements 48.14). Option B evolutive retenue (DECISIONS.md F-Epic9-A2) : seuil palier 1 = chiffres courants arrondis au point inferieur (lines 49 / branches 41 / functions 64 / statements 48). Stories follow-up :
+  - **9.A.2.b** (palier 2 -> 65%) : combler les branches `detectBlacklist` (36-101) + `confirmParrainageOnSuccess` paths role inattendu / validation_status_skipped / generate_code_failed (1031-1083). Estimation ~6-8 SC unit. Pre-requis : helper `createSupabaseFromMock` 9.A.1 deja en place.
+  - **9.A.2.c** (palier 3 -> 85% cible originale) : combler les branches restantes `createParrainageRelation` self_referral / 23505 / blacklist_other / meme_ip (524-831) + `revokeFilleuleValidation*` (108-235). Estimation ~5-7 SC unit. Pre-requis : 9.A.2.b livree.
+  - Total estime pour atteindre 85% : ~12-15 SC unit dedies, repartis sur 2 stories pour rester sous le seuil ~0,5-1j-dev par story.
+
 ## Deferred from: code review of 9-a-1-refonte-mocks-supabase-frommock-discriminants-par-table (2026-05-17)
 
 - **`insert().then()` non conforme Promise/A+ (pas de `onRejected`)** [`tests/unit/_lib/supabase-mock.ts:106`] — Pattern hérité de `buildCronFromMock`. Le second argument `reject` est ignoré. Non impactant dans les usages actuels (aucun `.then(null, onRejected)` dans le code applicatif Supabase), mais non conforme à la spec Promises/A+. À corriger si le thenable est jamais consommé dans un contexte rejection.

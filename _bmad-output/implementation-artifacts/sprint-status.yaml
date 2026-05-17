@@ -365,7 +365,7 @@ development_status:
 
   # Mini-epic 9.A - Hardening Epic 8 (7 stories, 9.A.7 = ordre 0 prioritaire)
   9-a-1-refonte-mocks-supabase-frommock-discriminants-par-table: done
-  9-a-2-coverage-parrainage-85-percent-gha-artefact: in-progress
+  9-a-2-coverage-parrainage-85-percent-gha-artefact: review
   9-a-3-suppression-alias-deprecated-sendparrainagebienvenuemarraine: backlog
   9-a-4-rename-sendparrainagefilleuleconfirmation-types-filleulestatut: backlog
   9-a-5-rpc-atomique-parrainage-decrement-compteur: backlog
@@ -375,7 +375,15 @@ development_status:
   # 257e393 du 2026-05-17), jamais re-validee car workflow integration-tests
   # ne se declenche que sur PR. Revelee par la premiere PR Epic 9 (9.A.1).
   # Bloque le merge de #7 (9.A.1) et #8 (9.A.2). Story prioritaire ordre 0.
-  9-a-7-fix-integration-test-regressions-post-epic-8: review
+  9-a-7-fix-integration-test-regressions-post-epic-8: done
+  # 9.A.2.b et 9.A.2.c ajoutees 2026-05-18 a la decouverte Option B evolutive
+  # sur PR #8 9.A.2 : 1er run GHA mesure coverage cumulee unit+integration =
+  # ~50% (lines 49.48 / branches 41.92 / functions 64.28 / statements 48.14),
+  # ecart >5 pts vs cible originale 85%. Option B retenue (seuil palier 1 =
+  # chiffres courants), follow-up sur 2 stories pour atteindre 85% par paliers
+  # (palier 2 = 65%, palier 3 = 85%). DECISIONS.md F-Epic9-A2.
+  9-a-2-b-combler-branches-parrainage-palier-65-percent: backlog
+  9-a-2-c-combler-branches-parrainage-cible-85-percent: backlog
 
   # Mini-epic 9.B - Couverture E2E manquante (2 stories, heritees 7.C)
   9-b-1-e2e-rgpd-cascade-heritee-7-c-3: backlog
