@@ -389,18 +389,74 @@ test.afterAll(async () => {
 
 ### Agent Model Used
 
-{{agent_model_name_version}}
+claude-opus-4-7 (1M context)
 
 ### Debug Log References
 
+- `npm run lint` exit 0 (192 warnings baseline preservee, 0 erreur).
+- `npm run lint:a11y-check` exit 0 (baseline 155, no regression).
+- `npm run a11y:axe:check` exit 0 (8 parcours audites, aucun delta Critical/Serious vs baseline 2026-05-17).
+- `npm run test:unit` exit 0 (87/87 tests).
+- `npm run check:no-direct-notifications-log-insert` exit 0 (aucun INSERT direct hors helper).
+- `npx tsc --noEmit` : 2 erreurs `.next/types/` pre-existantes tolerees (heritage 8.A.4 AC14). 0 erreur sur les fichiers modifies.
+- `npm run build` exit 0 (vercel-build full chain green, aucune route ajoutee).
+- `npm run test:e2e` non execute en local (Sylvain ne lance pas Docker localement, validation par GHA workflow uniquement -- cf. memoire `feedback_test_local_supabase`).
+
 ### Completion Notes List
 
+**Implementation strictement additive (1 fichier cree)** :
+
+- `tests/e2e/parrainage-symetrique.spec.ts` (~330 lignes) : 4 SC tagges `@parrainage-symetrique`.
+  - SC1 [golden-path] parrain accompagne affiche son code sur /accompagne/parrainage : login user3 (accompagne), navigation page parrainage, assertions UI (eyebrow "Mon espace", H1 "Mon parrainage", code "E2ETEST8" visible, boutons copie avec apostrophe U+2019 tolere, compteur "0 sur 5", empty state filleuls).
+  - SC2 [golden-path] filleul accompagnant valide code sur /register : deeplink ?role=accompagnant&parrainage_code=E2ETEST8, avancement wizard name -> localisation -> parrainage, assertion input pre-rempli + message valid avec parrain "Seed" visible. Pas de submit final (evite pollution Resend/Supabase).
+  - SC3 [golden-path] filleul accompagnant bypass visio avec parrain accompagne : miroir 7.C.2 AC4 mais setup parrainee_par=user3 au lieu de user4. Verrouille role-independance OnboardingClient.isFilleule (FR51 + AR-E8.5).
+  - SC4 [golden-path] confirmParrainageOnSuccess proxy BDD : reproduit shape finale attendue post-paiement (parrainages.statut='abonnee' + accompagnants_profiles.validation_source='parrainage' + parrainages_codes.code filleul genere). Stripe Checkout hors-portee Playwright pur.
+
+**Cleanup defensif afterAll** :
+
+- `resetEphemeralRows()` (codes parrainages e2e-test-*, admin_actions_log marker).
+- DELETE parrainages_codes WHERE code IN ('E2ETEST8', 'e2e-test-syme2') -- helper ne touche pas cette table.
+- UPDATE users.parrainee_par=NULL pour user5 -- exception documentee vs convention 7.C.2 (8.D.1 est derniere story Epic 8, retour etat seed plus sain).
+- UPDATE subscriptions.ccc2 vers etat seed expire (current_period_end = now() - 1 day).
+- DELETE subscriptions WHERE stripe_subscription_id LIKE 'sub_e2e_syme%' (SC4 filleul abonne simule).
+- UPDATE accompagnants_profiles.validation_source='manuelle' pour user5 (reset SC4 mute).
+
+**Hors-scope explicitement liste (AC10)** :
+
+- Aucun parcours Stripe Checkout reel (UI hosted non automatisable + couvert par 8.A.4 SC1 integration).
+- Aucune assertion email "bienvenue parrain" / "filleule confirmation" (pas de capture inbox CI, mock Resend defere 7.C.4).
+- Aucun test sens interdits (`accompagne->accompagne`, `accompagnant->accompagne`) -- deja couverts par 8.A.4 SC3/SC4.
+- Aucun test cron `confirm-parrainages` ni recompense Stripe -- 8.A.4 SC6.
+- Aucun test page admin `/admin/parrainages` filtre role -- 8.C.1 livre, tests manuels admin.
+- Aucun test page `/accompagnant/parrainage` -- Epic 2 deja en prod.
+- Aucune modif `playwright-e2e.config.ts`, `package.json`, `vercel.json`, `.github/workflows/e2e-tests.yml` (infra suffit).
+- Aucune migration BDD (heritage F-Epic8-A0 GO sans migration).
+
+**AC7 runs GHA consecutifs verts** :
+
+- Run-id 1 : 25997884389 (https://github.com/Sharo0s/roxanetnous/actions/runs/25997884389) -- en cours, validation post-completion.
+- Run-id 2 : 25997885732 (https://github.com/Sharo0s/roxanetnous/actions/runs/25997885732) -- en cours, validation post-completion.
+
+**Note contexte commit** :
+
+Story commitee en bloc avec l'ensemble Epic 8 (8.A.0 -> 8.C.3 + 8.D.1) : les 10 stories precedentes etaient `done` en sprint-status mais leur code n'etait pas encore pousse dans git (dernier commit = 7.C.2). Strategie acte avec Sylvain en session (option "Un commit unique Epic 8 + 8.D.1").
+
 ### File List
+
+**Cree :**
+- `tests/e2e/parrainage-symetrique.spec.ts` (nouveau fichier, ~330 lignes, 4 SC tagges `@parrainage-symetrique`).
+
+**Modifie (story 8.D.1) :**
+- `_bmad-output/implementation-artifacts/8-d-1-e2e-playwright-parcours-accompagne-accompagnant-golden-path.md` (status `ready-for-dev` -> `review`, Dev Agent Record + File List + DoD a11y + checkbox tasks).
+- `_bmad-output/implementation-artifacts/sprint-status.yaml` (status `ready-for-dev` -> `in-progress` -> `review` -- transition `done` post-merge).
+
+**Inchange (par design AC10) :**
+- `playwright-e2e.config.ts`, `playwright.config.ts`, `vercel.json`, `package.json`, `.github/workflows/e2e-tests.yml`, `tests/e2e/_lib/*`.
 
 ## DoD a11y
 
 **Non applicable** : cette story est purement infrastructurelle (tests E2E Playwright reuse de PO existants). Aucun changement UI applicatif, aucune copy nouvelle, aucun composant React modifie. La regle CLAUDE.md `npm run a11y:axe:check` reste obligatoire avant commit livraison (AC8) pour preserver le baseline 0 violations Critical/Serious sur 7 parcours.
 
-- [ ] **Non applicable** : story infrastructurelle E2E, 0 changement UI applicatif.
-- [ ] Pas de regression `eslint-plugin-jsx-a11y` (`npm run lint:a11y-check` vert en CI) -- baseline 155, no regression.
-- [ ] Pas de regression axe-core (`npm run a11y:axe:check` vert) -- aucun delta Critical/Serious vs baseline existante.
+- [x] **Non applicable** : story infrastructurelle E2E, 0 changement UI applicatif.
+- [x] Pas de regression `eslint-plugin-jsx-a11y` (`npm run lint:a11y-check` vert en CI) -- baseline 155, no regression.
+- [x] Pas de regression axe-core (`npm run a11y:axe:check` vert) -- aucun delta Critical/Serious vs baseline existante (8 parcours audites baseline 2026-05-17).
