@@ -220,15 +220,20 @@ test('[golden-path] filleul accompagnant valide le code sur /register @parrainag
   await page.goto(`/register?role=accompagnant&parrainage_code=${CODE_E2E}`)
 
   // Step 'name' : firstName + lastName + Continuer (cf. register-form.tsx:288-316).
+  // Le bouton "Continuer" n est rendu que pour la step courante
+  // (register-form.tsx:310 `{isCurrent('name') && ...}`), donc unique a ce stade.
   await page.fill('input[name="firstName"]', 'E2E')
   await page.fill('input[name="lastName"]', 'Filleul')
-  await page.getByRole('button', { name: 'Continuer' }).click()
+  await page.getByRole('button', { name: 'Continuer' }).last().click()
 
   // Step 'localisation' : ville + codePostal + Continuer (cf. register-form.tsx:318-344).
-  // CityAutocomplete remplit ville + codePostal via inputs nommés.
-  await page.fill('input[name="ville"]', 'Rennes')
-  await page.fill('input[name="codePostal"]', '35000')
-  await page.getByRole('button', { name: 'Continuer' }).click()
+  // CityAutocomplete (components/ui/city-autocomplete.tsx:143-178) rend 2 inputs
+  // SANS attribut `name` -- on cible donc via placeholder (`Paris`, `75001`).
+  await page.fill('input[placeholder="Paris"]', 'Rennes')
+  await page.fill('input[placeholder="75001"]', '35000')
+  // 2 boutons "Continuer" sont visibles (name + localisation) car les steps
+  // precedentes restent affichees -- on prend le dernier (step courante).
+  await page.getByRole('button', { name: 'Continuer' }).last().click()
 
   // Step 'parrainage' : le code doit etre pre-rempli (initialParrainageCode mount).
   // Le useEffect ligne 94-100 a lance checkParrainageCode au mount -> apres
