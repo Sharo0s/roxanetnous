@@ -13,6 +13,40 @@ export default defineConfig({
     tsconfigPaths: true,
   },
   test: {
+    // Story 9.A.2 : coverage agrege unit + integration au niveau racine `test:`
+    // afin que les hits des 2 projets soient cumules dans un seul rapport.
+    // Seuil per-file applique uniquement a `app/actions/parrainage.ts`
+    // (cible AC4 8.A.4 hardening, retro Epic 8 I2, defer ligne 60 solde).
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'json-summary', 'html'],
+      reportsDirectory: 'coverage',
+      include: ['app/**/*.{ts,tsx}', 'lib/**/*.{ts,tsx}'],
+      exclude: [
+        '**/*.test.ts',
+        '**/*.spec.ts',
+        '**/types.ts',
+        'app/**/layout.tsx',
+        'app/**/page.tsx',
+        'app/**/loading.tsx',
+        'app/**/error.tsx',
+        'app/**/not-found.tsx',
+        '.next/**',
+        'app/api/auth/**',
+        'lib/database.types.ts',
+      ],
+      // Note: l'option `all` (Vitest <=2) n'existe plus en Vitest 4.x ; les
+      // fichiers matchant `include` sont desormais instrumentes meme s'ils
+      // ne sont pas importes par un test.
+      thresholds: {
+        'app/actions/parrainage.ts': {
+          lines: 85,
+          branches: 85,
+          functions: 85,
+          statements: 85,
+        },
+      },
+    },
     projects: [
       {
         resolve: { tsconfigPaths: true },

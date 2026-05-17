@@ -56,6 +56,31 @@ tests/integration/
                                    # Commande ciblee : npm run test:integration -- tests/integration/parrainage/
 ```
 
+## Coverage (story 9.A.2)
+
+Le workflow GHA `integration-tests.yml` execute `npm run test:integration:coverage` (lance les 2 projets vitest, unit + integration, pour cumuler les hits sur `app/actions/parrainage.ts`) et publie l'arborescence `coverage/` comme artefact `coverage-integration` (retention 30 jours).
+
+```bash
+# Local (necessite Supabase local pour cumuler unit + integration)
+npm run test:integration:coverage
+open coverage/index.html
+```
+
+Le bloc `coverage` est defini au niveau racine `test:` dans `vitest.config.ts` (pas dans `projects:`) afin d'agreger les 2 suites dans un seul rapport. Reporters actifs : `text` (logs CI), `json-summary` (`coverage/coverage-summary.json` machine-readable), `html` (`coverage/index.html` debug local).
+
+### Seuil per-file 85% sur `app/actions/parrainage.ts`
+
+Vitest applique un seuil `lines/branches/functions/statements >= 85%` UNIQUEMENT sur `app/actions/parrainage.ts` (cible AC4 8.A.4 hardening, retro Epic 8 I2). Si la couverture cumulee tombe sous 85% sur l'un des 4 indicateurs, `npm run test:integration:coverage` retourne un exit code non-zero et le job GHA echoue.
+
+### Procedure si un commit fait baisser la couverture sous 85%
+
+1. Telecharger l'artefact `coverage-integration` depuis l'onglet Actions de la PR rouge.
+2. Ouvrir `coverage/index.html` ou parser `coverage/coverage-summary.json` pour identifier les branches non couvertes.
+3. **Option A (preferee si ecart faible)** : ajouter des SC unit (`tests/unit/parrainage-symetrie.test.ts` ou fichier dedie) ciblant les branches manquantes, via le helper `createSupabaseFromMock` (`tests/unit/_lib/supabase-mock.ts`).
+4. **Option B (si ecart > 5 pts)** : abaisser le seuil dans `vitest.config.ts` au chiffre courant + tracer la dette dans `deferred-work.md` + ouvrir une story follow-up `9.A.2.b` (ou Epic 10+) + entree `DECISIONS.md F-Epic9-A2`.
+
+Ne JAMAIS baisser le seuil sans tracer la dette.
+
 ## Mocking
 
 `tests/integration/setup.ts` configure les mocks globaux :
