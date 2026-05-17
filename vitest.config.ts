@@ -13,6 +13,47 @@ export default defineConfig({
     tsconfigPaths: true,
   },
   test: {
+    // Story 9.A.2 : coverage agrege unit + integration au niveau racine `test:`
+    // afin que les hits des 2 projets soient cumules dans un seul rapport.
+    // Seuil per-file applique uniquement a `app/actions/parrainage.ts`
+    // (cible AC4 8.A.4 hardening, retro Epic 8 I2, defer ligne 60 solde).
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'json-summary', 'html'],
+      reportsDirectory: 'coverage',
+      include: ['app/**/*.{ts,tsx}', 'lib/**/*.{ts,tsx}'],
+      exclude: [
+        '**/*.test.ts',
+        '**/*.spec.ts',
+        '**/types.ts',
+        'app/**/layout.tsx',
+        'app/**/page.tsx',
+        'app/**/loading.tsx',
+        'app/**/error.tsx',
+        'app/**/not-found.tsx',
+        '.next/**',
+        'app/api/auth/**',
+        'lib/database.types.ts',
+      ],
+      // Note: l'option `all` (Vitest <=2) n'existe plus en Vitest 4.x ; les
+      // fichiers matchant `include` sont desormais instrumentes meme s'ils
+      // ne sont pas importes par un test.
+      // Story 9.A.2 - Option B evolutive (DECISIONS.md F-Epic9-A2) :
+      // 1er run GHA = 49.48 lines / 41.92 branches / 64.28 functions / 48.14 statements.
+      // Ecart vs cible 85% (>5 pts sur tous indicateurs) -> palier 1 = chiffres
+      // courants arrondis au point inferieur (refus regression sous niveau actuel).
+      // Story follow-up 9.A.2.b backlog : combler vers palier 2 (65%) en ciblant
+      // detectBlacklist + confirmParrainageOnSuccess paths.
+      // Story follow-up 9.A.2.c backlog : combler vers cible originale (85%).
+      thresholds: {
+        'app/actions/parrainage.ts': {
+          lines: 49,
+          branches: 41,
+          functions: 64,
+          statements: 48,
+        },
+      },
+    },
     projects: [
       {
         resolve: { tsconfigPaths: true },

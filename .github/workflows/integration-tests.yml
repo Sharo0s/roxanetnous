@@ -54,8 +54,8 @@ jobs:
         env:
           SUPABASE_URL: http://localhost:54321
 
-      - name: Run integration tests
-        run: npm run test:integration
+      - name: Run integration tests with coverage
+        run: npm run test:integration:coverage
         env:
           SUPABASE_URL: http://localhost:54321
           NEXT_PUBLIC_SUPABASE_URL: http://localhost:54321
@@ -63,6 +63,14 @@ jobs:
           STRIPE_WEBHOOK_SECRET: whsec_test_secret_for_integration_tests
           PARRAINAGE_INTERNAL_SECRET: parrainage_internal_secret_for_integration_tests
           CRON_SECRET: test-cron-secret-7b2
+
+      - name: Upload coverage artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-integration
+          path: coverage/
+          retention-days: 30
 
       - name: Stop Supabase
         if: always()
