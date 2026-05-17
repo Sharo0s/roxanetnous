@@ -231,9 +231,15 @@ test('[golden-path] filleul accompagnant valide le code sur /register @parrainag
   // SANS attribut `name` -- on cible donc via placeholder (`Paris`, `75001`).
   await page.fill('input[placeholder="Paris"]', 'Rennes')
   await page.fill('input[placeholder="75001"]', '35000')
+  // Le dropdown autocomplete (suggestions API geo) intercepte les pointer
+  // events sur le bouton "Continuer" -- on le ferme via Escape (handler
+  // city-autocomplete.tsx:127-128) avec fallback `force: true` au clic au
+  // cas ou le dropdown se rouvre suite au re-render.
+  await page.keyboard.press('Escape')
   // 2 boutons "Continuer" sont visibles (name + localisation) car les steps
   // precedentes restent affichees -- on prend le dernier (step courante).
-  await page.getByRole('button', { name: 'Continuer' }).last().click()
+  // `force: true` ignore les pointer events intercepts (dropdown residuel).
+  await page.getByRole('button', { name: 'Continuer' }).last().click({ force: true })
 
   // Step 'parrainage' : le code doit etre pre-rempli (initialParrainageCode mount).
   // Le useEffect ligne 94-100 a lance checkParrainageCode au mount -> apres
