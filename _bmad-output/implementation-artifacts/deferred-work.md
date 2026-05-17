@@ -1,5 +1,10 @@
 # Deferred Work
 
+## Deferred from: code review of 8-d-1-e2e-playwright-parcours-accompagne-accompagnant-golden-path (2026-05-17)
+
+- **`afterAll` sans try/catch inter-blocs : etat partiellement nettoye si un `withPg` echoue** [`tests/e2e/parrainage-symetrique.spec.ts:111-165`] — Les 6 `withPg` sequentiels du `afterAll` n'ont pas de try/catch individuel. Un echec de l'etape 2 (DELETE parrainages_codes) arrete la cascade : `parrainee_par`, subscriptions et `validation_source` restent pollues entre runs. `resetEphemeralRows` ne couvre pas ces tables. Pattern pre-existant dans 7.C.1/7.C.2, non critique grace aux 2 runs GHA consecutifs requis.
+- **SC4 : assertions BDD dans la meme connexion que les inserts, pas d'isolation cross-connexion** [`tests/e2e/parrainage-symetrique.spec.ts:360-403`] — Les SELECTs d'assertion lisent ce que le test vient d'inserer dans la meme connexion auto-commit. Ils ne valident pas l'etat vu par une connexion tierce (applicatif, cron). SC4 est un proxy non-strict par conception (justifie header du spec + AC5). Separation inserts/assertions en deux `withPg` distincts renforcerait l'independance observationnelle -- deferre par design assume.
+
 ## Deferred from: implementation of 8-c-3-wording-ui-neutre-marraine-filleule-parrain-filleul (2026-05-17)
 
 - **F-Epic8-C3 alias 1-release -- supprimer `lib/emails.ts:sendParrainageBienvenueMarraine`** [`lib/emails.ts:596`] -- Alias deprecated conserve 1 release (Epic 9). Filet de securite pour rattraper tout import oublie sur l'ancien nom. Lorsque la prochaine release prod sera deployee et qu'un audit `grep -r "sendParrainageBienvenueMarraine" app/ components/ lib/ tests/` ne remonte plus que la definition de l'alias (lib/emails.ts:596), supprimer la fonction wrapper. Heritage Epic 8 wording neutre. Rappel : mock test `tests/integration/setup.ts:165` et `tests/unit/parrainage-symetrie.test.ts:86` exposent toujours l'alias pour compat -- a retirer en meme temps.

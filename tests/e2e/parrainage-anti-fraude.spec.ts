@@ -66,17 +66,9 @@ test.beforeAll(async () => {
 
 test.afterAll(async () => {
   // Cleanup systematique : supprime toutes les rows parrainages avec code prefix
-  // e2e-test-*. Voir tests/e2e/_lib/fixtures.ts pour la liste exacte des DELETE.
+  // e2e-test-* + admin_actions_log marker='e2e-test'.
+  // Voir tests/e2e/_lib/fixtures.ts pour la liste exacte des DELETE.
   await resetEphemeralRows()
-
-  // Cleanup admin_actions_log : resetEphemeralRows ne traite pas cette table.
-  // On supprime uniquement les rows dont details->>marker = 'e2e-test'. Ce
-  // marker est pose par les tests AC2 (objet details JSONB).
-  await withPg(async (client) => {
-    await client.query(
-      `DELETE FROM public.admin_actions_log WHERE details->>'marker' = 'e2e-test'`,
-    )
-  })
 })
 
 test('[anti-fraude] blacklist meme_email : etat parrainages.bloque + log admin @parrainage-anti-fraude', async () => {

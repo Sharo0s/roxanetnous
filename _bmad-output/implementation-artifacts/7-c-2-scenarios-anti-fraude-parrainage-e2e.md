@@ -1,6 +1,6 @@
 # Story 7.C.2 : Scenarios anti-fraude parrainage E2E
 
-Status: in-progress
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 

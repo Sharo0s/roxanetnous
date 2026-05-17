@@ -1,6 +1,6 @@
 # Story 8.D.1 : E2E Playwright -- parcours `accompagne -> accompagnant` golden path
 
-Status: review
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -475,3 +475,13 @@ Story commitee en bloc avec l'ensemble Epic 8 (8.A.0 -> 8.C.3 + 8.D.1) : les 10 
 - [x] **Non applicable** : story infrastructurelle E2E, 0 changement UI applicatif.
 - [x] Pas de regression `eslint-plugin-jsx-a11y` (`npm run lint:a11y-check` vert en CI) -- baseline 155, no regression.
 - [x] Pas de regression axe-core (`npm run a11y:axe:check` vert) -- aucun delta Critical/Serious vs baseline existante (8 parcours audites baseline 2026-05-17).
+
+### Review Findings
+
+_Code review via bmad-code-review -- 2026-05-17 (3 couches : Blind Hunter + Edge Case Hunter + Acceptance Auditor). 3 patches, 2 defers, 9 dismissed._
+
+- [x] [Review][Patch] Guard `toHaveLength(1)` manquant avant `rows[0]` en SC3 [tests/e2e/parrainage-symetrique.spec.ts:302] — SC4 applique systematiquement ce guard (lignes 370/386/400) ; SC3 accede directement a `result.rows[0]?.parrainee_par` sans verification prealable. Un UUID user5 absent du seed retournerait `undefined` avec un message d'erreur trompeur. Ajouter `expect(result.rows).toHaveLength(1)` avant l'assertion `.toBe(ACCOMPAGNE_ID)`.
+- [x] [Review][Patch] Doublon DELETE `admin_actions_log` dans `parrainage-anti-fraude.afterAll` [tests/e2e/parrainage-anti-fraude.spec.ts] — la consolidation de ce DELETE dans `resetEphemeralRows` (fixtures.ts) rend le DELETE explicite de `afterAll` anti-fraude redondant (il s'execute deux fois : via `resetEphemeralRows` puis via le bloc `withPg` dedie). Supprimer le bloc withPg explicite qui cible `admin_actions_log` dans l'`afterAll` de `parrainage-anti-fraude.spec.ts`.
+- [x] [Review][Patch] Conflit UNIQUE `parrainages_codes.code` non absorbe dans `ensureAccompagneParrainSetup` [tests/e2e/parrainage-symetrique.spec.ts:94-102] — l'upsert sur `ON CONFLICT (user_id)` ne couvre pas le cas ou un autre user_id possede deja `code='E2ETEST8'` dans la colonne UNIQUE `code`. Si `FILLEULE_ID` avait ete seed avec ce code par un run anterieur non nettoye, l'INSERT declenche une erreur `23505` non capturee. Ajouter `ON CONFLICT (code) DO NOTHING` ou verifier l'absence prealable via DELETE ciblant le code avant l'upsert.
+- [x] [Review][Defer] `afterAll` : echec d'un bloc `withPg` avale silencieusement, blocs subsequents non executes [tests/e2e/parrainage-symetrique.spec.ts:111-165] — les 6 `withPg` du `afterAll` sont independants et sequentiels sans try/catch. Un echec de l'etape 2 (DELETE parrainages_codes) empeche le reset de `parrainee_par`, la subscription et `validation_source`. `resetEphemeralRows` ne couvre pas ces tables. Pollution inter-run possible. Pattern pre-existant dans 7.C.1/7.C.2 -- deferred, pre-existing
+- [x] [Review][Defer] SC4 : assertions BDD dans la meme connexion que les inserts, pas d'isolation cross-connexion [tests/e2e/parrainage-symetrique.spec.ts:360-403] — les SELECTs d'assertion lisent ce que le test vient d'inserer dans la meme connexion auto-commit. Ils ne valident pas l'etat vu par l'applicatif (cron/server action) depuis une connexion tierce. SC4 proxy BDD non-strict par conception (justifie dans header du spec), mais la separation inserts/assertions en deux withPg distincts renforcerait l'independance observationnelle. Deferre par design assume (AC5 spec). -- deferred, pre-existing

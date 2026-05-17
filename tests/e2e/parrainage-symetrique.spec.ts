@@ -89,8 +89,14 @@ async function ensureAccompagneParrainSetup(): Promise<void> {
       [SUB_CCC2_ID],
     )
 
-    // parrainages_codes : INSERT ON CONFLICT (user_id) DO UPDATE SET code.
-    // PRIMARY KEY (user_id) + UNIQUE (code) -> upsert sur user_id ecrase le code.
+    // parrainages_codes : eviction prealable du code si un autre user_id le possede
+    // (contrainte UNIQUE sur code independante du PK user_id). L ON CONFLICT (user_id)
+    // ne couvre pas ce cas et provoquerait une erreur 23505 non capturee.
+    await client.query(
+      `DELETE FROM public.parrainages_codes WHERE code = $1 AND user_id != $2`,
+      [CODE_E2E, ACCOMPAGNE_ID],
+    )
+    // Upsert sur user_id PK : reinitialise compteur si la row existe deja.
     await client.query(
       `INSERT INTO public.parrainages_codes (user_id, code, compteur_confirmes, total_recompenses)
        VALUES ($1, $2, 0, 0)
@@ -299,6 +305,7 @@ test('[golden-path] filleul accompagnant bypass visio avec parrain accompagne @p
       `SELECT parrainee_par FROM public.users WHERE id = $1`,
       [FILLEULE_ID],
     )
+    expect(result.rows).toHaveLength(1)
     expect(result.rows[0]?.parrainee_par).toBe(ACCOMPAGNE_ID)
   })
 })
