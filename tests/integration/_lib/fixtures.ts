@@ -101,6 +101,23 @@ export async function createTestSubscription(
 
 export type TestProfile = { id: string; userId: string }
 
+// Story 9.A.7 : la migration 20260510234500_accompagnantes_profiles_a_completer_default_and_check
+// a introduit (a) un DEFAULT 'a_completer' sur validation_status + (b) un CHECK
+// `accompagnants_profiles_completion_check` qui exige ville/code_postal/experience/
+// specialites/diplomes renseignes des que validation_status != 'a_completer'.
+// Le trigger handle_new_user cree desormais une row avec validation_status='a_completer'
+// et tous les champs metier vides ; tout UPDATE vers 'valide'/'en_attente'/'refuse'
+// sans renseigner ces champs viole le CHECK et echoue silencieusement (PostgREST
+// ne throw pas si on n'inspecte pas .error). Les helpers fournissent donc desormais
+// des valeurs metier par defaut + propagent l'erreur si l'UPDATE/INSERT echoue.
+const ACCOMPAGNANT_PROFILE_DEFAULTS = {
+  ville: 'Rennes',
+  code_postal: '35000',
+  experience: 'Test fixture experience',
+  specialites: ['fixture'] as string[],
+  diplomes: ['fixture'] as string[],
+} as const
+
 // Le trigger handle_new_user cree deja un profile pour les roles 'accompagnant'
 // et 'accompagne'. Ces helpers retournent le profile existant (UPDATE pour enrichir
 // les champs metier) plutot que d'INSERT en doublon.
@@ -116,10 +133,17 @@ export async function createTestAccompagnanteProfile(
     .maybeSingle()
 
   if (existing) {
-    await supabase
+    const { error: updateError } = await supabase
       .from('accompagnants_profiles')
-      .update({ validation_status: 'valide', adresse: opts?.adresse ?? null })
+      .update({
+        validation_status: 'valide',
+        adresse: opts?.adresse ?? null,
+        ...ACCOMPAGNANT_PROFILE_DEFAULTS,
+      })
       .eq('id', existing.id)
+    if (updateError) {
+      throw new Error(`createTestAccompagnanteProfile UPDATE echec : ${updateError.message}`)
+    }
     track('accompagnants_profiles', existing.id)
     return { id: existing.id, userId }
   }
@@ -130,6 +154,7 @@ export async function createTestAccompagnanteProfile(
       user_id: userId,
       validation_status: 'valide',
       adresse: opts?.adresse ?? null,
+      ...ACCOMPAGNANT_PROFILE_DEFAULTS,
     })
     .select('id')
     .single()

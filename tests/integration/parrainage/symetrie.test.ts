@@ -145,7 +145,12 @@ describe('Parrainage symetrique — Epic 8 (8.A.4)', () => {
       const profileSeed = await createTestAccompagnanteProfile(filleul.id)
       await supabase
         .from('accompagnants_profiles')
-        .update({ validation_status: 'en_attente', validation_source: null })
+        // Story 9.A.7 : validation_source NOT NULL DEFAULT 'manuelle' (migration
+        // 20260428130104) -- on ne peut pas passer null. La fixture etend deja les
+        // champs metier requis par le CHECK accompagnants_profiles_completion_check
+        // (migration 20260510234500). UPDATE partiel laisse les champs metier en
+        // place donc CHECK ok.
+        .update({ validation_status: 'en_attente', validation_source: 'manuelle' })
         .eq('id', profileSeed.id)
     }
 
@@ -285,7 +290,12 @@ describe('Parrainage symetrique — Epic 8 (8.A.4)', () => {
       const profileSeed = await createTestAccompagnanteProfile(filleul.id)
       await supabase
         .from('accompagnants_profiles')
-        .update({ validation_status: 'en_attente', validation_source: null })
+        // Story 9.A.7 : validation_source NOT NULL DEFAULT 'manuelle' (migration
+        // 20260428130104) -- on ne peut pas passer null. La fixture etend deja les
+        // champs metier requis par le CHECK accompagnants_profiles_completion_check
+        // (migration 20260510234500). UPDATE partiel laisse les champs metier en
+        // place donc CHECK ok.
+        .update({ validation_status: 'en_attente', validation_source: 'manuelle' })
         .eq('id', profileSeed.id)
     }
 
