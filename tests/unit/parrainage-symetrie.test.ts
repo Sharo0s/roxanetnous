@@ -102,6 +102,7 @@ import {
   confirmParrainageOnSuccess,
 } from '@/app/actions/parrainage'
 import { GET as cronConfirmParrainagesGET } from '@/app/api/cron/confirm-parrainages/route'
+import { createSupabaseFromMock } from './_lib/supabase-mock'
 
 // ─── Constantes ───────────────────────────────────────────────────────────────
 const VALID_CODE = 'ABCD2345'
@@ -139,19 +140,10 @@ describe('validateCode — parrain accompagné', () => {
     //  call 3 : users.select('role, first_name').eq('id', userId).maybeSingle()  [NOUVEAU]
     //  call 4 : subscriptions.select('status').eq('user_id', userId).maybeSingle()
     const rpc = buildRpcAllowed()
-    let callIdx = 0
-    const tables: Record<string, unknown>[] = [
-      { user_id: PARRAIN_ACCOMPAGNE_ID },             // parrainages_codes
-      { role: 'accompagne', first_name: 'Alice' },    // users (role+first_name)
-      { status: 'active' },                            // subscriptions
-    ]
-    const fromMock = vi.fn(() => {
-      const data = tables[callIdx++] ?? null
-      return {
-        select: vi.fn().mockReturnThis(),
-        eq: vi.fn().mockReturnThis(),
-        maybeSingle: vi.fn().mockResolvedValue({ data, error: null }),
-      }
+    const { fromMock } = createSupabaseFromMock({
+      parrainages_codes: [{ data: { user_id: PARRAIN_ACCOMPAGNE_ID }, error: null }],
+      users: [{ data: { role: 'accompagne', first_name: 'Alice' }, error: null }],
+      subscriptions: [{ data: { status: 'active' }, error: null }],
     })
     mockCreateClient.mockResolvedValue({ ...rpc, from: fromMock })
 
@@ -166,19 +158,10 @@ describe('validateCode — parrain accompagné', () => {
 
   it('SC2 : sub cancelled -> { valid: false, reason: "marraine_subscription_inactive" }', async () => {
     const rpc = buildRpcAllowed()
-    let callIdx = 0
-    const tables: Record<string, unknown>[] = [
-      { user_id: PARRAIN_ACCOMPAGNE_ID },
-      { role: 'accompagne', first_name: 'Alice' },
-      { status: 'cancelled' },
-    ]
-    const fromMock = vi.fn(() => {
-      const data = tables[callIdx++] ?? null
-      return {
-        select: vi.fn().mockReturnThis(),
-        eq: vi.fn().mockReturnThis(),
-        maybeSingle: vi.fn().mockResolvedValue({ data, error: null }),
-      }
+    const { fromMock } = createSupabaseFromMock({
+      parrainages_codes: [{ data: { user_id: PARRAIN_ACCOMPAGNE_ID }, error: null }],
+      users: [{ data: { role: 'accompagne', first_name: 'Alice' }, error: null }],
+      subscriptions: [{ data: { status: 'cancelled' }, error: null }],
     })
     mockCreateClient.mockResolvedValue({ ...rpc, from: fromMock })
 
@@ -194,24 +177,19 @@ describe('validateCode — parrain accompagné', () => {
 describe('validateCode — parrain accompagnant (non-régression)', () => {
   it('SC3 : validation_status=valide + sub active -> { valid: true }', async () => {
     const rpc = buildRpcAllowed()
-    let callIdx = 0
-    const tables: Record<string, unknown>[] = [
-      { user_id: PARRAIN_ACCOMPAGNANT_ID },
-      { role: 'accompagnant', first_name: 'Bob' },
-      // call 4 : users embed avec accompagnants_profiles (path accompagnant)
-      {
-        first_name: 'Bob',
-        accompagnants_profiles: [{ validation_status: 'valide' }],
-      },
-      { status: 'active' },
-    ]
-    const fromMock = vi.fn(() => {
-      const data = tables[callIdx++] ?? null
-      return {
-        select: vi.fn().mockReturnThis(),
-        eq: vi.fn().mockReturnThis(),
-        maybeSingle: vi.fn().mockResolvedValue({ data, error: null }),
-      }
+    const { fromMock } = createSupabaseFromMock({
+      parrainages_codes: [{ data: { user_id: PARRAIN_ACCOMPAGNANT_ID }, error: null }],
+      users: [
+        { data: { role: 'accompagnant', first_name: 'Bob' }, error: null },
+        {
+          data: {
+            first_name: 'Bob',
+            accompagnants_profiles: [{ validation_status: 'valide' }],
+          },
+          error: null,
+        },
+      ],
+      subscriptions: [{ data: { status: 'active' }, error: null }],
     })
     mockCreateClient.mockResolvedValue({ ...rpc, from: fromMock })
 
@@ -230,35 +208,16 @@ describe('validateCode — parrain accompagnant (non-régression)', () => {
 // ═══════════════════════════════════════════════════════════════════════════════
 describe('createParrainageRelation — guard invalid_filleul_role', () => {
   it('SC4 : filleul accompagné -> { ok:false, reason:"invalid_filleul_role" } + Sentry', async () => {
-    // validateCode interne appelé en premier -> parrain accompagné valide
+    // validateCode interne appelé en premier -> parrain accompagné valide.
+    // createParrainageRelation post-validateCode lookup guard filleul -> role accompagné (interdit).
     const rpcValidate = buildRpcAllowed()
-    let callIdx = 0
-    // validateCode appels : parrainages_codes / users(role+fn) / subscriptions
-    // createParrainageRelation appels post-validateCode : users(role filleul)
-    const tablesValidate: Record<string, unknown>[] = [
-      { user_id: PARRAIN_ACCOMPAGNE_ID },
-      { role: 'accompagne', first_name: 'Alice' },
-      { status: 'active' },
-    ]
-    // Appel guard filleul : role = accompagné (interdit)
-    const fromMock = vi.fn(() => {
-      if (callIdx < tablesValidate.length) {
-        const data = tablesValidate[callIdx++]
-        return {
-          select: vi.fn().mockReturnThis(),
-          eq: vi.fn().mockReturnThis(),
-          maybeSingle: vi.fn().mockResolvedValue({ data, error: null }),
-        }
-      }
-      // Après validateCode : guard filleul -> role accompagné
-      return {
-        select: vi.fn().mockReturnThis(),
-        eq: vi.fn().mockReturnThis(),
-        maybeSingle: vi.fn().mockResolvedValue({
-          data: { role: 'accompagne' },
-          error: null,
-        }),
-      }
+    const { fromMock } = createSupabaseFromMock({
+      parrainages_codes: [{ data: { user_id: PARRAIN_ACCOMPAGNE_ID }, error: null }],
+      users: [
+        { data: { role: 'accompagne', first_name: 'Alice' }, error: null }, // validateCode
+        { data: { role: 'accompagne' }, error: null },                      // guard filleul
+      ],
+      subscriptions: [{ data: { status: 'active' }, error: null }],
     })
     mockCreateClient.mockResolvedValue({ ...rpcValidate, from: fromMock })
 
@@ -286,7 +245,6 @@ describe('createParrainageRelation — guard invalid_filleul_role', () => {
 describe('createParrainageRelation — golden path symétrique accompagné→accompagnant', () => {
   it('SC5 : parrain accompagné + filleul accompagnant -> { ok:true }', async () => {
     const rpc = buildRpcAllowed()
-    let callIdx = 0
 
     // Séquence des from() dans cet ordre :
     //  validateCode : parrainages_codes / users(role+fn) / subscriptions
@@ -296,48 +254,21 @@ describe('createParrainageRelation — golden path symétrique accompagné→acc
     //  detectBlacklist : users(email) / (pas d'autres filleules)
     //  UPDATE users(parrainee_par)
     //  loadNamesForAdminEmail : users(marraine) / users(filleule)
-    const responses: Array<{ data: unknown; error: null }> = [
-      { data: { user_id: PARRAIN_ACCOMPAGNE_ID }, error: null },          // parrainages_codes
-      { data: { role: 'accompagne', first_name: 'Alice' }, error: null }, // users role+fn (validateCode)
-      { data: { status: 'active' }, error: null },                         // subscriptions
-      { data: { role: 'accompagnant' }, error: null },                     // guard filleul
-      { data: null, error: null },                                          // idempotence check
-    ]
-
-    // Trace les arguments des appels .update(...) — AC4 demande explicitement
-    // que users.parrainee_par soit posé au parrain.id sur le golden path.
-    const updatePayloads: Array<Record<string, unknown>> = []
-    const fromCalls: string[] = []
-
-    const fromMock = vi.fn((table: string) => {
-      fromCalls.push(table)
-      const resp = callIdx < responses.length ? responses[callIdx++] : { data: null, error: null }
-      return {
-        select: vi.fn().mockReturnThis(),
-        eq: vi.fn().mockReturnThis(),
-        neq: vi.fn().mockReturnThis(),
-        not: vi.fn().mockReturnThis(),
-        is: vi.fn().mockReturnThis(),
-        in: vi.fn().mockReturnThis(),
-        order: vi.fn().mockReturnThis(),
-        limit: vi.fn().mockReturnThis(),
-        update: vi.fn((payload: Record<string, unknown>) => {
-          updatePayloads.push({ table, ...payload })
-          return {
-            eq: vi.fn().mockReturnThis(),
-            is: vi.fn().mockResolvedValue({ error: null }),
-          }
-        }),
-        insert: vi.fn().mockReturnValue({
-          select: vi.fn().mockReturnThis(),
-          single: vi.fn().mockResolvedValue({
-            data: { id: PARRAINAGE_ID },
-            error: null,
-          }),
-        }),
-        maybeSingle: vi.fn().mockResolvedValue(resp),
-        single: vi.fn().mockResolvedValue(resp),
-      }
+    const { fromMock, capturedUpdates } = createSupabaseFromMock({
+      parrainages_codes: [{ data: { user_id: PARRAIN_ACCOMPAGNE_ID }, error: null }],
+      subscriptions: [{ data: { status: 'active' }, error: null }],
+      users: [
+        { data: { role: 'accompagne', first_name: 'Alice' }, error: null }, // validateCode
+        { data: { role: 'accompagnant' }, error: null },                    // guard filleul
+        { data: null, error: null },                                         // detectBlacklist email lookup
+        { data: { email: 'alice@ex.fr', first_name: 'Alice' }, error: null }, // loadNames marraine
+        { data: { email: 'carl@ex.fr', first_name: 'Carl' }, error: null },   // loadNames filleule
+      ],
+      // parrainages : (1) idempotence check -> null  (2) INSERT -> { id: PARRAINAGE_ID }
+      parrainages: [
+        { data: null, error: null },
+        { data: { id: PARRAINAGE_ID }, error: null },
+      ],
     })
     mockCreateClient.mockResolvedValue({ ...rpc, from: fromMock })
 
@@ -359,8 +290,10 @@ describe('createParrainageRelation — golden path symétrique accompagné→acc
 
     // AC4 — vérifie qu'un UPDATE a bien été émis sur la table users avec
     // parrainee_par = parrain.id (clé du bypass onboarding downstream).
-    const parraineParUpdate = updatePayloads.find(
-      (p) => p.table === 'users' && p.parrainee_par === PARRAIN_ACCOMPAGNE_ID,
+    const parraineParUpdate = capturedUpdates.find(
+      (u) =>
+        u.table === 'users' &&
+        (u.payload as Record<string, unknown>)?.parrainee_par === PARRAIN_ACCOMPAGNE_ID,
     )
     expect(parraineParUpdate).toBeDefined()
   })
@@ -392,42 +325,33 @@ describe('confirmParrainageOnSuccess — parrain accompagné', () => {
     //    8. users.select(email,fn filleule).eq.single
     //    9. admin_actions_log.insert
 
-    let adminCallIdx = 0
-    const adminResponses = [
-      // 1 : parrainage row
-      {
-        data: {
-          id: PARRAINAGE_ID,
-          statut: 'inscrite',
-          marraine_id: PARRAIN_ACCOMPAGNE_ID,
-          filleule_id: FILLEUL_ACCOMPAGNANT_ID,
+    const { fromMock: adminFrom } = createSupabaseFromMock({
+      // 1 : parrainage row (select.eq.eq.order.limit.maybeSingle)
+      // 2 : update parrainages (update.eq.eq.select -> lockedRows)
+      parrainages: [
+        {
+          data: {
+            id: PARRAINAGE_ID,
+            statut: 'inscrite',
+            marraine_id: PARRAIN_ACCOMPAGNE_ID,
+            filleule_id: FILLEUL_ACCOMPAGNANT_ID,
+          },
+          error: null,
         },
-      },
-      // 2 : role parrain
-      { data: { role: 'accompagne' } },
-      // 3 : sub parrain
-      { data: { status: parrainSubStatus } },
-      // 4 : filleule profile
-      { data: { id: 'profile-filleule-id' } },
-    ]
-
-    const adminFrom = vi.fn(() => {
-      const resp = adminCallIdx < adminResponses.length
-        ? adminResponses[adminCallIdx++]
-        : { data: [{ id: 'x' }] }
-      return {
-        select: vi.fn().mockReturnThis(),
-        eq: vi.fn().mockReturnThis(),
-        order: vi.fn().mockReturnThis(),
-        limit: vi.fn().mockReturnThis(),
-        update: vi.fn().mockReturnValue({
-          eq: vi.fn().mockReturnThis(),
-          select: vi.fn().mockResolvedValue({ data: [{ id: PARRAINAGE_ID }], error: null }),
-        }),
-        insert: vi.fn().mockResolvedValue({ data: null, error: null }),
-        single: vi.fn().mockResolvedValue({ data: { email: 'x@ex.fr', first_name: 'X' }, error: null }),
-        maybeSingle: vi.fn().mockResolvedValue({ data: resp.data, error: null }),
-      }
+        { data: [{ id: PARRAINAGE_ID }], error: null }, // update.select -> lockedRows (length=1)
+      ],
+      // role parrain (maybeSingle) — email/fn marraine+filleule (single×2)
+      users: [
+        { data: { role: 'accompagne' }, error: null },
+        { data: { email: 'x@ex.fr', first_name: 'X' }, error: null },
+        { data: { email: 'x@ex.fr', first_name: 'X' }, error: null },
+      ],
+      subscriptions: [{ data: { status: parrainSubStatus }, error: null }],
+      // filleule profile (maybeSingle) — update accompagnants_profiles (update.eq.eq.select)
+      accompagnants_profiles: [
+        { data: { id: 'profile-filleule-id' }, error: null },
+        { data: [{ id: 'profile-filleule-id' }], error: null }, // update.select -> validationUpdated
+      ],
     })
 
     // Client non-admin (auth.getUser)
@@ -469,55 +393,6 @@ describe('confirmParrainageOnSuccess — parrain accompagné', () => {
 // `coupon.metadata.role_parrain` + `admin_actions_log.details.role_parrain` +
 // `sendParrainageRecompense({ role })`.
 // ═══════════════════════════════════════════════════════════════════════════════
-
-type CronTableResponses = {
-  // Réponses ordonnées par appel from(table) successif.
-  parrainages?: unknown[]
-  parrainages_codes?: unknown[]
-  users?: unknown[]
-  accompagnants_profiles?: unknown[]
-  admin_actions_log?: unknown[]
-}
-
-function buildCronFromMock(responses: CronTableResponses) {
-  const indices: Record<string, number> = {}
-  const calls: string[] = []
-  const adminLogInserts: Array<Record<string, unknown>> = []
-
-  const fromMock = vi.fn((table: string) => {
-    calls.push(table)
-    indices[table] = indices[table] ?? 0
-    const pool = (responses as Record<string, unknown[] | undefined>)[table] ?? []
-    const item = pool[indices[table]++] ?? null
-
-    // Cas spécial admin_actions_log.insert : on capture le payload.
-    const baseChain = {
-      select: vi.fn().mockReturnThis(),
-      eq: vi.fn().mockReturnThis(),
-      neq: vi.fn().mockReturnThis(),
-      lte: vi.fn().mockReturnThis(),
-      gte: vi.fn().mockReturnThis(),
-      order: vi.fn().mockReturnThis(),
-      not: vi.fn().mockReturnThis(),
-      is: vi.fn().mockReturnThis(),
-      in: vi.fn().mockReturnThis(),
-      limit: vi.fn().mockResolvedValue(item ?? { data: null, error: null }),
-      single: vi.fn().mockResolvedValue(item ?? { data: null, error: null }),
-      maybeSingle: vi.fn().mockResolvedValue(item ?? { data: null, error: null }),
-      update: vi.fn().mockReturnValue({
-        eq: vi.fn().mockReturnThis(),
-        select: vi.fn().mockResolvedValue(item ?? { data: null, error: null }),
-      }),
-      insert: vi.fn((payload: Record<string, unknown>) => {
-        if (table === 'admin_actions_log') adminLogInserts.push(payload)
-        return Promise.resolve({ data: null, error: null })
-      }),
-    }
-    return baseChain
-  })
-
-  return { fromMock, calls, adminLogInserts }
-}
 
 function buildClaimRpc(claimResult: { claimed: boolean; total_recompenses?: number } | null) {
   return vi.fn((rpcName: string) => {
@@ -572,7 +447,7 @@ describe('cron confirm-parrainages — récompense role-aware (8.A.3)', () => {
     mockStripeSubsUpdate.mockResolvedValue({})
     mockSendParrainageRecompense.mockResolvedValue(undefined)
 
-    const { fromMock, adminLogInserts } = buildCronFromMock({
+    const { fromMock, capturedInserts } = createSupabaseFromMock({
       parrainages: [
         // 1er from('parrainages') : .select.eq.lte.limit -> array de rows
         { data: [{ id: PARRAINAGE_ROW_ID, marraine_id: MARRAINE_ID, filleule_id: FILLEUL_ID, filleule_abonnee_at: new Date().toISOString() }], error: null },
@@ -614,6 +489,7 @@ describe('cron confirm-parrainages — récompense role-aware (8.A.3)', () => {
     })
 
     // admin_actions_log.details.role_parrain
+    const adminLogInserts = (capturedInserts.admin_actions_log ?? []) as Array<Record<string, unknown>>
     const appliedLog = adminLogInserts.find((l) => l.action_type === 'parrainage_recompense_appliquee')
     expect(appliedLog).toBeDefined()
     expect((appliedLog?.details as Record<string, unknown>)?.role_parrain).toBe('accompagne')
@@ -637,7 +513,7 @@ describe('cron confirm-parrainages — récompense role-aware (8.A.3)', () => {
     })
     mockStripeCouponsCreate.mockResolvedValue({ id: 'coupon_never_created' })
 
-    const { fromMock } = buildCronFromMock({
+    const { fromMock } = createSupabaseFromMock({
       parrainages: [
         { data: [{ id: PARRAINAGE_ROW_ID, marraine_id: MARRAINE_ID, filleule_id: FILLEUL_ID, filleule_abonnee_at: new Date().toISOString() }], error: null },
         { data: [{ id: PARRAINAGE_ROW_ID }], error: null },
@@ -682,7 +558,7 @@ describe('cron confirm-parrainages — récompense role-aware (8.A.3)', () => {
     mockStripeSubsUpdate.mockResolvedValue({})
     mockSendParrainageRecompense.mockResolvedValue(undefined)
 
-    const { fromMock, adminLogInserts } = buildCronFromMock({
+    const { fromMock, capturedInserts } = createSupabaseFromMock({
       parrainages: [
         { data: [{ id: PARRAINAGE_ROW_ID, marraine_id: MARRAINE_ID, filleule_id: FILLEUL_ID, filleule_abonnee_at: new Date().toISOString() }], error: null },
         { data: [{ id: PARRAINAGE_ROW_ID }], error: null },
@@ -718,6 +594,7 @@ describe('cron confirm-parrainages — récompense role-aware (8.A.3)', () => {
       role_parrain: 'accompagnant',
     })
 
+    const adminLogInserts = (capturedInserts.admin_actions_log ?? []) as Array<Record<string, unknown>>
     const appliedLog = adminLogInserts.find((l) => l.action_type === 'parrainage_recompense_appliquee')
     expect((appliedLog?.details as Record<string, unknown>)?.role_parrain).toBe('accompagnant')
 
@@ -736,7 +613,7 @@ describe('cron confirm-parrainages — récompense role-aware (8.A.3)', () => {
       planType: 'mensuel',
     })
 
-    const { fromMock } = buildCronFromMock({
+    const { fromMock } = createSupabaseFromMock({
       parrainages: [
         { data: [{ id: PARRAINAGE_ROW_ID, marraine_id: MARRAINE_ID, filleule_id: FILLEUL_ID, filleule_abonnee_at: new Date().toISOString() }], error: null },
         { data: [{ id: PARRAINAGE_ROW_ID }], error: null },

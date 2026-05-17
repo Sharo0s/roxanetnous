@@ -364,7 +364,7 @@ development_status:
   epic-9: in-progress
 
   # Mini-epic 9.A - Hardening Epic 8 (7 stories, 9.A.7 = ordre 0 prioritaire)
-  9-a-1-refonte-mocks-supabase-frommock-discriminants-par-table: ready-for-dev
+  9-a-1-refonte-mocks-supabase-frommock-discriminants-par-table: done
   9-a-2-coverage-parrainage-85-percent-gha-artefact: backlog
   9-a-3-suppression-alias-deprecated-sendparrainagebienvenuemarraine: backlog
   9-a-4-rename-sendparrainagefilleuleconfirmation-types-filleulestatut: backlog
