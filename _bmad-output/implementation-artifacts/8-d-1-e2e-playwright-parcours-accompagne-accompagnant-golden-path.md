@@ -434,8 +434,23 @@ claude-opus-4-7 (1M context)
 
 **AC7 runs GHA consecutifs verts** :
 
-- Run-id 1 : 25997884389 (https://github.com/Sharo0s/roxanetnous/actions/runs/25997884389) -- en cours, validation post-completion.
-- Run-id 2 : 25997885732 (https://github.com/Sharo0s/roxanetnous/actions/runs/25997885732) -- en cours, validation post-completion.
+Premier batch (echec SC2 -- selecteur invalide + dropdown autocomplete intercepte click) :
+- Run 1 : 25997884389 -- **failure** (SC2 timeout `input[name="ville"]` -- CityAutocomplete sans attribut `name`).
+- Run 2 : 25997885732 -- **failure** (meme cause).
+
+Fix 1 commit `0438400` : selecteur via placeholder `Paris`/`75001` + `.last()` defensif.
+
+Deuxieme batch (1 vert flake + 1 echec dropdown) :
+- Run 3 : 25998074834 -- **success** (timing favorable, pas de suggestions geo a temps).
+- Run 4 : 25998076683 -- **failure** (dropdown autocomplete `<li> intercepts pointer events`).
+
+Fix 2 commit `85e5af3` : `page.keyboard.press('Escape')` + `click({ force: true })` defensif.
+
+Troisieme batch (2 verts consecutifs -- AC7 satisfait) :
+- Run 5 : 25998214403 -- **success** (https://github.com/Sharo0s/roxanetnous/actions/runs/25998214403).
+- Run 6 : 25998215894 -- **success** (https://github.com/Sharo0s/roxanetnous/actions/runs/25998215894).
+
+**AC7 satisfait** : 2 runs GHA consecutifs verts validant les 10 tests E2E (4 SC 8.D.1 tagges `@parrainage-symetrique` + smoke 7.C.1 + 3 SC anti-fraude 7.C.2).
 
 **Note contexte commit** :
 
