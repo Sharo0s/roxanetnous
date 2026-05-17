@@ -142,9 +142,16 @@ vi.mock('next/server', async () => {
 // Mock next/cache : neutralise `revalidatePath` (le vrai throw `Invariant: static
 // generation store missing` en dehors d'un request scope). Story 8.A.4 :
 // `confirmParrainageOnSuccess` appelle revalidatePath en fin de chemin.
+// Story 9.A.7 : ajout `unstable_cache` passthrough -- `lib/departements.ts:17`
+// l'utilise et la chaine d'imports `app/actions/annonces.ts` -> `lib/departements`
+// faisait crasher `tests/integration/annonces-toggle/idempotence-publiee.test.ts`
+// au chargement avec « No "unstable_cache" export is defined on the "next/cache" mock ».
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const passthroughCache = <T extends (...args: any[]) => any>(fn: T): T => fn
 vi.mock('next/cache', () => ({
   revalidatePath: vi.fn(),
   revalidateTag: vi.fn(),
+  unstable_cache: passthroughCache,
 }))
 
 // Mock @/lib/emails : capture les sendXxxEmail synchrones du webhook Stripe.
