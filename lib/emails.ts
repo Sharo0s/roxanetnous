@@ -535,7 +535,7 @@ export async function sendRenewalReminderEmail(params: {
   }
 }
 
-export async function sendParrainageBienvenueMarraine(params: {
+export async function sendParrainageBienvenueParrain(params: {
   email: string
   firstName: string
   code: string
@@ -561,12 +561,76 @@ export async function sendParrainageBienvenueMarraine(params: {
           <p>Comment ça marche :</p>
           <ul>
             <li>Partagez ce code avec un accompagnant de votre réseau professionnel.</li>
-            <li>À son inscription, elle s'appuie sur votre garantie : pas de vérification de documents ni de visio, et son profil est activé dès la souscription.</li>
+            <li>À son inscription, il s'appuie sur votre garantie : pas de vérification de documents ni de visio, et son profil est activé dès la souscription.</li>
             <li>5 parrainages confirmés vous offrent <strong>6 mois d'abonnement gratuit</strong>.</li>
           </ul>
           <p style="margin-top: 24px;">
             <a href="${dashboardUrl}" style="background: #000; color: #fff; padding: 12px 24px; text-decoration: none; display: inline-block;">
               Accéder à mon espace
+            </a>
+          </p>
+        </div>
+      `,
+    })
+
+    await logNotification({
+      userId: params.userId,
+      email: params.email,
+      type: 'parrainage_bienvenue',
+      subject,
+      status: 'sent',
+    })
+  } catch (error) {
+    await logNotification({
+      userId: params.userId,
+      email: params.email,
+      type: 'parrainage_bienvenue',
+      subject,
+      status: 'error',
+      error: error instanceof Error ? error.message : 'Erreur inconnue',
+    })
+  }
+}
+
+/** @deprecated Epic 8 -- supprimer prochaine release (Epic 9). Voir _bmad-output/implementation-artifacts/deferred-work.md */
+export const sendParrainageBienvenueMarraine = sendParrainageBienvenueParrain
+
+// Story 8.A.1 : variante accompagne du mail "bienvenue parrain". Symetrique de
+// sendParrainageBienvenueMarraine mais le destinataire est un accompagne dont
+// l'abonnement vient de passer en active/trialing (1ere fois). Wording masculin
+// neutre obligatoire (regle CLAUDE.md durcie : "parrain"/"filleul",
+// jamais "marraine"/"filleule"). CTA vers /accompagne/parrainage (page livree 8.B.1).
+export async function sendParrainageBienvenueAccompagne(params: {
+  email: string
+  firstName: string
+  code: string
+  userId?: string
+}) {
+  const subject = 'Votre code de parrainage roxanetnous'
+  const parrainageUrl = `${BASE_URL}/accompagne/parrainage`
+
+  try {
+    await resend.emails.send({
+      from: FROM_EMAIL,
+      to: params.email,
+      subject,
+      html: `
+        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+          <h1 style="color: #000;">Bienvenue dans le programme parrainage${params.firstName ? `, ${escapeHtml(params.firstName)}` : ''}</h1>
+          <p>Votre abonnement roxanetnous est actif. Vous pouvez désormais inviter un proche accompagnant à rejoindre la plateforme grâce au parrainage.</p>
+          <div style="margin: 24px 0; padding: 24px; background: #f5f5f5; border-radius: 8px; text-align: center;">
+            <p style="margin: 0 0 8px 0; color: #666; font-size: 14px;">Votre code de parrainage</p>
+            <p style="margin: 0; font-size: 32px; font-weight: bold; letter-spacing: 4px; color: #000;">${escapeHtml(params.code)}</p>
+          </div>
+          <p>Comment ça marche :</p>
+          <ul>
+            <li>Partagez ce code avec un accompagnant de votre entourage.</li>
+            <li>À son inscription, il s'appuie sur votre garantie : pas de vérification de documents ni de visio, son profil est activé dès la souscription.</li>
+            <li>5 parrainages confirmés vous offrent <strong>6 mois d'abonnement gratuit</strong>.</li>
+          </ul>
+          <p style="margin-top: 24px;">
+            <a href="${parrainageUrl}" style="background: #000; color: #fff; padding: 12px 24px; text-decoration: none; display: inline-block;">
+              Voir mon parrainage
             </a>
           </p>
         </div>
@@ -602,7 +666,7 @@ export async function sendParrainageFilleuleConfirmation(params: {
   const dashboardUrl = `${BASE_URL}/accompagnant/dashboard`
   const marraineLabel = params.marraineFirstName?.trim()
     ? escapeHtml(params.marraineFirstName)
-    : 'votre marraine'
+    : 'votre parrain'
 
   try {
     await resend.emails.send({
@@ -648,9 +712,21 @@ export async function sendParrainageRecompense(params: {
   totalRecompenses: number
   userId?: string
   planType?: 'mensuel' | 'annuel' | null
+  // 8.A.3 (F-Epic8-A3) : rôle du parrain pour adapter l'URL de l'abonnement.
+  // Optionnel pour rétro-compat (fallback 'accompagnant' = comportement Epic 2).
+  role?: 'accompagnant' | 'accompagne'
 }) {
   const subject = 'Félicitations, vous avez 6 mois offerts sur roxanetnous'
-  const abonnementUrl = `${BASE_URL}/accompagnant/abonnement`
+  // Fallback 'accompagnant' = comportement Epic 2 historique (tous les parrains
+  // pré-8.A.3 sont accompagnants). Un role null inattendu déclenche un warning Sentry.
+  if (!params.role) {
+    Sentry.captureMessage('sendParrainageRecompense appelé sans role', {
+      level: 'warning',
+      tags: { flow: 'parrainage', signal: 'recompense-email-missing-role' },
+      extra: { userId: params.userId },
+    })
+  }
+  const abonnementUrl = `${BASE_URL}/${params.role ?? 'accompagnant'}/abonnement`
   const safeFirstName = params.firstName?.trim() ? escapeHtml(params.firstName) : ''
   const greetingFirstName = safeFirstName ? `, ${safeFirstName}` : ''
   const cumulSentence = params.totalRecompenses > 1
@@ -763,10 +839,10 @@ export async function sendAdminParrainageFlag(params: {
   const subjectPrefix = isBlocage ? 'Parrainage bloqué' : 'Parrainage suspect'
 
   const typeLabels: Record<string, string> = {
-    meme_email: 'même email entre marraine et filleule',
-    meme_carte: 'même carte de paiement entre marraine et filleule',
-    meme_ip: 'même adresse IP que d\'autres filleules de cette marraine',
-    meme_adresse: 'même adresse postale entre marraine et filleule',
+    meme_email: 'même email entre parrain et filleul',
+    meme_carte: 'même carte de paiement entre parrain et filleul',
+    meme_ip: 'même adresse IP que d\'autres filleuls de ce parrain',
+    meme_adresse: 'même adresse postale entre parrain et filleul',
   }
 
   const subject = `${subjectPrefix} - ${typeLabels[params.type] || params.type}`
@@ -783,11 +859,11 @@ export async function sendAdminParrainageFlag(params: {
           <p>Un parrainage déclenche une alerte de détection automatique sur roxanetnous.</p>
           <table style="border-collapse: collapse; margin: 16px 0;">
             <tr>
-              <td style="padding: 8px 16px 8px 0; color: #666;">Marraine :</td>
+              <td style="padding: 8px 16px 8px 0; color: #666;">Parrain :</td>
               <td style="padding: 8px 0; color: #000; font-weight: 600;">${escapeHtml(params.marraineName)}</td>
             </tr>
             <tr>
-              <td style="padding: 8px 16px 8px 0; color: #666;">Filleule :</td>
+              <td style="padding: 8px 16px 8px 0; color: #666;">Filleul :</td>
               <td style="padding: 8px 0; color: #000; font-weight: 600;">${escapeHtml(params.filleuleName)}</td>
             </tr>
             <tr>
@@ -1211,7 +1287,7 @@ export async function sendParrainageVerificationEmail(params: {
           </p>
           <p>
             Si vous pensez qu'il s'agit d'une erreur, ou si vous partagez
-            votre moyen de paiement avec votre marraine, contactez-nous :
+            votre moyen de paiement avec votre parrain, contactez-nous :
             <a href="mailto:roxanetnous@outlook.com">roxanetnous@outlook.com</a>.
           </p>
           <p style="margin-top: 24px;">

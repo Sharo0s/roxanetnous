@@ -1,0 +1,62 @@
+{
+  "_comment": [
+    "Ne pas regenerer ce baseline pour faire passer la CI sans justification dans le PR.",
+    "Toute regeneration doit etre motivee : montee de version axe-core, livraison story Lot B, ou correction massive justifiee."
+  ],
+  "generatedAt": "2026-05-17T14:11:55.477Z",
+  "commitSha": "f5612fa9e8a460d28c80d8018c3940401a77a74a",
+  "totals": {
+    "violations": 0,
+    "nodes": 0
+  },
+  "parcours": [
+    {
+      "id": "p1-onboarding-aux",
+      "url": "/login",
+      "proxy": true,
+      "violations": []
+    },
+    {
+      "id": "p2-recherche",
+      "url": "/recherche",
+      "proxy": false,
+      "violations": []
+    },
+    {
+      "id": "p3-messagerie",
+      "url": "/login",
+      "proxy": true,
+      "violations": []
+    },
+    {
+      "id": "p4-login",
+      "url": "/login",
+      "proxy": false,
+      "violations": []
+    },
+    {
+      "id": "p4-register",
+      "url": "/register?role=accompagnant",
+      "proxy": false,
+      "violations": []
+    },
+    {
+      "id": "p5-landing",
+      "url": "/",
+      "proxy": false,
+      "violations": []
+    },
+    {
+      "id": "p6-suppression-rgpd",
+      "url": "/login",
+      "proxy": true,
+      "violations": []
+    },
+    {
+      "id": "p7-parrainage-accompagne",
+      "url": "/login",
+      "proxy": true,
+      "violations": []
+    }
+  ]
+}

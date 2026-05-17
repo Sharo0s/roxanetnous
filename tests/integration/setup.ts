@@ -84,6 +84,10 @@ vi.mock('@/lib/stripe', async () => {
       },
       subscriptions: {
         retrieve: vi.fn(),
+        update: vi.fn(),
+      },
+      coupons: {
+        create: vi.fn(),
       },
       paymentMethods: {
         retrieve: vi.fn(),
@@ -116,6 +120,33 @@ vi.mock('next/headers', () => ({
   headers: vi.fn().mockResolvedValue(new Map()),
 }))
 
+// Mock partiel next/server : neutralise `after()` (hors request scope, le vrai
+// throw `E468 after() outside request scope`). Conserve NextRequest/NextResponse
+// reels pour les helpers existants (stripe-webhook-helper, cron purge).
+// Story 8.A.4 : appele par `confirmParrainageOnSuccess` + webhook `triggerAccompagneCodeGenesisIfEligible`.
+vi.mock('next/server', async () => {
+  const actual = await vi.importActual<typeof import('next/server')>('next/server')
+  return {
+    ...actual,
+    after: vi.fn((task: () => Promise<unknown> | unknown) => {
+      // Execute le callback immediatement en test pour rapprocher du comportement runtime.
+      // Erreurs swallowed (le code metier wraprappe deja en try/catch interne).
+      const result = task()
+      if (result && typeof (result as Promise<unknown>).catch === 'function') {
+        ;(result as Promise<unknown>).catch(() => {})
+      }
+    }),
+  }
+})
+
+// Mock next/cache : neutralise `revalidatePath` (le vrai throw `Invariant: static
+// generation store missing` en dehors d'un request scope). Story 8.A.4 :
+// `confirmParrainageOnSuccess` appelle revalidatePath en fin de chemin.
+vi.mock('next/cache', () => ({
+  revalidatePath: vi.fn(),
+  revalidateTag: vi.fn(),
+}))
+
 // Mock @/lib/emails : capture les sendXxxEmail synchrones du webhook Stripe.
 // Les tests T1, T2, T4 asserent l'appel via vi.mocked(...).mock.calls.
 // L'export reste partiel : on conserve les helpers reels qui ne sont pas
@@ -131,6 +162,7 @@ vi.mock('@/lib/emails', () => ({
   sendMatchingNotificationEmail: vi.fn().mockResolvedValue(undefined),
   sendPlanChangeEmail: vi.fn().mockResolvedValue(undefined),
   sendRenewalReminderEmail: vi.fn().mockResolvedValue(undefined),
+  sendParrainageBienvenueParrain: vi.fn().mockResolvedValue(undefined),
   sendParrainageBienvenueMarraine: vi.fn().mockResolvedValue(undefined),
   sendParrainageFilleuleConfirmation: vi.fn().mockResolvedValue(undefined),
   sendParrainageRecompense: vi.fn().mockResolvedValue(undefined),
@@ -141,6 +173,7 @@ vi.mock('@/lib/emails', () => ({
   enqueueOuvertureConfirmationEmail: vi.fn().mockResolvedValue(undefined),
   enqueueOuvertureNotificationEmail: vi.fn().mockResolvedValue(undefined),
   sendParrainageVerificationEmail: vi.fn().mockResolvedValue(undefined),
+  sendParrainageBienvenueAccompagne: vi.fn().mockResolvedValue(undefined),
 }))
 
 // Mock @/lib/supabase/server.createClient : par defaut retourne un client admin

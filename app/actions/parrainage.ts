@@ -6,7 +6,7 @@ import { revalidatePath } from 'next/cache'
 import { headers } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
 import {
-  sendParrainageBienvenueMarraine,
+  sendParrainageBienvenueParrain,
   sendParrainageFilleuleConfirmation,
   sendAdminParrainageFlag,
 } from '@/lib/emails'
@@ -313,6 +313,7 @@ export type ValidationCodeResult =
         | 'marraine_not_validated'
         | 'marraine_subscription_inactive'
         | 'rate_limited'
+        | 'db_error'
     }
 
 // H12 (code review 2026-04-29) : rate-limit fenêtre glissante par IP pour
@@ -399,6 +400,75 @@ export async function validateCode(rawCode: string): Promise<ValidationCodeResul
     return { valid: false, reason: 'unknown_code' }
   }
 
+  // 8.A.2 — Branching role-aware : lookup du rôle du parrain pour choisir
+  // le chemin de validation (accompagné = check sub uniquement ; accompagnant
+  // = check accompagnants_profiles + sub, comportement historique intact).
+  const { data: parrainUser, error: parrainUserError } = await supabaseAdmin
+    .from('users')
+    .select('role, first_name')
+    .eq('id', row.user_id)
+    .maybeSingle()
+
+  if (parrainUserError) {
+    Sentry.captureException(parrainUserError, {
+      tags: { flow: 'parrainage', signal: 'validate-code-users-lookup-error' },
+      extra: { parrainId: row.user_id },
+    })
+    return { valid: false, reason: 'db_error' }
+  }
+
+  const parrainRole = (parrainUser as { role?: string } | null)?.role
+
+  if (parrainRole === 'accompagne') {
+    // Parrain accompagné : pas de row accompagnants_profiles — vérifier
+    // uniquement l'abonnement actif (subscriptions.user_id UNIQUE → maybeSingle).
+    const { data: parrainSub, error: parrainSubError } = await supabaseAdmin
+      .from('subscriptions')
+      .select('status')
+      .eq('user_id', row.user_id)
+      .maybeSingle()
+    if (parrainSubError) {
+      Sentry.captureException(parrainSubError, {
+        tags: { flow: 'parrainage', signal: 'validate-code-subscription-lookup-error' },
+        extra: { parrainId: row.user_id, roleParrain: 'accompagne' },
+      })
+      return { valid: false, reason: 'db_error' }
+    }
+    const isSubActive =
+      parrainSub?.status === 'active' || parrainSub?.status === 'trialing'
+    if (!isSubActive) {
+      Sentry.captureMessage('parrainage marraine sub inactive', {
+        level: 'warning',
+        tags: { flow: 'parrainage', signal: 'marraine-sub-inactive' },
+        extra: {
+          marraineId: row.user_id,
+          roleParrain: 'accompagne',
+          subStatus: parrainSub?.status ?? null,
+        },
+      })
+      return { valid: false, reason: 'marraine_subscription_inactive' }
+    }
+    return {
+      valid: true,
+      marraineId: row.user_id,
+      marraineFirstName: ((parrainUser as { first_name?: string } | null)?.first_name) || '',
+    }
+  }
+
+  // 8.A.2 patch — Rôle parrain ni 'accompagne' ni 'accompagnant' (admin, null,
+  // user supprimé, futur enum) : fail-fast avec Sentry warning au lieu de
+  // tomber silencieusement dans le path accompagnant qui renverra
+  // 'marraine_not_validated' trompeur.
+  if (parrainRole !== 'accompagnant') {
+    Sentry.captureMessage('parrainage marraine unexpected role', {
+      level: 'warning',
+      tags: { flow: 'parrainage', signal: 'marraine-unexpected-role' },
+      extra: { marraineId: row.user_id, roleParrain: parrainRole ?? null },
+    })
+    return { valid: false, reason: 'marraine_not_validated' }
+  }
+
+  // Parrain accompagnant : path existant complet.
   // Désambiguïsation FK : accompagnants_profiles a deux FK vers users
   // (user_id et validated_by), donc PostgREST exige un hint explicite
   // sur le nom de la contrainte. Sans cela, l'embed renvoie un tableau
@@ -477,6 +547,30 @@ export async function createParrainageRelation(params: {
 
   const supabaseAdmin = await createClient({ serviceRole: true })
 
+  // 8.A.2 — Guard rôle filleul : seul un accompagnant peut être filleul.
+  // Couvre accompagne→accompagne et accompagnant→accompagne (les deux sens interdits).
+  const { data: filleulUser, error: filleulUserError } = await supabaseAdmin
+    .from('users')
+    .select('role')
+    .eq('id', params.filleuleId)
+    .maybeSingle()
+  if (filleulUserError) {
+    Sentry.captureException(filleulUserError, {
+      tags: { flow: 'parrainage', signal: 'create-relation-filleul-lookup-error' },
+      extra: { filleuleId: params.filleuleId },
+    })
+    return { ok: false, reason: 'db_error' }
+  }
+  const roleFilleul = (filleulUser as { role?: string } | null)?.role
+  if (roleFilleul !== 'accompagnant') {
+    Sentry.captureMessage('parrainage invalid filleul role', {
+      level: 'warning',
+      tags: { flow: 'parrainage', signal: 'invalid-filleul-role' },
+      extra: { filleuleId: params.filleuleId, roleFilleul: roleFilleul ?? null },
+    })
+    return { ok: false, reason: 'invalid_filleul_role' }
+  }
+
   // Idempotence : si déjà une ligne pour ce filleule + code, la renvoyer (sans relancer
   // la détection blacklist pour éviter doubles logs/emails).
   const { data: existing } = await supabaseAdmin
@@ -497,6 +591,16 @@ export async function createParrainageRelation(params: {
       const recheck = await validateCode(code)
       if (!recheck.valid) {
         return { ok: false, reason: recheck.reason }
+      }
+      // Re-vérifier le rôle filleul : entre le premier appel et le retry idempotent,
+      // un admin a pu changer le rôle du filleul.
+      const { data: filleulRecheck } = await supabaseAdmin
+        .from('users')
+        .select('role')
+        .eq('id', params.filleuleId)
+        .maybeSingle()
+      if ((filleulRecheck as { role?: string } | null)?.role !== 'accompagnant') {
+        return { ok: false, reason: 'invalid_filleul_role' }
       }
       return {
         ok: true,
@@ -605,8 +709,8 @@ export async function createParrainageRelation(params: {
       .select('first_name, last_name')
       .eq('id', params.filleuleId)
       .maybeSingle()
-    const marraineName = `${marraine?.first_name || ''} ${marraine?.last_name || ''}`.trim() || 'Marraine'
-    const filleuleName = `${filleule?.first_name || ''} ${filleule?.last_name || ''}`.trim() || 'Filleule'
+    const marraineName = `${marraine?.first_name || ''} ${marraine?.last_name || ''}`.trim() || 'Parrain'
+    const filleuleName = `${filleule?.first_name || ''} ${filleule?.last_name || ''}`.trim() || 'Filleul'
     return { marraineName, filleuleName }
   }
 
@@ -783,15 +887,96 @@ export async function confirmParrainageOnSuccess(
     return { ok: true, alreadyDone: true }
   }
 
-  // Vérification que la marraine est toujours validée au moment du paiement.
-  // Si elle a été déchue entre l'inscription de la filleule et le paiement, on
-  // refuse la validation automatique par parrainage.
-  const { data: marraineProfile } = await supabaseAdmin
-    .from('accompagnants_profiles')
-    .select('validation_status')
-    .eq('user_id', parrainage.marraine_id)
+  // 8.A.2 — Vérification que le parrain est toujours éligible au moment du paiement.
+  // Branching role-aware : un parrain accompagné n'a jamais de row accompagnants_profiles
+  // (FLAG-A audit 8.A.0) — on vérifie uniquement son abonnement actif.
+  // Un parrain accompagnant conserve le path historique (validation_status = 'valide').
+  const { data: parrainRoleRow, error: parrainRoleError } = await supabaseAdmin
+    .from('users')
+    .select('role')
+    .eq('id', parrainage.marraine_id)
     .maybeSingle()
-  if (marraineProfile?.validation_status !== 'valide') {
+  if (parrainRoleError) {
+    Sentry.captureException(parrainRoleError, {
+      tags: { flow: 'parrainage', signal: 'confirm-marraine-role-lookup-error' },
+      extra: { parrainageId: parrainage.id, marraineId: parrainage.marraine_id },
+    })
+    return { ok: false, reason: 'db_error' }
+  }
+  const parrainRoleConfirm = (parrainRoleRow as { role?: string } | null)?.role
+
+  if (parrainRoleConfirm === 'accompagne') {
+    const { data: parrainSubConfirm, error: parrainSubConfirmError } = await supabaseAdmin
+      .from('subscriptions')
+      .select('status')
+      .eq('user_id', parrainage.marraine_id)
+      .maybeSingle()
+    if (parrainSubConfirmError) {
+      Sentry.captureException(parrainSubConfirmError, {
+        tags: { flow: 'parrainage', signal: 'confirm-marraine-subscription-lookup-error' },
+        extra: { parrainageId: parrainage.id, marraineId: parrainage.marraine_id, roleParrain: 'accompagne' },
+      })
+      return { ok: false, reason: 'db_error' }
+    }
+    const isParrainSubActive =
+      parrainSubConfirm?.status === 'active' || parrainSubConfirm?.status === 'trialing'
+    if (!isParrainSubActive) {
+      // Post-paiement : parrain accompagné qui a churné entre signup filleul
+      // et confirm. Cas anti-fraude potentiel ou churn honnête — Sentry warning
+      // pour monitoring (paiement Stripe réussi sans bypass parrainage).
+      Sentry.captureMessage('parrainage marraine ineligible at payment', {
+        level: 'warning',
+        tags: { flow: 'parrainage', signal: 'marraine-ineligible-at-payment' },
+        extra: {
+          parrainageId: parrainage.id,
+          marraineId: parrainage.marraine_id,
+          roleParrain: 'accompagne',
+          subStatus: parrainSubConfirm?.status ?? null,
+        },
+      })
+      return { ok: false, reason: 'marraine_no_longer_validated' }
+    }
+  } else if (parrainRoleConfirm === 'accompagnant') {
+    // Parrain accompagnant : path historique — vérification accompagnants_profiles.
+    const { data: marraineProfile, error: marraineProfileError } = await supabaseAdmin
+      .from('accompagnants_profiles')
+      .select('validation_status')
+      .eq('user_id', parrainage.marraine_id)
+      .maybeSingle()
+    if (marraineProfileError) {
+      Sentry.captureException(marraineProfileError, {
+        tags: { flow: 'parrainage', signal: 'confirm-marraine-profile-lookup-error' },
+        extra: { parrainageId: parrainage.id, marraineId: parrainage.marraine_id, roleParrain: 'accompagnant' },
+      })
+      return { ok: false, reason: 'db_error' }
+    }
+    if (marraineProfile?.validation_status !== 'valide') {
+      Sentry.captureMessage('parrainage marraine ineligible at payment', {
+        level: 'warning',
+        tags: { flow: 'parrainage', signal: 'marraine-ineligible-at-payment' },
+        extra: {
+          parrainageId: parrainage.id,
+          marraineId: parrainage.marraine_id,
+          roleParrain: 'accompagnant',
+          validationStatus: marraineProfile?.validation_status ?? null,
+        },
+      })
+      return { ok: false, reason: 'marraine_no_longer_validated' }
+    }
+  } else {
+    // Race TOCTOU (#3) ou rôle inattendu : entre validateCode/createRelation
+    // et confirmParrainageOnSuccess, un admin a pu changer le rôle du parrain,
+    // ou la row users a été altérée. Fail-fast avec Sentry warning au lieu
+    // de tomber silencieusement sur un path par défaut.
+    Sentry.captureMessage('parrainage marraine unexpected role at confirm', {
+      level: 'warning',
+      tags: { flow: 'parrainage', signal: 'marraine-unexpected-role-at-confirm' },
+      extra: {
+        parrainageId: parrainage.id,
+        marraineId: parrainage.marraine_id,
+        roleParrain: parrainRoleConfirm ?? null,
+      },
+    })
     return { ok: false, reason: 'marraine_no_longer_validated' }
   }
 
@@ -928,14 +1113,14 @@ export async function confirmParrainageOnSuccess(
 
   // L1 (code review 2026-04-29) : n'envoyer l'email "bienvenue marraine"
   // qu'à la création réelle du code, pas sur retour idempotent.
-  if (filleuleUser?.email && 'code' in codeResult && codeResult.created) {
+  if (marraineUser?.email && 'code' in codeResult && codeResult.created) {
     after(async () => {
       try {
-        await sendParrainageBienvenueMarraine({
-          email: filleuleUser.email,
-          firstName: filleuleUser.first_name || '',
+        await sendParrainageBienvenueParrain({
+          email: marraineUser.email,
+          firstName: marraineUser.first_name || '',
           code: codeResult.code,
-          userId: user.id,
+          userId: parrainage.marraine_id,
         })
       } catch {}
     })

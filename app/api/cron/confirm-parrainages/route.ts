@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import * as Sentry from '@sentry/nextjs'
 import { createClient } from '@/lib/supabase/server'
 import { stripe } from '@/lib/stripe'
 import { getSubscriptionStatus, hasActiveSubscription } from '@/lib/subscription-helpers'
@@ -167,17 +168,69 @@ export async function GET(request: NextRequest) {
         continue
       }
 
-      // M3 : re-vérifier que le statut de validation de la marraine est
-      // toujours 'valide' (peut avoir été révoqué par l'admin entre J+0 et J+30).
-      const { data: marraineProfile } = await supabase
-        .from('accompagnants_profiles')
-        .select('validation_status')
-        .eq('user_id', row.marraine_id)
-        .single()
-      if (marraineProfile?.validation_status !== 'valide') {
-        console.warn('[cron_confirm_parrainages][marraine_not_valid]', {
-          marraine_id: row.marraine_id,
-          validation_status: marraineProfile?.validation_status ?? null,
+      // 8.A.3 (F-Epic8-A3) : lookup du rôle du parrain pour brancher le
+      // pré-check `accompagnants_profiles` (n'existe pas pour un accompagné)
+      // et tracer le rôle dans le coupon / log / email récompense.
+      const { data: marraineRoleRow, error: marraineRoleErr } = await supabase
+        .from('users')
+        .select('role')
+        .eq('id', row.marraine_id)
+        .maybeSingle()
+      // Ne pas `continue` sur une erreur de lookup rôle : le parrainage est déjà
+      // en `confirme` (CAS swap effectué), il ne sera pas retraité. On fall-back
+      // sur le path accompagnant (comportement Epic 2 historique) et on émet la
+      // récompense quand même. Sentry warning pour investigation.
+      if (marraineRoleErr) {
+        Sentry.captureException(marraineRoleErr, {
+          level: 'warning',
+          tags: { flow: 'parrainage', signal: 'cron-marraine-role-read-failed' },
+          extra: { marraineId: row.marraine_id },
+        })
+        console.error('[cron_confirm_parrainages][marraine_role_read_error]', { marraine_id: row.marraine_id, err: marraineRoleErr })
+        errors++
+        // Pas de continue — on poursuit avec role=null (fallback accompagnant)
+        // pour ne pas bloquer définitivement la récompense.
+      }
+      const role = marraineRoleRow?.role ?? null
+
+      if (role === 'accompagnant') {
+        // M3 : re-vérifier que le statut de validation de la marraine est
+        // toujours 'valide' (peut avoir été révoqué par l'admin entre J+0 et J+30).
+        const { data: marraineProfile } = await supabase
+          .from('accompagnants_profiles')
+          .select('validation_status')
+          .eq('user_id', row.marraine_id)
+          .single()
+        if (marraineProfile?.validation_status !== 'valide') {
+          console.warn('[cron_confirm_parrainages][marraine_not_valid]', {
+            marraine_id: row.marraine_id,
+            validation_status: marraineProfile?.validation_status ?? null,
+          })
+          continue
+        }
+      } else if (role === 'accompagne') {
+        // 8.A.3 (FLAG-A propagé) : pas de row dans accompagnants_profiles
+        // pour un parrain accompagné. Les pré-checks `marraineSub.active`,
+        // `trialing`, `cancelAt` (en amont) suffisent à garantir l'éligibilité.
+      } else {
+        // Défense en profondeur : rôle null, 'admin' ou futur enum. Skip
+        // récompense + log + Sentry warning. Le compteur reste à 5 et le
+        // palier sera re-tenté au prochain cron si le rôle redevient cohérent.
+        Sentry.captureMessage('cron confirm-parrainages marraine unexpected role', {
+          level: 'warning',
+          tags: { flow: 'parrainage', signal: 'cron-marraine-unexpected-role' },
+          extra: { marraineId: row.marraine_id, roleParrain: role },
+        })
+        await supabase.from('admin_actions_log').insert({
+          admin_id: null,
+          action_type: 'parrainage_recompense_skipped',
+          target_type: 'subscription',
+          target_id: row.marraine_id,
+          details: {
+            marraine_id: row.marraine_id,
+            role_parrain: role,
+            reason: 'unexpected_role',
+          },
         })
         continue
       }
@@ -234,7 +287,7 @@ export async function GET(request: NextRequest) {
           duration: 'repeating',
           duration_in_months: 6,
           name: couponName,
-          metadata: { user_id: row.marraine_id, type: 'parrainage_recompense' },
+          metadata: { user_id: row.marraine_id, type: 'parrainage_recompense', role_parrain: role },
         })
 
         // D3 (code review 2026-04-29) : Dev Notes 2.4 ratifient le remplacement
@@ -252,6 +305,7 @@ export async function GET(request: NextRequest) {
             coupon_id: coupon.id,
             marraine_id: row.marraine_id,
             total_recompenses: newTotalRecompenses,
+            role_parrain: role,
           },
         })
 
@@ -261,6 +315,7 @@ export async function GET(request: NextRequest) {
           totalRecompenses: newTotalRecompenses,
           userId: row.marraine_id,
           planType: marraineSub.planType,
+          role,
         })
 
         rewards++
@@ -268,6 +323,11 @@ export async function GET(request: NextRequest) {
         // C2/H7 : Stripe a échoué APRÈS le claim BDD. On rollback le claim
         // via une RPC inverse : compteur += palier, total -= 1. Le palier
         // sera re-tenté au prochain cron une fois Stripe dispo.
+        Sentry.captureException(stripeErr, {
+          level: 'error',
+          tags: { flow: 'parrainage', signal: 'cron-coupon-failed', severity: 'critical' },
+          extra: { marraineId: row.marraine_id, roleParrain: role, palier: RECOMPENSE_PALIER },
+        })
         console.error('[cron_confirm_parrainages][stripe_apply]', stripeErr)
         const { error: rollbackErr } = await supabase
           .rpc('parrainage_rollback_recompense', {

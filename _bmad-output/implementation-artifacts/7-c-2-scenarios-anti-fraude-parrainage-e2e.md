@@ -1,6 +1,6 @@
 # Story 7.C.2 : Scenarios anti-fraude parrainage E2E
 
-Status: review
+Status: in-progress
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -268,6 +268,19 @@ claude-opus-4-7
 - `tests/e2e/_lib/pages.ts` (modifie) — ajout classe `OnboardingPage` (PO minimal).
 - `_bmad-output/implementation-artifacts/7-c-2-scenarios-anti-fraude-parrainage-e2e.md` (modifie) — story file (status review, tasks/subtasks, Dev Agent Record, File List).
 - `_bmad-output/implementation-artifacts/sprint-status.yaml` (modifie) — transition `7-c-2-scenarios-anti-fraude-parrainage-e2e` : `ready-for-dev` -> `review`.
+
+### Review Findings
+
+- [x] [Review][Decision] Tests AC2/AC3 auto-validants — Limitation acceptée (stratégie BDD directe consciente, documentée en en-tête spec). Server action non appelable en E2E sans reproduire le protocole RSC interne Next.js.
+- [x] [Review][Decision] `UPDATE parrainee_par` sans `WHERE IS NULL` — Idempotence documentée dans commentaire inline. Le UPDATE pose toujours `MARRAINE_ID`, no-op si déjà la bonne valeur.
+- [x] [Review][Patch] Pas de `beforeAll(resetEphemeralRows)` — non-idempotent sur retry CI et cross-run [`tests/e2e/parrainage-anti-fraude.spec.ts`]
+- [x] [Review][Patch] `withPg` local sans `assertLocalPgUrl` — risque d'écriture accidentelle en base prod si `SUPABASE_DB_URL` pointe sur la prod [`tests/e2e/parrainage-anti-fraude.spec.ts:21-30`]
+- [x] [Review][Patch] Assertions RPC/INSERT sans guard `toHaveLength(1)` avant `rows[0]` — erreur opaque en cas d'INSERT silencieux [`tests/e2e/parrainage-anti-fraude.spec.ts:80,107,118,126,188`]
+- [x] [Review][Patch] Credentials fallback `postgres:postgres` — `assertLocalPgUrl` refuse avant connexion, risque éliminé [`tests/e2e/parrainage-anti-fraude.spec.ts:14-15`]
+- [x] [Review][Patch] `resetEphemeralRows()` n'inclut pas le cleanup `admin_actions_log` — contrat incomplet si appelé seul depuis d'autres specs [`tests/e2e/_lib/fixtures.ts`]
+- [x] [Review][Defer] Idempotence RPC (`was_added=false` sur double flag) non exercée — pré-existant, hors scope 7.C.2 — deferred, pre-existing
+- [x] [Review][Defer] Permission `service_role` de la RPC non testée (test en superuser, bypass GRANT) — accepté comme limitation documentée — deferred, pre-existing
+- [x] [Review][Defer] `OnboardingPage.goto()` ne vérifie pas l'URL finale après navigation — pattern hérité des autres POs — deferred, pre-existing
 
 ## Change Log
 

@@ -1,5 +1,5 @@
 ---
-stepsCompleted: ['index-only-rétroactif', 'epic-6-ajoute-2026-05-13']
+stepsCompleted: ['index-only-rétroactif', 'epic-6-ajoute-2026-05-13', 'epic-8-ajoute-2026-05-16']
 inputDocuments:
   - prd.md
   - ../../DECISIONS.md
@@ -8,8 +8,10 @@ inputDocuments:
   - epic-4.md
   - epic-5.md
   - epic-6.md
+  - epic-7.md
+  - epic-8.md
 workflowType: 'epics-index'
-note: 'Index minimaliste créé rétroactivement 2026-05-06 pour compatibilité avec bmad-sprint-planning. Les Epic 1 et Epic 2 sont reconstitués depuis l''historique BMad. Epic 3, 4, 5 cadrés formellement. Epic 6 cadré 2026-05-13 (audit MCP fait, checkpoint review en attente).'
+note: 'Index minimaliste créé rétroactivement 2026-05-06 pour compatibilité avec bmad-sprint-planning. Les Epic 1 et Epic 2 sont reconstitués depuis l''historique BMad. Epic 3, 4, 5 cadrés formellement. Epic 6 cadré 2026-05-13 (audit MCP fait, checkpoint review en attente). Epic 7 cadré 2026-05-13 (hardening sécu + RGPD + E2E). Epic 8 cadré 2026-05-16 (parrainage symétrique accompagné→accompagnant).'
 created: '2026-05-06'
 ---
 
@@ -34,6 +36,8 @@ Cet index recense les épics du projet roxanetnous. Il a été créé rétroacti
 | 4 | Hardening pré-go-live Bretagne (Sentry, schema logNotification, email queue, tests métier, debt résolution) | livré 2026-05-08 | 2026-05-07 → 2026-05-08 | NFR fiabilité + NFR sécurité + NFR testabilité + dette technique Epic 2/3 | `epic-4.md` + `../implementation-artifacts/epic-4-retro-2026-05-08.md` |
 | 5 | Cohérence éditoriale + hardening continu post-Bretagne (renommage `accompagnante` → `accompagnant`, bugs latents messagerie, hardening typage transverse, audits 30j, observabilité oncall) | livré 2026-05-13 | 2026-05-13 (1 jour) | FR1-2, FR4-5, FR7, FR11-12, FR16-19, FR27-29, FR45-46, FR48 (impacts indirects) + NFR2, NFR4-6 | `epic-5.md` + `../implementation-artifacts/epic-5-retro-2026-05-13.md` |
 | 6 | Finalisation renommage (BDD résiduel + code) + hardening Epic 5 reporté + bugs latents OCR/tests | cadré 2026-05-13, checkpoint review en attente | démarrage post-checkpoint Sylvain | FR1, FR7, FR11-12, FR16-19, FR27-29 + NFR2, NFR5, NFR6 | `epic-6.md` |
+| 7 | Hardening sécurité + RGPD + E2E Playwright | en cours (7.A.1-10 + 7.B.1-2 done au 2026-05-15) | 2026-05-13 → en cours | NFR sécu/RGPD/test transverses | `epic-7.md` |
+| 8 | Parrainage symétrique (accompagné → accompagnant) | cadré 2026-05-16, sprint à planifier | démarrage à planifier post-Epic 7 | FR49-FR55 (nouveaux) + NFR a11y/RGPD/test transverses | `epic-8.md` |
 
 ## Note de méthode
 
@@ -47,6 +51,8 @@ L'Epic 5 « Cohérence éditoriale + hardening continu post-Bretagne » a été 
 
 L'Epic 6 « Finalisation renommage + hardening Epic 5 reporté » a été cadré le 2026-05-13 (audit MCP BDD prod fait, inventaire code résiduel fait, checkpoint review en attente Sylvain). Il regroupe **5 mini-epics et ~17 stories** : 6.A renommage BDD résiduel + code (5 stories : 3 tables encore au féminin + enum value orpheline + RPC orpheline + composant `AccompagnanteDashboardHeader` + 381 occurrences TS), 6.B bugs latents révélés par audit (3 stories : tests intégration paywall cassés + inserts `lib/ocr.ts` vers table inexistante + backward-compat email à fin de vie), 6.C hardening dette Epic 5 reporté (4 stories : `lib/matching.ts` typage + switch domaine Supabase conditionnel + seed UTF-8 départements + centralisation helpers email reconsidérée), 6.D suite Playwright reportée Epic 5 (3 stories : anti-fraude parrainage + RGPD cascade + matching), 6.E audits 30j post-Epic 4 (2 stories conditionnelles calendrier ~2026-06-08 : 5.D.1 cron notify-waitlist-retry + 5.D.2 BATCH_LIMIT send-waitlist). **Aucun pré-requis bloquant**. Source : `epic-6.md`.
 
+L'Epic 8 « Parrainage symétrique (accompagné → accompagnant) » a été cadré le 2026-05-16 via le skill `bmad-create-epics-and-stories`. Il étend le programme de parrainage existant (Epic 2, SCP 2026-04-18) pour autoriser un **accompagné avec abonnement actif** à parrainer un **accompagnant** (bypass visio + validation auto + récompense 6 mois Stripe à 5 parrainages confirmés). Il regroupe **4 mini-épics et 11 stories** : 8.A backend & métier (5 stories : audit BDD, webhook genèse code, server actions + guards sens interdits, cron récompense price_id selon rôle, tests intégration), 8.B UI accompagné (2 stories : page `/accompagne/parrainage` + a11y, teaser dashboard), 8.C UI admin + wording transverse (3 stories : admin tous rôles, politique confidentialité, rename email + wording neutre `marraine/filleule` → `parrain/filleul`), 8.D E2E Playwright (1 story : golden path `accompagne→accompagnant`, dépend Epic 7.C.1 harness). **Nouveaux FR : FR49-FR55**. Sens autorisés post-Epic 8 : `accompagne→accompagnant` + `accompagnant→accompagnant`. Sens interdits par guard serveur : `accompagne→accompagne`, `accompagnant→accompagne`. Source : `epic-8.md`.
+
 ## Pointeurs croisés
 
 - **Décisions produit** : `DECISIONS.md` (racine) — fait autorité.
@@ -55,3 +61,4 @@ L'Epic 6 « Finalisation renommage + hardening Epic 5 reporté » a été cadré
 - **Trous identifiés (matière brute)** : `../../docs/epic-3-candidates.md`.
 - **Architecture initiale** : `architecture-technique-roxanetnous-2026-02-09.md`.
 - **NFR Accessibilité** : `../test-artifacts/nfr-assessment-a11y-2026-05-04.md` (re-run AI-13 2026-05-06 PASS avec réserves).
+- **SCP parrainage origine** : `sprint-change-proposal-2026-04-18-parrainage.md` (canevas étendu par Epic 8).

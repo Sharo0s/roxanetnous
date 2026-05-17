@@ -7,8 +7,35 @@ import { revokeFilleuleValidationFromWebhook } from '@/app/actions/parrainage'
 
 const NOTES_MAX_LENGTH = 5000
 
+type SupabaseAdminClient = Awaited<ReturnType<typeof createClient>>
+
 // Story 2.3 AC8 : trois actions admin pour gérer les rows parrainages bloquées,
 // flaggées ou frauduleuses. Auth check role admin obligatoire (pattern admin-signalements.ts).
+
+// 8.C.1 : lookup defensif du role parrain pour enrichir admin_actions_log.details.role_parrain.
+// DB error -> Sentry warning + null. marraine_id null (cascade SET NULL) -> null sans Sentry.
+// Pattern miroir de l'enrichissement coupon.metadata.role_parrain en 8.A.3.
+async function lookupParrainRole(
+  supabaseAdmin: SupabaseAdminClient,
+  marraineId: string | null,
+  parrainageId: string,
+): Promise<string | null> {
+  if (!marraineId) return null
+  const { data, error } = await supabaseAdmin
+    .from('users')
+    .select('role')
+    .eq('id', marraineId)
+    .maybeSingle()
+  if (error) {
+    Sentry.captureMessage('admin parrainage role lookup failed', {
+      level: 'warning',
+      tags: { flow: 'admin', signal: 'role-lookup-failed' },
+      extra: { parrainageId, marraineId },
+    })
+    return null
+  }
+  return (data as { role?: string } | null)?.role ?? null
+}
 
 async function requireAdmin() {
   const supabase = await createClient()
@@ -44,6 +71,11 @@ export async function autoriserException(
     .eq('id', parrainageId)
     .maybeSingle()
   if (!parrainage) return { error: 'Parrainage introuvable.' }
+
+  // 8.C.1 : Lookup role parrain pour enrichir admin_actions_log.details.role_parrain
+  // (parallele de l'enrichissement coupon.metadata.role_parrain en 8.A.3).
+  // Lookup defensif : DB error ou marraine_id null -> role_parrain: null, ne bloque pas l'action.
+  const parrainRole = await lookupParrainRole(supabaseAdmin, parrainage.marraine_id, parrainageId)
 
   // Reset statut + flags (le flow normal pourra reprendre).
   // Si déjà 'fraude', on remet 'inscrite' aussi (l'admin assume la décision).
@@ -84,6 +116,7 @@ export async function autoriserException(
       notes: notes?.trim().slice(0, NOTES_MAX_LENGTH) || null,
       marraine_id: parrainage.marraine_id,
       filleule_id: parrainage.filleule_id,
+      role_parrain: parrainRole,
     },
   })
   if (logErr) {
@@ -116,6 +149,10 @@ export async function confirmerFraude(
     .eq('id', parrainageId)
     .maybeSingle()
   if (!parrainage) return { error: 'Parrainage introuvable.' }
+
+  // 8.C.1 : Lookup role parrain pour enrichir admin_actions_log.details.role_parrain
+  // (parallele de l'enrichissement coupon.metadata.role_parrain en 8.A.3).
+  const parrainRole = await lookupParrainRole(supabaseAdmin, parrainage.marraine_id, parrainageId)
 
   // H11 (code review 2026-04-29) : si le parrainage était 'confirme', il a
   // contribué au compteur de la marraine et potentiellement à une récompense.
@@ -170,6 +207,7 @@ export async function confirmerFraude(
             ancien_compteur: codeRow.compteur_confirmes,
             nouveau_compteur: newCompteur,
             total_recompenses_actuel: codeRow.total_recompenses,
+            role_parrain: parrainRole,
             note: 'Vérifier manuellement si une récompense doit être révoquée (cancel coupon Stripe + decrement total_recompenses).',
           },
         })
@@ -234,6 +272,7 @@ export async function confirmerFraude(
       notes: notes?.trim().slice(0, NOTES_MAX_LENGTH) || null,
       marraine_id: parrainage.marraine_id,
       filleule_id: parrainage.filleule_id,
+      role_parrain: parrainRole,
       via: 'admin_confirme',
     },
   })
@@ -250,6 +289,7 @@ export async function confirmerFraude(
 }
 
 // Story 2.3 AC8 : ignorerFlag retire le flag de suspicion sans toucher au statut.
+// 8.C.1 : ajout d'un pre-lookup parrainage pour enrichir le log avec role_parrain.
 export async function ignorerFlag(
   parrainageId: string,
 ): Promise<{ error?: string }> {
@@ -257,6 +297,20 @@ export async function ignorerFlag(
   if (authErr || !user) return { error: authErr || 'Accès non autorisé.' }
 
   const supabaseAdmin = await createClient({ serviceRole: true })
+
+  // 8.C.1 : pre-lookup marraine_id pour enrichir admin_actions_log.details.role_parrain.
+  // Defense en profondeur : si la row a disparu entre temps, l'UPDATE n'aura aucun effet
+  // et l'INSERT log capturera quand meme l'action (role_parrain restera null).
+  const { data: parrainage } = await supabaseAdmin
+    .from('parrainages')
+    .select('marraine_id')
+    .eq('id', parrainageId)
+    .maybeSingle()
+  const parrainRole = await lookupParrainRole(
+    supabaseAdmin,
+    parrainage?.marraine_id ?? null,
+    parrainageId,
+  )
 
   const { error: updateErr } = await supabaseAdmin
     .from('parrainages')
@@ -269,7 +323,7 @@ export async function ignorerFlag(
     action_type: 'parrainage_ignore_flag',
     target_type: 'parrainage',
     target_id: parrainageId,
-    details: { parrainage_id: parrainageId },
+    details: { parrainage_id: parrainageId, role_parrain: parrainRole },
   })
 
   revalidatePath('/admin/parrainages')

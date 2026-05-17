@@ -27,6 +27,21 @@ export default async function AccompagneDashboard() {
   ])
   const subscribed = subscription.active
 
+  let parrainageCode: string | null = null
+  let parrainageCompteur = 0
+  let parrainageTotalRecompenses = 0
+
+  if (subscribed) {
+    const { data: parrainageRow } = await supabase
+      .from('parrainages_codes')
+      .select('code, compteur_confirmes, total_recompenses')
+      .eq('user_id', user.id)
+      .maybeSingle()
+    parrainageCode = parrainageRow?.code ?? null
+    parrainageCompteur = parrainageRow?.compteur_confirmes ?? 0
+    parrainageTotalRecompenses = parrainageRow?.total_recompenses ?? 0
+  }
+
   const { data: profile } = await supabase
     .from('accompagnes_profiles')
     .select('id, ville')
@@ -289,6 +304,31 @@ export default async function AccompagneDashboard() {
                       : 'Aucun favori pour le moment.'}
                   </p>
                 </Link>
+
+                {parrainageCode && (
+                  <Link
+                    href="/accompagne/parrainage"
+                    className="bg-white rounded-2xl border border-[#e8dfd2] p-6 hover:border-kraft transition flex flex-col"
+                  >
+                    <h3 className="italic text-lg mb-2">Mon parrainage</h3>
+                    <p className="text-gray-600 text-sm">
+                      {parrainageCompteur > 0 || parrainageTotalRecompenses > 0
+                        ? <><strong className="text-gray-900 font-medium">{parrainageCompteur} / 5</strong> parrainages confirmés.</>
+                        : 'Partagez votre code, 6 mois offerts tous les 5 parrainages.'}
+                    </p>
+                    <div className="flex gap-1 mt-2 mb-1" aria-hidden="true">
+                      {[0, 1, 2, 3, 4].map((i) => (
+                        <span
+                          key={i}
+                          className={`h-1 flex-1 rounded-full ${i < (parrainageCompteur % 5 === 0 && parrainageCompteur > 0 ? 5 : parrainageCompteur % 5) ? 'bg-kraft' : 'bg-gray-200'}`}
+                        />
+                      ))}
+                    </div>
+                    {parrainageCompteur < 5 && (
+                      <p className="text-xs text-gray-500 mt-2">6 mois offerts à 5 parrainages.</p>
+                    )}
+                  </Link>
+                )}
 
                 <Link
                   href="/accompagne/abonnement"

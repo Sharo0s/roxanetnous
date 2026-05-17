@@ -17,7 +17,7 @@ const DEFAULT_PG_URL = 'postgresql://postgres:postgres@localhost:54322/postgres'
 
 const LOCAL_HOSTS = new Set(['localhost', '127.0.0.1', '[::1]', '::1'])
 
-function assertLocalPgUrl(connectionString: string): void {
+export function assertLocalPgUrl(connectionString: string): void {
   let hostname: string
   try {
     hostname = new URL(connectionString.replace(/^postgres(?:ql)?:/, 'http:')).hostname
@@ -56,6 +56,9 @@ export async function resetEphemeralRows(): Promise<void> {
 
     // Parrainages : matcher sur code (TEXT NOT NULL).
     await client.query(`DELETE FROM public.parrainages WHERE code LIKE 'e2e-test-%'`)
+
+    // Admin actions log : matcher sur le marker JSON pose par les tests anti-fraude.
+    await client.query(`DELETE FROM public.admin_actions_log WHERE details->>'marker' = 'e2e-test'`)
   } finally {
     await client.end()
   }

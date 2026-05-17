@@ -49,6 +49,11 @@ tests/integration/
     ...                            # T1, T2, T3, T4 (phase 2)
   paywall/                         # 5 tests paywall server actions (epic-4.md AC3)
     ...                            # T6-T10 (phase 2)
+  parrainage/                      # 6 scenarios parrainage symetrique Epic 8 (story 8.A.4)
+    symetrie.test.ts               # SC1 golden path accompagne->accompagnant + SC2 non-regression
+                                   # Epic 2 + SC3/SC4 sens interdits + SC5 sub cancelled au validateCode
+                                   # + SC6 cron skip recompense quand sub parrain cancelled au palier 5.
+                                   # Commande ciblee : npm run test:integration -- tests/integration/parrainage/
 ```
 
 ## Mocking

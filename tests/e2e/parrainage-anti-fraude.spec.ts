@@ -33,13 +33,12 @@
 import { test, expect } from '@playwright/test'
 import pg from 'pg'
 import { loginAs } from './_lib/session'
-import { resetEphemeralRows } from './_lib/fixtures'
+import { resetEphemeralRows, assertLocalPgUrl } from './_lib/fixtures'
 import { OnboardingPage } from './_lib/pages'
 
 const { Client } = pg
 
-const PG_URL =
-  process.env.SUPABASE_DB_URL ?? 'postgresql://postgres:postgres@localhost:54322/postgres'
+const PG_URL = process.env.SUPABASE_DB_URL ?? 'postgresql://postgres:postgres@localhost:54322/postgres'
 
 const MARRAINE_ID = '00000000-0000-0000-0000-000000000004'
 const FILLEULE_ID = '00000000-0000-0000-0000-000000000005'
@@ -49,7 +48,9 @@ const FILLEULE_ID = '00000000-0000-0000-0000-000000000005'
 const SHARED_IP = '203.0.113.42'
 
 async function withPg<T>(fn: (client: pg.Client) => Promise<T>): Promise<T> {
-  const client = new Client({ connectionString: PG_URL })
+  // Refuse toute connexion non-locale pour eviter des ecritures accidentelles en prod.
+  assertLocalPgUrl(PG_URL)
+  const client = new Client({ connectionString: PG_URL, connectionTimeoutMillis: 5_000 })
   await client.connect()
   try {
     return await fn(client)
@@ -57,6 +58,11 @@ async function withPg<T>(fn: (client: pg.Client) => Promise<T>): Promise<T> {
     await client.end()
   }
 }
+
+test.beforeAll(async () => {
+  // Nettoie les residus d'un run precedent (crash avant afterAll, retry CI).
+  await resetEphemeralRows()
+})
 
 test.afterAll(async () => {
   // Cleanup systematique : supprime toutes les rows parrainages avec code prefix
@@ -87,6 +93,7 @@ test('[anti-fraude] blacklist meme_email : etat parrainages.bloque + log admin @
        RETURNING id`,
       ['e2e-test-blacklist-email', MARRAINE_ID, FILLEULE_ID],
     )
+    expect(insertParrainage.rows).toHaveLength(1)
     const parrainageId = insertParrainage.rows[0]!.id
 
     // 2. INSERT row admin_actions_log analogue a celle posee par
@@ -157,6 +164,7 @@ test('[anti-fraude] flag meme_ip : flag_suspicion contient meme_ip @parrainage-a
        RETURNING id`,
       ['e2e-test-meme-ip-baseline', MARRAINE_ID, SHARED_IP],
     )
+    expect(insertSeed.rows).toHaveLength(1)
     const baselineId = insertSeed.rows[0]!.id
 
     // 2. INSERT 2eme row parrainages avec la meme IP.
@@ -172,6 +180,7 @@ test('[anti-fraude] flag meme_ip : flag_suspicion contient meme_ip @parrainage-a
        RETURNING id`,
       ['e2e-test-meme-ip-target', MARRAINE_ID, FILLEULE_ID, SHARED_IP],
     )
+    expect(insertNew.rows).toHaveLength(1)
     const newParrainageId = insertNew.rows[0]!.id
 
     // 3. Appel direct RPC merge_parrainage_flag_suspicion (SECURITY DEFINER).
@@ -185,6 +194,7 @@ test('[anti-fraude] flag meme_ip : flag_suspicion contient meme_ip @parrainage-a
          FROM public.merge_parrainage_flag_suspicion($1, $2)`,
       [newParrainageId, 'meme_ip'],
     )
+    expect(rpcResult.rows).toHaveLength(1)
     expect(rpcResult.rows[0]?.was_added).toBe(true)
     expect(rpcResult.rows[0]?.flag_suspicion).toContain('meme_ip')
 

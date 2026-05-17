@@ -12,6 +12,7 @@ import {
 } from '@/lib/emails'
 import { revokeFilleuleValidationFromWebhook } from '@/app/actions/parrainage'
 import { normalizeAddress } from '@/lib/parrainage-detection'
+import { triggerAccompagneCodeGenesisIfEligible } from '@/lib/parrainage-codes'
 import type Stripe from 'stripe'
 
 function getSupabaseAdmin() {
@@ -49,10 +50,22 @@ async function detectBlacklistAtWebhook(
   try {
     if (!parrainage.filleule_id) return
 
-    // 1) Détection meme_adresse (FLAG) via accompagnants_profiles
-    const [{ data: marraineProfile }, { data: filleuleProfile }] = await Promise.all([
+    // 1) Détection meme_adresse (FLAG).
+    // Le filleul est toujours accompagnant (guard createParrainageRelation).
+    // Le parrain peut être accompagnant (accompagnants_profiles) ou accompagné
+    // (accompagnes_profiles) — on lit les deux tables et on prend la première non-null.
+    const [
+      { data: marraineAccProfile },
+      { data: marraineAceProfile },
+      { data: filleuleProfile },
+    ] = await Promise.all([
       supabase
         .from('accompagnants_profiles')
+        .select('adresse')
+        .eq('user_id', parrainage.marraine_id)
+        .maybeSingle(),
+      supabase
+        .from('accompagnes_profiles')
         .select('adresse')
         .eq('user_id', parrainage.marraine_id)
         .maybeSingle(),
@@ -63,7 +76,9 @@ async function detectBlacklistAtWebhook(
         .maybeSingle(),
     ])
 
-    const marraineAddr = normalizeAddress((marraineProfile?.adresse as string) || '')
+    const marraineAddr = normalizeAddress(
+      (marraineAccProfile?.adresse as string) || (marraineAceProfile?.adresse as string) || '',
+    )
     const filleuleAddr = normalizeAddress((filleuleProfile?.adresse as string) || '')
     const adresseMatch =
       marraineAddr.length > 0 && filleuleAddr.length > 0 && marraineAddr === filleuleAddr
@@ -172,9 +187,9 @@ async function detectBlacklistAtWebhook(
         .maybeSingle(),
     ])
     const marraineName =
-      `${marraineUser?.first_name || ''} ${marraineUser?.last_name || ''}`.trim() || 'Marraine'
+      `${marraineUser?.first_name || ''} ${marraineUser?.last_name || ''}`.trim() || 'Parrain'
     const filleuleName =
-      `${filleuleUser?.first_name || ''} ${filleuleUser?.last_name || ''}`.trim() || 'Filleule'
+      `${filleuleUser?.first_name || ''} ${filleuleUser?.last_name || ''}`.trim() || 'Filleul'
 
     // P12 (code review 2026-05-04) : si meme_carte ET meme_adresse, on pose
     // d'abord le flag adresse (traçabilité historique) AVANT de bloquer sur
@@ -544,6 +559,11 @@ export async function POST(request: NextRequest) {
         { onConflict: 'user_id' }
       )
 
+      // Story 8.A.1 : genese du code parrainage accompagne a la 1ere activation
+      // d'abonnement. Defensif en interne (filtre role + idempotence), pas de
+      // try/catch supplementaire ici (catch global C1 du webhook + Sentry interne).
+      await triggerAccompagneCodeGenesisIfEligible({ userId, status: subscriptionResponse.status })
+
       const rawParrainageCode = session.metadata?.parrainage_code
       const parrainageCode = rawParrainageCode ? normalizeParrainageCode(rawParrainageCode) : null
       if (parrainageCode && userId) {
@@ -713,6 +733,15 @@ export async function POST(request: NextRequest) {
         .from('subscriptions')
         .update(updateData)
         .eq('stripe_subscription_id', subscription.id)
+
+      // Story 8.A.1 : genese du code parrainage accompagne a la 1ere transition
+      // status='active'|'trialing'. Idempotent au niveau applicatif (filtre
+      // role + maybeSingle sur parrainages_codes), tout rejeu ou re-activation
+      // retourne created:false sans renvoyer d'email.
+      await triggerAccompagneCodeGenesisIfEligible({
+        userId: existing.user_id,
+        status: typeof updateData.status === 'string' ? updateData.status : '',
+      })
 
       // Rattrapage capture fingerprint parrainage : en mode trial, le PM peut
       // n'être attaché qu'après checkout.session.completed (via SetupIntent).

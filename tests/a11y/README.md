@@ -1,7 +1,7 @@
 # Suite a11y axe-core / Playwright (Lot B)
 
-Cette suite outille la mesure dynamique de l'accessibilité sur les **6 parcours
-critiques** (P1-P6) du projet roxanetnous. Elle complète le scan statique
+Cette suite outille la mesure dynamique de l'accessibilité sur les **7 parcours
+critiques** (P1-P7) du projet roxanetnous. Elle complète le scan statique
 `eslint-plugin-jsx-a11y` (Lot A, `npm run lint:a11y-check`) avec une couche
 runtime via [`axe-core`](https://github.com/dequelabs/axe-core) exécuté dans
 [`Playwright`](https://playwright.dev/).
@@ -28,9 +28,10 @@ npm run a11y:axe:check
 | P1  | `p1-onboarding-aux.spec.ts`       | `/login` (proxy)               | Onboarding accompagnante — voir `lib/auth-stub.md`       |
 | P2  | `p2-recherche.spec.ts`            | `/recherche`                   | Audit hors `<div class="leaflet-container">`             |
 | P3  | `p3-messagerie.spec.ts`           | `/login` (proxy)               | Messagerie auth-required — voir `lib/auth-stub.md`       |
-| P4  | `p4-inscription-checkout.spec.ts` | `/register?role=accompagnante` (entree `p4-register`) + `/login` (entree `p4-login`) — 2 sous-entrees dans le baseline | Audit complet — Input refonte 2.5.5                      |
+| P4  | `p4-inscription-checkout.spec.ts` | `/register?role=accompagnant` (entree `p4-register`) + `/login` (entree `p4-login`) — 2 sous-entrees dans le baseline | Audit complet — Input refonte 2.5.5                      |
 | P5  | `p5-landing.spec.ts`              | `/`                            | Audit hors carte SVG hero (story 2.6.5 dediee)           |
 | P6  | `p6-suppression-rgpd.spec.ts`     | `/login` (proxy)               | Suppression RGPD auth-required — voir `lib/auth-stub.md` |
+| P7  | `p7-parrainage-accompagne.spec.ts`| `/login` (proxy)               | Parrainage accompagné (auth-required) — voir `lib/auth-stub.md` |
 
 ## Baseline
 
@@ -112,7 +113,7 @@ documenter dans la PR (avec mise à jour baseline le cas échéant).
 - `tests/a11y/lib/run-axe.ts` — helper `runAxe(page, options)` filtré
   Critical/Serious, tags `wcag2a`, `wcag2aa`, `wcag22aa`, `best-practice`.
 - `tests/a11y/lib/auth-stub.md` — décision auth.
-- `tests/a11y/p*-*.spec.ts` — 6 specs smoke.
+- `tests/a11y/p*-*.spec.ts` — 7 specs smoke.
 - `scripts/build-axe-baseline.mjs` — generator (calque Lot A).
 - `scripts/check-axe-baseline.mjs` — wrapper check (calque
   `findLatestBaseline()` Lot A).

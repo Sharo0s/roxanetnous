@@ -26,9 +26,10 @@ de compte de test**. Les specs auditent à la place la **page d'entrée publique
 | P1       | `/login` (proxy)                                       | Onboarding réel reporté Lot C                          |
 | P2       | `/recherche` (public)                                  | Audit complet hors `<div class="leaflet-container">`   |
 | P3       | `/login` (proxy)                                       | Messagerie temps réel reporté Lot C                    |
-| P4       | `/register?role=accompagnante` puis `/login` (publics) | Audit complet (champs Input refonte 2.5.5)             |
+| P4       | `/register?role=accompagnant` puis `/login` (publics) | Audit complet (champs Input refonte 2.5.5)             |
 | P5       | `/` (public)                                           | Audit complet hors carte SVG hero (story 2.6.5 dédiée) |
 | P6       | `/login` (proxy)                                       | Suppression compte reporté Lot C                       |
+| P7       | `/login` (proxy)                                       | Parrainage accompagné — voir story 8.B.1                |
 
 ## Re-évaluation Lot C
 

@@ -27,6 +27,7 @@ type ParrainageState =
         | 'marraine_not_validated'
         | 'marraine_subscription_inactive'
         | 'rate_limited'
+        | 'db_error'
     }
 
 const PARRAINAGE_ERRORS: Record<
@@ -43,6 +44,8 @@ const PARRAINAGE_ERRORS: Record<
     'Le compte de votre parrain est inactif (abonnement suspendu ou en attente de paiement). Demandez-lui de régulariser sa situation, puis réessayez avec son code.',
   rate_limited:
     'Trop de tentatives de validation depuis votre adresse. Patientez quelques minutes avant de réessayer.',
+  db_error:
+    'Une erreur technique nous empêche de valider ce code. Réessayez dans quelques instants.',
 }
 
 type RegisterFormProps = {

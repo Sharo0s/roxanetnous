@@ -2,12 +2,12 @@
 
 import { useEffect, useRef, useState } from 'react'
 
-type FilleuleStatut = 'inscrite' | 'abonnee' | 'confirme' | 'fraude' | 'bloque'
+type FilleulStatut = 'inscrite' | 'abonnee' | 'confirme' | 'fraude' | 'bloque'
 
-type Filleule = {
+type Filleul = {
   firstName: string | null
   lastName: string | null
-  statut: FilleuleStatut
+  statut: FilleulStatut
   inscriteAt: string
   abonneeAt: string | null
 }
@@ -19,12 +19,13 @@ function capitalize(s: string): string {
 
 // Format compact pour preserver la confidentialite : "Marie.D" au lieu
 // du nom complet, en respectant la capitalisation (Marie, pas MARIE).
-function formatFilleuleName(firstName: string | null, lastName: string | null): string {
+function formatFilleulName(firstName: string | null, lastName: string | null): string {
   const first = (firstName || '').trim()
   const last = (lastName || '').trim()
   if (!first && !last) return 'Filleul'
   const formattedFirst = first ? capitalize(first) : ''
   const initialLast = last ? `.${last.charAt(0).toUpperCase()}` : ''
+  if (!formattedFirst && initialLast) return 'Filleul'
   return `${formattedFirst}${initialLast}`
 }
 
@@ -33,7 +34,7 @@ type Props = {
   baseUrl: string
   compteur: number
   totalRecompenses: number
-  filleules: Array<Filleule>
+  filleuls: Array<Filleul>
 }
 
 const PALIER = 5
@@ -41,16 +42,19 @@ const PALIER = 5
 function joursRestantsAvantConfirmation(abonneeAt: string | null): number | null {
   if (!abonneeAt) return null
   const dateAbonnee = new Date(abonneeAt).getTime()
+  if (isNaN(dateAbonnee)) return null
   const cible = dateAbonnee + 30 * 24 * 60 * 60 * 1000
   const restant = Math.ceil((cible - Date.now()) / (24 * 60 * 60 * 1000))
   return Math.max(0, restant)
 }
 
-export function ParrainageView({ code, baseUrl, compteur, totalRecompenses, filleules }: Props) {
+export function ParrainageView({ code, baseUrl, compteur, totalRecompenses, filleuls }: Props) {
   const [copied, setCopied] = useState<'code' | 'link' | null>(null)
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  const inviteLink = `${baseUrl}/register?role=accompagnante&parrainage_code=${encodeURIComponent(code)}`
+  // Story 8.B.1 AC6 : l'inscription parrainee cible un filleul accompagnant.
+  // RegisterForm accepte directement `role=accompagnant` (cf. components/auth/register-form.tsx:64-65).
+  const inviteLink = `${baseUrl}/register?role=accompagnant&parrainage_code=${encodeURIComponent(code)}`
 
   useEffect(() => {
     return () => {
@@ -86,7 +90,14 @@ export function ParrainageView({ code, baseUrl, compteur, totalRecompenses, fill
     phrase = `Plus que ${restant} filleuls pour 6 mois offerts`
   }
 
-  const filleulesAffichables = filleules.filter((f) => f.statut !== 'fraude' && f.statut !== 'bloque')
+  const filleulsAffichables = filleuls.filter((f) => f.statut !== 'fraude' && f.statut !== 'bloque')
+
+  const copyAnnouncement =
+    copied === 'code'
+      ? 'Code copié dans le presse-papier'
+      : copied === 'link'
+        ? 'Lien d’invitation copié dans le presse-papier'
+        : ''
 
   return (
     <div className="space-y-6">
@@ -120,6 +131,10 @@ export function ParrainageView({ code, baseUrl, compteur, totalRecompenses, fill
             {copied === 'link' ? 'Copié' : 'Copier le lien d’invitation'}
           </button>
         </div>
+        {/* Annonce ARIA live pour copie clipboard (a11y - AC8 story 8.B.1) */}
+        <div role="status" aria-live="polite" className="sr-only">
+          {copyAnnouncement}
+        </div>
         <p className="text-sm text-gray-600 mt-6 max-w-md mx-auto leading-relaxed">
           Partagez ce code ou ce lien avec un accompagnant de votre réseau.
           Vous vous portez garant : il évite la visio et publie ses annonces dès la souscription.
@@ -134,7 +149,14 @@ export function ParrainageView({ code, baseUrl, compteur, totalRecompenses, fill
             {totalRecompenses} récompense{totalRecompenses > 1 ? 's' : ''} déjà obtenue{totalRecompenses > 1 ? 's' : ''}
           </p>
         )}
-        <div className="relative h-1.5 w-full bg-[#f1eade] rounded-full overflow-hidden mt-6 mb-2">
+        <div
+          className="relative h-1.5 w-full bg-[#f1eade] rounded-full overflow-hidden mt-6 mb-2"
+          role="progressbar"
+          aria-valuenow={compteurClamped}
+          aria-valuemin={0}
+          aria-valuemax={PALIER}
+          aria-label="Progression du cycle de parrainage"
+        >
           <div
             className="absolute inset-y-0 left-0 bg-kraft rounded-full transition-all duration-500"
             style={{ width: `${progressPercent}%` }}
@@ -146,20 +168,20 @@ export function ParrainageView({ code, baseUrl, compteur, totalRecompenses, fill
         </div>
       </div>
 
-      {/* Liste filleules */}
+      {/* Liste filleuls */}
       <section>
         <h2 className="text-center italic text-xl text-gray-900 mb-1">Vos filleuls en cours</h2>
         <p className="text-center text-sm text-gray-600 mb-6">
           Un filleul est validé après 30 jours d&apos;abonnement actif.
         </p>
 
-        {filleulesAffichables.length === 0 ? (
+        {filleulsAffichables.length === 0 ? (
           <p className="text-center text-sm text-gray-500 italic py-6">
             Aucun filleul pour le moment. Partagez votre code pour démarrer votre premier cycle.
           </p>
         ) : (
           <ul className="space-y-2">
-            {filleulesAffichables.map((f, idx) => {
+            {filleulsAffichables.map((f, idx) => {
               const joursRestants =
                 f.statut === 'abonnee'
                   ? joursRestantsAvantConfirmation(f.abonneeAt)
@@ -200,7 +222,7 @@ export function ParrainageView({ code, baseUrl, compteur, totalRecompenses, fill
                 >
                   <div className="flex items-center justify-between mb-2 gap-4">
                     <span className="text-sm font-medium text-gray-900 truncate">
-                      {formatFilleuleName(f.firstName, f.lastName)}
+                      {formatFilleulName(f.firstName, f.lastName)}
                     </span>
                     <span className={`text-xs ${labelClass} flex-shrink-0`}>{label}</span>
                   </div>
@@ -223,7 +245,7 @@ export function ParrainageView({ code, baseUrl, compteur, totalRecompenses, fill
       {/* Compteurs synthetiques */}
       <div className="grid grid-cols-3 gap-3 md:gap-4">
         <div className="bg-white border border-[#e8dfd2] rounded-xl p-5 text-center">
-          <p className="italic text-3xl text-gray-900">{filleulesAffichables.length}</p>
+          <p className="italic text-3xl text-gray-900">{filleulsAffichables.length}</p>
           <p className="text-xs text-gray-600 mt-1">filleuls invités</p>
         </div>
         <div className="bg-white border border-[#e8dfd2] rounded-xl p-5 text-center">

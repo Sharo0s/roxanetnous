@@ -1,5 +1,91 @@
 # Deferred Work
 
+## Deferred from: implementation of 8-c-3-wording-ui-neutre-marraine-filleule-parrain-filleul (2026-05-17)
+
+- **F-Epic8-C3 alias 1-release -- supprimer `lib/emails.ts:sendParrainageBienvenueMarraine`** [`lib/emails.ts:596`] -- Alias deprecated conserve 1 release (Epic 9). Filet de securite pour rattraper tout import oublie sur l'ancien nom. Lorsque la prochaine release prod sera deployee et qu'un audit `grep -r "sendParrainageBienvenueMarraine" app/ components/ lib/ tests/` ne remonte plus que la definition de l'alias (lib/emails.ts:596), supprimer la fonction wrapper. Heritage Epic 8 wording neutre. Rappel : mock test `tests/integration/setup.ts:165` et `tests/unit/parrainage-symetrie.test.ts:86` exposent toujours l'alias pour compat -- a retirer en meme temps.
+
+- **F-Epic8-C3 rename `sendParrainageFilleuleConfirmation`** [`lib/emails.ts:659`] -- Non execute (decision pragmatique 8.C.3 AC4 Option par defaut : ne PAS renommer pour eviter diff sur 4 call-sites tests + 2 app/actions). Le fallback `'votre marraine'` -> `'votre parrain'` ligne 669 a ete corrige, suffisant pour l'utilisateur final. A reconsiderer Epic 9 si coherence stricte voulue (rename `sendParrainageFilleulConfirmation` + alias deprecated pattern T2.2).
+
+- **F-Epic8-C3 rename types TS internes `FilleuleStatut` / `Filleule`** [`components/accompagnant/parrainage-view.tsx:5-13`] -- Hors-perimetre regle CLAUDE.md (la regle vise la copy affichee, pas les identifiants TS). Defer Epic 9 si refacto code-style souhaite. Pas bloquant.
+
+- **F-Epic8-C3 audit Sentry 7j post-deploy emails admin parrainage** -- Surveiller que les emails `admin_parrainage_flag` envoyes en prod (notifications via Sentry signal `email-send-failed` ou tag `flow:email`) utilisent bien le nouveau wording (sujet `Parrainage bloqué - même email entre parrain et filleul` ou variantes neutres). Si une regression apparait, defer Epic 9.
+
+- **F-Epic8-C3 validation manuelle navigateur staging** -- Sylvain valide visuellement /admin/parrainages + /accompagnant/parrainage en staging apres deploiement. T14 differe car aucune session admin local. Verifications attendues : (a) table admin affiche `Parrain` / `Filleul` en-tetes, (b) helper text H1 dit `Toutes les relations parrain / filleul`, (c) composant accompagnant fallback `Filleul` apparait si first/last name null.
+
+## Deferred from: code review of 8-c-3-wording-ui-neutre-marraine-filleule-parrain-filleul (2026-05-17)
+
+- **`marraineId`/`marraineFirstName` noms du return type `validateCode` même pour un parrain accompagné** [`app/actions/parrainage.ts`] — Dette de nommage héritée Epic 2 ; scope renommage global AI-6.A.1 (accompagne → accompagnant BDD complet). Pas de bug fonctionnel, juste sémantique trompeuse.
+- **CTA URL `/accompagnant/dashboard` hardcodé dans `sendParrainageBienvenueParrain`** [`lib/emails.ts:~545`] — Dispatch actuel correct (seuls accompagnants appellent cette fonction via le path historique) ; risque via l'alias deprecated uniquement si mauvais callsite futur. À corriger si un accompagné est routé vers cette fonction.
+- **Deux lectures BDD non-atomiques dans `validateCode`** [`app/actions/parrainage.ts`] — users puis subscriptions dans deux requêtes séparées, fenêtre TOCTOU théorique. Pré-existant avant ce diff ; mitigé par le re-check dans `confirmParrainageOnSuccess`.
+
+## Deferred from: implementation of 8-c-2-politique-confidentialite-extension-parrainage-accompagne (2026-05-17)
+
+- **Bullet « Finalités du traitement » dédiée au parrainage entre utilisateurs (optionnelle)** [`app/politique-de-confidentialite/page.tsx:44-51`] — Décision défaut retenue 8.C.2 : ne PAS ajouter de bullet explicite « Programme de parrainage entre utilisateurs (accompagnants et accompagnés) et gestion des récompenses associées ». Rationale : le parrainage est un mécanisme d'acquisition/rétention contractuel (article 6.1.b RGPD exécution du contrat), implicitement couvert par les bullets existantes « Création et gestion de votre compte utilisateur » et « Gestion des abonnements et paiements » (la récompense est un coupon Stripe appliqué sur l'abonnement existant). Une 7e bullet ajouterait de la fatigue cognitive sans apport RGPD significatif. À reconsidérer si CNIL audit explicite, communication transparence renforcée, ou demande utilisateur. Formulation prête à coller : « Programme de parrainage entre utilisateurs et gestion des récompenses associées » — à insérer après « Gestion des abonnements et paiements » (ligne 48) pour respecter l'ordre logique acquisition → abonnement → parrainage.
+
+## Deferred from: implementation of 8-c-1-page-admin-parrainages-tous-roles-filtre (2026-05-17)
+
+- **Index `idx_users_role` pour stats admin parrainages à grand volume** — Audit BDD 8.A.0 a flaggé l'absence d'index dédié sur `users.role` (seuls `users_pkey`, `users_email_key`, `idx_users_email_lower`). 8.C.1 introduit 2 nouvelles requêtes `parrainages JOIN users WHERE users.role = $filter` (counters + filtrage table) via PostgREST `!inner` modifier. Au volume actuel (826 users + 3 parrainages prod), le scan séquentiel reste rapide et l'index n'apporte rien. Pertinence si volumétrie parrainages > 10k rows OU si des batches analytics admin (stats journalières/mensuelles par rôle parrain) deviennent fréquents. Migration future suggérée : `CREATE INDEX CONCURRENTLY idx_users_role ON public.users(role)` — `CONCURRENTLY` essentiel pour éviter le lock écriture sur la table critique `users`.
+
+## Deferred from: code review of 8-c-1-page-admin-parrainages-tous-roles-filtre (2026-05-17)
+
+- **F5 — `autoriserException` réécrit `parrainee_par` sans guard `IS NULL`** [`app/actions/admin-parrainages.ts`] — Si une filleule a entre-temps un autre parrainage légitime, l'exception admin écrase son attribution silencieusement. Comportement pré-existant à 8.C.1 ; l'override admin peut être intentionnel. À arbitrer en Epic 9 si des cas prod remontés.
+- **F8 — Race condition register-form : avancement step sans code validé (`status === 'checking'`)** [`components/auth/register-form.tsx`] — Clic rapide ou Enter pendant la validation async → step avance avec code non encore validé. Mitigé côté serveur (re-validation `createParrainageRelation`). Hors scope 8.C.1 ; à corriger en Epic 9 UX parrainage.
+- **F11 — `validateCode` : accompagné sans row `subscriptions` reçoit `marraine_subscription_inactive`** [`app/actions/parrainage.ts`] — Race window entre paiement Stripe et webhook inscription. Timing inhérent à l'archi async Stripe ; retry natif du client résout. À monitorer en Sentry (signal `marraine-sub-inactive` + roleParrain='accompagne').
+- **F15 — `confirmerFraude` décrémente `compteur_confirmes` via read-modify-write non atomique** [`app/actions/admin-parrainages.ts`] — Race condition si 2 admins confirment fraude simultanément sur le même parrain. Probablité très faible (1 admin prod). Corriger avec un RPC delta `parrainage_decrement_compteur` en Epic 9.
+
+## Deferred from: code review of 8-b-2-teaser-dashboard-accompagne-invitez-accompagnant (2026-05-17)
+
+- **Barre de progression vide aux multiples exacts de 5 (`compteur % 5 === 0`)** [`app/accompagne/dashboard/page.tsx:323`] — Pre-existing dans `app/accompagnant/dashboard/page.tsx:484` (Epic 2). À multiples de 5, `i < 0` est faux pour tout `i` → 5 segments gris alors que la récompense vient d'être déclenchée. Fix nécessite décision UX : barre pleine momentanément + reset, ou signal visuel distinct au palier ? À trancher en Epic 9 ou story UX parrainage multi-cycles.
+- **Compteur brut `{parrainageCompteur} / 5` trompeur au-delà du 1er cycle** [`app/accompagne/dashboard/page.tsx:316`] — Pre-existing dans `app/accompagnant/dashboard/page.tsx:477`. À 7 parrainages cumulés : affiche `7 / 5` au lieu de `2 / 5` (progression dans le cycle courant). Corriger en affichant `parrainageCompteur % 5` au numérateur — à décider en même temps que le comportement multi-cycles ci-dessus.
+- **`parrainageTotalRecompenses > 0` + `compteur === 0` affiche "0 / 5 confirmés"** [`app/accompagne/dashboard/page.tsx:315`] — Pre-existing dans accompagnant. Cas : utilisateur au début du 2e cycle (cron a remis `compteur_confirmes` à 0 post-récompense). Le ternaire bascule sur "progression" car `totalRecompenses > 0`, mais affiche `0 / 5` — contradictoire. Variable `total_recompenses` sert de switch sans jamais apparaître dans l'UI. Résoudre conjointement avec les deux items ci-dessus.
+
+## Deferred from: code review of 8-a-4-tests-integration-parrainage-symetrique (2026-05-17)
+
+- **SC6 assertions `processed >= 1` / `confirmed >= 1` en `>=`** [`tests/integration/parrainage/symetrie.test.ts`] — Les compteurs cron sont assertés en `>=` et non filtrés sur `parrainage.id` spécifique. Rows résiduelles d'autres suites pourraient satisfaire l'assertion même si la row seedée n'est pas traitée. Acceptable pour l'instant (nettoyage beforeAll/afterAll limite la contamination), à renforcer si flakiness CI observée.
+- **Rate-limit clé `'validate_code:unknown'` partagée entre SC1/SC2/SC5** [`tests/integration/setup.ts`] — Mock `headers()` retourne `Map vide` → clé IP `'unknown'` identique pour tous les appels `validateCode`. Risque de flakiness si le plafond (30 req) est atteint dans un run avec beaucoup de tests. Plafond non atteint à 6 scénarios actuels. À surveiller si la suite est étendue.
+
+## Deferred from: implementation of 8-a-4-tests-integration-parrainage-symetrique (2026-05-17)
+
+- **Couverture `app/actions/parrainage.ts` non mesurée localement** — La cible AC4 ≥ 85% n'a pas pu être vérifiée localement (Sylvain n'exécute pas Docker, heritage `feedback_test_local_supabase`). Le GHA workflow `integration-tests.yml` exécute la suite mais ne produit pas de rapport de couverture annoté par fichier dans la sortie CI standard. Action de suivi : (a) lancer manuellement `npm run test:integration:coverage` post-merge sur une instance Supabase de staging pour confirmer la cible, ou (b) ajouter `--coverage` au workflow GHA et publier `coverage/coverage-summary.json` comme artefact. Si la couverture mesurée est < 85%, candidat hardening Epic 9 sur branches non couvertes (anti-fraude `detectBlacklist`, idempotence INSERT 23505 racy, anti auto-parrainage `self_referral`).
+- **Extension `tests/integration/setup.ts` pour mocks `next/server.after` + `next/cache.revalidatePath` + `sendParrainageBienvenueAccompagne`** — Hors AC15 strict (le diff sur `tests/integration/setup.ts` n'était pas listé). Justification : `confirmParrainageOnSuccess` appelle `after()` (next/server) et `revalidatePath` (next/cache) qui throw hors request scope, et `sendParrainageBienvenueAccompagne` (livré 8.A.1) n'était pas dans la liste des mocks email. Ces 3 extensions sont strictement additives (vi.importActual + override sélectif) et n'impactent pas les suites paywall/stripe-webhook/cron-purge existantes (audit grep : aucun usage de `after`/`revalidatePath` dans ces server actions). À valider via run GHA `integration-tests` complet post-merge.
+
+## Deferred from: code review des stories 8.A.3 + 7.C.2 (2026-05-17)
+
+- **Double lookup `users` dans `validateCode`** [`app/actions/parrainage.ts:400`] — Le path 8.A.2 ajoute `supabaseAdmin.from('users').select('role, first_name')` séparé, alors que l'embed existant `users!user_id` charge déjà `first_name` pour le path accompagnant. Deux round-trips BDD sur la même PK. Corriger en fusionnant le select `role` dans l'embed existant, mais cela demande de revoir la structure du branchement role-aware. Candidat refactoring story 8.X perf parrainage.
+- **Valeur retournée de `triggerAccompagneCodeGenesisIfEligible` ignorée dans le webhook** [`app/api/webhooks/stripe/route.ts:551, 727`] — Les deux call-sites font `await triggerAccompagneCodeGenesisIfEligible(...)` sans utiliser le retour `{ codeCreated, code }`. Inoffensif aujourd'hui (toute logique post-genesis est dans la fonction elle-même), mais si une future story doit brancher sur `codeCreated`, la valeur sera silencieusement perdue. À documenter ou consommer explicitement lors de l'ajout du prochain feature dépendant.
+
+## Deferred from: implementation of 8-a-1-webhook-stripe-genese-code-parrainage-accompagne (2026-05-17)
+
+- **Bascule `sendParrainageBienvenueMarraine` -> `sendParrainageBienvenueParrain`** — Story 8.C.3 (wording neutre) renomme la fonction historique avec alias rétro-compat 1 release. 8.A.1 a livré `sendParrainageBienvenueAccompagne` (nouveau nom, neutre dès création, hors-périmètre rename) mais **n'a pas modifié** `sendParrainageBienvenueMarraine` (path accompagnant intact). Quand 8.C.3 sera mergée, vérifier que les appelants existants (`app/actions/admin.ts:226`) sont bien sur l'alias retro-compat puis basculer vers le nouveau nom dans une story de cleanup. Ne s'applique pas à `sendParrainageBienvenueAccompagne` (déjà neutre).
+- ~~**Test integration end-to-end webhook -> code parrainage accompagne** — La story 8.A.1 couvre l'helper en tests unitaires purs (5 scénarios + status=trialing). La story 8.A.4 cadrera la suite d'intégration end-to-end (mock event Stripe -> webhook -> assertion BDD `parrainages_codes` + `notifications_log`), avec mock `resend` et idempotence rejeu event.~~ **[Solde 8.A.4 - 2026-05-17]** Suite `tests/integration/parrainage/symetrie.test.ts` livrée : 6 scénarios SC1-SC6 couvrant le golden path accompagne→accompagnant via webhook + server actions + assertion BDD `parrainages_codes`/`parrainages`/`subscriptions`/`accompagnants_profiles`.
+
+## Deferred from: code review of 8-a-0-audit-mcp-schema-parrainages (2026-05-17)
+
+- **F5 — AC2 `visiteur` absent de l'enum `user_role`** — Écart de spec 8.A.0 documenté, non-impactant Epic 8. Clarifier la spec en début d'Epic 9 si un rôle visiteur est envisagé.
+- **F6 — AC3 `canceled`/`unpaid` absents de `subscription_status`** — Écart de spec documenté (`cancelled` double L en BDD, pas de `unpaid`). Mettre à jour la spec au prochain audit BDD ou en cadrage Epic 9.
+- **F7 — DDL `users` complète non auditée** — Audit 8.A.0 ciblait `users.role` uniquement. Si une future story écrit sur d'autres colonnes `users`, faire un audit `users` complet en amont.
+- **F12 — `relforcerowsecurity` non vérifié sur `parrainages_codes`** — Risque faible (service role bypass standard). À inclure dans le prochain audit sécurité global RLS.
+
+## Deferred from: code review of 8-a-2-server-actions-parrainage-symetrique (2026-05-17)
+
+- **`first_name` vide silencieusement renvoyé via `|| ''`** [`app/actions/parrainage.ts:429`] — Pattern pré-existant ligne 478 (path accompagnant). UX dégradée si un parrain n'a pas (encore) renseigné son prénom. Dette globale, à traiter par enforcement BDD (`first_name NOT NULL` ou DEFAULT) ou fallback copy UI.
+- **Cast `as { role?: string } | null` désactive le typage strict Supabase** [`app/actions/parrainage.ts:411, 519, 844`] — Pattern récurrent du fichier (et d'autres server actions). À traiter par génération `supabase gen types typescript` + suppression des casts manuels dans une story dédiée.
+- **Mocks `fromMock` séquentiels non discriminants, `mockAfter` exécuté sync sans await, `mockNormalizeEmail` vide** [`tests/unit/parrainage-symetrie.test.ts:131-160, 169, 218`] — Pattern hérité de 8.A.1 et d'autres test files. La séquence d'appels arbitraire (ignorant le nom de table) rend les tests fragiles aux refactos. Refonte du harness mocks Supabase (helper partagé par table, `await mockAfter`, normalizeEmail discriminant) à cadrer hors story 8.A.2.
+
+## Deferred from: code review of 8-a-1-webhook-stripe-genese-code-parrainage-accompagne (2026-05-17)
+
+- **F4 — Type log `parrainage_bienvenue` partagé entre accompagné et accompagnant** — `sendParrainageBienvenueAccompagne` et `sendParrainageBienvenueMarraine` utilisent le même `type: 'parrainage_bienvenue'`. Analytics ambigus sans JOIN users. À corriger lors du renommage global 8.C.3 (introduire `parrainage_bienvenue_accompagne` / `parrainage_bienvenue_accompagnant`).
+- **F8 — Sentry `tags.severity='warning'` sans `level: 'warning'`** — Pattern pré-existant dans tout le webhook Stripe. Les captures remontent en level `error` par défaut. À aligner dans un epic hardening Sentry dédié.
+- **F9 — 3 clients Supabase serviceRole ouverts par invocation genesis** — `triggerAccompagneCodeGenesisIfEligible` ouvre son propre client + `generateCodeForUserSystem` ouvre le sien. Refactoriser pour injection de client en paramètre dans un epic perf.
+- **F10 — Genesis appelée sur chaque renouvellement mensuel** — `subscription.updated` avec `status='active'` déclenche genesis à chaque cycle. Idempotent (layer 2 court-circuite), mais round-trip BDD superflu. Optimisation early-exit si row `parrainages_codes` existe déjà, à évaluer sous charge réelle.
+- ~~**F11 — Chemin retry 23505 non couvert par le mock de test** — `generateCodeForUserSystem` retry 3× sur collision code ; le mock utilise `'XXOTHER'` (pas `'23505'`). Branche retry non testée. À couvrir en 8.A.4 (tests E2E webhook).~~ **[Solde 8.A.4 - 2026-05-17]** Suite intégration `tests/integration/parrainage/symetrie.test.ts` SC1 exerce `generateCodeForUserSystem` sur BDD réelle via `confirmParrainageOnSuccess` (genèse code filleul). Branche retry 23505 toujours non exercée en pratique (collision sur 31^8 ~10^12 keyspace = probabilité négligeable), à laisser au design : la branche est défensive et n'a pas vocation à être déclenchée hors test ciblé d'injection.
+
+## Deferred from: code review of 7-c-2-scenarios-anti-fraude-parrainage-e2e (2026-05-16)
+
+- **Idempotence RPC double flag non exercée** — Tester `merge_parrainage_flag_suspicion` avec un flag déjà présent (`was_added=false`). Hors scope 7.C.2 ; candidat 7.C.3 ou story hardening RPC.
+- **Permission `service_role` de la RPC non testée** — Le test appelle la RPC en superuser (bypass GRANT). Tester l'accès en `service_role` uniquement exigerait un client Supabase JS en service_role, hors pattern E2E direct PG. Limitation documentée, acceptable.
+- **`OnboardingPage.goto()` sans assertion URL finale** — Pattern hérité de tous les POs existants. Amélioration globale des POs à mutualiser si le besoin se pose sur plusieurs specs.
+
 ## Deferred from: code review of 7-b-2-cron-purge-notifications-log-18-mois (2026-05-14)
 
 - **T2 — Timing attack sur comparaison `===` du secret** [`app/api/cron/purge-notifications/route.ts:42`] — Pré-existant dans tous les crons du projet. Risque théorique faible côté Vercel cron interne.
@@ -93,7 +179,7 @@
 
 - `validateCode` exposé sans rate-limit (oracle d'énumération de codes 8 chars) [app/actions/parrainage.ts:255-298] — reconnu dans la spec comme « à traiter séparément ». Combiner avec rate-limit IP global et/ou refondre en route API protégée.
 - `console.error` sans alerting/Sentry partout dans les chemins fraude/email/blacklist — dette pré-existante de toute la stack, pas spécifique à 2-3. À traiter de façon transverse (Sentry + alertes côté monitoring).
-- Types `as any` dans pages admin [app/admin/parrainages/page.tsx:185, app/admin/parrainages/blacklist/page.tsx:134] — dette TS pré-existante. À typer proprement quand la BDD aura des types Supabase générés stables.
+- ~~Types `as any` dans pages admin [app/admin/parrainages/page.tsx:185, app/admin/parrainages/blacklist/page.tsx:134] — dette TS pré-existante. À typer proprement quand la BDD aura des types Supabase générés stables.~~ **[Solde 8.C.1 - 2026-05-17]** Aucun `as any` résiduel dans `app/admin/parrainages/page.tsx` ni `app/admin/parrainages/blacklist/page.tsx` (devenue redirect). La page principale utilise désormais le cast SCP D5 `as unknown as SupabaseClient<Database>` (ligne 77, whitelist `scripts/check-as-any-admin.mjs`), pattern hérité de 4.6/F11. `check:as-any-admin` exit 0 confirmé.
 - `escapeHtml` dans `lib/emails.ts` non visible dans le diff — dépendance externe utilisée intensivement, à valider hors review (test XSS dédié sur les templates email).
 
 ## Deferred from: code review of 2-5-1-outillage-a11y-baseline-lint (2026-05-04)
@@ -377,3 +463,25 @@ Tous ces findings concernent du code **strictement preserve** depuis HEAD (verif
 ## Deferred from: code review of 7-c-1-infra-e2e-playwright (2026-05-16)
 
 - **`NEXT_PUBLIC_SUPABASE_ANON_KEY` absent du bloc `env:` explicite du step "Run Playwright E2E"** [`.github/workflows/e2e-tests.yml`] — Cle injectee via `GITHUB_ENV` uniquement (pattern identique a `integration-tests.yml` de reference). Si le step "Capture Supabase keys" est absent dans un futur workflow copie-colle, la cle manquante provoque des 401 silencieux. Candidat a rendre explicite dans un hardening GHA.
+
+
+## Deferred from: story 8-a-2-server-actions-parrainage-symetrique (2026-05-17)
+
+- **Index `idx_users_role` non créé** [`users.role`] — Les requêtes ajoutées en 8.A.2 font des lookups par PK (`id`) avec SELECT `role` : pas de scan par rôle, index inutile à volumétrie actuelle (< 100 users). À créer en 8.C.1 si des requêtes batch filtrant sur `users.role` sont ajoutées (ex. dashboard admin). Migration candidate : `CREATE INDEX IF NOT EXISTS idx_users_role ON public.users USING btree (role);`.
+
+
+## Deferred from: code review of 8-b-1-page-accompagne-parrainage-code-filleuls-a11y (2026-05-17)
+
+- **Clé de liste React instable `${inscriteAt}-${idx}`** [`components/accompagne/parrainage-view.tsx:218`] — `filleule_id` est SELECT-é en BDD mais non transmis au composant, empêchant son usage comme clé UUID stable. Si deux filleuls ont le même timestamp (seed/test), clés dupliquées possibles. Pre-existing accompagnant — à corriger en Epic 9 si refacto partagée.
+- **Fallback UI absent sur échec `navigator.clipboard`** [`components/accompagne/parrainage-view.tsx:69-71`] — catch silencieux, l'utilisateur ne sait pas si la copie a échoué. Pre-existing accompagnant — pattern acceptable en HTTPS prod, à améliorer si signalements Safari/iOS.
+- **`p4-register` URL dans le baseline axe-core toujours `?role=accompagnante`** [`axe-core-baseline-2026-05-17.json:39`] — Regen le baseline après story 8.C.3 (renommage `accompagnante` → `accompagnant` dans le formulaire d'inscription).
+- **`abonneeAt` futur ou hors-plage → barre progression 0% + label "Validé dans N>30 jours"** [`components/accompagne/parrainage-view.tsx:187-213`] — Pre-existing accompagnant. À clamper si signalement utilisateur.
+
+## Deferred from: implementation of 8-b-1-page-accompagne-parrainage-code-filleuls-a11y (2026-05-17)
+
+- **Annonce ARIA live sur copie clipboard absente de `components/accompagnant/parrainage-view.tsx`** — Le composant accompagne livre en 8.B.1 ajoute un `<div role="status" aria-live="polite" className="sr-only">` qui annonce "Code copié dans le presse-papier" / "Lien d'invitation copié dans le presse-papier" après `clipboard.writeText`. Le composant accompagnant historique (Epic 2) n'a que le toggle de label bouton "Copier"/"Copié", sans annonce lecteur d'écran. Alignement à faire en 8.C.3 (wording neutre cross-codebase) ou story dédiée a11y accompagnant.
+- **Attribut `role="progressbar" aria-valuenow/min/max` absent de `components/accompagnant/parrainage-view.tsx`** — Le composant accompagne livre en 8.B.1 ajoute ces attributs ARIA sur le conteneur de la barre de progression (avec `aria-label="Progression du cycle de parrainage"`). Le composant accompagnant historique n'a que `aria-hidden="true"` sur l'élément visuel interne. Alignement à faire en 8.C.3 ou epic suivant.
+
+## Deferred from: implementation of 8-b-2-teaser-dashboard-accompagne-invitez-accompagnant (2026-05-17)
+
+- **Alignement teaser parrainage accompagnant `rounded-xl` -> `rounded-2xl`** [`app/accompagnant/dashboard/page.tsx:472`] — Le teaser accompagnant historique (Epic 2, 2026-04-29) utilise encore la classe `rounded-xl` pre-refonte foyer. Le teaser accompagne livré 8.B.2 utilise `rounded-2xl` (design system foyer, refonte 2026-05-11 commit 8387e40, cohérent avec les autres cartes "Mon espace" accompagne). Divergence cosmétique transverse path. À aligner en story 8.C.X (polish design system cross-roles) ou epic 9. Risque régression nul, impact UX très faible. Pre-existing accompagnant — non livré par 8.B.2 pour respecter l'AC7 (zero touche au path accompagnant).

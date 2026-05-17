@@ -47,6 +47,7 @@ function formatFlag(flag: string | null): string {
 type SearchParams = {
   vue?: 'tous' | 'suspects' | 'bloques'
   statut?: string
+  role_parrain?: 'all' | 'accompagnant' | 'accompagne'
   page?: string
   id?: string
 }
@@ -59,8 +60,20 @@ type ParrainageRow = {
   flag_suspicion: string | null
   created_at: string
   filleule_id: string | null
-  marraine: { first_name: string | null; last_name: string | null; email: string | null; phone: string | null } | null
+  marraine: {
+    first_name: string | null
+    last_name: string | null
+    email: string | null
+    phone: string | null
+    role: 'accompagnant' | 'accompagne' | 'admin' | null
+  } | null
   filleule: { first_name: string | null; last_name: string | null; email: string | null; phone: string | null } | null
+}
+
+const ROLE_PARRAIN_LABELS: Record<'accompagnant' | 'accompagne' | 'admin', string> = {
+  accompagnant: 'Accompagnant',
+  accompagne: 'Accompagné',
+  admin: 'Admin',
 }
 
 export default async function AdminParrainagesPage({
@@ -71,12 +84,19 @@ export default async function AdminParrainagesPage({
   const params = await searchParams
   const vue = params.vue === 'suspects' || params.vue === 'bloques' ? params.vue : 'tous'
   const statutFilter = params.statut?.toString() || ''
+  const roleParrainFilter: 'all' | 'accompagnant' | 'accompagne' =
+    params.role_parrain === 'accompagnant' || params.role_parrain === 'accompagne'
+      ? params.role_parrain
+      : 'all'
   const page = Math.max(1, parseInt(params.page || '1', 10) || 1)
   const highlightId = params.id?.toString() || ''
 
   const supabaseAdmin = (await createClient({ serviceRole: true })) as unknown as SupabaseClient<Database>
 
-  // Compteurs globaux (tous statuts + flags actifs)
+  // Compteurs globaux (tous statuts + flags actifs + roles parrain).
+  // 8.C.1 : 2 nouveaux counters role-parrain via PostgREST `!inner` modifier
+  // pour forcer un INNER JOIN qui exclut les rows avec marraine_id null
+  // (pattern coherent lib/admin/pending-counts.ts:38 et notify-ouverture-retry/route.ts:83).
   const counterPromises = STATUTS.map((s) =>
     supabaseAdmin
       .from('parrainages')
@@ -88,20 +108,48 @@ export default async function AdminParrainagesPage({
     .select('id', { count: 'exact', head: true })
     .not('flag_suspicion', 'is', null)
     .not('statut', 'in', '(bloque,fraude)')
+  const accompagnantParrainCounterPromise = supabaseAdmin
+    .from('parrainages')
+    .select('id, marraine:marraine_id!inner(role)', { count: 'exact', head: true })
+    .eq('marraine.role', 'accompagnant')
+  const accompagneParrainCounterPromise = supabaseAdmin
+    .from('parrainages')
+    .select('id, marraine:marraine_id!inner(role)', { count: 'exact', head: true })
+    .eq('marraine.role', 'accompagne')
 
-  const counterResults = await Promise.all([...counterPromises, flagCounterPromise])
+  const counterResults = await Promise.all([
+    ...counterPromises,
+    flagCounterPromise,
+    accompagnantParrainCounterPromise,
+    accompagneParrainCounterPromise,
+  ])
   const counters: Record<string, number> = {}
   STATUTS.forEach((s, i) => {
     counters[s] = counterResults[i].count || 0
   })
-  counters.flag_suspicion = counterResults[counterResults.length - 1].count || 0
+  // Indices nommés pour éviter un décalage silencieux si le tableau Promise.all évolue.
+  const IDX_FLAG = STATUTS.length         // après les N counters statut
+  const IDX_ACCOMPAGNANT = STATUTS.length + 1
+  const IDX_ACCOMPAGNE = STATUTS.length + 2
+  counters.flag_suspicion = counterResults[IDX_FLAG].count || 0
+  const roleParrainCounters = {
+    accompagnant: counterResults[IDX_ACCOMPAGNANT].count || 0,
+    accompagne: counterResults[IDX_ACCOMPAGNE].count || 0,
+  }
 
-  // Requête principale (paginée)
+  // Requête principale (paginée).
+  // 8.C.1 : `role` ajoute a l'embed marraine + `!inner` conditionnel pour le filtre
+  // role parrain (preserve marraine_id null en vue "tous", exclut en mode filtre).
+  const marraineEmbed =
+    roleParrainFilter !== 'all'
+      ? 'marraine:marraine_id!inner (first_name, last_name, email, phone, role)'
+      : 'marraine:marraine_id (first_name, last_name, email, phone, role)'
+
   let query = supabaseAdmin
     .from('parrainages')
     .select(
       `id, code, statut, blocage_raison, flag_suspicion, created_at, filleule_id,
-       marraine:marraine_id (first_name, last_name, email, phone),
+       ${marraineEmbed},
        filleule:filleule_id (first_name, last_name, email, phone)`,
       { count: 'exact' },
     )
@@ -116,6 +164,9 @@ export default async function AdminParrainagesPage({
   if (statutFilter && (STATUTS as readonly string[]).includes(statutFilter)) {
     query = query.eq('statut', statutFilter)
   }
+  if (roleParrainFilter !== 'all') {
+    query = query.eq('marraine.role', roleParrainFilter)
+  }
 
   const from = (page - 1) * PAGE_SIZE
   const to = from + PAGE_SIZE - 1
@@ -127,6 +178,7 @@ export default async function AdminParrainagesPage({
     const qs = new URLSearchParams()
     if (vue !== 'tous') qs.set('vue', vue)
     if (statutFilter) qs.set('statut', statutFilter)
+    if (roleParrainFilter !== 'all') qs.set('role_parrain', roleParrainFilter)
     if (totalPages > 1) qs.set('page', String(totalPages))
     redirect(`/admin/parrainages${qs.toString() ? `?${qs.toString()}` : ''}`)
   }
@@ -148,10 +200,17 @@ export default async function AdminParrainagesPage({
   }
 
   function buildHref(overrides: Partial<SearchParams>): string {
-    const merged = { vue, statut: statutFilter, page: String(page), ...overrides }
+    const merged = {
+      vue,
+      statut: statutFilter,
+      role_parrain: roleParrainFilter,
+      page: String(page),
+      ...overrides,
+    }
     const qs = new URLSearchParams()
     if (merged.vue && merged.vue !== 'tous') qs.set('vue', merged.vue)
     if (merged.statut) qs.set('statut', merged.statut)
+    if (merged.role_parrain && merged.role_parrain !== 'all') qs.set('role_parrain', merged.role_parrain)
     if (merged.page && merged.page !== '1') qs.set('page', merged.page)
     const s = qs.toString()
     return `/admin/parrainages${s ? `?${s}` : ''}`
@@ -166,7 +225,7 @@ export default async function AdminParrainagesPage({
         <div className="text-xs uppercase tracking-[0.18em] text-kraft mb-2">Espace admin</div>
         <h1 className="text-3xl md:text-4xl italic text-gray-900 leading-tight">Parrainages</h1>
         <p className="text-sm text-gray-600 mt-3">
-          Toutes les relations marraine / filleule, leur statut et leur risque éventuel.
+          Toutes les relations parrain / filleul, leur statut et leur risque éventuel.
           {totalAtRisk > 0 && (
             <> Actuellement <strong className="text-gray-900">{totalAtRisk}</strong> dossier{totalAtRisk > 1 ? 's' : ''} à examiner.</>
           )}
@@ -264,6 +323,46 @@ export default async function AdminParrainagesPage({
         </div>
       )}
 
+      {/* Filtre rôle parrain (visible toutes vues — 8.C.1) */}
+      <div className="flex items-center gap-2 mb-6 flex-wrap" role="group" aria-label="Filtrer par rôle parrain">
+        <Link
+          href={buildHref({ role_parrain: 'all', page: '1' })}
+          aria-current={roleParrainFilter === 'all' ? 'page' : undefined}
+          className={`px-3 py-1.5 text-xs rounded-full border transition ${
+            roleParrainFilter === 'all'
+              ? 'bg-gray-900 text-white border-gray-900'
+              : 'bg-white text-gray-700 border-[#e8dfd2] hover:border-kraft'
+          }`}
+        >
+          Tous rôles
+          <span className="ml-1.5 tabular-nums opacity-70">{count ?? 0}</span>
+        </Link>
+        <Link
+          href={buildHref({ role_parrain: 'accompagnant', page: '1' })}
+          aria-current={roleParrainFilter === 'accompagnant' ? 'page' : undefined}
+          className={`px-3 py-1.5 text-xs rounded-full border transition ${
+            roleParrainFilter === 'accompagnant'
+              ? 'bg-gray-900 text-white border-gray-900'
+              : 'bg-white text-gray-700 border-[#e8dfd2] hover:border-kraft'
+          }`}
+        >
+          Accompagnant
+          <span className="ml-1.5 tabular-nums opacity-70">{roleParrainCounters.accompagnant}</span>
+        </Link>
+        <Link
+          href={buildHref({ role_parrain: 'accompagne', page: '1' })}
+          aria-current={roleParrainFilter === 'accompagne' ? 'page' : undefined}
+          className={`px-3 py-1.5 text-xs rounded-full border transition ${
+            roleParrainFilter === 'accompagne'
+              ? 'bg-gray-900 text-white border-gray-900'
+              : 'bg-white text-gray-700 border-[#e8dfd2] hover:border-kraft'
+          }`}
+        >
+          Accompagné
+          <span className="ml-1.5 tabular-nums opacity-70">{roleParrainCounters.accompagne}</span>
+        </Link>
+      </div>
+
       <p className="text-sm text-gray-500 mb-4 tabular-nums">
         {count ?? 0} résultat{(count ?? 0) > 1 ? 's' : ''}
       </p>
@@ -281,8 +380,9 @@ export default async function AdminParrainagesPage({
             <thead className="bg-[#faf7f2] text-xs text-gray-500 uppercase tracking-wider">
               <tr>
                 <th scope="col" className="text-left px-4 py-3 font-medium">Date</th>
-                <th scope="col" className="text-left px-4 py-3 font-medium">Marraine</th>
-                <th scope="col" className="text-left px-4 py-3 font-medium">Filleule</th>
+                <th scope="col" className="text-left px-4 py-3 font-medium">Parrain</th>
+                <th scope="col" className="text-left px-4 py-3 font-medium">Rôle parrain</th>
+                <th scope="col" className="text-left px-4 py-3 font-medium">Filleul</th>
                 <th scope="col" className="text-left px-4 py-3 font-medium">Statut</th>
                 {showRichDetails ? (
                   <>
@@ -335,6 +435,9 @@ export default async function AdminParrainagesPage({
                       {showRichDetails && marraine?.phone && (
                         <div className="text-xs text-gray-400">{marraine.phone}</div>
                       )}
+                    </td>
+                    <td className="px-4 py-3 text-gray-700 whitespace-nowrap">
+                      {marraine?.role ? (ROLE_PARRAIN_LABELS[marraine.role] ?? marraine.role) : '—'}
                     </td>
                     <td className="px-4 py-3 text-gray-900">
                       <div className="font-medium">

@@ -8,7 +8,7 @@ type Props = {
   firstName: string
   lastName: string
   unreadCount: number
-  currentPage?: 'dashboard' | 'annonces' | 'recherche' | 'messages' | 'favoris' | 'profil' | 'abonnement' | 'other'
+  currentPage?: 'dashboard' | 'annonces' | 'recherche' | 'messages' | 'favoris' | 'profil' | 'parrainage' | 'abonnement' | 'other'
 }
 
 type LinkDef = {

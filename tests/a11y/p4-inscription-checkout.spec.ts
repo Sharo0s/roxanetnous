@@ -2,8 +2,8 @@ import { test, expect } from '@playwright/test'
 import { runAxe, summarizeCriticalSerious } from './lib/run-axe'
 
 test.describe('P4 — Inscription / Login (publics)', () => {
-  test('axe smoke /register?role=accompagnante', async ({ page }, testInfo) => {
-    await page.goto('/register?role=accompagnante', { waitUntil: 'domcontentloaded' })
+  test('axe smoke /register?role=accompagnant', async ({ page }, testInfo) => {
+    await page.goto('/register?role=accompagnant', { waitUntil: 'domcontentloaded' })
     try {
       await page.waitForLoadState('networkidle', { timeout: 5000 })
     } catch {
@@ -15,7 +15,7 @@ test.describe('P4 — Inscription / Login (publics)', () => {
     const summary = summarizeCriticalSerious(result.criticalSerious)
     await testInfo.attach('axe-violations.json', {
       body: JSON.stringify(
-        { parcours: 'p4-register', url: '/register?role=accompagnante', violations: summary },
+        { parcours: 'p4-register', url: '/register?role=accompagnant', violations: summary },
         null,
         2,
       ),

@@ -6,7 +6,7 @@ import { redirect } from 'next/navigation'
 import {
   sendValidationResultEmail,
   sendNewMessageEmail,
-  sendParrainageBienvenueMarraine,
+  sendParrainageBienvenueParrain,
 } from '@/lib/emails'
 import { stripe } from '@/lib/stripe'
 import { getSubscriptionStatus } from '@/lib/subscription-helpers'
@@ -223,7 +223,7 @@ export async function validateAccompagnante(
         // marraine" que sur création réelle. Pour une re-validation
         // (refuse -> valide), le code existait déjà, l'email serait spam.
         if (codeResult.created) {
-          await sendParrainageBienvenueMarraine({
+          await sendParrainageBienvenueParrain({
             email: auxUser.email,
             firstName: auxUser.first_name || '',
             code: codeResult.code,
