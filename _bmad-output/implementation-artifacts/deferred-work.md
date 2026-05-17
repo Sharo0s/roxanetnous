@@ -1,5 +1,11 @@
 # Deferred Work
 
+## Deferred from: code review of 9-a-1-refonte-mocks-supabase-frommock-discriminants-par-table (2026-05-17)
+
+- **`insert().then()` non conforme Promise/A+ (pas de `onRejected`)** [`tests/unit/_lib/supabase-mock.ts:106`] — Pattern hérité de `buildCronFromMock`. Le second argument `reject` est ignoré. Non impactant dans les usages actuels (aucun `.then(null, onRejected)` dans le code applicatif Supabase), mais non conforme à la spec Promises/A+. À corriger si le thenable est jamais consommé dans un contexte rejection.
+- **SC5 : filtre `.eq()` post-update non capturé** [`tests/unit/parrainage-symetrie.test.ts:292–298`] — `capturedUpdates` stocke `{ table, payload }` mais pas les arguments du `.eq()` de filtre. Un UPDATE sur la mauvaise ligne (mauvais `id`) passerait l'assertion actuelle. Pré-existant à 9.A.1 (l'ancienne `updatePayloads` inline ne capturait pas non plus le `.eq()`). À traiter dans un renforcement futur du helper si le risk est jugé réel.
+- **SC9 : pool `users: []` vide — ambiguïté "user non trouvé" vs "abonnement inactif"** [`tests/unit/parrainage-symetrie.test.ts SC9`] — SC9 teste le skip de récompense quand `marraineSub.active === false`, mais avec `users: []`, le cron reçoit `{ data: null }` sur tout lookup `users`, rendant impossible de distinguer si le skip est dû à la sub inactive ou à un user introuvable. Pré-existant hors périmètre 9.A.1.
+
 ## Deferred from: code review of 8-d-1-e2e-playwright-parcours-accompagne-accompagnant-golden-path (2026-05-17)
 
 - **`afterAll` sans try/catch inter-blocs : etat partiellement nettoye si un `withPg` echoue** [`tests/e2e/parrainage-symetrique.spec.ts:111-165`] — Les 6 `withPg` sequentiels du `afterAll` n'ont pas de try/catch individuel. Un echec de l'etape 2 (DELETE parrainages_codes) arrete la cascade : `parrainee_par`, subscriptions et `validation_source` restent pollues entre runs. `resetEphemeralRows` ne couvre pas ces tables. Pattern pre-existant dans 7.C.1/7.C.2, non critique grace aux 2 runs GHA consecutifs requis.
@@ -75,7 +81,7 @@
 
 - **`first_name` vide silencieusement renvoyé via `|| ''`** [`app/actions/parrainage.ts:429`] — Pattern pré-existant ligne 478 (path accompagnant). UX dégradée si un parrain n'a pas (encore) renseigné son prénom. Dette globale, à traiter par enforcement BDD (`first_name NOT NULL` ou DEFAULT) ou fallback copy UI.
 - **Cast `as { role?: string } | null` désactive le typage strict Supabase** [`app/actions/parrainage.ts:411, 519, 844`] — Pattern récurrent du fichier (et d'autres server actions). À traiter par génération `supabase gen types typescript` + suppression des casts manuels dans une story dédiée.
-- **Mocks `fromMock` séquentiels non discriminants, `mockAfter` exécuté sync sans await, `mockNormalizeEmail` vide** [`tests/unit/parrainage-symetrie.test.ts:131-160, 169, 218`] — Pattern hérité de 8.A.1 et d'autres test files. La séquence d'appels arbitraire (ignorant le nom de table) rend les tests fragiles aux refactos. Refonte du harness mocks Supabase (helper partagé par table, `await mockAfter`, normalizeEmail discriminant) à cadrer hors story 8.A.2.
+- ~~**Mocks `fromMock` séquentiels non discriminants, `mockAfter` exécuté sync sans await, `mockNormalizeEmail` vide** [`tests/unit/parrainage-symetrie.test.ts:131-160, 169, 218`] — Pattern hérité de 8.A.1 et d'autres test files. La séquence d'appels arbitraire (ignorant le nom de table) rend les tests fragiles aux refactos. Refonte du harness mocks Supabase (helper partagé par table, `await mockAfter`, normalizeEmail discriminant) à cadrer hors story 8.A.2.~~ **[Solde 9.A.1 - 2026-05-17]** Helper partagé `tests/unit/_lib/supabase-mock.ts` (`createSupabaseFromMock`) introduit, discrimine par nom de table (pool par clé `table_name`). 9 scénarios SC1–SC5 + SC8–SC11 migrés du dispatcher positionnel vers le helper. Sous-volet `mockAfter` sans await + `mockNormalizeEmail` vide non couverts par 9.A.1 (volets distincts du I6 strict mocks Supabase) — toujours ouverts pour story future hardening tests si besoin.
 
 ## Deferred from: code review of 8-a-1-webhook-stripe-genese-code-parrainage-accompagne (2026-05-17)
 
