@@ -55,19 +55,19 @@ so that la coverage cumulee unit+integration du fichier passe du palier 1 (~50%)
   - [x] T4.5 `npm run lint:a11y-check` : baseline 155 preserve. `npm run a11y:axe:check` : N/A (story 100% tests, pas d'UI touchee — voir DoD a11y plus bas).
   - [x] T4.6 `npm run check:no-direct-notifications-log-insert` / `check:as-any-global` / `check:oracle-paywall` : exit 0.
 
-- [ ] **T5 Push + run GHA + ajustement seuil palier 2** (AC2, AC3, AC7)
-  - [x] T5.1 Push branche `story/9-a-2-b-coverage-palier-65`. Workflow `integration-tests` declenche sur PR.
-  - [ ] T5.2 1er run GHA mesure coverage cumulee unit+integration -> noter les 4 indicateurs reels (palier 1 actuel reste 49/41/64/48 -> pas de regression bloquante).
-  - [ ] T5.3 Mettre a jour `vitest.config.ts > thresholds` avec chiffres mesures arrondis au point inferieur, **plancher palier 1** (jamais < 49/41/64/48).
-  - [ ] T5.4 Option B-bis si un indicateur ne franchit pas 65% : palier 2 effectif = mesure reelle, documenter DECISIONS.md.
-  - [ ] T5.5 2e push si T5.3 necessaire. 1 run vert suffit (pattern F-Epic9-A2 relaxe).
+- [x] **T5 Push + run GHA + ajustement seuil palier 2** (AC2, AC3, AC7)
+  - [x] T5.1 Push branche `story/9-a-2-b-coverage-palier-65`. Workflow `integration-tests` declenche sur PR #13.
+  - [x] T5.2 1er run GHA #26037648833 mesure coverage cumulee unit+integration : lines **67.47** / branches **59.61** / functions **92.85** / statements **65.65**. Palier 1 (49/41/64/48) franchi sur tous les indicateurs. Integration + E2E + Vercel Preview verts.
+  - [x] T5.3 `vitest.config.ts > thresholds` MAJ : `lines: 67 / branches: 59 / functions: 92 / statements: 65` (chiffres mesures arrondis au point inferieur, plancher palier 1 maintenu).
+  - [x] T5.4 **Option B-bis appliquee** : branches plafonne a 59.61 (< 65) -> palier 2 effectif sur branches = 59 (mesure reelle). 3/4 indicateurs franchissent 65%. DECISIONS.md F-Epic9-A2 enrichi.
+  - [x] T5.5 2e push (ajustement thresholds + doc) sur la meme PR #13. 1 run vert suffit (pattern F-Epic9-A2 relaxe).
 
-- [ ] **T6 Documentation + handoff** (AC8, AC9)
-  - [ ] T6.1 `DECISIONS.md > F-Epic9-A2 > Implications` : ajouter ligne palier 2 atteint avec chiffres + commit.
-  - [ ] T6.2 `deferred-work.md > 9.A.2.b` : barrer + chiffre + commit. MAJ `9.A.2.c` branches restantes.
-  - [x] T6.3 `_bmad-output/implementation-artifacts/sprint-status.yaml` : `9-a-2-b-...` `ready-for-dev` -> `in-progress` -> `review` au push GHA vert, puis `done` post-merge.
-  - [ ] T6.4 Mettre a jour memoire `project_epic_9_cadrage` : chiffre palier 2 effectif + statut 9.A.2.b done.
-  - [x] T6.5 Change Log de cette story : 3 entrees (creation ready-for-dev, implementation in-progress, merge done) avec dates + chiffres + commits.
+- [x] **T6 Documentation + handoff** (AC8, AC9)
+  - [x] T6.1 `DECISIONS.md > F-Epic9-A2` : bloc "Palier 2 atteint le 2026-05-18 via 9.A.2.b" ajoute avec chiffres GHA + Option B-bis branches + ref PR #13 / run #26037648833.
+  - [x] T6.2 `deferred-work.md > 9.A.2.b` solde `[Solde 9.A.2.b - 2026-05-18 - PR #13 / run GHA #26037648833]` + chiffres. `9.A.2.c` enrichi avec branches RESTANTES precises (createParrainageRelation self_referral/23505/blacklist_other/meme_ip, revokeFilleuleValidation*, retry generateCode 23505 documente non couvrable).
+  - [x] T6.3 `_bmad-output/implementation-artifacts/sprint-status.yaml` : `9-a-2-b-...` `ready-for-dev` -> `in-progress` -> `review` (post-merge passera a `done`).
+  - [x] T6.4 Memoire `project_epic_9_cadrage` MAJ : 9 stories done 2026-05-18 + chiffres palier 2 effectif + branches Option B-bis documente.
+  - [x] T6.5 Change Log de cette story : 3 entrees (creation ready-for-dev, implementation in-progress->review, ajustement thresholds post-GHA).
 
 ## Dev Notes
 
@@ -211,7 +211,9 @@ claude-opus-4-7 (1M context) -- bmad-dev-story workflow
 
 **(D2) Decision pattern test indirect `detectBlacklist`** : helper non export -> teste via `createParrainageRelation` qui l'appelle apres l'INSERT initial (T2 Note dev). Confirmation par observable side-effect : return value (`reason: 'blacklist_meme_email'` ou `ok: true` + RPC `merge_parrainage_flag_suspicion` appele pour meme_ip).
 
-**(D3) Coverage local unit-only mesure** : lines **59.86%** / branches **48.07%** / functions **78.57%** / statements **58.24%**. Cumul unit+integration GHA attendu **+6 a +10 pts** sur lines/statements/branches selon overlap integration tests. Palier 2 (65%) **probable** sur lines/functions/statements ; **branches** plafonne probablement entre 55-60% (Option B-bis prevue, defer 9.A.2.c).
+**(D3) Coverage local unit-only mesure** : lines **59.86%** / branches **48.07%** / functions **78.57%** / statements **58.24%**.
+
+**(D3-bis) Coverage cumulee unit+integration GHA #26037648833** : lines **67.47%** / branches **59.61%** / functions **92.85%** / statements **65.65%**. Gain mesure vs palier 1 (49.48/41.92/64.28/48.14) = **+17.99 lines / +17.69 branches / +28.57 functions / +17.51 statements**. Palier 2 (65%) **atteint sur 3/4 indicateurs** (lines, functions, statements). **Branches plafonne a 59.61** -> Option B-bis appliquee : palier 2 effectif branches = 59 (arrondi au point inferieur), gap residuel -5.39 pts vs cible 65% reporte sur 9.A.2.c.
 
 **(D4) Hors palier 2 / [Defer 9.A.2.c]** explicitement non testes par cette story (justifies AC10 + Dev Notes Hors palier 2) :
 - `createParrainageRelation` self_referral (l. 544) + idempotence 23505 retry (l. 634-650) + blacklist_other (l. 612) -- volumineux, defer 9.A.2.c (~5-7 SC dedies).
@@ -221,7 +223,7 @@ claude-opus-4-7 (1M context) -- bmad-dev-story workflow
 
 **(D5) DoD a11y** : N/A par construction. Story 100% tests unitaires, 0 fichier `.tsx` touche. Baselines `lint:a11y-check` 155 + `axe-core` 0 violations Critical/Serious preservees (pattern herite stories soeurs 9.A.1 / 9.A.2).
 
-**(D6) Pending T5/T6** : ajustement `vitest.config.ts > thresholds` + update `DECISIONS.md` + `deferred-work.md` + memoire seront finalises **apres** 1er run GHA reussi et observation des chiffres reels cumules unit+integration.
+**(D6) T5/T6 finalises** : 1er run GHA #26037648833 vert (integration + e2e + Vercel Preview). Coverage cumulee mesuree -> ajustement `vitest.config.ts > thresholds` palier 2 effectif `67/59/92/65` (Option B-bis branches). DECISIONS.md F-Epic9-A2 enrichi + deferred-work.md 9.A.2.b solde + 9.A.2.c precise (branches restantes ~7-10 SC). Memoire `project_epic_9_cadrage` MAJ (9 stories done 2026-05-18).
 
 ### File List
 
@@ -232,12 +234,12 @@ claude-opus-4-7 (1M context) -- bmad-dev-story workflow
 **Inchanges (verifies)** :
 - `app/actions/parrainage.ts` : aucune modification (AC10).
 - `tests/unit/_lib/supabase-mock.ts` : reuse strict, aucune extension necessaire.
-- `vitest.config.ts > thresholds` : reste a palier 1 (49/41/64/48) jusqu'au 1er run GHA.
 
-**A modifier post-1er-run-GHA (T5/T6)** :
-- `vitest.config.ts > coverage.thresholds['app/actions/parrainage.ts']` (4 valeurs).
-- `DECISIONS.md > F-Epic9-A2 > Implications`.
-- `_bmad-output/implementation-artifacts/deferred-work.md` (item 9.A.2.b solde + 9.A.2.c precise).
+**Modifies post-1er-run-GHA (T5/T6)** :
+- `vitest.config.ts > coverage.thresholds['app/actions/parrainage.ts']` : `lines: 67 / branches: 59 / functions: 92 / statements: 65` (Option B-bis branches).
+- `DECISIONS.md > F-Epic9-A2` : bloc "Palier 2 atteint le 2026-05-18 via 9.A.2.b" ajoute.
+- `_bmad-output/implementation-artifacts/deferred-work.md` : 9.A.2.b solde `[Solde 9.A.2.b - 2026-05-18 - PR #13 / run GHA #26037648833]`, 9.A.2.c precise branches restantes.
+- Memoire `~/.claude/projects/.../memory/project_epic_9_cadrage.md` : 9 stories done 2026-05-18 + chiffres palier 2 effectif.
 
 ## DoD a11y
 
@@ -246,4 +248,5 @@ N/A -- story 100% tests unitaires sans impact UI applicatif. Aucun composant Rea
 ## Change Log
 
 - 2026-05-18 -- Story creee via `bmad-create-story` (workflow `/bmad-create-story`). Source : defer ligne 13 `_bmad-output/implementation-artifacts/deferred-work.md` + `DECISIONS.md > F-Epic9-A2` palier 2 cible 65% + analyse statique branches non couvertes 9.A.2 Dev Notes. 6-8 SC unit cibles : SC12-SC16 (`detectBlacklist`) + SC17-SC19 (`confirmParrainageOnSuccess` paths edge). Status `backlog` -> `ready-for-dev`.
-- 2026-05-18 -- Implementation via `bmad-dev-story`. 8 SC ajoutes (`tests/unit/parrainage-symetrie.test.ts` +311 lignes, SC12-SC19). 102 SC verts (94+8). Coverage unit-only mesure : lines 59.86 / branches 48.07 / functions 78.57 / statements 58.24 (vs palier 1 49/41/64/48). `tsc --noEmit` OK, `npm run lint` 193 warnings (baseline), `lint:a11y-check` 155 (baseline), 3 checks custom exit 0. Status `ready-for-dev` -> `in-progress` -> `review`. Reste T5/T6 (push GHA pour cumul unit+integration + ajustement thresholds + DECISIONS.md + deferred-work.md MAJ).
+- 2026-05-18 -- Implementation via `bmad-dev-story`. 8 SC ajoutes (`tests/unit/parrainage-symetrie.test.ts` +311 lignes, SC12-SC19). 102 SC verts (94+8). Coverage unit-only mesure : lines 59.86 / branches 48.07 / functions 78.57 / statements 58.24 (vs palier 1 49/41/64/48). `tsc --noEmit` OK, `npm run lint` 193 warnings (baseline), `lint:a11y-check` 155 (baseline), 3 checks custom exit 0. Status `ready-for-dev` -> `in-progress` -> `review`. PR #13 ouverte.
+- 2026-05-18 -- Run GHA #26037648833 vert (integration + e2e + Vercel Preview). Cumul unit+integration mesure : lines **67.47** / branches **59.61** / functions **92.85** / statements **65.65**. Palier 2 (65%) atteint sur 3/4 indicateurs ; branches plafonne 59.61 -> **Option B-bis** appliquee (palier 2 effectif `lines: 67 / branches: 59 / functions: 92 / statements: 65`). `vitest.config.ts > thresholds` MAJ + DECISIONS.md F-Epic9-A2 enrichi + deferred-work.md 9.A.2.b solde + 9.A.2.c precise. Memoire `project_epic_9_cadrage` MAJ. Commit ajustements thresholds + doc.

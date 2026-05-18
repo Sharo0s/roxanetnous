@@ -1022,6 +1022,14 @@ Heritage 9.A.7 (Option B-like : fix fixtures plutot que refonte code), F-Epic8-A
 
 [Source: _bmad-output/implementation-artifacts/9-a-2-coverage-parrainage-85-percent-gha-artefact.md] [Source: run integration GHA #26005309649 sur PR #8] [Source: _bmad-output/implementation-artifacts/deferred-work.md > Deferred from 9-a-2] [Source: vitest.config.ts:41-55]
 
+**Palier 2 atteint le 2026-05-18 via 9.A.2.b (PR #13, run GHA #26037648833)** :
+
+- Cumul unit+integration mesure : lines **67.47** / branches **59.61** / functions **92.85** / statements **65.65**.
+- Palier 2 cible 65% **atteint** sur lines (67.47), functions (92.85), statements (65.65). **Non atteint** sur branches (59.61, ecart -5.39 pts).
+- **Option B-bis appliquee** : palier 2 effectif = chiffres mesures arrondis au point inferieur = `lines: 67 / branches: 59 / functions: 92 / statements: 65`. Garde-fou CI palier 2 actif. Plancher palier 1 maintenu (jamais < 49/41/64/48).
+- 8 SC unit ajoutes (SC12-SC19) : detectBlacklist (5 SC = meme_email direct, P9 multi-filleules, meme_ip, no match, edge cases vides) + confirmParrainageOnSuccess paths (3 SC = role inattendu, validation_status_skipped, generate_code_failed).
+- **Reste 9.A.2.c -> palier 3 (85% cible originale)** : combler branches restantes = `createParrainageRelation` self_referral/23505/blacklist_other/meme_ip (524-831) + `revokeFilleuleValidation*` (108-235) + branches `detectBlacklist` partielles + branches retry generateCode 23505 (defer 8.A.1 F11 documente "non exerce en pratique"). Gap branches 59.61 -> 85 = +25 pts = ~5-7 SC unit dedies.
+
 
 ## F-Epic9-A5 -- RPC `parrainage_decrement_compteur` sans check `is_admin()` (2026-05-18)
 

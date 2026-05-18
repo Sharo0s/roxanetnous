@@ -39,18 +39,22 @@ export default defineConfig({
       // fichiers matchant `include` sont desormais instrumentes meme s'ils
       // ne sont pas importes par un test.
       // Story 9.A.2 - Option B evolutive (DECISIONS.md F-Epic9-A2) :
-      // 1er run GHA = 49.48 lines / 41.92 branches / 64.28 functions / 48.14 statements.
-      // Ecart vs cible 85% (>5 pts sur tous indicateurs) -> palier 1 = chiffres
-      // courants arrondis au point inferieur (refus regression sous niveau actuel).
-      // Story follow-up 9.A.2.b backlog : combler vers palier 2 (65%) en ciblant
-      // detectBlacklist + confirmParrainageOnSuccess paths.
-      // Story follow-up 9.A.2.c backlog : combler vers cible originale (85%).
+      // Palier 1 (PR #8) = 49.48 lines / 41.92 branches / 64.28 functions / 48.14 statements.
+      // Story 9.A.2.b (PR #13) palier 2 livre : SC12-SC19 (detectBlacklist + confirm paths).
+      // Cumul unit+integration GHA #26037648833 : lines 67.47 / branches 59.61 /
+      // functions 92.85 / statements 65.65. Palier 2 (65%) atteint sur 3/4
+      // indicateurs (lines, functions, statements) ; branches plafonne a 59.61
+      // -> Option B-bis : palier 2 effectif = chiffres mesures arrondis au point
+      // inferieur (refus regression). Plancher palier 1 maintenu.
+      // Story follow-up 9.A.2.c backlog : combler vers cible originale (85%) en
+      // ciblant createParrainageRelation self_referral/23505/blacklist_other/meme_ip
+      // + revokeFilleuleValidation* + branches detectBlacklist restantes.
       thresholds: {
         'app/actions/parrainage.ts': {
-          lines: 49,
-          branches: 41,
-          functions: 64,
-          statements: 48,
+          lines: 67,
+          branches: 59,
+          functions: 92,
+          statements: 65,
         },
       },
     },
