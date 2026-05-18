@@ -376,6 +376,17 @@ development_status:
   # ne se declenche que sur PR. Revelee par la premiere PR Epic 9 (9.A.1).
   # Bloque le merge de #7 (9.A.1) et #8 (9.A.2). Story prioritaire ordre 0.
   9-a-7-fix-integration-test-regressions-post-epic-8: done
+  # 9.A.8 ajoutee 2026-05-18 a la decouverte dette env vars Vercel pendant
+  # livraison 9.A.6 (PR #11 : 3 deploys Vercel echec successifs sur
+  # `SUPABASE_SERVICE_ROLE_KEY` absente Preview, fix temporaire override
+  # branche `story/9-a-6-...` via API REST). Story de promotion override
+  # branche -> "all Preview" pour eviter repetition systematique du bug sur
+  # toute future PR Preview qui prerender la landing /. Inclut documentation
+  # bug CLI Vercel v54 (`vercel env add --value` stocke "" en mode agent,
+  # workaround API REST direct). Story 100% infra/gouvernance, 0 fichier
+  # source touche. Ordre 1 bloquante : la prochaine PR Preview qui modifie
+  # un fichier source declenche le bug. Voir DECISIONS.md F-Epic9-A8.
+  9-a-8-supabase-service-role-key-all-preview: ready-for-dev
   # 9.A.2.b et 9.A.2.c ajoutees 2026-05-18 a la decouverte Option B evolutive
   # sur PR #8 9.A.2 : 1er run GHA mesure coverage cumulee unit+integration =
   # ~50% (lines 49.48 / branches 41.92 / functions 64.28 / statements 48.14),
