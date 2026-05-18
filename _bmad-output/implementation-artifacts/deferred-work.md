@@ -1,5 +1,12 @@
 # Deferred Work
 
+## Deferred from: code review of 9-b-1-e2e-rgpd-cascade-heritee-7-c-3 (2026-05-18)
+
+- **Retry CI SC1/SC2 : assertion SET NULL vacuoirement sur retry** [`tests/e2e/rgpd-cascade.spec.ts:168-173`] — Sur retry Playwright, la row `parrainages` existe déjà avec `marraine_id=NULL` (SET NULL du 1er run). L'assertion passe sans exercer la cascade. Pattern identique aux autres specs E2E, non causé par 9.B.1.
+- **`admin_actions_log` : accumulation rows orphelines `consultation_profil` par run SC3** — Chaque run SC3 insère un log avec `target_id=EPHEMERAL_ADMIN_ID` (pas de FK, persiste après suppression user). Cosmétique, pas d'impact CI. Candidat nettoyage si `resetEphemeralRows` est étendu.
+- **SC1–SC40 bypassent le branch rate-limit `validateCode` via `buildRpcAllowed` non-thenable** [`tests/unit/parrainage-symetrie.test.ts`] — Problème documenté lors de l'implémentation SC46. Non causé par 9.B.1. À corriger si `validateCode` est refactoré pour rendre le rate-limit plus visible.
+- **Marge branches threshold 75.38 → seuil 75** [`vitest.config.ts:59`] — Déjà listé dans le deferred de 9.A.2.d ci-dessous (doublons consolidés).
+
 ## Deferred from: code review of 9-a-2-d-palier-3-final-ou-acceptation-palier-effectif (2026-05-18)
 
 - **`clearAllMocks` ne reset pas `mockImplementation`** [`tests/unit/parrainage-symetrie.test.ts:130`] — Pattern pre-existing SC1–SC40. Contamination latente si un futur SC omet de re-setter `mockNormalizeEmail`. Non causé par 9.A.2.d.

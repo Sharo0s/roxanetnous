@@ -1,6 +1,6 @@
 # Story 9.B.1 : E2E RGPD cascade (suppression compte 3 rôles) — héritée 7.C.3
 
-Status: review
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -263,6 +263,16 @@ claude-sonnet-4-6 (bmad-create-story 2026-05-18) + claude-sonnet-4-6 (bmad-dev-s
 - **`tests/e2e/README.md`** (modifié, +1 ligne) : mention `rgpd-cascade.spec.ts` + tag `@rgpd-cascade` + 3 SC.
 - **`_bmad-output/implementation-artifacts/9-b-1-e2e-rgpd-cascade-heritee-7-c-3.md`** (modifié) : tasks/subtasks T1-T3+T5.1 cochés + Dev Agent Record + File List + Change Log.
 - **`_bmad-output/implementation-artifacts/sprint-status.yaml`** (modifié) : `9-b-1-...` `ready-for-dev` → `in-progress` (T5.2 `in-progress → review` après T4).
+
+### Review Findings
+
+- [x] [Review][Decision→Patch DONE] SC3 stratégie d'assertion : `role="alert"` possiblement masqué si `DeleteUserButton` appelle `setConfirming(false)` lors de l'erreur (le bloc erreur est dans la branche `confirming=true`). À vérifier : si le composant reset `confirming` à `false` sur erreur, `toHaveText('Impossible de supprimer un administrateur.')` timeoutera toujours. Décision requise : (A) corriger le composant pour maintenir `confirming=true` lors d'une erreur, (B) changer la stratégie d'assertion (assert via `page.waitForResponse()` sur le payload JSON API), ou (C) confirmer que le composant affiche bien l'alerte sans reset `confirming`. AC4 requiert également l'assertion du payload JSON `{ error: '...' }`, pas seulement le texte UI. [`tests/e2e/rgpd-cascade.spec.ts:307-309`]
+- [x] [Review][Patch DONE] Codes `RGPDTEST1`/`RGPDTEST2` hors-pattern `e2e-test-` — `resetEphemeralRows()` nettoie uniquement `parrainages_codes` via cascade sur `users` (OK), mais si un insert `parrainages_codes` réussit et que le user insert échoue ensuite dans un autre test, la row code orpheline persiste jusqu'à la prochaine suppression user. Renommer en `e2e-test-rgpd1-code`/`e2e-test-rgpd2-code` pour conformité contrat fixtures. [`tests/e2e/rgpd-cascade.spec.ts:118, 217`]
+- [x] [Review][Patch DONE] SC1 mute temporairement `SEED_ACCOMPAGNE_ID.parrainee_par` pendant l'exécution — si le test crashe entre l'UPDATE et le DELETE ephemere, le seed user 3 reste avec un `parrainee_par` corrompu jusqu'à l'`afterAll`. Envelopper dans un `try/finally` local pour rendre le reset atomique. [`tests/e2e/rgpd-cascade.spec.ts:133-137`]
+- [x] [Review][Defer] Retry CI SC1/SC2 : sur retry Playwright, la row `parrainages` existe déjà avec `marraine_id=NULL`, donc l'assertion SET NULL passe vacuoirement sans avoir exercé la cascade — pre-existing pattern identique aux autres specs E2E. [`tests/e2e/rgpd-cascade.spec.ts:168-173`] — deferred, pre-existing
+- [x] [Review][Defer] Marge branches threshold 75.38 → seuil 75 (0.38 pt) — décision F-Epic9-A2 actée, surveiller à chaque story touchant `app/actions/parrainage.ts`. [`vitest.config.ts:59`] — deferred, pre-existing
+- [x] [Review][Defer] `admin_actions_log` accumule une row orpheline `consultation_profil` par run SC3 (target_id sans FK) — cosmétique, pas d'impact CI. — deferred, pre-existing
+- [x] [Review][Defer] SC1–SC40 bypassent silencieusement le branch rate-limit dans `validateCode` via `buildRpcAllowed` non-thenable — problème antérieur au diff, non causé par 9.B.1. [`tests/unit/parrainage-symetrie.test.ts`] — deferred, pre-existing
 
 ## DoD a11y
 

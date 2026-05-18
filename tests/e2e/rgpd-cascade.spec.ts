@@ -116,7 +116,7 @@ test('@rgpd-cascade SC1 — suppression compte accompagnant : cascades BDD', asy
     // Code parrainage (parrainages_codes) -> CASCADE attendu (flag 8.A.0)
     await client.query(
       `INSERT INTO public.parrainages_codes (user_id, code, compteur_confirmes, total_recompenses)
-       VALUES ($1, 'RGPDTEST1', 0, 0)
+       VALUES ($1, 'e2e-test-rgpd1-code', 0, 0)
        ON CONFLICT (user_id) DO NOTHING`,
       [EPHEMERAL_ACCOMPAGNANT_ID],
     )
@@ -129,60 +129,72 @@ test('@rgpd-cascade SC1 — suppression compte accompagnant : cascades BDD', asy
        ON CONFLICT (id) DO NOTHING`,
       [EPHEMERAL_ACCOMPAGNANT_ID, SEED_ACCOMPAGNE_ID],
     )
+  })
 
-    // Poser parrainee_par sur le seed accompagne pour tester SET NULL sur users.parrainee_par
+  // Poser parrainee_par sur le seed accompagne dans un try/finally pour garantir
+  // le reset meme en cas de crash entre l'UPDATE et le DELETE ephemere.
+  await withPg(async (client) => {
     await client.query(
       `UPDATE public.users SET parrainee_par = $1 WHERE id = $2`,
       [EPHEMERAL_ACCOMPAGNANT_ID, SEED_ACCOMPAGNE_ID],
     )
   })
+  try {
+    // --- Action : DELETE public.users WHERE id = accompagnant ephemere ---
+    await withPg(async (client) => {
+      await client.query(`DELETE FROM public.users WHERE id = $1`, [EPHEMERAL_ACCOMPAGNANT_ID])
+    })
 
-  // --- Action : DELETE public.users WHERE id = accompagnant ephemere ---
-  await withPg(async (client) => {
-    await client.query(`DELETE FROM public.users WHERE id = $1`, [EPHEMERAL_ACCOMPAGNANT_ID])
-  })
+    // --- Asserts cascades ---
+    await withPg(async (client) => {
+      // users : row supprimee
+      const usersResult = await client.query(
+        `SELECT id FROM public.users WHERE id = $1`,
+        [EPHEMERAL_ACCOMPAGNANT_ID],
+      )
+      expect(usersResult.rowCount, 'users : row accompagnant ephemere supprimee').toBe(0)
 
-  // --- Asserts cascades ---
-  await withPg(async (client) => {
-    // users : row supprimee
-    const usersResult = await client.query(
-      `SELECT id FROM public.users WHERE id = $1`,
-      [EPHEMERAL_ACCOMPAGNANT_ID],
-    )
-    expect(usersResult.rowCount, 'users : row accompagnant ephemere supprimee').toBe(0)
+      // accompagnants_profiles : CASCADE -> 0 rows
+      const profilesResult = await client.query(
+        `SELECT user_id FROM public.accompagnants_profiles WHERE user_id = $1`,
+        [EPHEMERAL_ACCOMPAGNANT_ID],
+      )
+      expect(profilesResult.rowCount, 'accompagnants_profiles : CASCADE -> 0 rows').toBe(0)
 
-    // accompagnants_profiles : CASCADE -> 0 rows
-    const profilesResult = await client.query(
-      `SELECT user_id FROM public.accompagnants_profiles WHERE user_id = $1`,
-      [EPHEMERAL_ACCOMPAGNANT_ID],
-    )
-    expect(profilesResult.rowCount, 'accompagnants_profiles : CASCADE -> 0 rows').toBe(0)
+      // parrainages_codes : CASCADE (PK) -> 0 rows
+      const codesResult = await client.query(
+        `SELECT user_id FROM public.parrainages_codes WHERE user_id = $1`,
+        [EPHEMERAL_ACCOMPAGNANT_ID],
+      )
+      expect(codesResult.rowCount, 'parrainages_codes : CASCADE -> 0 rows').toBe(0)
 
-    // parrainages_codes : CASCADE (PK) -> 0 rows
-    const codesResult = await client.query(
-      `SELECT user_id FROM public.parrainages_codes WHERE user_id = $1`,
-      [EPHEMERAL_ACCOMPAGNANT_ID],
-    )
-    expect(codesResult.rowCount, 'parrainages_codes : CASCADE -> 0 rows').toBe(0)
+      // parrainages.marraine_id : SET NULL -> marraine_id = NULL sur la row e2e-test-rgpd1
+      const parrainagesResult = await client.query(
+        `SELECT marraine_id FROM public.parrainages WHERE code = 'e2e-test-rgpd1'`,
+      )
+      expect(parrainagesResult.rowCount, 'parrainages row e2e-test-rgpd1 existe encore').toBeGreaterThan(0)
+      expect(parrainagesResult.rows[0].marraine_id, 'parrainages.marraine_id : SET NULL').toBeNull()
 
-    // parrainages.marraine_id : SET NULL -> marraine_id = NULL sur la row e2e-test-rgpd1
-    const parrainagesResult = await client.query(
-      `SELECT marraine_id FROM public.parrainages WHERE code = 'e2e-test-rgpd1'`,
-    )
-    expect(parrainagesResult.rowCount, 'parrainages row e2e-test-rgpd1 existe encore').toBeGreaterThan(0)
-    expect(parrainagesResult.rows[0].marraine_id, 'parrainages.marraine_id : SET NULL').toBeNull()
-
-    // users.parrainee_par : SET NULL -> seed accompagne n'a plus parrainee_par
-    const parraineeParResult = await client.query(
-      `SELECT parrainee_par FROM public.users WHERE id = $1`,
-      [SEED_ACCOMPAGNE_ID],
-    )
-    expect(parraineeParResult.rows[0]?.parrainee_par, 'users.parrainee_par : SET NULL').toBeNull()
-  })
+      // users.parrainee_par : SET NULL -> seed accompagne n'a plus parrainee_par
+      const parraineeParResult = await client.query(
+        `SELECT parrainee_par FROM public.users WHERE id = $1`,
+        [SEED_ACCOMPAGNE_ID],
+      )
+      expect(parraineeParResult.rows[0]?.parrainee_par, 'users.parrainee_par : SET NULL').toBeNull()
+    })
+  } finally {
+    // Reset defensif parrainee_par si le DELETE ou les asserts ont echoue.
+    await withPg(async (client) => {
+      await client.query(
+        `UPDATE public.users SET parrainee_par = NULL WHERE id = $1`,
+        [SEED_ACCOMPAGNE_ID],
+      )
+    })
+  }
 
   // Note : la row parrainage e2e-test-rgpd1 est nettoyee par resetEphemeralRows() du
   // prochain beforeAll (code LIKE 'e2e-test-%'). parrainee_par est resetté par
-  // cleanupEphemeralRgpdUsers() en afterAll.
+  // cleanupEphemeralRgpdUsers() en afterAll (defense en profondeur).
 })
 
 test('@rgpd-cascade SC2 — suppression compte accompagne : cascades BDD', async () => {
@@ -215,7 +227,7 @@ test('@rgpd-cascade SC2 — suppression compte accompagne : cascades BDD', async
     // Code parrainage (accompagne peut en avoir un via parrainage symetrique flag 8.A.0) -> CASCADE attendu
     await client.query(
       `INSERT INTO public.parrainages_codes (user_id, code, compteur_confirmes, total_recompenses)
-       VALUES ($1, 'RGPDTEST2', 0, 0)
+       VALUES ($1, 'e2e-test-rgpd2-code', 0, 0)
        ON CONFLICT (user_id) DO NOTHING`,
       [EPHEMERAL_ACCOMPAGNE_ID],
     )

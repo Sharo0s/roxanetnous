@@ -15,7 +15,6 @@ export function DeleteUserButton({ userId, userName }: { userId: string; userNam
     if (result?.error) {
       setError(result.error)
       setLoading(false)
-      setConfirming(false)
     }
   }
 
