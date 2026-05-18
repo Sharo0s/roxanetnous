@@ -1,6 +1,6 @@
 # Story 9.A.4 : Rename `sendParrainageFilleuleConfirmation` + types TS `FilleuleStatut` / `Filleule`
 
-Status: review
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -234,6 +234,12 @@ Epic 8 (story 8.C.3) a livré l'alignement wording UI neutre `Marraine → Parra
   - `_bmad-output/implementation-artifacts/9-a-4-rename-sendparrainagefilleuleconfirmation-types-filleulestatut.md` (cette story : status + tasks cochés + Dev Agent Record).
 - **0 fichier créé**. **0 fichier supprimé**. Aucun conflit attendu : tous les call-sites sont concentrés dans 8 fichiers, audit pré/post grep validé par T1/T9.
 - **Pas de modification de** : `components/accompagne/*`, `app/accompagne/*` (déjà clean), `types/supabase.ts` (BDD intact), `supabase/migrations/*` (zéro migration), `app/api/webhooks/stripe/*` (path webhook accompagne hors scope), `lib/parrainage-codes.ts` (helper neutre), `lib/parrainage-detection.ts` (helper neutre), `vitest.config.ts` (thresholds 9.A.2 intacts), `package.json` (zéro nouveau script), `.github/workflows/*` (zéro workflow modifié).
+
+### Review Findings
+
+- [x] [Review][Defer] `'parrainage_filleule_confirm'` non renommé dans `logNotification` [`lib/emails.ts:690,698`] — deferred, pre-existing : le type de log BDD reste au féminin alors que la fonction est renommée au masculin. Sans impact fonctionnel (string libre), mais divergence analytique latente. À solder lors de la suppression de l'alias en Epic 10 ou dans une story dédiée renommage type log.
+- [x] [Review][Defer] 4 copies locales de `FilleulStatut` sans source de vérité partagée [`app/accompagnant/parrainage/page.tsx:7`, `app/accompagne/parrainage/page.tsx:7`, `components/accompagnant/parrainage-view.tsx:5`, `components/accompagne/parrainage-view.tsx:5`] — deferred, pre-existing : divergence silencieuse possible si un statut BDD est ajouté sans mettre à jour les 4 fichiers. À extraire dans `/lib/types/parrainage.ts` lors d'un refactoring types.
+- [x] [Review][Defer] `AccompagnanteParrainagePage` — nom de fonction page toujours au féminin [`app/accompagnant/parrainage/page.tsx:9`] — deferred, pre-existing : default export Next.js, nom opaque pour le routeur, sans impact runtime. À corriger dans le renommage global `accompagnante → accompagnant` (AI-6.A.1).
 
 ### References
 
