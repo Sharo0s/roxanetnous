@@ -1021,3 +1021,14 @@ Quand 9.A.2.b livre des nouveaux SC unit ciblant `detectBlacklist` + `confirmPar
 Heritage 9.A.7 (Option B-like : fix fixtures plutot que refonte code), F-Epic8-A0 (audit BDD GO), 8.A.4 AC4 (cible 85% originale).
 
 [Source: _bmad-output/implementation-artifacts/9-a-2-coverage-parrainage-85-percent-gha-artefact.md] [Source: run integration GHA #26005309649 sur PR #8] [Source: _bmad-output/implementation-artifacts/deferred-work.md > Deferred from 9-a-2] [Source: vitest.config.ts:41-55]
+
+
+## F-Epic9-A5 -- RPC `parrainage_decrement_compteur` sans check `is_admin()` (2026-05-18)
+
+**Decision** : la RPC `parrainage_decrement_compteur(p_user_id uuid, p_delta int default 1)` (migration `20260518084458_parrainage_decrement_compteur.sql`, story 9.A.5) suit strictement le pattern `parrainage_increment_compteur` (`20260429140000_parrainage_atomic_rpcs.sql:20-45`) : `SECURITY DEFINER` + REVOKE FROM PUBLIC/anon/authenticated + AUCUN check `auth.uid() = is_admin()` dans le corps.
+
+**Motivation** : le caller unique `confirmerFraude` (`app/actions/admin-parrainages.ts`) invoque la RPC via `createClient({ serviceRole: true })`, donc `auth.uid()` est NULL cote RPC. Un check `is_admin()` retournerait systematiquement `false` -> la RPC throw `permission denied` en permanence -> paradoxe technique. La defense en profondeur est assuree par (a) `requireAdmin()` cote server action (session admin authentifiee), et (b) REVOKE anon/authenticated (zero exposition PostgREST public).
+
+**Implications** : la formulation textuelle de `AR-Epic9-2` (epic-9.md ligne 53 : "SECURITY DEFINER avec check `auth.uid()` = admin via fonction `is_admin()`") est techniquement incompatible avec l'usage service-role du caller et reflete une imprecision de cadrage. La regle pour 9.A.5 et toute future RPC parrainage atomique consommee par un caller service-role est : suivre le pattern reel `parrainage_increment_compteur` (REVOKE FROM PUBLIC/anon/authenticated, pas de check `is_admin()`). Audit MCP post-cutover 2026-05-18 ACL strict `postgres=X/postgres,service_role=X/postgres` confirme.
+
+**Source** : `_bmad-output/planning-artifacts/epic-9.md#AR-Epic9-2`, `supabase/migrations/20260429140000_parrainage_atomic_rpcs.sql`, audit MCP 2026-05-18 (pre/post-cutover), `_bmad-output/implementation-artifacts/9-a-5-rpc-atomique-parrainage-decrement-compteur.md#AC2-AC21`.
