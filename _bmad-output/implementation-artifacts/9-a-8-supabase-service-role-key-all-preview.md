@@ -1,6 +1,6 @@
 # Story 9.A.8 : SUPABASE_SERVICE_ROLE_KEY scopée "all Preview" Vercel
 
-Status: review
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -162,16 +162,16 @@ GET https://api.vercel.com/v9/projects/prj_p731Z29MnX3ziZoJwLJlJF2SmQyw/env?team
   - [x] T8.2 `git diff --cached | grep -iE 'eyJhbGci|sb_secret_'` : 0 match attendu (validation T9.2 post-stage).
   - [x] T8.3 Aucun lint/test/build exécuté (story 100% gouvernance/infra, conforme AC9).
 
-- [ ] **T9 — Commit + PR** (heritage 9.A.6 commit `35b231a`)
-  - [ ] T9.1 Branche dédiée `story/9-a-8-srk-all-preview`.
-  - [ ] T9.2 1 commit principal : `Story 9.A.8 : infra(vercel) SUPABASE_SERVICE_ROLE_KEY + NEXT_PUBLIC_SUPABASE_URL scopees all Preview + cleanup overrides 9.A.6`.
-  - [ ] T9.3 PR title `Story 9.A.8 — SRK + NEXT_PUBLIC_SUPABASE_URL all Preview + doc bug CLI Vercel v54`.
-  - [ ] T9.4 PR body : résumé fix + scope étendu (URL) + lien DECISIONS.md F-Epic9-A8 + lien deploy validation T4.
-  - [ ] T9.5 Merge sans review obligatoire (story infra/gouvernance, pas de code).
+- [x] **T9 — Commit + PR** (heritage 9.A.6 commit `35b231a`)
+  - [x] T9.1 Branche dédiée `story/9-a-8-srk-all-preview` créée.
+  - [x] T9.2 Commit principal `eb607ed` : `Story 9.A.8 : infra(vercel) SRK + NEXT_PUBLIC_SUPABASE_URL scopees all Preview + cleanup overrides 9.A.6`.
+  - [x] T9.3 PR #12 : `Story 9.A.8 — SRK + NEXT_PUBLIC_SUPABASE_URL all Preview + doc bug CLI Vercel v54`.
+  - [x] T9.4 PR body livré : résumé fix + scope étendu (URL) + lien DECISIONS.md F-Epic9-A8 + lien deploy validation T4.
+  - [x] T9.5 3 checks GHA verts (e2e + integration + Vercel Preview Comments) + Vercel Preview Ready (`dpl_w7wcgbVMM4gtRrt9sF8Qj5F8wSi8`). Squash merge sur main commit `8db9515`, branche supprimée.
 
-- [ ] **T10 — Post-merge `review → done`** (heritage 9.A.6 commit `879e197`)
-  - [ ] T10.1 Chore commit séparé : `sprint-status.yaml` `9-a-8-...: review → done` + Story file Status: `review → done` + Change Log final.
-  - [ ] T10.2 Mémoire `project_epic_9_cadrage` : noter 9.A.8 DONE.
+- [x] **T10 — Post-merge `review → done`** (heritage 9.A.6 commit `879e197`)
+  - [x] T10.1 Chore commit séparé : `sprint-status.yaml` `9-a-8-...: review → done` + Story file Status: `review → done` + Change Log final.
+  - [x] T10.2 Mémoire `project_epic_9_cadrage` : 9.A.8 DONE noté.
 
 ## Dev Notes
 
@@ -304,7 +304,8 @@ claude-opus-4-7[1m] (Opus 4.7, 1M context) ou équivalent (story exécutable par
 | 2026-05-18 | dev (claude-opus-4-7) | Story 9.A.8 — Cleanup overrides branches (T5) : DELETE SRK `BnSigPw679WwCk3Q` + URL `SRe1U8NbNpQaHsLe` + ANON orphelin `kAeLONx9UkpNrhzJ`, tous HTTP 200. Audit final 0 override branche. |
 | 2026-05-18 | dev (claude-opus-4-7) | Story 9.A.8 — `DECISIONS.md` F-Epic9-A8 ajouté (scope étendu SRK + URL + bug CLI v54 + impact + source). |
 | 2026-05-18 | dev (claude-opus-4-7) | Story 9.A.8 — DoD CI light vert (0 source touché, 0 PII repo). Story passée en `review`. |
-| TBD | dev (claude-opus-4-7) | Story 9.A.8 — chore post-merge PR #{N} : `review → done`. |
+| 2026-05-18 | dev (claude-opus-4-7) | Story 9.A.8 — PR #12 commit `eb607ed` (3 fichiers) + squash merge sur main commit `8db9515`. 3 checks GHA verts (e2e + integration + Vercel Preview Comments) + Vercel Preview Ready (`dpl_w7wcgbVMM4gtRrt9sF8Qj5F8wSi8`). |
+| 2026-05-18 | dev (claude-opus-4-7) | Story 9.A.8 — chore post-merge PR #12 : `review → done`. Mémoire `project_epic_9_cadrage` MAJ. |
 
 ## DoD a11y
 
