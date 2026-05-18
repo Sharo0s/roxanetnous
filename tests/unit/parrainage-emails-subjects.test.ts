@@ -6,7 +6,7 @@
 // Couvre 5 sujets clefs cite epic-8.md ligne 535 :
 //  - sendParrainageBienvenueParrain
 //  - sendParrainageBienvenueAccompagne
-//  - sendParrainageFilleuleConfirmation
+//  - sendParrainageFilleulConfirmation
 //  - sendParrainageRecompense
 //  - sendAdminParrainageFlag (type: 'meme_email')
 
@@ -60,7 +60,7 @@ process.env.ADMIN_NOTIFICATIONS_EMAIL = 'admin@example.com'
 import {
   sendParrainageBienvenueParrain,
   sendParrainageBienvenueAccompagne,
-  sendParrainageFilleuleConfirmation,
+  sendParrainageFilleulConfirmation,
   sendParrainageRecompense,
   sendAdminParrainageFlag,
 } from '@/lib/emails'
@@ -93,8 +93,8 @@ describe('Parrainage emails subjects (Story 8.C.3 AC#13)', () => {
     expect(mockResendSend.mock.calls[0]?.[0]?.subject).toBe('Votre code de parrainage roxanetnous')
   })
 
-  it('sendParrainageFilleuleConfirmation -> subject = "Bienvenue sur roxanetnous, votre profil est validé"', async () => {
-    await sendParrainageFilleuleConfirmation({
+  it('sendParrainageFilleulConfirmation -> subject = "Bienvenue sur roxanetnous, votre profil est validé"', async () => {
+    await sendParrainageFilleulConfirmation({
       email: 'filleul@example.com',
       firstName: 'Claire',
       marraineFirstName: 'Alice',

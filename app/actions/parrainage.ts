@@ -7,7 +7,7 @@ import { headers } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
 import {
   sendParrainageBienvenueParrain,
-  sendParrainageFilleuleConfirmation,
+  sendParrainageFilleulConfirmation,
   sendAdminParrainageFlag,
 } from '@/lib/emails'
 import { stripe } from '@/lib/stripe'
@@ -1101,7 +1101,7 @@ export async function confirmParrainageOnSuccess(
   if (filleuleUser?.email) {
     after(async () => {
       try {
-        await sendParrainageFilleuleConfirmation({
+        await sendParrainageFilleulConfirmation({
           email: filleuleUser.email,
           firstName: filleuleUser.first_name || '',
           marraineFirstName: marraineUser?.first_name || '',

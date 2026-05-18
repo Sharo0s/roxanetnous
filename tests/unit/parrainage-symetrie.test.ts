@@ -83,7 +83,7 @@ vi.mock('@/lib/parrainage-codes', () => ({
 }))
 vi.mock('@/lib/emails', () => ({
   sendParrainageBienvenueParrain: vi.fn(),
-  sendParrainageFilleuleConfirmation: vi.fn(),
+  sendParrainageFilleulConfirmation: vi.fn(),
   sendAdminParrainageFlag: vi.fn(),
   sendParrainageRecompense: mockSendParrainageRecompense,
 }))

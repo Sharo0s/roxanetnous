@@ -2,12 +2,12 @@
 
 import { useEffect, useRef, useState } from 'react'
 
-type FilleuleStatut = 'inscrite' | 'abonnee' | 'confirme' | 'fraude' | 'bloque'
+type FilleulStatut = 'inscrite' | 'abonnee' | 'confirme' | 'fraude' | 'bloque'
 
-type Filleule = {
+type Filleul = {
   firstName: string | null
   lastName: string | null
-  statut: FilleuleStatut
+  statut: FilleulStatut
   inscriteAt: string
   abonneeAt: string | null
 }
@@ -33,7 +33,7 @@ type Props = {
   baseUrl: string
   compteur: number
   totalRecompenses: number
-  filleules: Array<Filleule>
+  filleules: Array<Filleul>
 }
 
 const PALIER = 5

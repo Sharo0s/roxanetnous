@@ -39,7 +39,7 @@ import {
 import { stripe } from '@/lib/stripe'
 import {
   sendParrainageBienvenueParrain,
-  sendParrainageFilleuleConfirmation,
+  sendParrainageFilleulConfirmation,
   sendParrainageRecompense,
 } from '@/lib/emails'
 import * as Sentry from '@sentry/nextjs'
@@ -271,7 +271,7 @@ describe('Parrainage symetrique — Epic 8 (8.A.4)', () => {
     }
 
     // 6) Email confirmation envoye via after()
-    expect(vi.mocked(sendParrainageFilleuleConfirmation)).toHaveBeenCalled()
+    expect(vi.mocked(sendParrainageFilleulConfirmation)).toHaveBeenCalled()
     expect(vi.mocked(sendParrainageBienvenueParrain)).toHaveBeenCalled()
   })
 

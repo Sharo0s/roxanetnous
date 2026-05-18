@@ -653,7 +653,7 @@ export async function sendParrainageBienvenueAccompagne(params: {
   }
 }
 
-export async function sendParrainageFilleuleConfirmation(params: {
+export async function sendParrainageFilleulConfirmation(params: {
   email: string
   firstName: string
   marraineFirstName: string
@@ -702,6 +702,9 @@ export async function sendParrainageFilleuleConfirmation(params: {
     })
   }
 }
+
+/** @deprecated Epic 9 -- supprimer prochaine release (Epic 10). Voir _bmad-output/implementation-artifacts/deferred-work.md */
+export const sendParrainageFilleuleConfirmation = sendParrainageFilleulConfirmation
 
 export async function sendParrainageRecompense(params: {
   email: string

@@ -1,5 +1,12 @@
 # Deferred Work
 
+## Deferred from: code review of 9-a-3-suppression-alias-deprecated-sendparrainagebienvenuemarraine (2026-05-18)
+
+- **Worktrees orphelins avec callers résiduels sur `sendParrainageBienvenueMarraine`** — Branches d'agents parallèles sous `.claude/worktrees/` (dont `agent-a957eafdcab66961e`, `agent-ab40d6da01624aa13`) contenant encore des imports de l'alias supprimé. Hors périmètre 9.A.3. Risque uniquement si un worktree orphelin est rebasé ou mergé post-9.A.3 (build cassant). Action : vérifier que ces worktrees sont abandonnés avant tout merge concurrent.
+- **`deferred-work.md` : référence de ligne périmée + description item F4 cite nom supprimé** — La ligne soldée cite `lib/emails.ts:596` (désormais occupée par autre chose post-suppression). L'item F4 (type log `parrainage_bienvenue`) cite encore `sendParrainageBienvenueMarraine` dans sa description. Cosmétique documentaire, non bloquant. À corriger au prochain passage sur `deferred-work.md`.
+- **Type log `parrainage_bienvenue` partagé par `sendParrainageBienvenueParrain` et `sendParrainageBienvenueAccompagne`** — Ambiguïté analytique pré-existante (impossible de distinguer les deux flows dans `notifications_log` sur le seul champ `type`). Candidat story dédiée Epic 9.D (introduire `parrainage_bienvenue_accompagnant` / `parrainage_bienvenue_accompagne`). Aucune régression introduite par 9.A.3.
+- **Baseline lint : dérive "192" (AC11 story) vs "193" (mesure réelle)** — La story indiquait 192 warnings comme baseline héritée 9.A.1 ; la mesure pré et post 9.A.3 est 193. Dérive documentée dans sprint-status et Completion Notes. À corriger dans la prochaine story qui re-baseline lint.
+
 ## Deferred from: implementation of 9-a-2-coverage-parrainage-85-percent-gha-artefact (2026-05-18)
 
 - **Couverture `app/actions/parrainage.ts` cumulee unit+integration = ~50%** (1er run GHA #26005309649 sur PR #8 : lines 49.48 / branches 41.92 / functions 64.28 / statements 48.14). Option B evolutive retenue (DECISIONS.md F-Epic9-A2) : seuil palier 1 = chiffres courants arrondis au point inferieur (lines 49 / branches 41 / functions 64 / statements 48). Stories follow-up :
@@ -22,9 +29,9 @@
 
 - **[Solde 9.A.3 - 2026-05-18] F-Epic8-C3 alias 1-release -- supprimer `lib/emails.ts:sendParrainageBienvenueMarraine`** [`lib/emails.ts:596`] -- Alias deprecated conserve 1 release (Epic 9). Filet de securite pour rattraper tout import oublie sur l'ancien nom. Lorsque la prochaine release prod sera deployee et qu'un audit `grep -r "sendParrainageBienvenueMarraine" app/ components/ lib/ tests/` ne remonte plus que la definition de l'alias (lib/emails.ts:596), supprimer la fonction wrapper. Heritage Epic 8 wording neutre. Rappel : mock test `tests/integration/setup.ts:165` et `tests/unit/parrainage-symetrie.test.ts:86` exposent toujours l'alias pour compat -- a retirer en meme temps.
 
-- **F-Epic8-C3 rename `sendParrainageFilleuleConfirmation`** [`lib/emails.ts:659`] -- Non execute (decision pragmatique 8.C.3 AC4 Option par defaut : ne PAS renommer pour eviter diff sur 4 call-sites tests + 2 app/actions). Le fallback `'votre marraine'` -> `'votre parrain'` ligne 669 a ete corrige, suffisant pour l'utilisateur final. A reconsiderer Epic 9 si coherence stricte voulue (rename `sendParrainageFilleulConfirmation` + alias deprecated pattern T2.2).
+- **[Solde 9.A.4 - 2026-05-18] F-Epic8-C3 rename `sendParrainageFilleuleConfirmation`** [`lib/emails.ts:659`] -- Non execute (decision pragmatique 8.C.3 AC4 Option par defaut : ne PAS renommer pour eviter diff sur 4 call-sites tests + 2 app/actions). Le fallback `'votre marraine'` -> `'votre parrain'` ligne 669 a ete corrige, suffisant pour l'utilisateur final. A reconsiderer Epic 9 si coherence stricte voulue (rename `sendParrainageFilleulConfirmation` + alias deprecated pattern T2.2).
 
-- **F-Epic8-C3 rename types TS internes `FilleuleStatut` / `Filleule`** [`components/accompagnant/parrainage-view.tsx:5-13`] -- Hors-perimetre regle CLAUDE.md (la regle vise la copy affichee, pas les identifiants TS). Defer Epic 9 si refacto code-style souhaite. Pas bloquant.
+- **[Solde 9.A.4 - 2026-05-18] F-Epic8-C3 rename types TS internes `FilleuleStatut` / `Filleule`** [`components/accompagnant/parrainage-view.tsx:5-13`] -- Hors-perimetre regle CLAUDE.md (la regle vise la copy affichee, pas les identifiants TS). Defer Epic 9 si refacto code-style souhaite. Pas bloquant.
 
 - **F-Epic8-C3 audit Sentry 7j post-deploy emails admin parrainage** -- Surveiller que les emails `admin_parrainage_flag` envoyes en prod (notifications via Sentry signal `email-send-failed` ou tag `flow:email`) utilisent bien le nouveau wording (sujet `Parrainage bloqué - même email entre parrain et filleul` ou variantes neutres). Si une regression apparait, defer Epic 9.
 

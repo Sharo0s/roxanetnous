@@ -4,7 +4,7 @@ import { ParrainageView } from '@/components/accompagnant/parrainage-view'
 import { AccompagnantDashboardHeader } from '@/components/layout/accompagnant-dashboard-header'
 import { getUnreadCount } from '@/lib/unread-count'
 
-type FilleuleStatut = 'inscrite' | 'abonnee' | 'confirme' | 'fraude' | 'bloque'
+type FilleulStatut = 'inscrite' | 'abonnee' | 'confirme' | 'fraude' | 'bloque'
 
 export default async function AccompagnanteParrainagePage() {
   const supabase = await createClient()
@@ -62,7 +62,7 @@ export default async function AccompagnanteParrainagePage() {
     return {
       firstName,
       lastName,
-      statut: row.statut as FilleuleStatut,
+      statut: row.statut as FilleulStatut,
       inscriteAt: row.filleule_inscrite_at as string,
       abonneeAt: row.filleule_abonnee_at as string | null,
     }
