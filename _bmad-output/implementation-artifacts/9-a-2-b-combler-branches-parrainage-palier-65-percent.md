@@ -1,6 +1,6 @@
 # Story 9.A.2.b : Combler branches `app/actions/parrainage.ts` -> palier 2 (~65%)
 
-Status: review
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -250,3 +250,4 @@ N/A -- story 100% tests unitaires sans impact UI applicatif. Aucun composant Rea
 - 2026-05-18 -- Story creee via `bmad-create-story` (workflow `/bmad-create-story`). Source : defer ligne 13 `_bmad-output/implementation-artifacts/deferred-work.md` + `DECISIONS.md > F-Epic9-A2` palier 2 cible 65% + analyse statique branches non couvertes 9.A.2 Dev Notes. 6-8 SC unit cibles : SC12-SC16 (`detectBlacklist`) + SC17-SC19 (`confirmParrainageOnSuccess` paths edge). Status `backlog` -> `ready-for-dev`.
 - 2026-05-18 -- Implementation via `bmad-dev-story`. 8 SC ajoutes (`tests/unit/parrainage-symetrie.test.ts` +311 lignes, SC12-SC19). 102 SC verts (94+8). Coverage unit-only mesure : lines 59.86 / branches 48.07 / functions 78.57 / statements 58.24 (vs palier 1 49/41/64/48). `tsc --noEmit` OK, `npm run lint` 193 warnings (baseline), `lint:a11y-check` 155 (baseline), 3 checks custom exit 0. Status `ready-for-dev` -> `in-progress` -> `review`. PR #13 ouverte.
 - 2026-05-18 -- Run GHA #26037648833 vert (integration + e2e + Vercel Preview). Cumul unit+integration mesure : lines **67.47** / branches **59.61** / functions **92.85** / statements **65.65**. Palier 2 (65%) atteint sur 3/4 indicateurs ; branches plafonne 59.61 -> **Option B-bis** appliquee (palier 2 effectif `lines: 67 / branches: 59 / functions: 92 / statements: 65`). `vitest.config.ts > thresholds` MAJ + DECISIONS.md F-Epic9-A2 enrichi + deferred-work.md 9.A.2.b solde + 9.A.2.c precise. Memoire `project_epic_9_cadrage` MAJ. Commit ajustements thresholds + doc.
+- 2026-05-18 -- 2e run GHA post-thresholds-update vert (integration + e2e + Vercel + Vercel Preview Comments). Palier 2 thresholds confirmes tenables. PR #13 squash-mergee sur main (commit `9e7d9d6`). Status `review` -> `done`.
