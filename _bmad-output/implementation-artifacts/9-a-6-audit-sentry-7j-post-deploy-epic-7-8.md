@@ -1,6 +1,6 @@
 # Story 9.A.6 : Audit Sentry 7j post-deploy Epic 7+8 (signaux role-aware)
 
-Status: review
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -408,6 +408,7 @@ claude-opus-4-7[1m] (Opus 4.7, 1M context)
 | 2026-05-18 | dev (claude-opus-4-7) | Story 9.A.6 — Rapport `audit-sentry-epic-7-8-2026-05-18.md` créé (~80 lignes), verdict global **PASS avec réserves**. |
 | 2026-05-18 | dev (claude-opus-4-7) | Story 9.A.6 — `DECISIONS.md` `F-Epic9-A6 -- 2026-05-18 -- PASS avec reserves` ajouté + `epic-8-retro-2026-05-17.md` préfixage AI-Epic7-D1/D2 `[Solde 9.A.6 - 2026-05-18]`. |
 | 2026-05-18 | dev (claude-opus-4-7) | Story 9.A.6 — DoD CI light vert (0 source touché). Story passée en `review`. Verrou go-live full France **levé sous condition** d'un ré-audit complet `9.A.6-bis` post-2026-05-24. |
+| 2026-05-18 | dev (claude-opus-4-7) | Story 9.A.6 — chore post-merge PR #11 (commit `95143a3`) : `review → done`. CI verte (e2e + integration + Vercel + preview comments). Dettes Vercel collatérales (CLI v54 stdin bug, `SUPABASE_SERVICE_ROLE_KEY` absente Preview, guillemets dans `NEXT_PUBLIC_SUPABASE_URL` Prod, JWT legacy vs publishable keys mix) à reporter en story d'hygiène env vars dédiée. |
 
 ## DoD a11y
 

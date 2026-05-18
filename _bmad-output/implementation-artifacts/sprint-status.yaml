@@ -369,7 +369,7 @@ development_status:
   9-a-3-suppression-alias-deprecated-sendparrainagebienvenuemarraine: done
   9-a-4-rename-sendparrainagefilleuleconfirmation-types-filleulestatut: done
   9-a-5-rpc-atomique-parrainage-decrement-compteur: done
-  9-a-6-audit-sentry-7j-post-deploy-epic-7-8: review
+  9-a-6-audit-sentry-7j-post-deploy-epic-7-8: done
   # 9.A.7 ajoutee 2026-05-18 a la decouverte 4 failures suite integration sur
   # PR #7 9.A.1. Suite integration cassee sur main depuis Epic 8 (~commit
   # 257e393 du 2026-05-17), jamais re-validee car workflow integration-tests
