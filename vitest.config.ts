@@ -39,22 +39,24 @@ export default defineConfig({
       // fichiers matchant `include` sont desormais instrumentes meme s'ils
       // ne sont pas importes par un test.
       // Story 9.A.2 - Option B evolutive (DECISIONS.md F-Epic9-A2) :
-      // Palier 1 (PR #8) = 49.48 lines / 41.92 branches / 64.28 functions / 48.14 statements.
-      // Story 9.A.2.b (PR #13) palier 2 livre : SC12-SC19 (detectBlacklist + confirm paths).
-      // Cumul unit+integration GHA #26037648833 : lines 67.47 / branches 59.61 /
-      // functions 92.85 / statements 65.65. Palier 2 (65%) atteint sur 3/4
-      // indicateurs (lines, functions, statements) ; branches plafonne a 59.61
-      // -> Option B-bis : palier 2 effectif = chiffres mesures arrondis au point
-      // inferieur (refus regression). Plancher palier 1 maintenu.
-      // Story follow-up 9.A.2.c backlog : combler vers cible originale (85%) en
-      // ciblant createParrainageRelation self_referral/23505/blacklist_other/meme_ip
-      // + revokeFilleuleValidation* + branches detectBlacklist restantes.
+      // Palier 1 (PR #8) = 49.48 / 41.92 / 64.28 / 48.14.
+      // Palier 2 (PR #13 9.A.2.b) = 67.47 / 59.61 / 92.85 / 65.65 (cumul GHA #26037648833).
+      // Palier 3 effectif (PR #14 9.A.2.c) = 80.96 / 72.69 / 100.00 / 79.79
+      // (cumul GHA #26041382960). 21 SC unit ajoutes (SC20-SC40) : createParrainageRelation
+      // branches restantes + revokeFilleuleValidation* + generateCodeForUser.
+      // functions atteint cible 85% (100%), lines/branches/statements plafonnent <85%.
+      // Gap branches 12.31 pts -> Option B-bis evolutive : palier 3 effectif =
+      // chiffres mesures arrondis au point inferieur (jamais regresser sous palier
+      // 2 = 67/59/92/65). Solde Option B evolutive 9.A.2.c. Cadrage 9.A.2.d pour
+      // combler branches non couvrables sans mock artificiel (error paths Sentry
+      // capture + retry 23505 generateCodeForUser keyspace 31^8 hors-cible
+      // structurel defer 8.A.1 F11).
       thresholds: {
         'app/actions/parrainage.ts': {
-          lines: 67,
-          branches: 59,
-          functions: 92,
-          statements: 65,
+          lines: 80,
+          branches: 72,
+          functions: 100,
+          statements: 79,
         },
       },
     },

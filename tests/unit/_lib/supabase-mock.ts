@@ -26,7 +26,11 @@ export type TableName =
   | 'annonces'
   | (string & {})
 
-export type SupabaseMockResponse = { data: unknown; error: null }
+// 9.A.2.c (F-Epic9-A2) : `error` relaxe a `unknown` pour permettre de seeder
+// des erreurs Postgres (`{ data: null, error: { code: '23505' } }`) sans
+// nouveau helper. Pas de breaking change : tous les seeds existants `error: null`
+// restent valides (`null` est `unknown`). Voir SC24/SC25 createParrainageRelation.
+export type SupabaseMockResponse = { data: unknown; error: unknown }
 
 export type SupabaseMockResponses = Partial<Record<TableName, SupabaseMockResponse[]>>
 
@@ -56,6 +60,9 @@ type SupabaseChainable = {
   maybeSingle: Mock
   update: Mock
   insert: Mock
+  // 9.A.2.c : `.delete()` chainable pour revokeFilleuleValidation
+  // (`.delete().eq('user_id', filleuleId)` sur parrainages_codes).
+  delete: Mock
 }
 
 const emptyResponse = (): SupabaseMockResponse => ({ data: null, error: null })
@@ -121,6 +128,16 @@ export function createSupabaseFromMock(
         }
         return insertResult
       }),
+      // 9.A.2.c : `.delete().eq(...)` invoque par revokeFilleuleValidation
+      // sur parrainages_codes (best-effort cleanup post-revoke). Le test
+      // observe le call via `fromMock.mock.calls` (table name) -- la valeur
+      // de retour n'est pas critique (await silencieux).
+      delete: vi.fn(() => ({
+        eq: vi.fn().mockReturnThis(),
+        neq: vi.fn().mockReturnThis(),
+        in: vi.fn().mockReturnThis(),
+        then: (resolve: (value: SupabaseMockResponse) => unknown) => resolve(item),
+      })),
     }
   })
 

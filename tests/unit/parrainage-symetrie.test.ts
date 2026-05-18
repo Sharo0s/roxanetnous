@@ -99,6 +99,11 @@ import {
   validateCode,
   createParrainageRelation,
   confirmParrainageOnSuccess,
+  // 9.A.2.c : SC32-SC35 ciblent revokeFilleuleValidationFromWebhook directement
+  // (revokeFilleuleValidation interne non exporte est teste via le webhook).
+  revokeFilleuleValidationFromWebhook,
+  // 9.A.2.c : SC36-SC40 generateCodeForUser (idempotence + auth + insert paths).
+  generateCodeForUser,
 } from '@/app/actions/parrainage'
 import { GET as cronConfirmParrainagesGET } from '@/app/api/cron/confirm-parrainages/route'
 import { createSupabaseFromMock } from './_lib/supabase-mock'
@@ -1046,5 +1051,751 @@ describe('confirmParrainageOnSuccess — paths edge non couverts 9.A.2.b', () =>
       target_id: FILLEUL_ACCOMPAGNANT_ID,
       details: { reason: 'db_constraint_violation' },
     })
+  })
+})
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// Story 9.A.2.c (F-Epic9-A2) — palier 3 coverage : branches restantes
+// `createParrainageRelation` + `revokeFilleuleValidation*` + `generateCodeForUser`.
+// SC20-SC40 ciblent les branches non couvertes identifiees par defer ligne 14-21
+// (`deferred-work.md`) apres palier 2 effectif (67/59/92/65 GHA #26037648833).
+// ═══════════════════════════════════════════════════════════════════════════════
+
+// ─── SC20-SC28 : createParrainageRelation branches restantes ────────────────
+
+describe('createParrainageRelation — branches restantes 9.A.2.c', () => {
+  it('SC20 : self_referral (marraineId === filleuleId) -> { ok:false, reason:"self_referral" }', async () => {
+    // validateCode reussit, marraineId === params.filleuleId -> return tot ligne 544.
+    // Pas de guard filleul, pas d'idempotence, pas d'INSERT.
+    const rpc = buildRpcAllowed()
+    const { fromMock, capturedInserts } = createSupabaseFromMock({
+      parrainages_codes: [{ data: { user_id: PARRAIN_ACCOMPAGNE_ID }, error: null }],
+      users: [
+        { data: { role: 'accompagne', first_name: 'Alice' }, error: null }, // validateCode
+      ],
+      subscriptions: [{ data: { status: 'active' }, error: null }],
+    })
+    mockCreateClient.mockResolvedValue({ ...rpc, from: fromMock })
+
+    const result = await createParrainageRelation({
+      code: VALID_CODE,
+      filleuleId: PARRAIN_ACCOMPAGNE_ID, // === marraineId retournee par validateCode
+      ipInscription: null,
+    })
+
+    expect(result).toEqual({ ok: false, reason: 'self_referral' })
+    // Pas de Sentry capture attendu (return silencieux).
+    expect(mockCaptureMessage).not.toHaveBeenCalledWith(
+      'parrainage invalid filleul role',
+      expect.anything(),
+    )
+    // Pas d'INSERT parrainages (return avant guard).
+    expect(capturedInserts.parrainages ?? []).toHaveLength(0)
+  })
+
+  it('SC21 : idempotence existing.statut="inscrite" + recheck OK -> reuse row { ok:true }', async () => {
+    // Sequence des from() :
+    //   validateCode initial : parrainages_codes(1) + users(1) + subscriptions(1)
+    //   guard filleul        : users(2)
+    //   idempotence lookup   : parrainages(1) -> { statut: 'inscrite' }
+    //   validateCode recheck : parrainages_codes(2) + users(3) + subscriptions(2)
+    //   filleulRecheck       : users(4)
+    const rpc = buildRpcAllowed()
+    const { fromMock, capturedInserts } = createSupabaseFromMock({
+      parrainages_codes: [
+        { data: { user_id: PARRAIN_ACCOMPAGNE_ID }, error: null }, // validateCode 1
+        { data: { user_id: PARRAIN_ACCOMPAGNE_ID }, error: null }, // validateCode recheck
+      ],
+      subscriptions: [
+        { data: { status: 'active' }, error: null }, // validateCode 1
+        { data: { status: 'active' }, error: null }, // validateCode recheck
+      ],
+      users: [
+        { data: { role: 'accompagne', first_name: 'Alice' }, error: null }, // validateCode 1
+        { data: { role: 'accompagnant' }, error: null },                    // guard filleul
+        { data: { role: 'accompagne', first_name: 'Alice' }, error: null }, // validateCode recheck
+        { data: { role: 'accompagnant' }, error: null },                    // filleulRecheck
+      ],
+      parrainages: [
+        {
+          data: {
+            id: PARRAINAGE_ID,
+            marraine_id: PARRAIN_ACCOMPAGNE_ID,
+            statut: 'inscrite',
+            blocage_raison: null,
+          },
+          error: null,
+        },
+      ],
+    })
+    mockCreateClient.mockResolvedValue({ ...rpc, from: fromMock })
+
+    const result = await createParrainageRelation({
+      code: VALID_CODE,
+      filleuleId: FILLEUL_ACCOMPAGNANT_ID,
+      ipInscription: null,
+    })
+
+    expect(result).toEqual({
+      ok: true,
+      parrainageId: PARRAINAGE_ID,
+      marraineId: PARRAIN_ACCOMPAGNE_ID,
+    })
+    // Pas d'INSERT parrainages (reuse de l'existing).
+    expect(capturedInserts.parrainages ?? []).toHaveLength(0)
+  })
+
+  it('SC22 : idempotence existing.statut="bloque" + raison "meme_email" -> blacklist_meme_email', async () => {
+    const rpc = buildRpcAllowed()
+    const { fromMock } = createSupabaseFromMock({
+      parrainages_codes: [{ data: { user_id: PARRAIN_ACCOMPAGNE_ID }, error: null }],
+      subscriptions: [{ data: { status: 'active' }, error: null }],
+      users: [
+        { data: { role: 'accompagne', first_name: 'Alice' }, error: null }, // validateCode
+        { data: { role: 'accompagnant' }, error: null },                    // guard filleul
+      ],
+      parrainages: [
+        {
+          data: {
+            id: PARRAINAGE_ID,
+            marraine_id: PARRAIN_ACCOMPAGNE_ID,
+            statut: 'bloque',
+            blocage_raison: 'meme_email',
+          },
+          error: null,
+        },
+      ],
+    })
+    mockCreateClient.mockResolvedValue({ ...rpc, from: fromMock })
+
+    const result = await createParrainageRelation({
+      code: VALID_CODE,
+      filleuleId: FILLEUL_ACCOMPAGNANT_ID,
+      ipInscription: null,
+    })
+
+    expect(result).toEqual({ ok: false, reason: 'blacklist_meme_email' })
+  })
+
+  it('SC23 : idempotence existing.statut="bloque" + autre raison -> blacklist_other', async () => {
+    const rpc = buildRpcAllowed()
+    const { fromMock } = createSupabaseFromMock({
+      parrainages_codes: [{ data: { user_id: PARRAIN_ACCOMPAGNE_ID }, error: null }],
+      subscriptions: [{ data: { status: 'active' }, error: null }],
+      users: [
+        { data: { role: 'accompagne', first_name: 'Alice' }, error: null }, // validateCode
+        { data: { role: 'accompagnant' }, error: null },                    // guard filleul
+      ],
+      parrainages: [
+        {
+          data: {
+            id: PARRAINAGE_ID,
+            marraine_id: PARRAIN_ACCOMPAGNE_ID,
+            statut: 'bloque',
+            blocage_raison: 'meme_ip', // autre raison
+          },
+          error: null,
+        },
+      ],
+    })
+    mockCreateClient.mockResolvedValue({ ...rpc, from: fromMock })
+
+    const result = await createParrainageRelation({
+      code: VALID_CODE,
+      filleuleId: FILLEUL_ACCOMPAGNANT_ID,
+      ipInscription: null,
+    })
+
+    expect(result).toEqual({ ok: false, reason: 'blacklist_other' })
+  })
+
+  it('SC24 : race 23505 sur INSERT initial -> raceRow.id reuse { ok:true }', async () => {
+    // INSERT echoue avec 23505 (unique violation index partiel) -> code re-lookup
+    // parrainages avec statut in ('inscrite','abonnee','confirme') -> raceRow trouve.
+    mockNormalizeEmail.mockReturnValue('')
+
+    const rpc = buildRpcAllowed()
+    const { fromMock, capturedInserts } = createSupabaseFromMock({
+      parrainages_codes: [{ data: { user_id: PARRAIN_ACCOMPAGNE_ID }, error: null }],
+      subscriptions: [{ data: { status: 'active' }, error: null }],
+      users: [
+        { data: { role: 'accompagne', first_name: 'Alice' }, error: null }, // validateCode
+        { data: { role: 'accompagnant' }, error: null },                    // guard filleul
+      ],
+      parrainages: [
+        { data: null, error: null },                                                       // idempotence : pas d'existing
+        { data: null, error: { code: '23505', message: 'unique_violation' } },             // INSERT : 23505
+        {
+          data: { id: PARRAINAGE_ID, marraine_id: PARRAIN_ACCOMPAGNE_ID, statut: 'inscrite' },
+          error: null,
+        }, // raceRow lookup
+      ],
+    })
+    mockCreateClient.mockResolvedValue({ ...rpc, from: fromMock })
+
+    const result = await createParrainageRelation({
+      code: VALID_CODE,
+      filleuleId: FILLEUL_ACCOMPAGNANT_ID,
+      ipInscription: null,
+    })
+
+    expect(result).toEqual({
+      ok: true,
+      parrainageId: PARRAINAGE_ID,
+      marraineId: PARRAIN_ACCOMPAGNE_ID,
+    })
+    // Verifier que l'INSERT a bien ete tente.
+    expect(capturedInserts.parrainages).toHaveLength(1)
+  })
+
+  it('SC25 : insertError non-23505 -> { ok:false, reason:"insert_failed" }', async () => {
+    mockNormalizeEmail.mockReturnValue('')
+
+    const rpc = buildRpcAllowed()
+    const { fromMock, calls } = createSupabaseFromMock({
+      parrainages_codes: [{ data: { user_id: PARRAIN_ACCOMPAGNE_ID }, error: null }],
+      subscriptions: [{ data: { status: 'active' }, error: null }],
+      users: [
+        { data: { role: 'accompagne', first_name: 'Alice' }, error: null },
+        { data: { role: 'accompagnant' }, error: null },
+      ],
+      parrainages: [
+        { data: null, error: null },                                                       // idempotence : pas d'existing
+        { data: null, error: { code: '42P01', message: 'relation does not exist' } },      // INSERT : autre erreur
+      ],
+    })
+    mockCreateClient.mockResolvedValue({ ...rpc, from: fromMock })
+
+    const result = await createParrainageRelation({
+      code: VALID_CODE,
+      filleuleId: FILLEUL_ACCOMPAGNANT_ID,
+      ipInscription: null,
+    })
+
+    expect(result).toEqual({ ok: false, reason: 'insert_failed' })
+    // Verifier 2 from('parrainages') (idempotence + INSERT), PAS de 3eme lookup raceRow.
+    const parrainagesCalls = calls.filter((t) => t === 'parrainages')
+    expect(parrainagesCalls).toHaveLength(2)
+  })
+
+  it('SC26 : filleulUserError lookup users role -> { ok:false, reason:"db_error" } + Sentry', async () => {
+    const rpc = buildRpcAllowed()
+    const { fromMock } = createSupabaseFromMock({
+      parrainages_codes: [{ data: { user_id: PARRAIN_ACCOMPAGNE_ID }, error: null }],
+      subscriptions: [{ data: { status: 'active' }, error: null }],
+      users: [
+        { data: { role: 'accompagne', first_name: 'Alice' }, error: null }, // validateCode
+        { data: null, error: { message: 'connection lost' } },              // guard filleul : ERROR
+      ],
+    })
+    mockCreateClient.mockResolvedValue({ ...rpc, from: fromMock })
+
+    const result = await createParrainageRelation({
+      code: VALID_CODE,
+      filleuleId: FILLEUL_ACCOMPAGNANT_ID,
+      ipInscription: null,
+    })
+
+    expect(result).toEqual({ ok: false, reason: 'db_error' })
+    expect(mockCaptureException).toHaveBeenCalledWith(
+      expect.objectContaining({ message: 'connection lost' }),
+      expect.objectContaining({
+        tags: expect.objectContaining({
+          signal: 'create-relation-filleul-lookup-error',
+        }),
+        extra: expect.objectContaining({ filleuleId: FILLEUL_ACCOMPAGNANT_ID }),
+      }),
+    )
+  })
+
+  it('SC27 : filleulRecheck role change pendant idempotence -> invalid_filleul_role', async () => {
+    // Sequence : idempotence inscrite -> recheck validateCode OK -> filleulRecheck
+    // retourne role='accompagne' (changement entre 1er appel et idempotence).
+    const rpc = buildRpcAllowed()
+    const { fromMock } = createSupabaseFromMock({
+      parrainages_codes: [
+        { data: { user_id: PARRAIN_ACCOMPAGNE_ID }, error: null }, // validateCode 1
+        { data: { user_id: PARRAIN_ACCOMPAGNE_ID }, error: null }, // validateCode recheck
+      ],
+      subscriptions: [
+        { data: { status: 'active' }, error: null },
+        { data: { status: 'active' }, error: null },
+      ],
+      users: [
+        { data: { role: 'accompagne', first_name: 'Alice' }, error: null }, // validateCode 1
+        { data: { role: 'accompagnant' }, error: null },                    // guard filleul (OK initial)
+        { data: { role: 'accompagne', first_name: 'Alice' }, error: null }, // validateCode recheck
+        { data: { role: 'accompagne' }, error: null },                      // filleulRecheck : role CHANGED
+      ],
+      parrainages: [
+        {
+          data: {
+            id: PARRAINAGE_ID,
+            marraine_id: PARRAIN_ACCOMPAGNE_ID,
+            statut: 'inscrite',
+            blocage_raison: null,
+          },
+          error: null,
+        },
+      ],
+    })
+    mockCreateClient.mockResolvedValue({ ...rpc, from: fromMock })
+
+    const result = await createParrainageRelation({
+      code: VALID_CODE,
+      filleuleId: FILLEUL_ACCOMPAGNANT_ID,
+      ipInscription: null,
+    })
+
+    expect(result).toEqual({ ok: false, reason: 'invalid_filleul_role' })
+  })
+
+  it('SC28 : mergeResult.was_added=false (worker concurrent gagne) -> skip log + email meme_ip', async () => {
+    mockNormalizeEmail.mockImplementation((email: string) =>
+      (email || '').toLowerCase().trim(),
+    )
+
+    // RPC merge_parrainage_flag_suspicion retourne { was_added: false } -> skip log+email.
+    const rpc = vi.fn((rpcName: string) => {
+      if (rpcName === 'try_consume_rate_limit') {
+        return {
+          select: vi.fn().mockReturnThis(),
+          maybeSingle: vi.fn().mockResolvedValue({ data: true, error: null }),
+        }
+      }
+      if (rpcName === 'merge_parrainage_flag_suspicion') {
+        return {
+          select: vi.fn().mockReturnThis(),
+          maybeSingle: vi.fn().mockResolvedValue({ data: { was_added: false }, error: null }),
+        }
+      }
+      return {
+        select: vi.fn().mockReturnThis(),
+        maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }),
+      }
+    })
+
+    const { fromMock, capturedInserts } = createSupabaseFromMock({
+      parrainages_codes: [{ data: { user_id: PARRAIN_ACCOMPAGNE_ID }, error: null }],
+      subscriptions: [{ data: { status: 'active' }, error: null }],
+      users: [
+        { data: { role: 'accompagne', first_name: 'Alice' }, error: null }, // validateCode
+        { data: { role: 'accompagnant' }, error: null },                    // guard filleul
+        { data: { email: 'marraine@ex.fr' }, error: null },                 // detectBlacklist marraine email
+        // Pas de loadNames car log+email skipped quand was_added=false.
+      ],
+      parrainages: [
+        { data: null, error: null },                                                          // idempotence
+        { data: { id: PARRAINAGE_ID }, error: null },                                         // INSERT
+        { data: [], error: null },                                                            // otherFilleulesIds vide (skip P9)
+        { data: [{ id: 'parrainage-other-id' }], error: null },                               // ipMatches non vide -> flag meme_ip
+      ],
+    })
+
+    mockCreateClient.mockResolvedValue({ rpc, from: fromMock })
+
+    const result = await createParrainageRelation({
+      code: VALID_CODE,
+      filleuleId: FILLEUL_ACCOMPAGNANT_ID,
+      ipInscription: '192.168.1.1',
+      filleuleEmail: 'carl@ex.fr',
+    })
+
+    expect(result).toEqual({
+      ok: true,
+      parrainageId: PARRAINAGE_ID,
+      marraineId: PARRAIN_ACCOMPAGNE_ID,
+    })
+    // RPC merge invoque (signal meme_ip declenche)
+    expect(rpc).toHaveBeenCalledWith('merge_parrainage_flag_suspicion', expect.objectContaining({
+      p_flag: 'meme_ip',
+    }))
+    // PAS de log admin_actions_log "parrainage_flag" (skip car was_added=false).
+    const adminLogs = (capturedInserts.admin_actions_log ?? []) as Array<Record<string, unknown>>
+    const flagLog = adminLogs.find((l) => l.action_type === 'parrainage_flag')
+    expect(flagLog).toBeUndefined()
+  })
+})
+
+// ─── SC29-SC35 : revokeFilleuleValidation* paths ──────────────────────────────
+//
+// Note : revokeFilleuleValidation (interne) n'est pas exporte ; SC29-SC31 le
+// testent via revokeFilleuleValidationFromWebhook avec internal secret valide
+// (bypass admin auth check -> delegue directement a revokeFilleuleValidation).
+// SC32-SC35 testent les branches auth de revokeFilleuleValidationFromWebhook.
+
+describe('revokeFilleuleValidation* — branches 9.A.2.c', () => {
+  const ADMIN_ID = 'aaaaaaaa-0000-0000-0000-000000000099'
+  const PROFILE_ID = 'pppppppp-0000-0000-0000-000000000010'
+  const INTERNAL_SECRET = 'test-secret-9a2c'
+
+  // Helper : seed via internal secret bypass admin check. revokeFilleuleValidation
+  // appelle createClient({ serviceRole: true }) UNE fois (pas de createClient
+  // sans serviceRole car bypass auth).
+  function seedWithInternalSecret(
+    accompagnantsProfilesPool: Array<{ data: unknown; error: unknown }>,
+  ) {
+    vi.stubEnv('PARRAINAGE_INTERNAL_SECRET', INTERNAL_SECRET)
+    const { fromMock, capturedInserts, capturedUpdates, calls } = createSupabaseFromMock({
+      accompagnants_profiles: accompagnantsProfilesPool,
+    })
+    mockCreateClient.mockResolvedValue({ from: fromMock })
+    return { fromMock, capturedInserts, capturedUpdates, calls }
+  }
+
+  it('SC29 : path principal validation_source="parrainage" + status="valide" -> update en_attente + DELETE code + log admin', async () => {
+    const { capturedInserts, capturedUpdates, calls } = seedWithInternalSecret([
+      {
+        data: {
+          id: PROFILE_ID,
+          validation_status: 'valide',
+          validation_source: 'parrainage',
+        },
+        error: null,
+      },
+    ])
+
+    await revokeFilleuleValidationFromWebhook(FILLEUL_ACCOMPAGNANT_ID, 'fraude_confirmee_admin', {
+      parrainageId: PARRAINAGE_ID,
+      marraineId: PARRAIN_ACCOMPAGNE_ID,
+      internalSecret: INTERNAL_SECRET,
+    })
+
+    // (a) update accompagnants_profiles {validation_status: 'en_attente', ...}
+    const profileUpdate = capturedUpdates.find(
+      (u) =>
+        u.table === 'accompagnants_profiles' &&
+        (u.payload as Record<string, unknown>)?.validation_status === 'en_attente',
+    )
+    expect(profileUpdate).toBeDefined()
+    expect(profileUpdate?.payload).toMatchObject({
+      validation_status: 'en_attente',
+      validation_source: 'manuelle',
+      validation_date: null,
+    })
+
+    // (b) update users { parrainee_par: null }
+    const userUpdate = capturedUpdates.find(
+      (u) =>
+        u.table === 'users' &&
+        (u.payload as Record<string, unknown>)?.parrainee_par === null,
+    )
+    expect(userUpdate).toBeDefined()
+
+    // (c) DELETE sur parrainages_codes invoque (call trace)
+    expect(calls).toContain('parrainages_codes')
+
+    // (d) admin_actions_log insert avec action_type 'parrainage_fraude_confirmee'
+    const adminLogs = (capturedInserts.admin_actions_log ?? []) as Array<Record<string, unknown>>
+    expect(adminLogs).toHaveLength(1)
+    expect(adminLogs[0]).toMatchObject({
+      action_type: 'parrainage_fraude_confirmee',
+      target_type: 'parrainage',
+      target_id: PARRAINAGE_ID,
+      details: {
+        via: 'fraude_confirmee_admin',
+        filleule_id: FILLEUL_ACCOMPAGNANT_ID,
+        marraine_id: PARRAIN_ACCOMPAGNE_ID,
+      },
+    })
+
+    vi.unstubAllEnvs()
+  })
+
+  it('SC30 : noop path (status="refuse") -> PAS d\'update profile + Sentry warning + log admin quand meme', async () => {
+    const { capturedInserts, capturedUpdates } = seedWithInternalSecret([
+      {
+        data: {
+          id: PROFILE_ID,
+          validation_status: 'refuse',
+          validation_source: 'manuelle',
+        },
+        error: null,
+      },
+    ])
+
+    await revokeFilleuleValidationFromWebhook(FILLEUL_ACCOMPAGNANT_ID, 'fraude_confirmee_admin', {
+      parrainageId: PARRAINAGE_ID,
+      marraineId: PARRAIN_ACCOMPAGNE_ID,
+      internalSecret: INTERNAL_SECRET,
+    })
+
+    // (a) PAS d'update accompagnants_profiles (noop branche)
+    const profileUpdate = capturedUpdates.find((u) => u.table === 'accompagnants_profiles')
+    expect(profileUpdate).toBeUndefined()
+
+    // (b) Sentry.captureMessage avec signal revoke-noop
+    expect(mockCaptureMessage).toHaveBeenCalledWith(
+      'parrainage revokeFilleuleValidation noop',
+      expect.objectContaining({
+        level: 'warning',
+        tags: expect.objectContaining({ signal: 'revoke-noop' }),
+        extra: expect.objectContaining({
+          filleule_id: FILLEUL_ACCOMPAGNANT_ID,
+          current_status: 'refuse',
+          current_source: 'manuelle',
+        }),
+      }),
+    )
+
+    // (c) update users + log admin executes meme en noop (toujours)
+    const userUpdate = capturedUpdates.find((u) => u.table === 'users')
+    expect(userUpdate).toBeDefined()
+    const adminLogs = (capturedInserts.admin_actions_log ?? []) as Array<Record<string, unknown>>
+    expect(adminLogs).toHaveLength(1)
+
+    vi.unstubAllEnvs()
+  })
+
+  it('SC31 : throw si context.parrainageId absent -> "parrainageId requis"', async () => {
+    vi.stubEnv('PARRAINAGE_INTERNAL_SECRET', INTERNAL_SECRET)
+    // Pas besoin de seed (fail-loud upfront avant tout from()).
+
+    await expect(
+      revokeFilleuleValidationFromWebhook(FILLEUL_ACCOMPAGNANT_ID, 'raison', {
+        internalSecret: INTERNAL_SECRET,
+        // parrainageId omis intentionnellement
+      }),
+    ).rejects.toThrow(/parrainageId requis/)
+
+    vi.unstubAllEnvs()
+  })
+
+  it('SC32 : internal secret valide -> bypass admin check + delegate', async () => {
+    // Identique a SC29 mais on verifie explicitement qu'aucun createClient sans
+    // serviceRole n'a ete fait (mockCreateClient appele 1 seule fois pour
+    // revokeFilleuleValidation interne, pas de check auth).
+    seedWithInternalSecret([
+      {
+        data: {
+          id: PROFILE_ID,
+          validation_status: 'valide',
+          validation_source: 'parrainage',
+        },
+        error: null,
+      },
+    ])
+
+    await revokeFilleuleValidationFromWebhook(FILLEUL_ACCOMPAGNANT_ID, 'webhook-stripe', {
+      parrainageId: PARRAINAGE_ID,
+      internalSecret: INTERNAL_SECRET,
+    })
+
+    // mockCreateClient invoque 1 fois (revokeFilleuleValidation interne, serviceRole).
+    expect(mockCreateClient).toHaveBeenCalledTimes(1)
+    expect(mockCreateClient).toHaveBeenCalledWith({ serviceRole: true })
+
+    vi.unstubAllEnvs()
+  })
+
+  it('SC33 : admin authentifie (pas de secret valide) -> delegate reussit', async () => {
+    // Pas de PARRAINAGE_INTERNAL_SECRET set -> hasValidSecret=false -> branche admin.
+    // 1er createClient() (sans serviceRole) -> auth.getUser() + users role lookup
+    // 2eme createClient({serviceRole}) -> revokeFilleuleValidation interne
+    const authClient = {
+      auth: {
+        getUser: vi.fn().mockResolvedValue({
+          data: { user: { id: ADMIN_ID } },
+        }),
+      },
+      from: vi.fn(() => ({
+        select: vi.fn().mockReturnThis(),
+        eq: vi.fn().mockReturnThis(),
+        single: vi.fn().mockResolvedValue({ data: { role: 'admin' }, error: null }),
+      })),
+    }
+
+    const { fromMock } = createSupabaseFromMock({
+      accompagnants_profiles: [
+        {
+          data: {
+            id: PROFILE_ID,
+            validation_status: 'valide',
+            validation_source: 'parrainage',
+          },
+          error: null,
+        },
+      ],
+    })
+    const adminClient = { from: fromMock }
+
+    mockCreateClient
+      .mockResolvedValueOnce(authClient)
+      .mockResolvedValueOnce(adminClient)
+
+    await expect(
+      revokeFilleuleValidationFromWebhook(FILLEUL_ACCOMPAGNANT_ID, 'admin-action', {
+        parrainageId: PARRAINAGE_ID,
+        marraineId: PARRAIN_ACCOMPAGNE_ID,
+      }),
+    ).resolves.toBeUndefined()
+
+    expect(mockCreateClient).toHaveBeenCalledTimes(2)
+  })
+
+  it('SC34 : non-auth (getUser retourne null) -> throw "non authentifie"', async () => {
+    const authClient = {
+      auth: {
+        getUser: vi.fn().mockResolvedValue({ data: { user: null } }),
+      },
+      from: vi.fn(),
+    }
+
+    mockCreateClient.mockResolvedValueOnce(authClient)
+
+    await expect(
+      revokeFilleuleValidationFromWebhook(FILLEUL_ACCOMPAGNANT_ID, 'raison', {
+        parrainageId: PARRAINAGE_ID,
+      }),
+    ).rejects.toThrow(/non authentifié/)
+  })
+
+  it('SC35 : authentifie non-admin -> throw "acces refuse"', async () => {
+    const authClient = {
+      auth: {
+        getUser: vi.fn().mockResolvedValue({
+          data: { user: { id: FILLEUL_ACCOMPAGNANT_ID } },
+        }),
+      },
+      from: vi.fn(() => ({
+        select: vi.fn().mockReturnThis(),
+        eq: vi.fn().mockReturnThis(),
+        single: vi.fn().mockResolvedValue({
+          data: { role: 'accompagnant' }, // pas admin
+          error: null,
+        }),
+      })),
+    }
+
+    mockCreateClient.mockResolvedValueOnce(authClient)
+
+    await expect(
+      revokeFilleuleValidationFromWebhook(FILLEUL_ACCOMPAGNANT_ID, 'raison', {
+        parrainageId: PARRAINAGE_ID,
+      }),
+    ).rejects.toThrow(/accès refusé/)
+  })
+})
+
+// ─── SC36-SC40 : generateCodeForUser paths ────────────────────────────────────
+//
+// 2 createClient appels : (1) sans serviceRole pour auth.getUser() + caller role
+// si user != userId ; (2) avec serviceRole pour parrainages_codes select+insert.
+// Note hors-cible AC1.u : retry 23505 (l. 287-300) keyspace 31^8 collision
+// non couvrable -- defer 8.A.1 F11 documente non exerce.
+
+describe('generateCodeForUser — branches 9.A.2.c', () => {
+  const USER_ID = 'uuuuuuuu-0000-0000-0000-000000000050'
+
+  function buildAuthClient(user: { id: string } | null) {
+    return {
+      auth: {
+        getUser: vi.fn().mockResolvedValue({ data: { user } }),
+      },
+      from: vi.fn(() => ({
+        select: vi.fn().mockReturnThis(),
+        eq: vi.fn().mockReturnThis(),
+        single: vi.fn().mockResolvedValue({ data: null, error: null }),
+      })),
+    }
+  }
+
+  it('SC36 : idempotence existing code -> { code, created:false } sans INSERT', async () => {
+    const authClient = buildAuthClient({ id: USER_ID })
+    const { fromMock, capturedInserts } = createSupabaseFromMock({
+      parrainages_codes: [{ data: { code: 'EXISTING1' }, error: null }],
+    })
+    const adminClient = { from: fromMock }
+
+    mockCreateClient
+      .mockResolvedValueOnce(authClient)
+      .mockResolvedValueOnce(adminClient)
+
+    const result = await generateCodeForUser(USER_ID)
+
+    expect(result).toEqual({ code: 'EXISTING1', created: false })
+    expect(capturedInserts.parrainages_codes ?? []).toHaveLength(0)
+  })
+
+  it('SC37 : non-auth (getUser retourne null) -> { error: "Non authentifié." }', async () => {
+    const authClient = buildAuthClient(null)
+    mockCreateClient.mockResolvedValueOnce(authClient)
+
+    const result = await generateCodeForUser(USER_ID)
+
+    expect(result).toEqual({ error: 'Non authentifié.' })
+    // Pas de 2eme createClient (serviceRole) car return tot.
+    expect(mockCreateClient).toHaveBeenCalledTimes(1)
+  })
+
+  it('SC38 : user.id !== userId + caller non-admin -> { error: "Accès refusé." }', async () => {
+    const authClient = {
+      auth: {
+        getUser: vi.fn().mockResolvedValue({
+          data: { user: { id: 'other-user-id' } },
+        }),
+      },
+      from: vi.fn(() => ({
+        select: vi.fn().mockReturnThis(),
+        eq: vi.fn().mockReturnThis(),
+        single: vi.fn().mockResolvedValue({
+          data: { role: 'accompagnant' }, // pas admin
+          error: null,
+        }),
+      })),
+    }
+    mockCreateClient.mockResolvedValueOnce(authClient)
+
+    const result = await generateCodeForUser(USER_ID)
+
+    expect(result).toEqual({ error: 'Accès refusé.' })
+    // Pas de createClient serviceRole (return avant)
+    expect(mockCreateClient).toHaveBeenCalledTimes(1)
+  })
+
+  it('SC39 : INSERT succes 1er essai -> { code, created:true }', async () => {
+    const authClient = buildAuthClient({ id: USER_ID })
+    const { fromMock, capturedInserts } = createSupabaseFromMock({
+      parrainages_codes: [
+        { data: null, error: null },  // idempotence : pas d'existing
+        { data: null, error: null },  // INSERT : succes (error null)
+      ],
+    })
+    const adminClient = { from: fromMock }
+
+    mockCreateClient
+      .mockResolvedValueOnce(authClient)
+      .mockResolvedValueOnce(adminClient)
+
+    const result = await generateCodeForUser(USER_ID)
+
+    // generateCode() mock retourne 'ABCD2345' (vi.mock @/lib/parrainage-codes ligne 81)
+    expect(result).toEqual({ code: 'ABCD2345', created: true })
+    expect(capturedInserts.parrainages_codes).toHaveLength(1)
+    expect(capturedInserts.parrainages_codes[0]).toMatchObject({
+      user_id: USER_ID,
+      code: 'ABCD2345',
+      compteur_confirmes: 0,
+      total_recompenses: 0,
+    })
+  })
+
+  it('SC40 : INSERT error non-23505 -> { error: "Erreur lors de la création..." }', async () => {
+    const authClient = buildAuthClient({ id: USER_ID })
+    const { fromMock } = createSupabaseFromMock({
+      parrainages_codes: [
+        { data: null, error: null },                                       // idempotence
+        { data: null, error: { code: '23502', message: 'not null violation' } }, // INSERT : autre erreur (pas 23505)
+      ],
+    })
+    const adminClient = { from: fromMock }
+
+    mockCreateClient
+      .mockResolvedValueOnce(authClient)
+      .mockResolvedValueOnce(adminClient)
+
+    const result = await generateCodeForUser(USER_ID)
+
+    expect(result).toEqual({ error: 'Erreur lors de la création du code de parrainage.' })
   })
 })

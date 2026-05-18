@@ -104,4 +104,47 @@ describe('createSupabaseFromMock', () => {
     expect(inserted).toEqual({ data: { id: 'parrainage-new-id' }, error: null })
     expect(capturedInserts.parrainages).toHaveLength(1)
   })
+
+  // ─── Story 9.A.2.c : extension type `error: unknown` + `.delete()` ──────────
+  // AC4 9.A.2.c : permettre de seeder un `error` non-null (ex. `{ code: '23505' }`)
+  // sur `.insert().select().single()` pour tester les paths race/insertError dans
+  // createParrainageRelation. Sans cette extension, le typage `error: null`
+  // bloquait les seeds avec erreur Postgres.
+
+  it('(g) propage error non-null sur .insert().select().single() (race 23505)', async () => {
+    const { fromMock, capturedInserts } = createSupabaseFromMock({
+      parrainages: [{ data: null, error: { code: '23505', message: 'unique violation' } }],
+    })
+
+    const inserted = await fromMock('parrainages')
+      .insert({ marraine_id: 'm1', filleule_id: 'f1' })
+      .select()
+      .single()
+
+    expect(inserted).toEqual({
+      data: null,
+      error: { code: '23505', message: 'unique violation' },
+    })
+    expect(capturedInserts.parrainages).toHaveLength(1)
+  })
+
+  it('(h) baseline regression : seed error: null continue de retourner { data, error: null }', async () => {
+    const { fromMock } = createSupabaseFromMock({
+      users: [{ data: { id: 'u1' }, error: null }],
+    })
+
+    const row = await fromMock('users').select().eq().maybeSingle()
+    expect(row).toEqual({ data: { id: 'u1' }, error: null })
+  })
+
+  it('(i) .delete().eq(...) chainable sans throw (revokeFilleuleValidation)', async () => {
+    const { fromMock, calls } = createSupabaseFromMock({
+      parrainages_codes: [{ data: null, error: null }],
+    })
+
+    // revokeFilleuleValidation appelle `.from('parrainages_codes').delete().eq('user_id', filleuleId)`
+    // -> on verifie que la chaine ne throw pas et que le call est trace.
+    expect(() => fromMock('parrainages_codes').delete().eq('user_id', 'f1')).not.toThrow()
+    expect(calls).toContain('parrainages_codes')
+  })
 })
