@@ -42,21 +42,23 @@ export default defineConfig({
       // Palier 1 (PR #8) = 49.48 / 41.92 / 64.28 / 48.14.
       // Palier 2 (PR #13 9.A.2.b) = 67.47 / 59.61 / 92.85 / 65.65 (cumul GHA #26037648833).
       // Palier 3 effectif (PR #14 9.A.2.c) = 80.96 / 72.69 / 100.00 / 79.79
-      // (cumul GHA #26041382960). 21 SC unit ajoutes (SC20-SC40) : createParrainageRelation
-      // branches restantes + revokeFilleuleValidation* + generateCodeForUser.
-      // functions atteint cible 85% (100%), lines/branches/statements plafonnent <85%.
-      // Gap branches 12.31 pts -> Option B-bis evolutive : palier 3 effectif =
-      // chiffres mesures arrondis au point inferieur (jamais regresser sous palier
-      // 2 = 67/59/92/65). Solde Option B evolutive 9.A.2.c. Cadrage 9.A.2.d pour
-      // combler branches non couvrables sans mock artificiel (error paths Sentry
-      // capture + retry 23505 generateCodeForUser keyspace 31^8 hors-cible
-      // structurel defer 8.A.1 F11).
+      // (cumul GHA #26041382960). 21 SC unit ajoutes (SC20-SC40).
+      // **Palier 3 final/effectif final (PR #15 9.A.2.d) = 86.50 / 75.38 / 100.00 / 85.18**
+      // (cumul GHA #26047697818, 2026-05-18). 7 SC unit ajoutes (SC41-SC47) :
+      // C1 error paths Sentry createParrainageRelation (SC41-SC45) + C3 validateCode
+      // rate-limit anti-fraude H12 (SC46-SC47). Option hybride retenue via GO Sylvain.
+      // Cible 85% strict ATTEINTE sur 3/4 indicateurs (lines 86.50 / functions 100
+      // / statements 85.18). Branches 75.38 < 85% (gap 9.62 pts) -> C2 NO-GO cosmetique
+      // + C4 HORS-CIBLE FORCE structurel (retry 23505 keyspace 31^8 defer 8.A.1 F11).
+      // **F-Epic9-A2 soldee definitivement** : palier 3 effectif final = chiffres mesures
+      // arrondis au point inferieur (jamais regresser sous palier 3 effectif 9.A.2.c
+      // = 80/72/100/79). Aucune story de coverage future planifiee sur ce fichier.
       thresholds: {
         'app/actions/parrainage.ts': {
-          lines: 80,
-          branches: 72,
+          lines: 86,
+          branches: 75,
           functions: 100,
-          statements: 79,
+          statements: 85,
         },
       },
     },
