@@ -56,7 +56,7 @@
 - **F5 — `autoriserException` réécrit `parrainee_par` sans guard `IS NULL`** [`app/actions/admin-parrainages.ts`] — Si une filleule a entre-temps un autre parrainage légitime, l'exception admin écrase son attribution silencieusement. Comportement pré-existant à 8.C.1 ; l'override admin peut être intentionnel. À arbitrer en Epic 9 si des cas prod remontés.
 - **F8 — Race condition register-form : avancement step sans code validé (`status === 'checking'`)** [`components/auth/register-form.tsx`] — Clic rapide ou Enter pendant la validation async → step avance avec code non encore validé. Mitigé côté serveur (re-validation `createParrainageRelation`). Hors scope 8.C.1 ; à corriger en Epic 9 UX parrainage.
 - **F11 — `validateCode` : accompagné sans row `subscriptions` reçoit `marraine_subscription_inactive`** [`app/actions/parrainage.ts`] — Race window entre paiement Stripe et webhook inscription. Timing inhérent à l'archi async Stripe ; retry natif du client résout. À monitorer en Sentry (signal `marraine-sub-inactive` + roleParrain='accompagne').
-- [Solde 9.A.5 - 2026-05-18] **F15 — `confirmerFraude` décrémente `compteur_confirmes` via read-modify-write non atomique** [`app/actions/admin-parrainages.ts`] — Race condition si 2 admins confirment fraude simultanément sur le même parrain. Probablité très faible (1 admin prod). Corriger avec un RPC delta `parrainage_decrement_compteur` en Epic 9.
+- **F15 — `confirmerFraude` décrémente `compteur_confirmes` via read-modify-write non atomique** [`app/actions/admin-parrainages.ts`] — Race condition si 2 admins confirment fraude simultanément sur le même parrain. Probablité très faible (1 admin prod). Corriger avec un RPC delta `parrainage_decrement_compteur` en Epic 9.
 
 ## Deferred from: code review of 8-b-2-teaser-dashboard-accompagne-invitez-accompagnant (2026-05-17)
 
@@ -506,12 +506,6 @@ Tous ces findings concernent du code **strictement preserve** depuis HEAD (verif
 
 - **Annonce ARIA live sur copie clipboard absente de `components/accompagnant/parrainage-view.tsx`** — Le composant accompagne livre en 8.B.1 ajoute un `<div role="status" aria-live="polite" className="sr-only">` qui annonce "Code copié dans le presse-papier" / "Lien d'invitation copié dans le presse-papier" après `clipboard.writeText`. Le composant accompagnant historique (Epic 2) n'a que le toggle de label bouton "Copier"/"Copié", sans annonce lecteur d'écran. Alignement à faire en 8.C.3 (wording neutre cross-codebase) ou story dédiée a11y accompagnant.
 - **Attribut `role="progressbar" aria-valuenow/min/max` absent de `components/accompagnant/parrainage-view.tsx`** — Le composant accompagne livre en 8.B.1 ajoute ces attributs ARIA sur le conteneur de la barre de progression (avec `aria-label="Progression du cycle de parrainage"`). Le composant accompagnant historique n'a que `aria-hidden="true"` sur l'élément visuel interne. Alignement à faire en 8.C.3 ou epic suivant.
-
-## Deferred from: code review of 9-a-4-rename-sendparrainagefilleuleconfirmation-types-filleulestatut (2026-05-18)
-
-- **`'parrainage_filleule_confirm'` non renommé dans `logNotification`** [`lib/emails.ts:690,698`] — le type de log BDD reste au féminin alors que la fonction est renommée au masculin neutre. String libre (pas d'union TS), aucun bug fonctionnel, mais divergence analytique latente entre nom de fonction et trace BDD. À solder lors de la suppression de l'alias (Epic 10) ou story dédiée renommage type log.
-- **4 copies locales de `FilleulStatut` sans source de vérité partagée** [`app/accompagnant/parrainage/page.tsx:7`, `app/accompagne/parrainage/page.tsx:7`, `components/accompagnant/parrainage-view.tsx:5`, `components/accompagne/parrainage-view.tsx:5`] — pre-existing ; divergence silencieuse possible si un statut BDD est ajouté sans mettre à jour les 4 fichiers. À extraire dans `/lib/types/parrainage.ts` lors d'un refactoring types.
-- **`AccompagnanteParrainagePage` — nom de fonction page au féminin** [`app/accompagnant/parrainage/page.tsx:9`] — default export Next.js, opaque pour le routeur, sans impact runtime. À corriger dans le renommage global `accompagnante → accompagnant` (dette AI-6.A.1).
 
 ## Deferred from: implementation of 8-b-2-teaser-dashboard-accompagne-invitez-accompagnant (2026-05-17)
 
