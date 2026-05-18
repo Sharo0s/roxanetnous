@@ -400,8 +400,13 @@ test('@rgpd-cascade SC3 — suppression compte admin : refus applicatif', async 
   await expect(confirmButton).toBeVisible({ timeout: 5_000 })
   await confirmButton.click()
 
-  // Asserter le message d'erreur role="alert"
-  const errorAlert = page.getByRole('alert')
+  // Asserter le message d erreur role="alert". Next.js injecte un announcer
+  // <div role="alert" id="__next-route-announcer__"> dans le DOM, donc
+  // getByRole('alert') matche 2 elements en strict mode. On filtre sur le
+  // texte attendu pour cibler le <p role="alert"> applicatif.
+  const errorAlert = page
+    .getByRole('alert')
+    .filter({ hasText: 'Impossible de supprimer un administrateur.' })
   await expect(errorAlert).toBeVisible({ timeout: 10_000 })
   await expect(errorAlert).toHaveText('Impossible de supprimer un administrateur.')
 
