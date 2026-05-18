@@ -2017,6 +2017,10 @@ describe('createParrainageRelation error paths Sentry — 9.A.2.d (C1)', () => {
       }),
     )
     // was_added falsy -> aucun INSERT admin_actions_log emis (cf. ligne 788)
+    expect(mockCaptureException).not.toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ tags: expect.objectContaining({ signal: 'signup-log-bloque' }) }),
+    )
   })
 
   it('SC45 : parraineeErr UPDATE users parrainee_par -> Sentry signup-parrainee-par + return ok:true', async () => {
@@ -2034,8 +2038,7 @@ describe('createParrainageRelation error paths Sentry — 9.A.2.d (C1)', () => {
         { data: { role: 'accompagne', first_name: 'Alice' }, error: null }, // validateCode
         { data: { role: 'accompagnant' }, error: null },                    // guard filleul
         { data: null, error: { code: '23502', message: 'users update parrainee_par error' } }, // UPDATE parrainee_par : ERROR
-        { data: { email: 'alice@ex.fr', first_name: 'Alice' }, error: null }, // loadNames marraine
-        { data: { email: 'carl@ex.fr', first_name: 'Carl' }, error: null },   // loadNames filleule
+        // loadNamesForAdminEmail jamais atteint (conditionne a blocage==='meme_email', golden path ici)
       ],
       parrainages: [
         { data: null, error: null },                                          // idempotence

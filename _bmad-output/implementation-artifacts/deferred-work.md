@@ -1,5 +1,16 @@
 # Deferred Work
 
+## Deferred from: code review of 9-a-2-d-palier-3-final-ou-acceptation-palier-effectif (2026-05-18)
+
+- **`clearAllMocks` ne reset pas `mockImplementation`** [`tests/unit/parrainage-symetrie.test.ts:130`] — Pattern pre-existing SC1–SC40. Contamination latente si un futur SC omet de re-setter `mockNormalizeEmail`. Non causé par 9.A.2.d.
+- **SC44 : 4e appel `from('users')` non documenté (UPDATE parrainee_par → emptyResponse)** [`tests/unit/parrainage-symetrie.test.ts:1982–1999`] — Comportement correct (parraineeErr null), pattern identique aux SC meme_ip pre-existants. Cosmétique documentaire.
+- **SC47 : asymétrie assertion RPC vs SC46** [`tests/unit/parrainage-symetrie.test.ts:2108`] — SC46 vérifie `rpc.toHaveBeenCalledWith('try_consume_rate_limit', ...)`, SC47 non. Asymétrie consciente, Sentry assertion suffit. Renforcer si le RPC est refactoré.
+- **Marge branches threshold 0.38 pt** [`vitest.config.ts:57`] — 75.38 GHA → seuil 75. Décision F-Epic9-A2 actée. Surveiller à chaque story touchant `app/actions/parrainage.ts`.
+- **`then()` sans handler `reject` sur builder update** [`tests/unit/_lib/supabase-mock.ts:120`] — Pré-existant depuis 9.A.1 (insert ligne 106 idem). Aucun path de prod ne rejette via ce canal. À corriger si le thenable est consommé en context rejection.
+- **Isolation `mockNormalizeEmail` absente du describe C1** [`tests/unit/parrainage-symetrie.test.ts:1811`] — Pattern identique SC1–SC40. Vitest en série, risque nul à court terme.
+- **SC47 : `headers()` throw avant `rateLimitKey` — edge non testé** [`app/actions/parrainage.ts:348–352`] — Edge plateforme Next.js, non reproductible en unit test pur.
+- **SC43 : import dynamique `sendAdminParrainageFlag` dans le corps du test** [`tests/unit/parrainage-symetrie.test.ts:1912`] — `sendAdminParrainageFlag` n'est pas dans le bloc `vi.hoisted`. Clarification post-review : pattern nécessaire en l'état, refactorisation non triviale (hoisted + factory). Candidat future refacto si le bloc hoisted est remanié.
+
 ## Deferred from: code review of 9-a-3-suppression-alias-deprecated-sendparrainagebienvenuemarraine (2026-05-18)
 
 - **Worktrees orphelins avec callers résiduels sur `sendParrainageBienvenueMarraine`** — Branches d'agents parallèles sous `.claude/worktrees/` (dont `agent-a957eafdcab66961e`, `agent-ab40d6da01624aa13`) contenant encore des imports de l'alias supprimé. Hors périmètre 9.A.3. Risque uniquement si un worktree orphelin est rebasé ou mergé post-9.A.3 (build cassant). Action : vérifier que ces worktrees sont abandonnés avant tout merge concurrent.
