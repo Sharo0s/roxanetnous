@@ -646,3 +646,405 @@ describe('cron confirm-parrainages — récompense role-aware (8.A.3)', () => {
     expect(rpcCallsClaim).toHaveLength(0)
   })
 })
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// Story 9.A.2.b (F-Epic9-A2) — palier 2 coverage : detectBlacklist + paths edge
+// confirmParrainageOnSuccess. SC12-SC19 ciblent les branches non couvertes
+// identifiees par defer ligne 13 (`deferred-work.md`).
+// ═══════════════════════════════════════════════════════════════════════════════
+
+// ─── SC12-SC16 : detectBlacklist (helper interne, teste via createParrainageRelation)
+//
+// Pattern : detectBlacklist n'est PAS exporte. On le teste via createParrainageRelation
+// qui l'appelle apres l'INSERT initial. On observe le resultat (return + side effects)
+// pour valider les 5 branches : blocage meme_email direct, blocage meme_email P9
+// multi-filleules, flag meme_ip, no match, edge case email/IP vides.
+
+describe('detectBlacklist (via createParrainageRelation) — branches non couvertes 9.A.2.b', () => {
+  it('SC12 : blocage meme_email direct marraine↔filleule -> { ok:false, reason:"blacklist_meme_email" }', async () => {
+    // Forcer normalizeEmail a retourner la meme valeur normalisee pour les 2 emails.
+    mockNormalizeEmail.mockImplementation((email: string) =>
+      (email || '').toLowerCase().trim(),
+    )
+
+    const rpc = buildRpcAllowed()
+    const { fromMock } = createSupabaseFromMock({
+      parrainages_codes: [{ data: { user_id: PARRAIN_ACCOMPAGNE_ID }, error: null }],
+      subscriptions: [{ data: { status: 'active' }, error: null }],
+      users: [
+        { data: { role: 'accompagne', first_name: 'Alice' }, error: null }, // validateCode
+        { data: { role: 'accompagnant' }, error: null },                    // guard filleul
+        { data: { email: 'alice@ex.fr' }, error: null },                    // detectBlacklist : marraine email
+        { data: { first_name: 'Alice', last_name: 'M' }, error: null },     // loadNames marraine
+        { data: { first_name: 'Carl', last_name: 'F' }, error: null },      // loadNames filleule
+      ],
+      parrainages: [
+        { data: null, error: null },                          // idempotence check
+        { data: { id: PARRAINAGE_ID }, error: null },         // INSERT
+      ],
+    })
+    mockCreateClient.mockResolvedValue({ ...rpc, from: fromMock })
+
+    const result = await createParrainageRelation({
+      code: VALID_CODE,
+      filleuleId: FILLEUL_ACCOMPAGNANT_ID,
+      ipInscription: null,
+      filleuleEmail: 'alice@ex.fr', // meme email que marraine
+    })
+
+    expect(result).toEqual({ ok: false, reason: 'blacklist_meme_email' })
+  })
+
+  it('SC13 : blocage meme_email via P9 multi-filleules historiques', async () => {
+    mockNormalizeEmail.mockImplementation((email: string) =>
+      (email || '').toLowerCase().trim(),
+    )
+
+    const rpc = buildRpcAllowed()
+    const { fromMock } = createSupabaseFromMock({
+      parrainages_codes: [{ data: { user_id: PARRAIN_ACCOMPAGNE_ID }, error: null }],
+      subscriptions: [{ data: { status: 'active' }, error: null }],
+      users: [
+        { data: { role: 'accompagne', first_name: 'Alice' }, error: null }, // validateCode
+        { data: { role: 'accompagnant' }, error: null },                    // guard filleul
+        { data: { email: 'marraine-other@ex.fr' }, error: null },           // detectBlacklist : marraine email (different)
+        { data: [{ email: 'carl@ex.fr' }], error: null },                   // detectBlacklist : lookup other filleules emails matching
+        { data: { first_name: 'Alice', last_name: 'M' }, error: null },     // loadNames marraine
+        { data: { first_name: 'Carl', last_name: 'F' }, error: null },      // loadNames filleule
+      ],
+      parrainages: [
+        { data: null, error: null },                                                          // idempotence check
+        { data: { id: PARRAINAGE_ID }, error: null },                                         // INSERT
+        { data: [{ filleule_id: 'other-filleule-id' }], error: null },                        // detectBlacklist : otherFilleulesIds non vide
+      ],
+    })
+    mockCreateClient.mockResolvedValue({ ...rpc, from: fromMock })
+
+    const result = await createParrainageRelation({
+      code: VALID_CODE,
+      filleuleId: FILLEUL_ACCOMPAGNANT_ID,
+      ipInscription: null,
+      filleuleEmail: 'carl@ex.fr',
+    })
+
+    expect(result).toEqual({ ok: false, reason: 'blacklist_meme_email' })
+  })
+
+  it('SC14 : flag meme_ip detecte (autre parrainage meme marraine, meme IP) -> { ok: true } + flag', async () => {
+    mockNormalizeEmail.mockImplementation((email: string) =>
+      (email || '').toLowerCase().trim(),
+    )
+
+    const rpc = vi.fn((rpcName: string) => {
+      if (rpcName === 'try_consume_rate_limit') {
+        return {
+          select: vi.fn().mockReturnThis(),
+          maybeSingle: vi.fn().mockResolvedValue({ data: true, error: null }),
+        }
+      }
+      if (rpcName === 'merge_parrainage_flag_suspicion') {
+        return {
+          select: vi.fn().mockReturnThis(),
+          maybeSingle: vi.fn().mockResolvedValue({ data: { was_added: true }, error: null }),
+        }
+      }
+      return { select: vi.fn().mockReturnThis(), maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }) }
+    })
+
+    const { fromMock } = createSupabaseFromMock({
+      parrainages_codes: [{ data: { user_id: PARRAIN_ACCOMPAGNE_ID }, error: null }],
+      subscriptions: [{ data: { status: 'active' }, error: null }],
+      users: [
+        { data: { role: 'accompagne', first_name: 'Alice' }, error: null }, // validateCode
+        { data: { role: 'accompagnant' }, error: null },                    // guard filleul
+        { data: { email: 'marraine-only@ex.fr' }, error: null },            // detectBlacklist : marraine email (different)
+        { data: { first_name: 'Alice', last_name: 'M' }, error: null },     // loadNames marraine
+        { data: { first_name: 'Carl', last_name: 'F' }, error: null },      // loadNames filleule
+      ],
+      parrainages: [
+        { data: null, error: null },                                                          // idempotence check
+        { data: { id: PARRAINAGE_ID }, error: null },                                         // INSERT
+        { data: [], error: null },                                                            // otherFilleulesIds vide (skip P9)
+        { data: [{ id: 'parrainage-other-id' }], error: null },                               // ipMatches non vide
+      ],
+    })
+
+    mockCreateClient.mockResolvedValue({ rpc, from: fromMock })
+
+    const result = await createParrainageRelation({
+      code: VALID_CODE,
+      filleuleId: FILLEUL_ACCOMPAGNANT_ID,
+      ipInscription: '192.168.1.1',
+      filleuleEmail: 'carl@ex.fr',
+    })
+
+    expect(result).toEqual({
+      ok: true,
+      parrainageId: PARRAINAGE_ID,
+      marraineId: PARRAIN_ACCOMPAGNE_ID,
+    })
+    // Le merge RPC a ete appele (signal meme_ip declenche)
+    expect(rpc).toHaveBeenCalledWith('merge_parrainage_flag_suspicion', expect.objectContaining({
+      p_flag: 'meme_ip',
+    }))
+  })
+
+  it('SC15 : no match (return {}) -> { ok: true } sans flag ni blocage', async () => {
+    mockNormalizeEmail.mockImplementation((email: string) =>
+      (email || '').toLowerCase().trim(),
+    )
+
+    const rpc = buildRpcAllowed()
+    const { fromMock } = createSupabaseFromMock({
+      parrainages_codes: [{ data: { user_id: PARRAIN_ACCOMPAGNE_ID }, error: null }],
+      subscriptions: [{ data: { status: 'active' }, error: null }],
+      users: [
+        { data: { role: 'accompagne', first_name: 'Alice' }, error: null }, // validateCode
+        { data: { role: 'accompagnant' }, error: null },                    // guard filleul
+        { data: { email: 'marraine-different@ex.fr' }, error: null },       // detectBlacklist : marraine email different
+        { data: { first_name: 'Alice', last_name: 'M' }, error: null },     // loadNames marraine
+        { data: { first_name: 'Carl', last_name: 'F' }, error: null },      // loadNames filleule
+      ],
+      parrainages: [
+        { data: null, error: null },                                                          // idempotence check
+        { data: { id: PARRAINAGE_ID }, error: null },                                         // INSERT
+        { data: [], error: null },                                                            // otherFilleulesIds vide
+      ],
+    })
+    mockCreateClient.mockResolvedValue({ ...rpc, from: fromMock })
+
+    const result = await createParrainageRelation({
+      code: VALID_CODE,
+      filleuleId: FILLEUL_ACCOMPAGNANT_ID,
+      ipInscription: null, // pas d'IP -> skip bloc IP
+      filleuleEmail: 'carl@ex.fr',
+    })
+
+    expect(result).toEqual({
+      ok: true,
+      parrainageId: PARRAINAGE_ID,
+      marraineId: PARRAIN_ACCOMPAGNE_ID,
+    })
+  })
+
+  it('SC16 : edge cases filleuleEmail null + ipInscription empty -> { ok: true } sans Sentry', async () => {
+    // mockNormalizeEmail retourne '' pour input vide
+    mockNormalizeEmail.mockReturnValue('')
+
+    const rpc = buildRpcAllowed()
+    const { fromMock } = createSupabaseFromMock({
+      parrainages_codes: [{ data: { user_id: PARRAIN_ACCOMPAGNE_ID }, error: null }],
+      subscriptions: [{ data: { status: 'active' }, error: null }],
+      users: [
+        { data: { role: 'accompagne', first_name: 'Alice' }, error: null }, // validateCode
+        { data: { role: 'accompagnant' }, error: null },                    // guard filleul
+        { data: { first_name: 'Alice', last_name: 'M' }, error: null },     // loadNames marraine
+        { data: { first_name: 'Carl', last_name: 'F' }, error: null },      // loadNames filleule
+      ],
+      parrainages: [
+        { data: null, error: null },                                                          // idempotence check
+        { data: { id: PARRAINAGE_ID }, error: null },                                         // INSERT
+      ],
+    })
+    mockCreateClient.mockResolvedValue({ ...rpc, from: fromMock })
+
+    const result = await createParrainageRelation({
+      code: VALID_CODE,
+      filleuleId: FILLEUL_ACCOMPAGNANT_ID,
+      ipInscription: '   ', // whitespace -> skip bloc IP
+      filleuleEmail: null,  // null -> skip bloc email entier
+    })
+
+    expect(result).toEqual({
+      ok: true,
+      parrainageId: PARRAINAGE_ID,
+      marraineId: PARRAIN_ACCOMPAGNE_ID,
+    })
+    // Pas de Sentry critique (la branche skip ne capture rien)
+    expect(mockCaptureException).not.toHaveBeenCalled()
+  })
+})
+
+// ─── SC17-SC19 : confirmParrainageOnSuccess paths edge
+
+describe('confirmParrainageOnSuccess — paths edge non couverts 9.A.2.b', () => {
+  // Builder reutilise pour SC17/SC18/SC19. Configure Stripe + auth client par defaut.
+  function buildBaseSession() {
+    mockStripeRetrieve.mockResolvedValue({
+      status: 'complete',
+      payment_status: 'paid',
+      metadata: { parrainage_code: VALID_CODE, user_id: FILLEUL_ACCOMPAGNANT_ID },
+    })
+  }
+
+  function buildAuthClient() {
+    return {
+      auth: {
+        getUser: vi.fn().mockResolvedValue({
+          data: { user: { id: FILLEUL_ACCOMPAGNANT_ID } },
+        }),
+      },
+    }
+  }
+
+  it('SC17 : parrainRoleConfirm inattendu (role=admin) -> marraine_no_longer_validated + Sentry signal "marraine-unexpected-role-at-confirm"', async () => {
+    buildBaseSession()
+
+    const { fromMock: adminFrom } = createSupabaseFromMock({
+      // 1 : parrainage row (select.eq.eq.order.limit.maybeSingle)
+      parrainages: [
+        {
+          data: {
+            id: PARRAINAGE_ID,
+            statut: 'inscrite',
+            marraine_id: PARRAIN_ACCOMPAGNE_ID,
+            filleule_id: FILLEUL_ACCOMPAGNANT_ID,
+          },
+          error: null,
+        },
+      ],
+      // 2 : users(role) -> role inattendu (ni accompagne ni accompagnant)
+      users: [{ data: { role: 'admin' }, error: null }],
+    })
+
+    mockCreateClient
+      .mockResolvedValueOnce(buildAuthClient())
+      .mockResolvedValue({ from: adminFrom })
+
+    const result = await confirmParrainageOnSuccess(SESSION_ID)
+
+    expect(result).toEqual({ ok: false, reason: 'marraine_no_longer_validated' })
+    expect(mockCaptureMessage).toHaveBeenCalledWith(
+      'parrainage marraine unexpected role at confirm',
+      expect.objectContaining({
+        level: 'warning',
+        tags: expect.objectContaining({ signal: 'marraine-unexpected-role-at-confirm' }),
+        extra: expect.objectContaining({
+          parrainageId: PARRAINAGE_ID,
+          marraineId: PARRAIN_ACCOMPAGNE_ID,
+          roleParrain: 'admin',
+        }),
+      }),
+    )
+  })
+
+  it('SC18 : validation_status_skipped (filleule en statut "refuse") -> Sentry warning + admin_actions_log "parrainage_validation_skipped"', async () => {
+    buildBaseSession()
+
+    const { fromMock: adminFrom, capturedInserts } = createSupabaseFromMock({
+      parrainages: [
+        {
+          data: {
+            id: PARRAINAGE_ID,
+            statut: 'inscrite',
+            marraine_id: PARRAIN_ACCOMPAGNE_ID,
+            filleule_id: FILLEUL_ACCOMPAGNANT_ID,
+          },
+          error: null,
+        },
+        { data: [{ id: PARRAINAGE_ID }], error: null }, // update.select -> lockedRows
+      ],
+      users: [
+        { data: { role: 'accompagne' }, error: null },                       // role parrain
+        { data: { email: 'parrain@ex.fr', first_name: 'P' }, error: null },  // marraine email
+        { data: { email: 'filleul@ex.fr', first_name: 'F' }, error: null },  // filleule email
+      ],
+      subscriptions: [{ data: { status: 'active' }, error: null }],
+      accompagnants_profiles: [
+        { data: { id: 'profile-filleule-id' }, error: null },                // filleule profile
+        { data: [], error: null },                                           // validationUpdated vide (filleule pas en_attente)
+        { data: { validation_status: 'refuse' }, error: null },              // currentProfile : refuse (pas valide)
+      ],
+      admin_actions_log: [],
+    })
+
+    mockCreateClient
+      .mockResolvedValueOnce(buildAuthClient())
+      .mockResolvedValue({ from: adminFrom })
+
+    const result = await confirmParrainageOnSuccess(SESSION_ID)
+
+    expect(result).toEqual({ ok: true })
+    expect(mockCaptureMessage).toHaveBeenCalledWith(
+      'parrainage validation status skipped',
+      expect.objectContaining({
+        level: 'warning',
+        tags: expect.objectContaining({ signal: 'validation-status-skipped' }),
+        extra: expect.objectContaining({
+          user_id: FILLEUL_ACCOMPAGNANT_ID,
+          current_status: 'refuse',
+        }),
+      }),
+    )
+    const adminLogs = (capturedInserts.admin_actions_log ?? []) as Array<Record<string, unknown>>
+    const skippedLog = adminLogs.find((l) => l.action_type === 'parrainage_validation_skipped')
+    expect(skippedLog).toBeDefined()
+    expect(skippedLog).toMatchObject({
+      action_type: 'parrainage_validation_skipped',
+      target_type: 'user',
+      target_id: FILLEUL_ACCOMPAGNANT_ID,
+      details: { current_status: 'refuse' },
+    })
+  })
+
+  it('SC19 : generate_code_failed (mock retourne { error }) -> Sentry error + admin_actions_log "parrainage_code_generation_failed"', async () => {
+    buildBaseSession()
+
+    // Forcer generateCodeForUserSystem a echouer
+    mockGenerateCodeForUserSystem.mockResolvedValueOnce({ error: 'db_constraint_violation' })
+
+    const { fromMock: adminFrom, capturedInserts } = createSupabaseFromMock({
+      parrainages: [
+        {
+          data: {
+            id: PARRAINAGE_ID,
+            statut: 'inscrite',
+            marraine_id: PARRAIN_ACCOMPAGNE_ID,
+            filleule_id: FILLEUL_ACCOMPAGNANT_ID,
+          },
+          error: null,
+        },
+        { data: [{ id: PARRAINAGE_ID }], error: null }, // update.select -> lockedRows
+      ],
+      users: [
+        { data: { role: 'accompagne' }, error: null },                       // role parrain
+        { data: { email: 'parrain@ex.fr', first_name: 'P' }, error: null },  // marraine email
+        { data: { email: 'filleul@ex.fr', first_name: 'F' }, error: null },  // filleule email
+      ],
+      subscriptions: [{ data: { status: 'active' }, error: null }],
+      accompagnants_profiles: [
+        { data: { id: 'profile-filleule-id' }, error: null },                // filleule profile
+        { data: [{ id: 'profile-filleule-id' }], error: null },              // validationUpdated OK
+      ],
+      admin_actions_log: [],
+    })
+
+    mockCreateClient
+      .mockResolvedValueOnce(buildAuthClient())
+      .mockResolvedValue({ from: adminFrom })
+
+    const result = await confirmParrainageOnSuccess(SESSION_ID)
+
+    expect(result).toEqual({ ok: true })
+    expect(mockCaptureMessage).toHaveBeenCalledWith(
+      'parrainage generate code failed',
+      expect.objectContaining({
+        level: 'error',
+        tags: expect.objectContaining({ signal: 'generate-code-failed' }),
+        extra: expect.objectContaining({
+          user_id: FILLEUL_ACCOMPAGNANT_ID,
+          reason: 'db_constraint_violation',
+        }),
+      }),
+    )
+    const adminLogs = (capturedInserts.admin_actions_log ?? []) as Array<Record<string, unknown>>
+    const codeFailLog = adminLogs.find((l) => l.action_type === 'parrainage_code_generation_failed')
+    expect(codeFailLog).toBeDefined()
+    expect(codeFailLog).toMatchObject({
+      action_type: 'parrainage_code_generation_failed',
+      target_type: 'user',
+      target_id: FILLEUL_ACCOMPAGNANT_ID,
+      details: { reason: 'db_constraint_violation' },
+    })
+  })
+})

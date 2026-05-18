@@ -10,9 +10,15 @@
 ## Deferred from: implementation of 9-a-2-coverage-parrainage-85-percent-gha-artefact (2026-05-18)
 
 - **Couverture `app/actions/parrainage.ts` cumulee unit+integration = ~50%** (1er run GHA #26005309649 sur PR #8 : lines 49.48 / branches 41.92 / functions 64.28 / statements 48.14). Option B evolutive retenue (DECISIONS.md F-Epic9-A2) : seuil palier 1 = chiffres courants arrondis au point inferieur (lines 49 / branches 41 / functions 64 / statements 48). Stories follow-up :
-  - **9.A.2.b** (palier 2 -> 65%) : combler les branches `detectBlacklist` (36-101) + `confirmParrainageOnSuccess` paths role inattendu / validation_status_skipped / generate_code_failed (1031-1083). Estimation ~6-8 SC unit. Pre-requis : helper `createSupabaseFromMock` 9.A.1 deja en place.
-  - **9.A.2.c** (palier 3 -> 85% cible originale) : combler les branches restantes `createParrainageRelation` self_referral / 23505 / blacklist_other / meme_ip (524-831) + `revokeFilleuleValidation*` (108-235). Estimation ~5-7 SC unit. Pre-requis : 9.A.2.b livree.
-  - Total estime pour atteindre 85% : ~12-15 SC unit dedies, repartis sur 2 stories pour rester sous le seuil ~0,5-1j-dev par story.
+  - **[Solde 9.A.2.b - 2026-05-18 - PR #13 / run GHA #26037648833]** **9.A.2.b** (palier 2 -> 65%) : combler les branches `detectBlacklist` (36-101) + `confirmParrainageOnSuccess` paths role inattendu / validation_status_skipped / generate_code_failed (1031-1083). 8 SC unit livres (SC12-SC19). Cumul GHA = lines **67.47** / branches **59.61** / functions **92.85** / statements **65.65**. Palier 2 atteint sur 3/4 indicateurs ; branches a 59.61 -> Option B-bis : palier 2 effectif = chiffres mesures arrondis (lines 67 / branches 59 / functions 92 / statements 65). Garde-fou CI palier 2 actif (`vitest.config.ts > thresholds`).
+  - **9.A.2.c** (palier 3 -> 85% cible originale) : combler les branches restantes. Pre-requis : 9.A.2.b livree (OK 2026-05-18). Branches RESTANTES non couvertes (post-9.A.2.b) :
+    - `createParrainageRelation` self_referral (l. 544) + idempotence 23505 retry (l. 634-650) + blacklist_other (l. 612) + meme_ip RPC merge edge cases (l. 770-823) -- ~3-4 SC.
+    - `revokeFilleuleValidation` (l. 108-180) + `revokeFilleuleValidationByAdmin` (l. 182-235) -- 2 fonctions internes, callers admin-parrainages.ts + webhooks/stripe -- ~2-3 SC.
+    - `detectBlacklist` branches partielles non couvertes (lookups error paths, multi-filleules edge cases) -- ~1-2 SC.
+    - `validateCode` accompagnant `accompagnants_profiles` lookup edge cases (l. ~460) -- ~1 SC.
+    - `generateCodeForUser` retry 23505 collision keyspace 31^8 (l. 237-303) -- **NON COUVRABLE sans mock artificiel** (defer 8.A.1 F11 "non exerce en pratique"). Documenter hors-cible 9.A.2.c.
+    - Gap branches : 59.61 -> 85 = +25 pts = ~5-7 SC unit dedies.
+    - Total estime 9.A.2.c : ~7-10 SC unit, ~0,5-1j-dev.
 
 ## Deferred from: code review of 9-a-1-refonte-mocks-supabase-frommock-discriminants-par-table (2026-05-17)
 
