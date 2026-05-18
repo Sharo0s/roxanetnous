@@ -1,6 +1,6 @@
 # Story 9.A.3 : Supprimer alias deprecated `sendParrainageBienvenueMarraine`
 
-Status: review
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -193,3 +193,10 @@ claude-opus-4-7[1m]
 ## DoD a11y
 
 Story sans impact UI = **N/A** (cf. AC15, règle CLAUDE.md projet : checklist a11y obligatoire pour stories à impact UI uniquement). La suppression d'un alias TypeScript serveur n'affecte aucun composant React, aucun DOM rendu, aucune interaction clavier. Aucun run `npm run a11y:axe:check` requis (mais `lint:a11y-check` doit rester vert en sécurité — cf. AC12).
+
+### Review Findings
+
+- [x] [Review][Defer] Worktrees orphelins avec callers résiduels sur `sendParrainageBienvenueMarraine` [.claude/worktrees/] — deferred, pre-existing. Branches d'agents parallèles inactifs hors périmètre 9.A.3 ; risque uniquement en cas de rebase concurrent d'un worktree orphelin.
+- [x] [Review][Defer] `deferred-work.md` : référence de ligne `lib/emails.ts:596` périmée + description item F4 cite encore l'ancien nom supprimé [`_bmad-output/implementation-artifacts/deferred-work.md`] — deferred, pre-existing. Cosmétique documentaire, non bloquant.
+- [x] [Review][Defer] Type log `parrainage_bienvenue` partagé par `sendParrainageBienvenueParrain` et `sendParrainageBienvenueAccompagne` — ambiguïté analytique pré-existante [`lib/emails.ts`] — deferred, pre-existing. Dette tracée, candidat Epic 9.D ou story dédiée.
+- [x] [Review][Defer] Baseline lint indiquée "192 warnings" dans AC11 mais mesure réelle = 193 — dérive pré-existante documentée dans sprint-status, aucune régression 9.A.3 — deferred, pre-existing.
