@@ -264,9 +264,11 @@ test('@matching SC2 -- notification email matching + idempotence notifications_l
     .first()
     .fill('e2e-test-match-sc2 description annonce matching accompagnant Rennes Personnes agees')
 
-  // CityAutocomplete : 2 inputs (ville + code postal). Les renseigner directement.
-  const villeInput = page.getByLabel('Ville', { exact: false })
-  const cpInput = page.getByLabel('Code postal', { exact: false })
+  // CityAutocomplete : 2 inputs (ville + code postal). Les <label> n ont pas d
+  // attribut htmlFor (dette a11y latente), donc page.getByLabel echoue. On cible
+  // via les placeholders stables (components/ui/city-autocomplete.tsx:154,174).
+  const villeInput = page.locator('input[placeholder="Paris"]')
+  const cpInput = page.locator('input[placeholder="75001"]')
   await villeInput.fill(VILLE)
   await cpInput.fill(CODE_POSTAL)
 
@@ -304,8 +306,8 @@ test('@matching SC2 -- notification email matching + idempotence notifications_l
     .locator('textarea')
     .first()
     .fill('e2e-test-match-sc2-bis description duplicate hour-bucket')
-  await page.getByLabel('Ville', { exact: false }).fill(VILLE)
-  await page.getByLabel('Code postal', { exact: false }).fill(CODE_POSTAL)
+  await page.locator('input[placeholder="Paris"]').fill(VILLE)
+  await page.locator('input[placeholder="75001"]').fill(CODE_POSTAL)
   await page.getByRole('button', { name: /Publier l['']annonce/i }).click()
   await expect(page).toHaveURL(/\/accompagnant\/annonces($|\/)/, { timeout: 20_000 })
 

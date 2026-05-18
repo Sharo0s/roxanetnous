@@ -36,6 +36,7 @@
 
 import { test, expect } from '@playwright/test'
 import pg from 'pg'
+import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 import { loginAs } from './_lib/session'
 import { resetEphemeralRows, assertLocalPgUrl } from './_lib/fixtures'
 
@@ -43,6 +44,9 @@ const { Client } = pg
 
 const PG_URL =
   process.env.SUPABASE_DB_URL ?? 'postgresql://postgres:postgres@localhost:54322/postgres'
+
+const SUPABASE_URL = process.env.SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL ?? ''
+const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY ?? ''
 
 // Seeds permanents (ne jamais supprimer).
 const SEED_ADMIN_ID = '00000000-0000-0000-0000-000000000001'
@@ -83,11 +87,92 @@ async function cleanupEphemeralRgpdUsers(): Promise<void> {
     // Suppression users ephemeres (cascades gerent les profils, subscriptions, codes)
     await client.query(`DELETE FROM public.users WHERE email LIKE 'e2e-rgpd-%'`)
   })
+
+  // Defensif : supprimer aussi les rows auth.users ephemeres (la cascade
+  // public.users -> auth.users ne se declenche pas dans ce sens ; et le contrat
+  // FK `public.users.id REFERENCES auth.users(id)` peut nous bloquer au prochain
+  // INSERT si auth.users a une row residuelle d un run precedent).
+  if (SUPABASE_URL && SERVICE_ROLE_KEY) {
+    const supa = createSupabaseClient(SUPABASE_URL, SERVICE_ROLE_KEY, {
+      auth: { autoRefreshToken: false, persistSession: false },
+    })
+    for (const id of [EPHEMERAL_ACCOMPAGNANT_ID, EPHEMERAL_ACCOMPAGNE_ID, EPHEMERAL_ADMIN_ID]) {
+      try {
+        await supa.auth.admin.deleteUser(id)
+      } catch {
+        // already deleted -- ignore
+      }
+    }
+  }
+}
+
+// Provisionne les 3 rows auth.users requises par les FK `public.users.id
+// REFERENCES auth.users(id)` -- les INSERTs directs SC1/SC2/SC3 sur public.users
+// echoueraient sinon avec users_id_fkey violation. Le trigger handle_new_user
+// cree automatiquement la row public.users + accompagnants_profiles ou
+// accompagnes_profiles selon le role -- ce qui est compatible avec les
+// ON CONFLICT (id) DO NOTHING / UPDATE des SC.
+async function provisionEphemeralAuthUsers(): Promise<void> {
+  if (!SUPABASE_URL || !SERVICE_ROLE_KEY) return
+  const supa = createSupabaseClient(SUPABASE_URL, SERVICE_ROLE_KEY, {
+    auth: { autoRefreshToken: false, persistSession: false },
+  })
+  const provisions = [
+    { id: EPHEMERAL_ACCOMPAGNANT_ID, email: EMAIL_ACCOMPAGNANT, role: 'accompagnant', last_name: 'RGPDAcc' },
+    { id: EPHEMERAL_ACCOMPAGNE_ID, email: EMAIL_ACCOMPAGNE, role: 'accompagne', last_name: 'RGPDAcc2' },
+    { id: EPHEMERAL_ADMIN_ID, email: EMAIL_ADMIN, role: 'admin', last_name: 'RGPDAdmin' },
+  ] as const
+  for (const p of provisions) {
+    const { error } = await supa.auth.admin.createUser({
+      id: p.id,
+      email: p.email,
+      password: 'e2e-rgpd-pwd-1234',
+      email_confirm: true,
+      user_metadata: { role: p.role, first_name: 'E2E', last_name: p.last_name },
+    })
+    if (error && !error.message?.includes('already') && !error.message?.includes('duplicate')) {
+      throw new Error(`provisionEphemeralAuthUsers(${p.email}) echec : ${error.message}`)
+    }
+  }
+
+  // Le trigger handle_new_user (supabase/migrations/20260513194300:259-263) ne
+  // supporte que role IN ('accompagnant', 'accompagne') -- 'admin' fallback en
+  // 'accompagne'. On force le bon role + nettoie les profils accompagnes crees
+  // a tort par le trigger pour l admin (FK CASCADE prendra le relais).
+  await withPg(async (client) => {
+    await client.query(
+      `UPDATE public.users SET role = 'accompagnant'::public.user_role,
+         first_name = 'E2E', last_name = 'RGPDAcc' WHERE id = $1`,
+      [EPHEMERAL_ACCOMPAGNANT_ID],
+    )
+    // Si trigger a cree accompagnes_profiles a tort (role='accompagnant' n est
+    // pas dans la whitelist du trigger ancien runs Supabase --> safety).
+    await client.query(
+      `DELETE FROM public.accompagnes_profiles WHERE user_id = $1`,
+      [EPHEMERAL_ACCOMPAGNANT_ID],
+    )
+    await client.query(
+      `INSERT INTO public.accompagnants_profiles (user_id, validation_status)
+       VALUES ($1, 'a_completer') ON CONFLICT (user_id) DO NOTHING`,
+      [EPHEMERAL_ACCOMPAGNANT_ID],
+    )
+    // EPHEMERAL_ADMIN_ID : trigger a force accompagne -> reposer role + nettoyer.
+    await client.query(
+      `UPDATE public.users SET role = 'admin'::public.user_role,
+         first_name = 'E2E', last_name = 'RGPDAdmin' WHERE id = $1`,
+      [EPHEMERAL_ADMIN_ID],
+    )
+    await client.query(
+      `DELETE FROM public.accompagnes_profiles WHERE user_id = $1`,
+      [EPHEMERAL_ADMIN_ID],
+    )
+  })
 }
 
 test.beforeAll(async () => {
   await resetEphemeralRows()
   await cleanupEphemeralRgpdUsers()
+  await provisionEphemeralAuthUsers()
 })
 
 test.afterAll(async () => {
