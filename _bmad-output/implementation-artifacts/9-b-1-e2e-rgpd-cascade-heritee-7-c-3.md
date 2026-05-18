@@ -1,6 +1,6 @@
 # Story 9.B.1 : E2E RGPD cascade (suppression compte 3 rôles) — héritée 7.C.3
 
-Status: ready-for-dev
+Status: review
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -82,13 +82,13 @@ so that toute régression dans les cascades BDD RGPD (tables orphelines après s
   - [x] T3.3 `npm run test:unit` exit 0 (aucun impact tests unit). -- **Done** : 133/133 tests verts (0 regression).
   - [x] T3.4 `npm run check:no-direct-notifications-log-insert` + `check:as-any-global` + `check:oracle-paywall` exit 0. -- **Done** : 3 scripts exit 0.
 
-- [ ] **T4 Push + 2 runs GHA verts consécutifs** (AC6)
-  - [ ] T4.1 Ouvrir PR sur branche `story/9-b-1-e2e-rgpd-cascade`.
-  - [ ] T4.2 Confirmer 2 runs GHA `E2E Tests` verts (pattern stabilisation 7.C.1).
+- [x] **T4 Push + 2 runs GHA verts consécutifs** (AC6)
+  - [x] T4.1 Ouvrir PR sur branche `story/9-b-1-e2e-rgpd-cascade`. -- **Done** : push sur branche `story/9-a-2-d-hybride` (PR #15, commit c48757f). Story 9.B.1 portée sur la même PR que 9.A.2.d (décision utilisateur).
+  - [x] T4.2 Confirmer 2 runs GHA `E2E Tests` verts (pattern stabilisation 7.C.1). -- **Done** : runs #26048059745 + #26047699987 verts.
 
 - [x] **T5 Documentation + sprint status** (AC1)
   - [x] T5.1 Mettre à jour `tests/e2e/README.md` : ajouter mention de `rgpd-cascade.spec.ts` dans la liste des specs + tag `@rgpd-cascade`. -- **Done** : mention ajoutée avec 3 SC + tag `@rgpd-cascade`.
-  - [ ] T5.2 `sprint-status.yaml` : `9-b-1-...` `in-progress` → `review` post-validation. -- En attente T4.
+  - [x] T5.2 `sprint-status.yaml` : `9-b-1-...` `in-progress` → `review` post-validation. -- **Done** : transition in-progress → review appliquée.
 
 ## Dev Notes
 
@@ -271,5 +271,7 @@ N/A — story 100% tests E2E, aucun changement visuel ou interactif.
 ## Change Log
 
 - 2026-05-18 : Création story 9.B.1 `ready-for-dev` via `bmad-create-story` (claude-sonnet-4-6). Héritée 7.C.3, infra Playwright déjà en place depuis 7.C.1/7.C.2/8.D.1. Cascades BDD confirmées par grep migrations. Stratégie BDD directe (`withPg` pattern 8.D.1).
+
+- 2026-05-18 : 2 runs GHA `E2E Tests` verts (#26048059745 + #26047699987) sur PR #15. Story passée `review`. T4+T5 complétés. AC1-AC7 satisfaits.
 
 - 2026-05-18 : Implémentation T1-T3+T5.1 via `bmad-dev-story` (claude-sonnet-4-6). Spec `tests/e2e/rgpd-cascade.spec.ts` créée (324 lignes) : 3 SC tags `@rgpd-cascade` — SC1 accompagnant (5 asserts CASCADE+SET NULL), SC2 accompagné (5 asserts + flag 8.A.0 parrainages_codes), SC3 admin refus UI. Analyse migrations T1 : 7 FKs confirmées (5 CASCADE + 2 SET NULL). Stratégie : BDD directe SC1/SC2 + UI SC3 (loginAs admin + DeleteUserButton). UUIDs éphémères statiques (`00000000-0000-0000-0000-e2e9000000{01-03}`), cleanup via email LIKE 'e2e-rgpd-%'. DoD CI vert : tsc 0, lint 193/0, lint:a11y-check 155, test:unit 133/133, 3 scripts checks 0. T4 (push + 2 runs GHA verts) en attente. Status `ready-for-dev` → `in-progress`.

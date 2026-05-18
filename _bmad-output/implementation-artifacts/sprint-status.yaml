@@ -407,7 +407,7 @@ development_status:
   9-a-2-d-palier-3-final-ou-acceptation-palier-effectif: done
 
   # Mini-epic 9.B - Couverture E2E manquante (2 stories, heritees 7.C)
-  9-b-1-e2e-rgpd-cascade-heritee-7-c-3: in-progress
+  9-b-1-e2e-rgpd-cascade-heritee-7-c-3: review
   9-b-2-e2e-matching-heritee-7-c-4: backlog
 
   # Mini-epic 9.C - Seed staging + validations manuelles UI (3 stories)
