@@ -1048,3 +1048,19 @@ Heritage 9.A.7 (Option B-like : fix fixtures plutot que refonte code), F-Epic8-A
 - Items AI-Epic7-D1 + AI-Epic7-D2 prefixes `[Solde 9.A.6 - 2026-05-18]` dans `epic-8-retro-2026-05-17.md` lignes 155-156.
 
 **Source** : `_bmad-output/implementation-artifacts/audit-sentry-epic-7-8-2026-05-18.md` (rapport detaille), `_bmad-output/implementation-artifacts/epic-8-retro-2026-05-17.md:60-62,155-156`, `_bmad-output/planning-artifacts/epic-9.md:203-220`, MCP Sentry queries 2026-05-18 (15 signaux), issue Sentry `ROXANETNOUS-7` (`https://roxanetnous.sentry.io/issues/ROXANETNOUS-7`), heritage `DECISIONS.md` F-Epic7-A4 (RPC SECURITY DEFINER + check `is_admin()` upfront).
+
+## F-Epic9-A8 -- hygiene env vars Vercel - SUPABASE_SERVICE_ROLE_KEY + NEXT_PUBLIC_SUPABASE_URL scopees all Preview + bug CLI v54 -- 2026-05-18
+
+**Decision** : promouvoir au scope **all Preview branches** (`gitBranch=null`) les env vars Supabase historiquement scopees a la branche `story/9-a-6-audit-sentry-epic-7-8` :
+- `SUPABASE_SERVICE_ROLE_KEY` (id `BjpMYqqzOSwvenB9`, type=sensitive)
+- `NEXT_PUBLIC_SUPABASE_URL` (id `1Hcq8FcGbPqYJNSz`, type=encrypted)
+
+Cleanup associe : suppression des overrides branche (`BnSigPw679WwCk3Q` pour SRK + `SRe1U8NbNpQaHsLe` pour URL + `kAeLONx9UkpNrhzJ` pour ANON_KEY qui avait deja un fallback Preview-all et qui peut donc etre supprime aussi pour proprete -- non bloquant). `NEXT_PUBLIC_SUPABASE_ANON_KEY` deja Preview-all (id `gAGSqhhneSwa87QF`) intacte.
+
+**Contexte** : decouverte 2026-05-18 pendant la livraison story 9.A.6 PR #11 (3 deploys Vercel echec successifs sur `Error: supabaseKey is required` au prerender SSG de `/`). Cause racine : `app/page.tsx:15` instancie `await createClient({ serviceRole: true })` au moment du prerender, qui lit `process.env.SUPABASE_SERVICE_ROLE_KEY` undefined en Preview. Fix temporaire 9.A.6 : ajout d'overrides scopes a la branche via API REST Vercel (workaround bug CLI v54, cf. ci-dessous). Story 9.A.8 cadree initialement pour SRK seulement ; **decouverte mid-exec** que `NEXT_PUBLIC_SUPABASE_URL` souffrait du meme trou (build test branch `test/9-a-8-srk-validation` echec `NEXT_PUBLIC_SUPABASE_URL is not set`). Scope etendu mid-story pour solder les 2 trous simultanement.
+
+**Bug CLI Vercel v54.0.0** : `vercel env add --value <val>` (et stdin pipe + heredoc) en mode "agent detected" (auto-active quand un agent CLI invoque la commande) stocke silencieusement `""` (chaine vide) au lieu de la valeur passee. 3 tentatives reproduites 2026-05-18 (story 9.A.6 livraison). La CLI affiche `"Added Environment Variable X to Project Y"` mais `vercel env pull` retourne `""`. **Workaround** : appel direct `POST /v10/projects/{id}/env` via curl + token extrait depuis `~/Library/Application Support/com.vercel.cli/auth.json`. Pattern reutilise integralement story 9.A.8 (2 POST + 1 DELETE + audit GET). A reporter a Vercel (issue GitHub `vercel/vercel`) hors-scope cette story.
+
+**Impact** : Toute future PR Preview qui prerender `/` build OK sans intervention manuelle ni override branche. Solde la dette latente decouverte 9.A.6 + previens repetition systematique du bug sur chaque nouvelle branche. Story 100% infra/gouvernance (0 fichier source modifie, 0 migration BDD, 0 nouveau parcours UI).
+
+**Source** : `_bmad-output/implementation-artifacts/9-a-8-supabase-service-role-key-all-preview.md` (Change Log + Dev Agent Record T1-T5), `_bmad-output/implementation-artifacts/9-a-6-audit-sentry-7j-post-deploy-epic-7-8.md` (Change Log section deploys echec), `app/page.tsx:15`, audit API REST Vercel 2026-05-18 (snapshot pre/post-fix), memoire `project_rotation_secrets_2026_05_16` (SRK reste JWT legacy 219 chars apres rotation 2026-05-16, anon migre `sb_publishable_*`).
