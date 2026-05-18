@@ -592,11 +592,8 @@ export async function sendParrainageBienvenueParrain(params: {
   }
 }
 
-/** @deprecated Epic 8 -- supprimer prochaine release (Epic 9). Voir _bmad-output/implementation-artifacts/deferred-work.md */
-export const sendParrainageBienvenueMarraine = sendParrainageBienvenueParrain
-
 // Story 8.A.1 : variante accompagne du mail "bienvenue parrain". Symetrique de
-// sendParrainageBienvenueMarraine mais le destinataire est un accompagne dont
+// sendParrainageBienvenueParrain mais le destinataire est un accompagne dont
 // l'abonnement vient de passer en active/trialing (1ere fois). Wording masculin
 // neutre obligatoire (regle CLAUDE.md durcie : "parrain"/"filleul",
 // jamais "marraine"/"filleule"). CTA vers /accompagne/parrainage (page livree 8.B.1).

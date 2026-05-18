@@ -170,7 +170,6 @@ vi.mock('@/lib/emails', () => ({
   sendPlanChangeEmail: vi.fn().mockResolvedValue(undefined),
   sendRenewalReminderEmail: vi.fn().mockResolvedValue(undefined),
   sendParrainageBienvenueParrain: vi.fn().mockResolvedValue(undefined),
-  sendParrainageBienvenueMarraine: vi.fn().mockResolvedValue(undefined),
   sendParrainageFilleuleConfirmation: vi.fn().mockResolvedValue(undefined),
   sendParrainageRecompense: vi.fn().mockResolvedValue(undefined),
   sendAdminParrainageFlag: vi.fn().mockResolvedValue(undefined),
