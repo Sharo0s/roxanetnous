@@ -1799,3 +1799,337 @@ describe('generateCodeForUser — branches 9.A.2.c', () => {
     expect(result).toEqual({ error: 'Erreur lors de la création du code de parrainage.' })
   })
 })
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// Story 9.A.2.d (F-Epic9-A2 Option hybride C1+C3)
+// SC41-SC47 : combler branches restantes app/actions/parrainage.ts -> palier 3
+// effectif final. Categorie C1 (error paths Sentry createParrainageRelation,
+// SC41-SC45) + Categorie C3 (validateCode rate-limit, SC46-SC47). C2 NO-GO
+// cosmetique. C4 HORS-CIBLE structurel (retry 23505 keyspace 31^8).
+// ═══════════════════════════════════════════════════════════════════════════════
+
+describe('createParrainageRelation error paths Sentry — 9.A.2.d (C1)', () => {
+  it('SC41 : blocErr UPDATE parrainages statut=bloque -> Sentry signup-update-bloque + return blacklist_meme_email', async () => {
+    // Path blocage meme_email : detectBlacklist retourne { blocage: 'meme_email' }
+    // via lookup email marraine identique. UPDATE parrainages statut=bloque echoue
+    // (postgres error) -> Sentry.captureException signal=signup-update-bloque
+    // severity=critical mais return continue best-effort avec reason=blacklist_meme_email.
+    mockNormalizeEmail.mockImplementation((email: string) =>
+      (email || '').toLowerCase().trim(),
+    )
+
+    const rpc = buildRpcAllowed()
+    const { fromMock } = createSupabaseFromMock({
+      parrainages_codes: [{ data: { user_id: PARRAIN_ACCOMPAGNE_ID }, error: null }],
+      subscriptions: [{ data: { status: 'active' }, error: null }],
+      users: [
+        { data: { role: 'accompagne', first_name: 'Alice' }, error: null }, // validateCode
+        { data: { role: 'accompagnant' }, error: null },                    // guard filleul
+        { data: { email: 'alice@ex.fr' }, error: null },                    // detectBlacklist marraine email = filleule email
+        { data: { first_name: 'Alice', last_name: 'M' }, error: null },     // loadNames marraine
+        { data: { first_name: 'Carl', last_name: 'F' }, error: null },      // loadNames filleule
+      ],
+      parrainages: [
+        { data: null, error: null },                                                            // idempotence : pas d'existing
+        { data: { id: PARRAINAGE_ID }, error: null },                                           // INSERT initial
+        { data: null, error: { code: '23502', message: 'not null violation update bloque' } }, // UPDATE statut=bloque : ERROR
+      ],
+    })
+    mockCreateClient.mockResolvedValue({ ...rpc, from: fromMock })
+
+    const result = await createParrainageRelation({
+      code: VALID_CODE,
+      filleuleId: FILLEUL_ACCOMPAGNANT_ID,
+      ipInscription: null,
+      filleuleEmail: 'alice@ex.fr',
+    })
+
+    expect(result).toEqual({ ok: false, reason: 'blacklist_meme_email' })
+    expect(mockCaptureException).toHaveBeenCalledWith(
+      expect.objectContaining({ code: '23502' }),
+      expect.objectContaining({
+        tags: expect.objectContaining({ signal: 'signup-update-bloque' }),
+        extra: expect.objectContaining({ parrainageId: PARRAINAGE_ID, raison: 'meme_email' }),
+      }),
+    )
+  })
+
+  it('SC42 : logErr INSERT admin_actions_log path meme_email -> Sentry signup-log-bloque', async () => {
+    // Path blocage meme_email : UPDATE statut=bloque OK, INSERT admin_actions_log
+    // echoue -> Sentry.captureException signal=signup-log-bloque severity=critical.
+    // Return continue avec reason=blacklist_meme_email (best-effort observabilite).
+    mockNormalizeEmail.mockImplementation((email: string) =>
+      (email || '').toLowerCase().trim(),
+    )
+
+    const rpc = buildRpcAllowed()
+    const { fromMock } = createSupabaseFromMock({
+      parrainages_codes: [{ data: { user_id: PARRAIN_ACCOMPAGNE_ID }, error: null }],
+      subscriptions: [{ data: { status: 'active' }, error: null }],
+      users: [
+        { data: { role: 'accompagne', first_name: 'Alice' }, error: null },
+        { data: { role: 'accompagnant' }, error: null },
+        { data: { email: 'alice@ex.fr' }, error: null },                    // detectBlacklist marraine
+        { data: { first_name: 'Alice', last_name: 'M' }, error: null },     // loadNames marraine
+        { data: { first_name: 'Carl', last_name: 'F' }, error: null },      // loadNames filleule
+      ],
+      parrainages: [
+        { data: null, error: null },                                          // idempotence
+        { data: { id: PARRAINAGE_ID }, error: null },                         // INSERT initial
+        { data: null, error: null },                                          // UPDATE bloque OK
+      ],
+      admin_actions_log: [
+        { data: null, error: { code: '23502', message: 'admin_actions_log target_id NULL' } }, // INSERT : ERROR
+      ],
+    })
+    mockCreateClient.mockResolvedValue({ ...rpc, from: fromMock })
+
+    const result = await createParrainageRelation({
+      code: VALID_CODE,
+      filleuleId: FILLEUL_ACCOMPAGNANT_ID,
+      ipInscription: null,
+      filleuleEmail: 'alice@ex.fr',
+    })
+
+    expect(result).toEqual({ ok: false, reason: 'blacklist_meme_email' })
+    expect(mockCaptureException).toHaveBeenCalledWith(
+      expect.objectContaining({ code: '23502' }),
+      expect.objectContaining({
+        tags: expect.objectContaining({ signal: 'signup-log-bloque' }),
+        extra: expect.objectContaining({ parrainageId: PARRAINAGE_ID, raison: 'meme_email' }),
+      }),
+    )
+  })
+
+  it('SC43 : sendAdminParrainageFlag throw path meme_email -> Sentry signup-email-bloque severity warning', async () => {
+    // Path blocage meme_email : UPDATE + INSERT log OK, sendAdminParrainageFlag
+    // throw (Resend down par exemple) -> catch englobant -> Sentry signal=signup-email-bloque
+    // severity warning. Return blacklist_meme_email (email best-effort).
+    mockNormalizeEmail.mockImplementation((email: string) =>
+      (email || '').toLowerCase().trim(),
+    )
+
+    const { sendAdminParrainageFlag } = await import('@/lib/emails')
+    vi.mocked(sendAdminParrainageFlag).mockRejectedValueOnce(new Error('Resend API timeout'))
+
+    const rpc = buildRpcAllowed()
+    const { fromMock } = createSupabaseFromMock({
+      parrainages_codes: [{ data: { user_id: PARRAIN_ACCOMPAGNE_ID }, error: null }],
+      subscriptions: [{ data: { status: 'active' }, error: null }],
+      users: [
+        { data: { role: 'accompagne', first_name: 'Alice' }, error: null },
+        { data: { role: 'accompagnant' }, error: null },
+        { data: { email: 'alice@ex.fr' }, error: null },                    // detectBlacklist marraine
+        { data: { first_name: 'Alice', last_name: 'M' }, error: null },     // loadNames marraine
+        { data: { first_name: 'Carl', last_name: 'F' }, error: null },      // loadNames filleule
+      ],
+      parrainages: [
+        { data: null, error: null },
+        { data: { id: PARRAINAGE_ID }, error: null },
+        { data: null, error: null },                                          // UPDATE bloque OK
+      ],
+      admin_actions_log: [
+        { data: null, error: null },                                          // INSERT log OK
+      ],
+    })
+    mockCreateClient.mockResolvedValue({ ...rpc, from: fromMock })
+
+    const result = await createParrainageRelation({
+      code: VALID_CODE,
+      filleuleId: FILLEUL_ACCOMPAGNANT_ID,
+      ipInscription: null,
+      filleuleEmail: 'alice@ex.fr',
+    })
+
+    expect(result).toEqual({ ok: false, reason: 'blacklist_meme_email' })
+    expect(mockCaptureException).toHaveBeenCalledWith(
+      expect.objectContaining({ message: 'Resend API timeout' }),
+      expect.objectContaining({
+        tags: expect.objectContaining({ signal: 'signup-email-bloque' }),
+        extra: expect.objectContaining({ parrainageId: PARRAINAGE_ID, type: 'meme_email' }),
+      }),
+    )
+  })
+
+  it('SC44 : mergeErr RPC merge_parrainage_flag_suspicion path meme_ip -> Sentry signup-merge-flag + skip log', async () => {
+    // Path flag meme_ip : RPC merge_parrainage_flag_suspicion echoue (data:null + error)
+    // -> Sentry.captureException signal=signup-merge-flag severity=critical.
+    // mergeResult?.was_added est falsy -> skip log/email mais return ok:true
+    // (le parrainage reste actif, le flag n'est qu'un signal best-effort).
+    mockNormalizeEmail.mockImplementation((email: string) =>
+      (email || '').toLowerCase().trim(),
+    )
+
+    const rpc = vi.fn((rpcName: string) => {
+      if (rpcName === 'try_consume_rate_limit') {
+        return {
+          select: vi.fn().mockReturnThis(),
+          maybeSingle: vi.fn().mockResolvedValue({ data: true, error: null }),
+        }
+      }
+      if (rpcName === 'merge_parrainage_flag_suspicion') {
+        return {
+          select: vi.fn().mockReturnThis(),
+          maybeSingle: vi.fn().mockResolvedValue({
+            data: null,
+            error: { code: '42883', message: 'function does not exist' },
+          }),
+        }
+      }
+      return { select: vi.fn().mockReturnThis(), maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }) }
+    })
+
+    const { fromMock } = createSupabaseFromMock({
+      parrainages_codes: [{ data: { user_id: PARRAIN_ACCOMPAGNE_ID }, error: null }],
+      subscriptions: [{ data: { status: 'active' }, error: null }],
+      users: [
+        { data: { role: 'accompagne', first_name: 'Alice' }, error: null }, // validateCode
+        { data: { role: 'accompagnant' }, error: null },                    // guard filleul
+        { data: { email: 'marraine-only@ex.fr' }, error: null },            // detectBlacklist marraine (diff)
+      ],
+      parrainages: [
+        { data: null, error: null },                                          // idempotence
+        { data: { id: PARRAINAGE_ID }, error: null },                         // INSERT initial
+        { data: [], error: null },                                            // otherFilleulesIds vide (skip P9)
+        { data: [{ id: 'parrainage-other-id' }], error: null },               // ipMatches non vide -> flag meme_ip
+      ],
+    })
+
+    mockCreateClient.mockResolvedValue({ rpc, from: fromMock })
+
+    const result = await createParrainageRelation({
+      code: VALID_CODE,
+      filleuleId: FILLEUL_ACCOMPAGNANT_ID,
+      ipInscription: '192.168.1.1',
+      filleuleEmail: 'carl@ex.fr',
+    })
+
+    expect(result).toEqual({
+      ok: true,
+      parrainageId: PARRAINAGE_ID,
+      marraineId: PARRAIN_ACCOMPAGNE_ID,
+    })
+    expect(mockCaptureException).toHaveBeenCalledWith(
+      expect.objectContaining({ code: '42883' }),
+      expect.objectContaining({
+        tags: expect.objectContaining({ signal: 'signup-merge-flag' }),
+        extra: expect.objectContaining({ parrainageId: PARRAINAGE_ID, flag: 'meme_ip' }),
+      }),
+    )
+    // was_added falsy -> aucun INSERT admin_actions_log emis (cf. ligne 788)
+  })
+
+  it('SC45 : parraineeErr UPDATE users parrainee_par -> Sentry signup-parrainee-par + return ok:true', async () => {
+    // Golden path SANS blocage (detectBlacklist retourne {}). UPDATE users
+    // parrainee_par echoue -> Sentry severity=critical mais return ok:true
+    // (best-effort : la relation parrainages.statut=inscrite est posee,
+    // l'attribution parrainee_par est secondaire).
+    mockNormalizeEmail.mockReturnValue('')  // pas d'email -> skip lookup blacklist email
+
+    const rpc = buildRpcAllowed()
+    const { fromMock } = createSupabaseFromMock({
+      parrainages_codes: [{ data: { user_id: PARRAIN_ACCOMPAGNE_ID }, error: null }],
+      subscriptions: [{ data: { status: 'active' }, error: null }],
+      users: [
+        { data: { role: 'accompagne', first_name: 'Alice' }, error: null }, // validateCode
+        { data: { role: 'accompagnant' }, error: null },                    // guard filleul
+        { data: null, error: { code: '23502', message: 'users update parrainee_par error' } }, // UPDATE parrainee_par : ERROR
+        { data: { email: 'alice@ex.fr', first_name: 'Alice' }, error: null }, // loadNames marraine
+        { data: { email: 'carl@ex.fr', first_name: 'Carl' }, error: null },   // loadNames filleule
+      ],
+      parrainages: [
+        { data: null, error: null },                                          // idempotence
+        { data: { id: PARRAINAGE_ID }, error: null },                         // INSERT initial
+      ],
+    })
+    mockCreateClient.mockResolvedValue({ ...rpc, from: fromMock })
+
+    const result = await createParrainageRelation({
+      code: VALID_CODE,
+      filleuleId: FILLEUL_ACCOMPAGNANT_ID,
+      ipInscription: null,
+      filleuleEmail: null,
+    })
+
+    expect(result).toEqual({
+      ok: true,
+      parrainageId: PARRAINAGE_ID,
+      marraineId: PARRAIN_ACCOMPAGNE_ID,
+    })
+    expect(mockCaptureException).toHaveBeenCalledWith(
+      expect.objectContaining({ code: '23502' }),
+      expect.objectContaining({
+        tags: expect.objectContaining({ signal: 'signup-parrainee-par' }),
+        extra: expect.objectContaining({
+          parrainageId: PARRAINAGE_ID,
+          filleuleId: FILLEUL_ACCOMPAGNANT_ID,
+        }),
+      }),
+    )
+  })
+})
+
+describe('validateCode rate-limit — 9.A.2.d (C3 anti-fraude H12)', () => {
+  it('SC46 : rate-limit triggered (allowed=false) -> Sentry rate-limit-validate-code + return reason=rate_limited', async () => {
+    // RPC try_consume_rate_limit retourne { data: false } -> brute-force
+    // suspecte. Sentry.captureMessage signal=rate-limit-validate-code level=warning
+    // + keyHash HMAC. Story 4.1 AC4. Return immediat sans lookup BDD.
+    //
+    // Note : validateCode fait `await supabaseAdmin.rpc(...)` directement sans
+    // .maybeSingle() -> il faut que rpc() retourne une thenable resolvant
+    // { data: false, error: null }. Les SC existants (SC1...) utilisent
+    // buildRpcAllowed qui retourne un builder non-thenable -> `data` finit
+    // par etre l'objet builder (truthy != false) et l'if rate-limit est
+    // silencieusement bypasse. C3 9.A.2.d exerce reellement la branche.
+    const rpc = vi.fn().mockReturnValue(
+      Promise.resolve({ data: false, error: null }),
+    )
+    const { fromMock } = createSupabaseFromMock()
+    mockCreateClient.mockResolvedValue({ rpc, from: fromMock })
+
+    const result = await validateCode(VALID_CODE)
+
+    expect(result).toEqual({ valid: false, reason: 'rate_limited' })
+    expect(mockCaptureMessage).toHaveBeenCalledWith(
+      'rate-limit-validate-code triggered',
+      expect.objectContaining({
+        level: 'warning',
+        tags: expect.objectContaining({ signal: 'rate-limit-validate-code' }),
+        extra: expect.objectContaining({ keyHash: 'hash' }),
+      }),
+    )
+    // RPC consume invoque, MAIS aucun lookup parrainages_codes (return early avant BDD)
+    expect(rpc).toHaveBeenCalledWith(
+      'try_consume_rate_limit',
+      expect.objectContaining({ p_key: expect.stringMatching(/^validate_code:/) }),
+    )
+  })
+
+  it('SC47 : rate-limit RPC error (catch) -> Sentry rate-limit-rpc-error critical + validation continue best-effort', async () => {
+    // RPC throw (BDD down, plpgsql exception) -> catch englobant capture l'erreur
+    // avec severity=critical (ouvre temporairement la fenetre brute-force).
+    // Le code continue : sans seed parrainages_codes, returns valid:false
+    // reason=unknown_code (preuve que la validation a poursuivi malgre l'erreur RPC).
+    const rpc = vi.fn().mockReturnValue(
+      Promise.reject(new Error('rate-limit rpc plpgsql exception')),
+    )
+    const { fromMock } = createSupabaseFromMock({
+      // Pas de parrainages_codes seede -> emptyResponse -> unknown_code en sortie.
+    })
+    mockCreateClient.mockResolvedValue({ rpc, from: fromMock })
+
+    const result = await validateCode(VALID_CODE)
+
+    expect(result).toEqual({ valid: false, reason: 'unknown_code' })
+    expect(mockCaptureException).toHaveBeenCalledWith(
+      expect.objectContaining({ message: 'rate-limit rpc plpgsql exception' }),
+      expect.objectContaining({
+        tags: expect.objectContaining({
+          signal: 'rate-limit-rpc-error',
+          severity: 'critical',
+        }),
+        extra: expect.objectContaining({ keyHash: 'hash' }),
+      }),
+    )
+  })
+})
