@@ -171,32 +171,34 @@ export async function confirmerFraude(
   if (updateErr) return { error: 'Erreur lors de la mise à jour.' }
 
   if (wasConfirmed) {
-    const { data: codeRow } = await supabaseAdmin
-      .from('parrainages_codes')
-      .select('compteur_confirmes, total_recompenses')
-      .eq('user_id', parrainage.marraine_id)
-      .maybeSingle()
+    // 9.A.5 : décrément atomique via RPC (race lost-update F15 défer Epic 8).
+    // Borné à zéro côté SQL (GREATEST(... , 0)). Retourne nouveau compteur ou null
+    // si aucune row parrainages_codes (cas marraine sans code généré : safe no-op).
+    const { data: newCompteur, error: decErr } = await supabaseAdmin
+      .rpc('parrainage_decrement_compteur', { p_user_id: parrainage.marraine_id })
 
-    if (codeRow) {
-      // Décrément atomique borné : ne descend pas sous 0.
-      const newCompteur = Math.max(0, (codeRow.compteur_confirmes ?? 0) - 1)
-      const { error: decErr } = await supabaseAdmin
+    if (decErr) {
+      console.error('[parrainage_admin][confirmer_fraude][decrement_rpc]', decErr)
+      Sentry.captureException(decErr, {
+        tags: { flow: 'admin', signal: 'confirmer-fraude-decrement-rpc-failed', severity: 'critical' },
+        extra: { parrainageId, marraineId: parrainage.marraine_id },
+      })
+    }
+
+    // newCompteur === null si pas de row parrainages_codes (parrain sans code) :
+    // skip le check récompense déclenchée (logique impossible sans compteur).
+    if (newCompteur !== null && newCompteur !== undefined) {
+      // Lecture séparée race-tolérante pour le check 'récompense déjà déclenchée'.
+      // Si total_recompenses change entre RPC et SELECT, le flag log peut être
+      // absent (faux négatif) mais aucun double décrément ni double log. L'admin
+      // peut re-trancher manuellement en consultant admin_actions_log.
+      const { data: codeRow } = await supabaseAdmin
         .from('parrainages_codes')
-        .update({ compteur_confirmes: newCompteur })
+        .select('compteur_confirmes, total_recompenses')
         .eq('user_id', parrainage.marraine_id)
-      if (decErr) {
-        console.error('[parrainage_admin][confirmer_fraude][counter_rollback]', decErr)
-        Sentry.captureException(decErr, {
-          tags: { flow: 'admin', signal: 'confirmer-fraude-counter-rollback', severity: 'critical' },
-          extra: { parrainageId, marraineId: parrainage.marraine_id },
-        })
-      }
+        .maybeSingle()
 
-      // Si la marraine a déjà reçu au moins une récompense, le parrainage
-      // frauduleux a peut-être contribué à un palier déclenché. On log un
-      // flag explicite pour que l'admin tranche (révoquer le coupon Stripe
-      // ou laisser tel quel selon l'analyse).
-      if ((codeRow.total_recompenses ?? 0) > 0) {
+      if (codeRow && (codeRow.total_recompenses ?? 0) > 0) {
         await supabaseAdmin.from('admin_actions_log').insert({
           admin_id: user.id,
           action_type: 'parrainage_fraude_recompense_a_reviser',
@@ -204,7 +206,7 @@ export async function confirmerFraude(
           target_id: parrainage.marraine_id,
           details: {
             parrainage_id: parrainageId,
-            ancien_compteur: codeRow.compteur_confirmes,
+            ancien_compteur: newCompteur + 1, // reconstitué post-RPC (delta = 1)
             nouveau_compteur: newCompteur,
             total_recompenses_actuel: codeRow.total_recompenses,
             role_parrain: parrainRole,
