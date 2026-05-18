@@ -130,8 +130,8 @@ Puis : `npm run test:e2e -- tests/e2e/mon-scenario.spec.ts`.
 Les contenus suivants sont reportes aux stories qui les portent :
 
 - **Anti-fraude parrainage** -> `7.C.2` (`tests/e2e/parrainage-anti-fraude.spec.ts`).
-- **RGPD cascade** -> `7.C.3` (`tests/e2e/rgpd-cascade.spec.ts`).
-- **Matching email** -> `7.C.4` (`tests/e2e/matching.spec.ts`).
+- **RGPD cascade** -> `9.B.1` (`tests/e2e/rgpd-cascade.spec.ts`). Tag `@rgpd-cascade` (3 SC : SC1 suppression accompagnant, SC2 suppression accompagne, SC3 refus admin).
+- **Matching** -> `9.B.2` (`tests/e2e/matching.spec.ts`). Tag `@matching` (3 SC : SC1 apparition annonce dans /recherche, SC2 notification email + idempotence notifications_log, SC3 soft paywall accompagne non-abonne redirige vers /accompagne/abonnement).
 - **Page objects dashboard / messages / admin / parrainage** : ajoutes a la
   demande par 7.C.2/3/4 dans `_lib/pages.ts`.
 - **Helper `createTestUser` runtime** : pas necessaire tant que les seeds

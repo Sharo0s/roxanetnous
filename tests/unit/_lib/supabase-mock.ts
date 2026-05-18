@@ -103,6 +103,13 @@ export function createSupabaseFromMock(
       maybeSingle: vi.fn().mockResolvedValue(item),
       update: vi.fn((payload: unknown) => {
         capturedUpdates.push({ table, payload })
+        // 9.A.2.d (F-Epic9-A2 Option hybride) : `then` ajoute pour rendre
+        // `.update().eq(...)` directement awaitable et resoudre `item` (qui
+        // peut porter `error: { code, message }`). Indispensable pour seeder
+        // les error paths Sentry C1 (`blocErr` / `logErr` / `mergeErr` /
+        // `parraineeErr` dans createParrainageRelation) sans toucher au code
+        // source. Pas de breaking change : `await update().is(...)` reste
+        // valide (resolve via `.is.mockResolvedValue`).
         return {
           eq: vi.fn().mockReturnThis(),
           neq: vi.fn().mockReturnThis(),
@@ -113,6 +120,7 @@ export function createSupabaseFromMock(
           order: vi.fn().mockReturnThis(),
           is: vi.fn().mockResolvedValue(item),
           select: vi.fn().mockResolvedValue(item),
+          then: (resolve: (value: SupabaseMockResponse) => unknown) => resolve(item),
         }
       }),
       insert: vi.fn((payload: unknown) => {

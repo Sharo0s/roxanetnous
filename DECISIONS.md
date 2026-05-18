@@ -1042,6 +1042,36 @@ Heritage 9.A.7 (Option B-like : fix fixtures plutot que refonte code), F-Epic8-A
 
 [Source: run integration GHA #26041382960 sur PR #14 (2026-05-18)] [Source: _bmad-output/implementation-artifacts/9-a-2-c-combler-branches-parrainage-cible-85-percent.md] [Source: tests/unit/parrainage-symetrie.test.ts:1051+ (SC20-SC40)] [Source: tests/unit/_lib/supabase-mock.ts (extension type + delete)]
 
+**Verdict 9.A.2.d (2026-05-18) -- Option hybride C1+C3 retenue -- F-Epic9-A2 solde definitivement** :
+
+Decision-gate light cadrage 1-page execute en T1 (`_bmad-output/implementation-artifacts/9-a-2-d-verdict-draft.md`, temporaire) + AskUserQuestion 3 options (A complete / B doc-only / hybride). GO Sylvain explicite : **Option hybride C1+C3**.
+
+Verdict cas-par-cas des 4 categories branches restantes :
+
+| Categorie | Description | Verdict | SC livres | Justification |
+|---|---|---|---|---|
+| **C1** Error paths Sentry `createParrainageRelation` (l. 691 / 722 / 743 / 759 / 780) | Sentry.captureException defensifs sur 5 INSERT/UPDATE Supabase + 1 try/catch email | **GO** | SC41 (blocErr) + SC42 (logErr meme_email) + SC43 (emailErr meme_email) + SC44 (mergeErr meme_ip) + SC45 (parraineeErr) = 5 SC | Observabilite est le 1er verrou de detection en prod. Aucun integration/E2E n'injecte d'erreur Supabase synthese -> regression silencieuse possible sur Sentry capture si quelqu'un retire le bloc. Cout marginal faible (~20 lignes/SC). |
+| **C2** `loadNamesForAdminEmail` defaults `Parrain` / `Filleul` (l. 712-713) | Fallback string si `users.first_name` vide | **NO-GO** | 0 | Marginal cosmetique. Affichage email admin uniquement, zero impact metier (anti-fraude reste fonctionnel meme avec `" "`). Regle 9.A.2.c "pas de mock artificiel pour 1 pt". |
+| **C3** `validateCode` rate-limit (l. 358-374 succes + 375-391 RPC error catch) | Defense H12 brute-force keyspace 31^8 (~10^12) | **GO** | SC46 (rate_limited triggered) + SC47 (rate-limit RPC error catch) = 2 SC | Securite anti-fraude reelle. Aucun test integration ne couvrait (`grep -rn rate_limited tests/integration/` -> 0 occurrence). Si on retire `Sentry.captureException(...)` du catch RPC error, aucun garde-fou ne le detectera avant la prochaine panne reelle. Cout faible (helper deja suffisant). |
+| **C4** `generateCodeForUser` retry 23505 (l. 287-300) | Retry collision PK code 8-chars keyspace 31^8 | **HORS-CIBLE FORCE** | 0 | Defer 8.A.1 F11 documente "non exerce en pratique" (proba collision ~0 a l'echelle prod 826 users / 813 codes). Pas de scenario metier reel ni de regression silencieuse plausible. |
+
+**Resultats coverage post-9.A.2.d (unit-only local, point comparaison avant push GHA)** : lines **85.46** (+5.53 vs 9.A.2.c local) / branches **71.92** (+2.69) / functions **100** (=) / statements **84.17** (+5.39). Sur unit-only, 85% strict atteint sur lines + statements + functions ; gap branches ~13 pts.
+
+**Cumul GHA #26047697818 (PR #15, 2026-05-18) - palier 3 final/effectif final** : lines **86.50** / branches **75.38** / functions **100.00** / statements **85.18**. Cible 85% strict **ATTEINTE sur 3/4 indicateurs** : lines (+1.50), functions (+15), statements (+0.18). Branches 75.38 reste < 85% (gap 9.62 pts, plafond structurel = C2 cosmetique NO-GO + C4 retry 23505 HORS-CIBLE FORCE keyspace 31^8 defer 8.A.1 F11). Cas hybride AC6 acte : palier 3 final pur sur 3 indicateurs + palier 3 effectif final sur branches = **86/75/100/85** (chiffres mesures arrondis au point inferieur). Plancher palier 3 effectif 9.A.2.c (80/72/100/79) jamais regresse (+6/+3/=/+6 vs courant). `vitest.config.ts > thresholds['app/actions/parrainage.ts']` MAJ 86/75/100/85 + commentaire inline solde definitivement la roadmap 9.A.2/b/c/d (mention F-Epic9-A2 final + ref PR #15 + run GHA #26047697818 + date 2026-05-18).
+
+**Extension helper `createSupabaseFromMock`** (additive zero breaking change) : ajout d'un `then` sur le sous-objet retourne par `.update(payload)` -> rend `.update().eq(...)` directement awaitable resolvant `item` (qui peut porter `error`). Indispensable pour seeder les error paths Sentry C1 sans toucher au code source. Pattern hérité 9.A.2.c (extension `error: unknown` + `delete` chainable). Test garantie helper existant (`tests/unit/supabase-mock.test.ts` ligne 52-62) intact (n'utilise pas `await` direct).
+
+**Statut F-Epic9-A2 backlog roadmap : RETIRE DEFINITIVEMENT**. Option B evolutive 9.A.2 -> 9.A.2.b -> 9.A.2.c -> 9.A.2.d **soldee definitivement**. Le palier 3 effectif final est atteint ; aucune story de coverage sur `app/actions/parrainage.ts` future ne sera planifiee (cible per-file deja optimisee). Si une future PR touche le fichier et regresse sous les thresholds, c'est le signal d'ajouter des SC ciblees au cas par cas, pas de redemarrer une story palier.
+
+**Branches restantes hors-cible final** (jamais couvertes par construction) :
+- C2 defaults `loadNamesForAdminEmail` (l. 712-713) -- cosmetique NO-GO.
+- C4 retry 23505 `generateCodeForUser` (l. 287-300) -- structurel keyspace 31^8.
+- Quelques sous-paths edge `confirmParrainageOnSuccess` + `validateCode` accompagnant (eg. `marraine-ineligible-at-payment`) -- partiellement couverts integration.
+
+**Regle pattern futur** (anti-regression) : tout futur error path Sentry critical ajoute dans `app/actions/parrainage.ts` doit etre accompagne d'au moins 1 SC unit qui assert (a) le signal Sentry attendu + (b) le best-effort return. La regle est applicable a tout fichier sous threshold per-file dans `vitest.config.ts`.
+
+[Source: tests/unit/parrainage-symetrie.test.ts SC41-SC47] [Source: tests/unit/_lib/supabase-mock.ts (then sous-objet update)] [Source: _bmad-output/implementation-artifacts/9-a-2-d-palier-3-final-ou-acceptation-palier-effectif.md] [Source: coverage/coverage-summary.json post-9.A.2.d unit-only 2026-05-18] [Source: cumul GHA #26047697818 sur PR #15 (2026-05-18)] [Source: vitest.config.ts:54-61 thresholds palier 3 final/effectif final 86/75/100/85]
+
 
 ## F-Epic9-A5 -- RPC `parrainage_decrement_compteur` sans check `is_admin()` (2026-05-18)
 
